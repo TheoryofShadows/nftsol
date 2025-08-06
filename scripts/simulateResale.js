@@ -1,0 +1,1 @@
+// Simulated resale logic

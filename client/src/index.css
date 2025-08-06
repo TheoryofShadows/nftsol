@@ -1,0 +1,816 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Responsive mobile improvements */
+@media (max-width: 768px) {
+  body, html {
+    overflow-x: hidden;
+  }
+  
+  /* Improve container spacing on mobile */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Prevent layout jumbling on mobile */
+  .group {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
+/* Reduce paint operations */
+.card-hover {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Optimize animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Root CSS variables */
+:root {
+  --background: hsl(0, 0%, 4%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(273, 100%, 66%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+
+  /* Solana specific colors */
+  --solana-purple: hsl(273, 100%, 66%);
+  --solana-green: hsl(160, 84%, 52%);
+  --dark-bg: hsl(0, 0%, 4%);
+  --card-bg: hsla(0, 0%, 100%, 0.05);
+  --glass-bg: hsla(0, 0%, 100%, 0.1);
+}
+
+.dark {
+  --background: hsl(0, 0%, 4%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(273, 100%, 66%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    background: hsl(0, 0%, 4%);
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
+    /* Better text rendering on iOS */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first responsive fixes */
+  @media (max-width: 768px) {
+    body {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .container {
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      /* Fix iOS Safari viewport issues */
+      height: -webkit-fill-available;
+      min-height: -webkit-fill-available;
+    }
+  }
+}
+
+@layer utilities {
+  .font-orbitron {
+    font-family: 'Orbitron', monospace;
+  }
+
+  .bg-solana-purple {
+    background-color: hsl(273, 100%, 66%);
+  }
+
+  .bg-solana-green {
+    background-color: hsl(160, 84%, 52%);
+  }
+
+  .text-solana-purple {
+    color: hsl(273, 100%, 66%);
+  }
+
+  .text-solana-green {
+    color: hsl(160, 84%, 52%);
+  }
+
+  /* Fix blinking cursor issues */
+  .cursor-pointer, button, [role="button"] {
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+  }
+
+  /* Prevent text cursor on interactive elements */
+  .select-none {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+  }
+
+  /* Ensure proper focus states for inputs only */
+  input[type="text"], input[type="number"], input[type="email"], textarea {
+    cursor: text !important;
+  }
+
+  .bg-gradient-solana {
+    background: linear-gradient(135deg, hsl(273, 100%, 66%) 0%, hsl(160, 84%, 52%) 100%);
+  }
+
+  .bg-gradient-dark {
+    background: linear-gradient(135deg, hsl(0, 0%, 10%) 0%, hsl(0, 0%, 4%) 100%);
+  }
+
+  .bg-gradient-card {
+    background: linear-gradient(135deg, hsla(273, 100%, 66%, 0.1) 0%, hsla(160, 84%, 52%, 0.1) 100%);
+  }
+
+  .bg-card-bg {
+    background: hsla(0, 0%, 100%, 0.05);
+  }
+
+  .bg-glass-bg {
+    background: hsla(0, 0%, 100%, 0.1);
+  }
+
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+  }
+
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+  }
+
+  /* Fix gradient text rendering issues */
+  .bg-clip-text {
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block;
+  }
+
+  /* Prevent text selection issues on gradients */
+  .bg-gradient-to-r {
+    display: inline-block;
+  }
+
+  /* Fix input focus states to prevent blinking */
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus {
+    outline: none !important;
+    border-color: #9333ea !important;
+    caret-color: white !important;
+  }
+
+  /* Prevent file input from interfering with other elements */
+  input[type="file"] {
+    pointer-events: auto !important;
+    z-index: 20 !important;
+  }
+
+  /* Ensure other inputs don't trigger file upload */
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative !important;
+  }
+
+  /* Force text inputs to be above file inputs */
+  .input-container {
+    position: relative;
+    z-index: 15;
+  }
+
+  /* Ensure buttons don't have input behavior */
+  button {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    cursor: pointer !important;
+  }
+
+  button:focus {
+    outline: none !important;
+  }
+
+  /* Fix card hover effects */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1 !important;
+  }
+
+  .group:hover .group-hover\:scale-105 {
+    transform: scale(1.05) !important;
+  }
+
+  /* Fix link styling */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Modern 2025 NFT Marketplace Enhancements */
+  .modern-card {
+    @apply bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .modern-card:hover {
+    @apply transform translate-y-[-4px] shadow-2xl border-white/30;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 35px 70px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .modern-btn {
+    @apply bg-gradient-to-r from-purple-600 via-purple-700 to-pink-600 hover:from-purple-700 hover:via-purple-800 hover:to-pink-700;
+    @apply text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300;
+    @apply shadow-lg hover:shadow-2xl transform hover:scale-105;
+    box-shadow: 0 10px 25px rgba(168, 85, 247, 0.3);
+  }
+
+  .modern-btn:hover {
+    box-shadow: 0 15px 35px rgba(168, 85, 247, 0.4);
+  }
+
+  .modern-input {
+    @apply bg-white/5 border border-white/20 rounded-xl px-4 py-3 w-full focus:outline-none focus:border-purple-400;
+    @apply backdrop-blur-md transition-all duration-300 placeholder-gray-400;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .modern-input:focus {
+    @apply bg-white/10 border-purple-400 shadow-lg;
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .modern-nav {
+    @apply bg-black/80 backdrop-blur-2xl border-b border-white/10;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 30, 0.9) 100%);
+  }
+
+  .modern-section {
+    @apply relative overflow-hidden;
+  }
+
+  .modern-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  }
+
+  .modern-grid {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .modern-skeleton {
+    @apply animate-pulse bg-gradient-to-r from-gray-800 via-gray-700 to-gray-800 bg-[length:200%_100%];
+    animation: skeleton-loading 1.5s infinite;
+  }
+
+  .modern-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    @apply bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-purple-300 border border-purple-500/30;
+    backdrop-filter: blur(10px);
+  }
+
+  .modern-divider {
+    @apply w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent;
+  }
+
+  /* Animation keyframes */
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Scroll effects */
+  .modern-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.5) transparent;
+  }
+
+  .modern-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .modern-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modern-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(168, 85, 247, 0.6), rgba(236, 72, 153, 0.6));
+    border-radius: 3px;
+  }
+
+  .modern-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(168, 85, 247, 0.8), rgba(236, 72, 153, 0.8));
+  }
+}
+
+/* Enhanced Mobile Experience */
+@media (max-width: 768px) {
+  .modern-nav {
+    backdrop-filter: blur(12px);
+    padding: 0 0.75rem;
+  }
+
+  .hero-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem !important;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.1rem !important;
+    margin-bottom: 1.5rem;
+  }
+
+  .nft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 0 0.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: 0 0.5rem;
+  }
+
+  /* Mobile-specific button styles */
+  .mobile-action-btn {
+    @apply w-full min-h-[44px] touch-manipulation;
+  }
+
+  /* Better mobile forms */
+  .mobile-form input, .mobile-form textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  /* Improved mobile cards */
+  .mobile-card {
+    margin: 0.5rem;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Mobile-optimized modals */
+  .mobile-modal {
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Prevent text overflow and improve mobile layout */
+  @media (max-width: 768px) {
+    .card-content {
+      @apply px-3 py-4;
+    }
+
+    .card-header {
+      @apply px-3 py-3;
+    }
+
+    .text-responsive {
+      @apply text-sm leading-tight;
+    }
+
+    .btn-responsive {
+      @apply text-sm px-3 py-2;
+    }
+
+    .grid-responsive {
+      @apply grid-cols-1 gap-3;
+    }
+
+    .flex-responsive {
+      @apply flex-col gap-2;
+    }
+  }
+
+  /* Fix text wrapping in containers */
+  .text-container {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+
+  /* Prevent horizontal scroll */
+  .no-scroll {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+}
+
+/* CRITICAL MOBILE FIXES FOR APPLE DEVICES */
+@media (max-width: 768px) {
+  /* Fix header spacing and prevent overlap */
+  header {
+    padding: 0.5rem 0 !important;
+    min-height: 60px;
+  }
+
+  /* Fix wallet dropdown positioning */
+  .wallet-dropdown-mobile {
+    position: fixed !important;
+    bottom: 1rem !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    top: auto !important;
+    transform: none !important;
+    z-index: 9999 !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Prevent content overlap */
+  main {
+    padding-top: 1rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Fix button sizes for Apple touch targets */
+  button {
+    min-height: 44px !important;
+    touch-action: manipulation !important;
+    font-size: 14px !important;
+  }
+
+  /* Fix text sizes */
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.25rem !important;
+  }
+
+  /* Better spacing between elements */
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+
+  /* Fix container margins */
+  .container {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    max-width: 100% !important;
+  }
+
+  /* Prevent horizontal scroll */
+  * {
+    max-width: 100vw;
+    box-sizing: border-box;
+  }
+
+  /* Fix card layouts */
+  .grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  /* Fix flex layouts */
+  .flex {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .justify-between {
+    justify-content: flex-start !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem !important;
+  }
+
+  .nft-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .mobile-spacing {
+    padding: 0.75rem;
+  }
+}
+
+/* Landscape mobile orientation */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-section {
+    padding: 1rem;
+  }
+
+  .mobile-nav-height {
+    height: 3rem;
+  }
+}
+
+/* Improved touch scrolling */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Better mobile typography */
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+}
+
+/* Mobile navbar improvements */
+@media (max-width: 768px) {
+  .mobile-nav {
+    padding: 0.5rem 1rem;
+    min-height: 60px;
+    position: relative;
+    z-index: 40;
+  }
+
+  .mobile-nav .nav-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  /* Prevent guide overlays */
+  .guide-overlay {
+    position: static !important;
+    z-index: auto !important;
+  }
+}
+
+/* Enhanced mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .text-4xl {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    letter-spacing: -0.025em;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+    letter-spacing: -0.025em;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .text-xl {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  /* Prevent text overlap in cards */
+  .card-content {
+    padding: 0.75rem !important;
+    gap: 0.5rem;
+  }
+
+  .flex {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Improve touch targets */
+  button, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Fix iOS Safari viewport issues */
+  .fixed {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+
+  /* Prevent horizontal scroll */
+  .overflow-x-hidden {
+    overflow-x: hidden;
+  }
+
+  /* Better spacing for mobile wallets */
+  .wallet-selector {
+    bottom: env(safe-area-inset-bottom, 1rem);
+    left: env(safe-area-inset-left, 1rem);
+    right: env(safe-area-inset-right, 1rem);
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+
+  .wallet-connect-modal {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Android Chrome specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Add any custom styles here */
+
+/* Wallet Adapter Integration Styles */
+.wallet-adapter-button-trigger {
+  background: linear-gradient(to right, #9333ea, #059669) !important;
+  border: none !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.wallet-adapter-button-trigger:hover:not([disabled]) {
+  opacity: 0.8 !important;
+}
+
+.wallet-adapter-button-trigger:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: rgba(0, 0, 0, 0.8) !important;
+}
+
+.wallet-adapter-modal {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 0.5rem !important;
+  color: white !important;
+}
+
+.wallet-adapter-modal-title {
+  color: white !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+}
+
+.wallet-adapter-modal-list {
+  padding: 1rem !important;
+}
+
+.wallet-adapter-modal-list-item {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  border-radius: 0.375rem !important;
+  margin-bottom: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.wallet-adapter-modal-list-item:hover {
+  background: #4b5563 !important;
+}
+
+.wallet-adapter-modal-list-item button {
+  color: white !important;
+  padding: 1rem !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+@media (max-width: 768px) {
+  .wallet-adapter-modal {
+    margin: 1rem !important;
+    max-height: 80vh !important;
+    overflow-y: auto !important;
+  }
+
+  .wallet-adapter-button-trigger {
+    padding: 0.375rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+}

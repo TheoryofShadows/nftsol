@@ -1,0 +1,530 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFTSol - Discover, Create & Trade NFTs on Solana</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'orbitron': ['Orbitron', 'monospace']
+                    },
+                    colors: {
+                        'solana-purple': '#9945FF',
+                        'solana-green': '#14F195',
+                        'dark-bg': '#0A0A0A',
+                        'card-bg': 'rgba(255, 255, 255, 0.05)',
+                        'glass-bg': 'rgba(255, 255, 255, 0.1)'
+                    },
+                    backgroundImage: {
+                        'gradient-solana': 'linear-gradient(135deg, #9945FF 0%, #14F195 100%)',
+                        'gradient-dark': 'linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%)',
+                        'gradient-card': 'linear-gradient(135deg, rgba(153, 69, 255, 0.1) 0%, rgba(20, 241, 149, 0.1) 100%)'
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="bg-dark-bg text-white font-inter">
+    <!-- @COMPONENT: Navbar -->
+    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-solana rounded-lg flex items-center justify-center">
+                        <i class="fas fa-cube text-xl text-white"></i>
+                    </div>
+                    <span class="text-2xl font-orbitron font-bold bg-gradient-solana bg-clip-text text-transparent">NFTSol</span>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-white hover:text-solana-green transition-colors duration-300">Explore</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Collections</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Create</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Activity</a>
+                </div>
+
+                <!-- Wallet Connection -->
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Search NFTs..." 
+                               class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 w-64 focus:outline-none focus:border-solana-purple transition-colors duration-300">
+                        <i class="fas fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <!-- @COMPONENT: WalletConnect -->
+                    <button data-event="click:connectWallet" 
+                            class="bg-gradient-solana hover:opacity-80 px-6 py-2 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-wallet mr-2"></i>Connect Wallet
+                    </button>
+                    <!-- @END_COMPONENT: WalletConnect -->
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- @END_COMPONENT: Navbar -->
+
+    <!-- @COMPONENT: Hero Section -->
+    <section class="pt-24 pb-16 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-dark opacity-90"></div>
+        <!-- Animated background particles -->
+        <div class="absolute inset-0">
+            <div class="absolute top-20 left-20 w-2 h-2 bg-solana-purple rounded-full opacity-60 animate-pulse"></div>
+            <div class="absolute top-40 right-32 w-1 h-1 bg-solana-green rounded-full opacity-80 animate-ping"></div>
+            <div class="absolute bottom-32 left-1/3 w-3 h-3 bg-solana-purple rounded-full opacity-40 animate-bounce"></div>
+        </div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-6xl md:text-8xl font-orbitron font-black mb-6">
+                    <span class="bg-gradient-solana bg-clip-text text-transparent">Discover</span><br>
+                    <span class="text-white">Rare NFTs</span>
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                    The premier marketplace for Solana NFTs. Discover, collect, and trade unique digital assets with lightning-fast transactions and minimal fees.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="bg-gradient-solana hover:opacity-80 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                        <i class="fas fa-rocket mr-2"></i>Explore Collections
+                    </button>
+                    <button class="border border-white/20 hover:bg-white/5 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300">
+                        <i class="fas fa-plus mr-2"></i>Create NFT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-solana-green" data-bind="stats.totalNFTs">45.2K</div>
+                    <div class="text-gray-400">Total NFTs</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-solana-purple" data-bind="stats.totalVolume">1.2M SOL</div>
+                    <div class="text-gray-400">Total Volume</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-solana-green" data-bind="stats.activeUsers">12.5K</div>
+                    <div class="text-gray-400">Active Users</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl font-bold text-solana-purple" data-bind="stats.collections">850</div>
+                    <div class="text-gray-400">Collections</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Hero Section -->
+
+    <!-- @COMPONENT: Trending Collections -->
+    <section class="py-16 bg-gradient-to-b from-transparent to-black/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="text-4xl font-orbitron font-bold">Trending Collections</h2>
+                <button class="text-solana-green hover:text-solana-purple transition-colors duration-300">
+                    View All <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+
+            <!-- @MAP: trendingCollections.map(collection => ( -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Collection Card 1 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-solana-purple/50 transition-all duration-300 group">
+                    <div class="relative">
+                        <!-- A vibrant digital art collection showcasing abstract geometric patterns -->
+                        <img src="https://images.unsplash.com/photo-1634973357973-f2ed2657db3c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                             alt="Geometric Digital Art Collection" 
+                             class="w-full h-48 object-cover rounded-xl mb-4 group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute top-4 left-4 bg-solana-green text-black px-3 py-1 rounded-full text-sm font-semibold">
+                            +24.5%
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-bind="collection.name">Cyber Genesis</h3>
+                    <p class="text-gray-400 mb-4" data-bind="collection.description">Digital art collection exploring cyberpunk aesthetics</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm text-gray-400">Floor Price</div>
+                            <div class="text-lg font-semibold text-solana-purple" data-bind="collection.floorPrice">12.5 SOL</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-400">Volume (24h)</div>
+                            <div class="text-lg font-semibold" data-bind="collection.volume24h">2.1K SOL</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collection Card 2 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-solana-purple/50 transition-all duration-300 group">
+                    <div class="relative">
+                        <!-- A mystical fantasy art collection featuring magical creatures and landscapes -->
+                        <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                             alt="Fantasy Art Collection" 
+                             class="w-full h-48 object-cover rounded-xl mb-4 group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute top-4 left-4 bg-solana-green text-black px-3 py-1 rounded-full text-sm font-semibold">
+                            +18.2%
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-bind="collection.name">Mystic Realms</h3>
+                    <p class="text-gray-400 mb-4" data-bind="collection.description">Fantasy creatures from parallel dimensions</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm text-gray-400">Floor Price</div>
+                            <div class="text-lg font-semibold text-solana-purple" data-bind="collection.floorPrice">8.9 SOL</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-400">Volume (24h)</div>
+                            <div class="text-lg font-semibold" data-bind="collection.volume24h">1.5K SOL</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collection Card 3 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-solana-purple/50 transition-all duration-300 group">
+                    <div class="relative">
+                        <!-- A futuristic space exploration themed art collection -->
+                        <img src="https://images.unsplash.com/photo-1446776877081-d282a0f896e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600" 
+                             alt="Space Exploration Art Collection" 
+                             class="w-full h-48 object-cover rounded-xl mb-4 group-hover:scale-105 transition-transform duration-300">
+                        <div class="absolute top-4 left-4 bg-solana-green text-black px-3 py-1 rounded-full text-sm font-semibold">
+                            +31.7%
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-bind="collection.name">Cosmic Explorers</h3>
+                    <p class="text-gray-400 mb-4" data-bind="collection.description">Journey through the infinite cosmos</p>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-sm text-gray-400">Floor Price</div>
+                            <div class="text-lg font-semibold text-solana-purple" data-bind="collection.floorPrice">15.2 SOL</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-400">Volume (24h)</div>
+                            <div class="text-lg font-semibold" data-bind="collection.volume24h">3.2K SOL</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Trending Collections -->
+
+    <!-- @COMPONENT: Featured NFTs -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-orbitron font-bold mb-4">Featured NFTs</h2>
+                <p class="text-gray-400 text-lg">Discover exceptional digital art from top creators</p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="flex justify-center mb-8">
+                <div class="bg-white/5 border border-white/10 rounded-lg p-1 inline-flex">
+                    <button class="px-6 py-2 bg-gradient-solana rounded-md text-white font-semibold">All</button>
+                    <button class="px-6 py-2 text-gray-400 hover:text-white transition-colors duration-300">Art</button>
+                    <button class="px-6 py-2 text-gray-400 hover:text-white transition-colors duration-300">Gaming</button>
+                    <button class="px-6 py-2 text-gray-400 hover:text-white transition-colors duration-300">Music</button>
+                    <button class="px-6 py-2 text-gray-400 hover:text-white transition-colors duration-300">Photography</button>
+                </div>
+            </div>
+
+            <!-- @MAP: featuredNFTs.map(nft => ( -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- NFT Card 1 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-solana-purple/50 transition-all duration-300 group">
+                    <!-- A stunning digital portrait of a cyberpunk character with neon lighting -->
+                    <img src="https://pixabay.com/get/ga7b1ce81b0e9dcc208f33dd7932d405f1f68934b90ffb0dde33f1a4f1c424d31d68dec7bfb80f9a0856bf9721499e9a4f4fe198272a7bfe3d7236074fd731f47_1280.jpg" 
+                         alt="Cyberpunk Digital Portrait" 
+                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2" data-bind="nft.name">Neon Dreams #247</h3>
+                        <p class="text-gray-400 text-sm mb-3" data-bind="nft.creator">by CyberArtist</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-xs text-gray-400">Current Bid</div>
+                                <div class="text-lg font-semibold text-solana-green" data-bind="nft.currentBid">5.2 SOL</div>
+                            </div>
+                            <button class="bg-gradient-solana hover:opacity-80 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300">
+                                Place Bid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NFT Card 2 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-solana-purple/50 transition-all duration-300 group">
+                    <!-- An abstract digital artwork with flowing colors and dynamic patterns -->
+                    <img src="https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600" 
+                         alt="Abstract Digital Art" 
+                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2" data-bind="nft.name">Fluid Dynamics #103</h3>
+                        <p class="text-gray-400 text-sm mb-3" data-bind="nft.creator">by AbstractMaster</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-xs text-gray-400">Current Bid</div>
+                                <div class="text-lg font-semibold text-solana-green" data-bind="nft.currentBid">7.8 SOL</div>
+                            </div>
+                            <button class="bg-gradient-solana hover:opacity-80 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300">
+                                Place Bid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NFT Card 3 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-solana-purple/50 transition-all duration-300 group">
+                    <!-- A futuristic 3D rendered character in a sci-fi environment -->
+                    <img src="https://images.unsplash.com/photo-1614728894747-a83421e2b9c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600" 
+                         alt="3D Sci-Fi Character" 
+                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2" data-bind="nft.name">Alpha Prototype #89</h3>
+                        <p class="text-gray-400 text-sm mb-3" data-bind="nft.creator">by SciFiStudio</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-xs text-gray-400">Current Bid</div>
+                                <div class="text-lg font-semibold text-solana-green" data-bind="nft.currentBid">12.1 SOL</div>
+                            </div>
+                            <button class="bg-gradient-solana hover:opacity-80 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300">
+                                Place Bid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NFT Card 4 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:border-solana-purple/50 transition-all duration-300 group">
+                    <!-- A magical fantasy landscape with ethereal lighting and mystical elements -->
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=600" 
+                         alt="Fantasy Landscape Art" 
+                         class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300">
+                    <div class="p-4">
+                        <h3 class="font-semibold mb-2" data-bind="nft.name">Enchanted Realm #156</h3>
+                        <p class="text-gray-400 text-sm mb-3" data-bind="nft.creator">by FantasyForge</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <div class="text-xs text-gray-400">Current Bid</div>
+                                <div class="text-lg font-semibold text-solana-green" data-bind="nft.currentBid">9.5 SOL</div>
+                            </div>
+                            <button class="bg-gradient-solana hover:opacity-80 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300">
+                                Place Bid
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+
+            <div class="text-center mt-12">
+                <button class="border border-white/20 hover:bg-white/5 px-8 py-3 rounded-lg font-semibold transition-all duration-300">
+                    Load More NFTs
+                </button>
+            </div>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Featured NFTs -->
+
+    <!-- @COMPONENT: Creator Spotlight -->
+    <section class="py-16 bg-gradient-to-r from-black/20 to-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-orbitron font-bold mb-4">Creator Spotlight</h2>
+                <p class="text-gray-400 text-lg">Meet the artists shaping the future of digital art</p>
+            </div>
+
+            <!-- @MAP: featuredCreators.map(creator => ( -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Creator Card 1 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:border-solana-purple/50 transition-all duration-300">
+                    <!-- A professional portrait of a digital artist in their creative workspace -->
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400" 
+                         alt="Digital Artist Portrait" 
+                         class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-solana-purple">
+                    <h3 class="text-xl font-semibold mb-2" data-bind="creator.name">Alex Chen</h3>
+                    <p class="text-gray-400 mb-4" data-bind="creator.bio">3D Artist & Animator</p>
+                    <div class="flex justify-between text-sm mb-4">
+                        <div>
+                            <div class="text-solana-green font-semibold" data-bind="creator.totalSales">127 SOL</div>
+                            <div class="text-gray-400">Total Sales</div>
+                        </div>
+                        <div>
+                            <div class="text-solana-purple font-semibold" data-bind="creator.totalNFTs">45</div>
+                            <div class="text-gray-400">NFTs Created</div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-gradient-solana hover:opacity-80 py-2 rounded-lg font-semibold transition-all duration-300">
+                        Follow Artist
+                    </button>
+                </div>
+
+                <!-- Creator Card 2 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:border-solana-purple/50 transition-all duration-300">
+                    <!-- A creative portrait of a female digital artist with colorful lighting -->
+                    <img src="https://pixabay.com/get/g2baf4688d303a62595bac897f09d27d10c930622f9d40688fd3e2206ec953a31937504038bb0eefe669b8d76bdf4d7abb628e0bf9cc25c22cdc7d807a79fc28c_1280.jpg" 
+                         alt="Female Digital Artist Portrait" 
+                         class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-solana-green">
+                    <h3 class="text-xl font-semibold mb-2" data-bind="creator.name">Maya Rodriguez</h3>
+                    <p class="text-gray-400 mb-4" data-bind="creator.bio">Abstract Digital Artist</p>
+                    <div class="flex justify-between text-sm mb-4">
+                        <div>
+                            <div class="text-solana-green font-semibold" data-bind="creator.totalSales">89 SOL</div>
+                            <div class="text-gray-400">Total Sales</div>
+                        </div>
+                        <div>
+                            <div class="text-solana-purple font-semibold" data-bind="creator.totalNFTs">32</div>
+                            <div class="text-gray-400">NFTs Created</div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-gradient-solana hover:opacity-80 py-2 rounded-lg font-semibold transition-all duration-300">
+                        Follow Artist
+                    </button>
+                </div>
+
+                <!-- Creator Card 3 -->
+                <div class="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 text-center hover:border-solana-purple/50 transition-all duration-300">
+                    <!-- A portrait of a young creative professional in a modern tech environment -->
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=400" 
+                         alt="Creative Professional Portrait" 
+                         class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-solana-purple">
+                    <h3 class="text-xl font-semibold mb-2" data-bind="creator.name">Jordan Kim</h3>
+                    <p class="text-gray-400 mb-4" data-bind="creator.bio">Cyberpunk Illustrator</p>
+                    <div class="flex justify-between text-sm mb-4">
+                        <div>
+                            <div class="text-solana-green font-semibold" data-bind="creator.totalSales">203 SOL</div>
+                            <div class="text-gray-400">Total Sales</div>
+                        </div>
+                        <div>
+                            <div class="text-solana-purple font-semibold" data-bind="creator.totalNFTs">67</div>
+                            <div class="text-gray-400">NFTs Created</div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-gradient-solana hover:opacity-80 py-2 rounded-lg font-semibold transition-all duration-300">
+                        Follow Artist
+                    </button>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Creator Spotlight -->
+
+    <!-- @COMPONENT: Newsletter & CTA -->
+    <section class="py-16 bg-gradient-card border-t border-white/10">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl font-orbitron font-bold mb-4">Stay in the Loop</h2>
+            <p class="text-gray-400 text-lg mb-8">Get notified about new collections, drops, and exclusive events</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+                <input type="email" placeholder="Enter your email" 
+                       class="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-solana-purple transition-colors duration-300">
+                <button class="bg-gradient-solana hover:opacity-80 px-6 py-3 rounded-lg font-semibold transition-all duration-300">
+                    Subscribe
+                </button>
+            </div>
+            
+            <p class="text-sm text-gray-400 mt-4">Join 15,000+ creators and collectors</p>
+        </div>
+    </section>
+    <!-- @END_COMPONENT: Newsletter & CTA -->
+
+    <!-- @COMPONENT: Footer -->
+    <footer class="bg-black/40 border-t border-white/10 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Logo & Description -->
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-gradient-solana rounded-lg flex items-center justify-center">
+                            <i class="fas fa-cube text-xl text-white"></i>
+                        </div>
+                        <span class="text-2xl font-orbitron font-bold bg-gradient-solana bg-clip-text text-transparent">NFTSol</span>
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        The premier marketplace for Solana NFTs. Discover, create, and trade unique digital assets with lightning-fast transactions.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-solana-purple transition-colors duration-300">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-solana-purple transition-colors duration-300">
+                            <i class="fab fa-discord text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-solana-purple transition-colors duration-300">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-solana-purple transition-colors duration-300">
+                            <i class="fab fa-telegram text-xl"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Explore</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Collections</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Create</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Activity</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-white/10 mt-8 pt-8 text-center">
+                <p class="text-gray-400">© 2024 NFTSol. All rights reserved. Built on Solana.</p>
+            </div>
+        </div>
+    </footer>
+    <!-- @END_COMPONENT: Footer -->
+
+    <script>
+        (function() {
+            // TODO: Implement wallet connection functionality
+            // TODO: Implement NFT data fetching and rendering
+            // TODO: Implement search and filtering functionality
+            // TODO: Implement bidding and purchasing logic
+            
+            // Simple hover effects and interactions
+            const cards = document.querySelectorAll('.group');
+            
+            // Enhanced hover effects for cards
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Animate stats on page load
+            const stats = document.querySelectorAll('[data-bind^="stats."]');
+            // TODO: Implement actual stat animation with real data
+            
+            // Mobile navigation toggle
+            // TODO: Implement mobile hamburger menu
+            
+            console.log('NFTSol marketplace initialized');
+        })();
+    </script>
+</body>
+</html>
