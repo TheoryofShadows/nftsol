@@ -1,0 +1,62 @@
+[33mb0c8262[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Sync local project with GitHub
+[33mf352f51[m chore: commit local changes before sync
+[33me0ab7e1[m chore(client): limit audit to critical to avoid false-positive on spl-token
+[33me7e24bd[m Improve NFT loading and display by connecting to multiple data sources
+[33m5a6f034[m Show actual NFT images instead of placeholders across the platform
+[33m7b640db[m Display actual NFT images instead of color placeholders on the website
+[33m1602aae[m Display NFT images properly on the marketplace and ensure correct rendering
+[33m484933e[m Add visual aid to explain the platform's intended functionality
+[33mdc0dfc4[m Improve marketplace loading speed and provide a helpful platform guide
+[33m921d8ac[m Display temporary images while resolving issues with original NFT photos
+[33mc501589[m Improve image display, add tutorial, and introduce advanced filtering options
+[33mdb8a43a[m Showcase real Solana NFTs instead of mock data across the platform
+[33m2d430c2[m Showcase authentic NFT data and outline the platform's future direction
+[33m854052f[m Improve wallet connectivity and add a home button for easier navigation
+[33m18744a8[m Enable users to add and remove NFTs from their list of favorites
+[33m1668e2e[m Improve NFT recommendations with quick actions and navigation
+[33m2c62bab[m Offer personalized NFT recommendations based on user preferences
+[33m64378ae[m Ensure wallet addresses are always active and properly configured on the platform
+[33mb39fa34[m Simulate NFT purchase transactions for testing purposes on the platform
+[33m715072a[m Improve the user experience by preventing unintended text selection
+[33m52c3da4[m Improve platform revenue distribution and NFT marketplace functionality
+[33m9e8f59b[m Give users ability to view their NFTs and improves marketplace features
+[33m8f43164[m Offer dynamic pricing suggestions to help users value their digital art
+[33m41152a9[m Enable image uploads for NFT creation and fix image display issues
+[33m375cb08[m Improve NFT creation form by adding validation and default values
+[33mcbf8e0d[m Enable NFT creation by sending data as JSON instead of form data
+[33mbf621ce[m Improve the NFT creation process and fix upload interactions
+[33m7c1d4b3[m Improve navigation and fix UI issues across the whole platform
+[33m597ddd1[m Provide detailed instructions for deploying the NFT marketplace using Autoscale
+[33mafd2096[m Provide instructions to deploy the NFT marketplace to nftsol.app
+[33m0bd4abb[m Improve platform deployment and enable NFT purchase functionality
+[33m498ba02[m Outline steps needed to enable revenue generation and NFT functionality
+[33m181534f[m Enable automatic token deployment when fees are available in the treasury
+[33m81dd9e3[m Improve token deployment and instruct users on how to fund treasury
+[33m8809a28[m Improve CLOUT token deployment by supporting multiple private key formats
+[33mdb1752a[m Prepare platform to deploy CLOUT token and enable real token transfers
+[33mc77ad83[m Update developer wallet address for receiving marketplace commissions
+[33mf9faae7[m Announce the complete operational status of the CLOUT reward distribution system
+[33m663d764[m Configure the CLOUT community treasury wallet for secure token distribution
+[33m029cf14[m Improve creator earnings and secures CLOUT token distribution
+[33m7771a7a[m Improve platform appeal by adjusting commission rates and wallet setup
+[33m8269c5b[m Implement secure multi-wallet system for platform fund management
+[33mc8205de[m Improve the user experience by displaying CLOUT rewards and fixing UI issues
+[33m77534e4[m Improve wallet connection process and handle connection errors gracefully
+[33m062cb3c[m Improve user experience by redirecting to wallet after login
+[33me08a09e[m Integrate secure wallets and CLOUT rewards system into the NFT marketplace
+[33m7513c8b[m Introduce NFT marketplace with wallet integration for buying digital assets
+[33m663b505[m Document all features available with the current production-ready application
+[33m2ea6bb0[m Provide instructions for setting up error tracking with the OkHttp library
+[33m99d4ef4[m Explain how to quickly add API keys and set up error and speed monitoring
+[33m1e35ff9[m Enable website visit tracking to better understand user engagement
+[33m1e68840[m Enable secure logins and add error and usage tracking capabilities
+[33m5cb298c[m Implement user login and registration system with database integration
+[33m7992f2b[m Connect the application to a real database and store user data there
+[33mdb8438f[m Provide simple instructions to quickly deploy the NFT marketplace online
+[33mef1c08f[m Showcase a full-stack NFT marketplace with advanced features ready to deploy
+[33m1ae8352[m Upload the complete NFTSol application to enable project deployment
+[33m2881509[m Guide users to link their domain with the deployed NFT marketplace
+[33m81dd744[m Configure the application for deployment to Vercel hosting platform
+[33mb641cab[m Enhance the application and deployment process to address the logo issue
+[33m34f4840[m Deploy NFT marketplace application with core components and configurations
+[33m6692134[m Initial commit
