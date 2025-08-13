@@ -1,0 +1,5 @@
+* text=auto
+
+# Keep lockfiles LF to avoid noisy diffs across OSes
+package-lock.json text eol=lf
+client/package-lock.json text eol=lf
