@@ -48,10 +48,6 @@ replit.nix
 # Replit/local state
 .local/
 
-# Node
-node_modules/
-npm-debug.log*
-
-# OS/editor noise
-.DS_Store
-Thumbs.db
+# Build/user files
+uploads/
+attached_assets/
