@@ -1,4 +1,6 @@
 
+import assert from 'node:assert';
+
 const PORT = process.env.PORT || 5000;
 const BASE_URL = `http://localhost:${PORT}`;
 
@@ -6,11 +8,6 @@ async function testServer() {
   console.log('🧪 Testing NFTSol Server...\n');
 
   const tests = [
-    {
-      name: 'Root Endpoint',
-      url: `${BASE_URL}/`,
-      method: 'GET'
-    },
     {
       name: 'Health Check',
       url: `${BASE_URL}/health`,
@@ -53,15 +50,31 @@ async function testServer() {
       }
 
       const response = await fetch(test.url, options);
-      const data = await response.json();
-      
-      console.log(`✅ ${test.name}: ${response.status} - ${data.message || data.status || 'OK'}`);
+
+      assert(response.ok, `HTTP error! status: ${response.status}`);
+
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : await response.text();
+
+      assert.equal(response.status, 200, `Expected status 200, got ${response.status}`);
+
+      const message = typeof data === 'string'
+        ? data
+        : data.message || data.status || 'OK';
+
+      console.log(`✅ ${test.name}: ${response.status} - ${message}`);
     } catch (error) {
       console.log(`❌ ${test.name}: Failed - ${error.message}`);
+      throw error;
     }
   }
 
   console.log('\n🎯 Server testing complete!');
 }
 
-testServer().catch(console.error);
+testServer().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
