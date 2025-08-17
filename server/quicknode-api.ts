@@ -16,6 +16,16 @@ interface QuickNodeNFT {
   price?: number;
 }
 
+interface QuickNodeNFTListResponse {
+  result?: {
+    nfts: QuickNodeNFT[];
+  };
+}
+
+interface QuickNodeNFTResponse {
+  result?: QuickNodeNFT;
+}
+
 class QuickNodeNFTService {
   private apiKey: string;
   private endpoint: string;
@@ -27,20 +37,23 @@ class QuickNodeNFTService {
 
   async fetchNFTsByCollection(collection: string, limit: number = 50): Promise<QuickNodeNFT[]> {
     try {
-      const response = await fetch(`${this.endpoint}/nft/collection/${collection}`, {
-        method: 'GET',
-        headers: {
-          'X-API-KEY': this.apiKey,
-          'Content-Type': 'application/json',
-        },
-        params: { limit: limit.toString() }
-      });
+      const query = new URLSearchParams({ limit: limit.toString() });
+      const response = await fetch(
+        `${this.endpoint}/nft/collection/${collection}?${query.toString()}`,
+        {
+          method: 'GET',
+          headers: {
+            'X-API-KEY': this.apiKey,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as QuickNodeNFTListResponse;
       return data.result?.nfts || [];
     } catch (error) {
       console.error('QuickNode NFT fetch error:', error);
@@ -62,7 +75,7 @@ class QuickNodeNFTService {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as QuickNodeNFTResponse;
       return data.result || null;
     } catch (error) {
       console.error('QuickNode metadata fetch error:', error);
@@ -84,7 +97,7 @@ class QuickNodeNFTService {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as QuickNodeNFTListResponse;
       return data.result?.nfts || [];
     } catch (error) {
       console.error('QuickNode wallet NFTs fetch error:', error);
