@@ -5,6 +5,7 @@ import cors from 'cors';
 import { body, validationResult, param, query } from 'express-validator';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
+import fs from 'fs';
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
@@ -229,7 +230,7 @@ export const validateFileUpload = (req: Request, res: Response, next: NextFuncti
   }
   
   // Check file signature (magic numbers)
-  const buffer = file.buffer || require('fs').readFileSync(file.path);
+  const buffer = file.buffer || fs.readFileSync(file.path);
   const signature = buffer.toString('hex', 0, 4);
   
   const validSignatures = [
