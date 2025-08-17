@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import colors from 'tailwindcss/colors';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Badge } from './ui/badge';
@@ -43,10 +44,10 @@ export function AdvancedAnalytics() {
   ];
 
   const categoryData = [
-    { name: 'Art', value: 45, color: '#8B5CF6' },
-    { name: 'Gaming', value: 30, color: '#06D6A0' },
-    { name: 'Music', value: 15, color: '#F72585' },
-    { name: 'Photography', value: 10, color: '#FFD166' }
+    { name: 'Art', value: 45, color: 'var(--neon-violet)' },
+    { name: 'Gaming', value: 30, color: 'var(--neon-mint)' },
+    { name: 'Music', value: 15, color: 'var(--neon-pink)' },
+    { name: 'Photography', value: 10, color: 'var(--neon-yellow)' }
   ];
 
   const topCollections = [
@@ -198,18 +199,18 @@ export function AdvancedAnalytics() {
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={volumeData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={colors.gray[700]} />
+                    <XAxis dataKey="date" stroke={colors.gray[400]} />
+                    <YAxis stroke={colors.gray[400]} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: '#1F2937', 
-                        border: '1px solid #374151',
+                        backgroundColor: colors.gray[800],
+                        border: `1px solid ${colors.gray[700]}`,
                         borderRadius: '8px'
                       }}
                     />
-                    <Line type="monotone" dataKey="volume" stroke="#8B5CF6" strokeWidth={3} />
-                    <Line type="monotone" dataKey="transactions" stroke="#06D6A0" strokeWidth={2} />
+                    <Line type="monotone" dataKey="volume" stroke="var(--neon-violet)" strokeWidth={3} />
+                    <Line type="monotone" dataKey="transactions" stroke="var(--neon-mint)" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -44,6 +45,19 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        neon: {
+          purple: "var(--neon-purple)",
+          green: "var(--neon-green)",
+          teal: "var(--neon-teal)",
+          red: "var(--neon-red)",
+          "dark-red": "var(--neon-dark-red)",
+          amber: "var(--neon-amber)",
+          violet: "var(--neon-violet)",
+          orange: "var(--neon-orange)",
+          mint: "var(--neon-mint)",
+          pink: "var(--neon-pink)",
+          yellow: "var(--neon-yellow)",
+        },
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",
@@ -86,5 +100,25 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@tailwindcss/typography"),
+    plugin(({ addBase }) => {
+      addBase({
+        ":root": {
+          "--neon-purple": "#9333ea",
+          "--neon-green": "#14f195",
+          "--neon-teal": "#059669",
+          "--neon-red": "#ef4444",
+          "--neon-dark-red": "#dc2626",
+          "--neon-amber": "#fbbf24",
+          "--neon-violet": "#8b5cf6",
+          "--neon-orange": "#f97316",
+          "--neon-mint": "#06D6A0",
+          "--neon-pink": "#F72585",
+          "--neon-yellow": "#FFD166",
+        },
+      });
+    }),
+  ],
 } satisfies Config;

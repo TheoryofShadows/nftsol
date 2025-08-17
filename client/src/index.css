@@ -225,7 +225,7 @@
   input[type="number"]:focus,
   textarea:focus {
     outline: none !important;
-    border-color: #9333ea !important;
+    border-color: var(--neon-purple) !important;
     caret-color: white !important;
   }
 
@@ -743,7 +743,7 @@
 
 /* Wallet Adapter Integration Styles */
 .wallet-adapter-button-trigger {
-  background: linear-gradient(to right, #9333ea, #059669) !important;
+  background: linear-gradient(to right, var(--neon-purple), var(--neon-teal)) !important;
   border: none !important;
   border-radius: 0.375rem !important;
   padding: 0.5rem 1rem !important;
@@ -767,39 +767,27 @@
 }
 
 .wallet-adapter-modal {
-  background: #1f2937 !important;
-  border: 1px solid #374151 !important;
-  border-radius: 0.5rem !important;
-  color: white !important;
+  @apply bg-gray-800 border border-gray-700 rounded-lg text-white;
 }
 
 .wallet-adapter-modal-title {
-  color: white !important;
-  font-size: 1.25rem !important;
-  font-weight: 600 !important;
+  @apply text-white text-xl font-semibold;
 }
 
 .wallet-adapter-modal-list {
-  padding: 1rem !important;
+  @apply p-4;
 }
 
 .wallet-adapter-modal-list-item {
-  background: #374151 !important;
-  border: 1px solid #4b5563 !important;
-  border-radius: 0.375rem !important;
-  margin-bottom: 0.5rem !important;
-  transition: all 0.2s ease !important;
+  @apply bg-gray-700 border border-gray-600 rounded-md mb-2 transition-all duration-200;
 }
 
 .wallet-adapter-modal-list-item:hover {
-  background: #4b5563 !important;
+  @apply bg-gray-600;
 }
 
 .wallet-adapter-modal-list-item button {
-  color: white !important;
-  padding: 1rem !important;
-  width: 100% !important;
-  text-align: left !important;
+  @apply text-white p-4 w-full text-left;
 }
 
 @media (max-width: 768px) {

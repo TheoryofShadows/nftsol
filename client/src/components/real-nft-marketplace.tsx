@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import colors from "tailwindcss/colors";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -146,21 +147,27 @@ export default function RealNFTMarketplace() {
   };
 
   const generateCollectionImage = (collectionName: string, tokenId: number): string => {
-    const colors = {
-      'Mad Lads': '#9333ea',
-      'DeGods': '#dc2626', 
-      'Solana Monkey Business': '#fbbf24',
-      'Claynosaurz': '#8b5cf6',
-      'Froganas': '#14f195',
-      'Lil Chiller': '#14f195',
-      'Okay Bears': '#f97316',
-      'Retardio Cousins': '#ef4444'
+    const collectionColors: Record<string, string> = {
+      'Mad Lads': '--neon-purple',
+      'DeGods': '--neon-dark-red',
+      'Solana Monkey Business': '--neon-amber',
+      'Claynosaurz': '--neon-violet',
+      'Froganas': '--neon-green',
+      'Lil Chiller': '--neon-green',
+      'Okay Bears': '--neon-orange',
+      'Retardio Cousins': '--neon-red'
     };
 
-    const color = colors[collectionName as keyof typeof colors] || '#9333ea';
+    const getColorValue = (varName: string) =>
+      getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+
+    const color =
+      getColorValue(collectionColors[collectionName as keyof typeof collectionColors] || '--neon-purple') ||
+      getColorValue('--neon-purple');
+    const accent = getColorValue('--neon-green') || getColorValue('--neon-green');
     const encodedName = encodeURIComponent(collectionName);
 
-    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:${color.substring(1)};stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:14f195;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23grad)' /%3E%3Ctext x='200' y='160' font-family='Arial, sans-serif' font-size='16' font-weight='bold' text-anchor='middle' fill='white'%3E${encodedName}%3C/text%3E%3Ctext x='200' y='200' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3E%23${tokenId}%3C/text%3E%3Ctext x='200' y='240' font-family='Arial, sans-serif' font-size='12' text-anchor='middle' fill='%23e5e7eb'%3EAuthentic NFT%3C/text%3E%3C/svg%3E`;
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:${encodeURIComponent(color)};stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:${encodeURIComponent(accent)};stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23grad)' /%3E%3Ctext x='200' y='160' font-family='Arial, sans-serif' font-size='16' font-weight='bold' text-anchor='middle' fill='white'%3E${encodedName}%3C/text%3E%3Ctext x='200' y='200' font-family='Arial, sans-serif' font-size='24' font-weight='bold' text-anchor='middle' fill='white'%3E%23${tokenId}%3C/text%3E%3Ctext x='200' y='240' font-family='Arial, sans-serif' font-size='12' text-anchor='middle' fill='${encodeURIComponent(colors.gray[200])}'%3EAuthentic NFT%3C/text%3E%3C/svg%3E`;
   };
 
   useEffect(() => {
@@ -393,9 +400,12 @@ export default function RealNFTMarketplace() {
                         alt={nft.name}
                         className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={(e) => {
-                          const colors = ['9333ea', 'dc2626', '14f195', 'fbbf24', '8b5cf6'];
-                          const color = colors[Math.floor(Math.random() * colors.length)];
-                          e.currentTarget.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23${color}'/%3E%3Ctext x='200' y='180' font-family='Arial, sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3E${encodeURIComponent(nft.name)}%3C/text%3E%3Ctext x='200' y='220' font-family='Arial, sans-serif' font-size='14' text-anchor='middle' fill='%23e5e7eb'%3E${encodeURIComponent(nft.collection)}%3C/text%3E%3C/svg%3E`;
+                          const colorVars = ['--neon-purple', '--neon-dark-red', '--neon-green', '--neon-amber', '--neon-violet'];
+                          const palette = colorVars.map(v =>
+                            getComputedStyle(document.documentElement).getPropertyValue(v).trim().replace('#','')
+                          );
+                          const color = palette[Math.floor(Math.random() * palette.length)];
+                          e.currentTarget.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23${color}'/%3E%3Ctext x='200' y='180' font-family='Arial, sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3E${encodeURIComponent(nft.name)}%3C/text%3E%3Ctext x='200' y='220' font-family='Arial, sans-serif' font-size='14' text-anchor='middle' fill='${encodeURIComponent(colors.gray[200])}'%3E${encodeURIComponent(nft.collection)}%3C/text%3E%3C/svg%3E`;
                         }}
                       />
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import colors from "tailwindcss/colors";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -332,8 +333,8 @@ function NFTCard({ nft, onList, onUnlist, isOwner }: NFTCardProps) {
             const target = e.target as HTMLImageElement;
             target.src = `data:image/svg+xml;base64,${btoa(`
               <svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
-                <rect width="300" height="200" fill="#374151"/>
-                <text x="150" y="100" text-anchor="middle" fill="#9CA3AF" font-family="Arial" font-size="14">
+                <rect width="300" height="200" fill="${colors.gray[700]}"/>
+                <text x="150" y="100" text-anchor="middle" fill="${colors.gray[400]}" font-family="Arial" font-size="14">
                   ${nft.name}
                 </text>
               </svg>
