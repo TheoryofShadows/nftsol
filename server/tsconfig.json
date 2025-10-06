@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": false,
+    "declaration": false,
+    "outDir": "../dist/server",
+    "rootDir": ".",
+    "strict": true,
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "../shared/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "../dist",
+    "../client"
+  ]
+}
