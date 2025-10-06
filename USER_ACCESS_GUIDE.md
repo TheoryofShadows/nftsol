@@ -4,15 +4,15 @@
 
 Once your NFTSol marketplace is deployed, users can access it through several methods depending on your deployment platform.
 
-### Replit Deployment Access
+
 
 **Automatic Domain:**
-- Your app will be available at: `https://your-repl-name.username.replit.app`
-- Example: `https://nftsol-marketplace.yourname.replit.app`
+
+
 
 **Custom Domain (Optional):**
 - You can configure a custom domain like `nftsol.app` or `marketplace.yourdomain.com`
-- Configure through Replit dashboard → Deployments → Custom Domain
+
 
 ### What Users Can Do
 
@@ -45,7 +45,7 @@ Once your NFTSol marketplace is deployed, users can access it through several me
 ### User Journey Example
 
 **New User:**
-1. Visit `https://your-deployed-app.replit.app`
+
 2. Browse featured NFTs without account
 3. Click "Connect Wallet" → Install Phantom if needed
 4. Create profile with username

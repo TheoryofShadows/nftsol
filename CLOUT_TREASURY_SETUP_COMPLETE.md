@@ -24,7 +24,7 @@ This address is now configured as your CLOUT community treasury wallet and will 
 ## **Next Steps for Full Configuration**
 
 ### **1. Set Environment Variable (Optional but Recommended)**
-To use this address in production, set it in your Replit Secrets:
+
 ```
 CLOUT_TREASURY_WALLET=FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM
 ```

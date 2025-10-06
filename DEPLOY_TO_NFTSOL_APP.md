@@ -6,8 +6,8 @@ Your `npm run build` completed successfully and created production files in `/di
 
 ## **📋 Exact Deployment Steps for nftsol.app**
 
-### **Step 1: Replit Static Deployment**
-1. In Replit, click **"Deployments"** tab (left sidebar)
+
+
 2. Click **"Enable Deployment"** 
 3. Select **"Static Site"**
 4. Configure deployment:
@@ -19,9 +19,9 @@ Your `npm run build` completed successfully and created production files in `/di
 1. After deployment completes, go to **"Custom Domains"** tab
 2. Click **"Add Custom Domain"**
 3. Enter: `nftsol.app`
-4. Replit will provide DNS instructions:
+
    - **TXT record** for domain verification
-   - **CNAME record** (www → cname.replit.com)
+
 5. Add these records at your domain registrar (GoDaddy, Namecheap, etc.)
 
 ### **Step 3: DNS Configuration**
@@ -29,15 +29,15 @@ At your domain registrar, add these records:
 ```dns
 Type: TXT
 Name: @
-Value: [Replit verification code]
+
 
 Type: CNAME  
 Name: www
-Value: cname.replit.com
+
 
 Type: A (if needed)
 Name: @
-Value: [Replit IP address]
+
 ```
 
 ## **🎯 What You're Deploying**
@@ -113,10 +113,10 @@ Once deployed to nftsol.app, you'll earn revenue from:
 - [x] Security measures in place
 
 ### **During Deployment:**
-- [ ] Enable static site deployment in Replit
+
 - [ ] Configure build command: `npm run build`
 - [ ] Set output directory: `dist/public`
-- [ ] Deploy and verify Replit URL works
+
 - [ ] Add custom domain: `nftsol.app`
 
 ### **After Deployment:**

@@ -38,11 +38,11 @@ Replace `YOUR_USERNAME` with your actual GitHub username.
 
 ## 🌐 Hosting Platform Deployment
 
-### Option 1: Replit Deployments (Recommended)
 
-1. Click the "Deploy" button in your Replit interface
+
+
 2. Choose your deployment settings
-3. Your app will be live at `your-repl-name.replit.app`
+
 
 **Pros:** Simple, integrated, automatic HTTPS, built-in database
 
@@ -91,7 +91,7 @@ PORT=5000
 
 ## 🗄️ Database Setup
 
-### For Replit Deployments
+
 - Use the built-in PostgreSQL database
 - Database credentials are automatically provided
 

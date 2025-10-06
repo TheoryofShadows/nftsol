@@ -19,8 +19,8 @@
    https://abc123def456@o123456.ingest.sentry.io/123456
    ```
 
-## Step 4: Add to Replit Secrets
-1. In Replit, go to Secrets tab (lock icon)
+
+
 2. Add new secret:
    - **Key**: `SENTRY_DSN`
    - **Value**: Your DSN URL from step 3

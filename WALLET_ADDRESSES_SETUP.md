@@ -6,7 +6,7 @@ To make NFTSol production-ready, you need to create secure Solana wallet address
 
 ## 🎯 Required Environment Variables
 
-You need to set these environment variables in your Replit project:
+
 
 ### **Platform Wallets**
 ```bash
@@ -127,7 +127,7 @@ CREATOR_ESCROW_WALLET=9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM
 ## 🎯 Next Steps
 
 1. **Create secure wallets** using Method 1 or 2 above
-2. **Set environment variables** in your Replit project
+
 3. **Test the system** using the Platform Management tab
 4. **Deploy to production** once testing is complete
 

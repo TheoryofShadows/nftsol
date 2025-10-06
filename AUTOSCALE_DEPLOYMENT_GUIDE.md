@@ -11,13 +11,13 @@ Your NFTSol marketplace is perfect for Autoscale deployment because it includes:
 ## **📋 Autoscale Deployment Steps**
 
 ### **Step 1: Access Deployments**
-1. In your Replit project, click **"Deploy"** button (top right)
+
 2. Select **"Deployments"** tab from the left sidebar
 
 ### **Step 2: Create Autoscale Deployment**
 1. Click **"Create Deployment"**
 2. Choose **"Autoscale"** (recommended for full-stack apps)
-3. Replit will automatically detect your configuration:
+
    - **Build Command:** `npm run build` (automatically detected)
    - **Start Command:** `npm run dev` (from your package.json)
    - **Port:** 5000 (automatically detected from your Express server)
@@ -30,7 +30,7 @@ Your NFTSol marketplace is perfect for Autoscale deployment because it includes:
 
 ### **Step 4: Get Your Live URL**
 After deployment completes (2-3 minutes):
-- You'll get a URL like: `https://nftsol-marketplace-username.replit.app`
+
 - Your full marketplace will be live and functional
 - Revenue generation starts immediately
 
@@ -61,15 +61,15 @@ After your Autoscale deployment is live:
 4. Enter: `nftsol.app`
 
 ### **Step 2: Configure DNS (Simpler Process)**
-Replit will provide just 2 records:
+
 ```dns
 Type: A
 Name: @
-Value: [Replit IP address]
+
 
 Type: CNAME
 Name: www  
-Value: [your-deployment].replit.app
+
 ```
 
 No TXT verification needed with Autoscale!
@@ -96,7 +96,7 @@ Once deployed, your marketplace generates revenue from:
 ## **🚀 Post-Deployment Actions**
 
 ### **Immediate (Day 1):**
-1. **Test all functionality** at your Replit URL
+
 2. **Create test NFTs** to verify minting works
 3. **Process test transactions** to confirm revenue flow
 4. **Share with beta users** for initial feedback

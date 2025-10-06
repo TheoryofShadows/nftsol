@@ -35,7 +35,7 @@ Your NFTSol marketplace is now **100% production ready** with all revenue-genera
 ### **Step 1: Connect nftsol.app Domain**
 ```bash
 # Follow DOMAIN_CONNECTION.md guide
-1. Add custom domain in Replit deployments
+
 2. Configure DNS records at your registrar
 3. Wait for SSL certificate provisioning (automatic)
 4. Verify https://nftsol.app loads correctly
@@ -43,7 +43,7 @@ Your NFTSol marketplace is now **100% production ready** with all revenue-genera
 
 ### **Step 2: Configure Production Environment**
 ```env
-# Add these secrets in Replit:
+
 DOMAIN=nftsol.app
 VITE_PINATA_API_KEY=your_pinata_key
 VITE_PINATA_SECRET_KEY=your_pinata_secret
@@ -52,7 +52,7 @@ CORS_ORIGIN=https://nftsol.app
 
 ### **Step 3: Deploy & Launch**
 ```bash
-# In Replit:
+
 1. Click "Deploy" button
 2. Select "Production" environment
 3. Confirm domain configuration

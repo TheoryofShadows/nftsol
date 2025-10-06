@@ -1,49 +1,22 @@
-import { users, type User, type InsertUser } from "@shared/schema";
-import { db } from "./db";
-import { eq, sql } from "drizzle-orm";
+import fs from "node:fs";
+import fsp from "node:fs/promises";
+import path from "node:path";
+import { Request } from "express";
 
-// modify the interface with any CRUD methods
-// you might need
+const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+async function ensureDir() { await fsp.mkdir(UPLOAD_DIR, { recursive: true }); }
 
-export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-}
-
-export class DatabaseStorage implements IStorage {
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
+export const storage = {
+  async save(buffer: Buffer, filename: string) {
+    await ensureDir();
+    const fp = path.join(UPLOAD_DIR, filename);
+    await fsp.writeFile(fp, buffer);
+    return { path: fp, url: `/uploads/${filename}` };
+  },
+  async fromRequest(req: Request, field = "file") {
+    const f: any = (req as any).file || (req as any).files?.[field];
+    if (!f) throw new Error("No file provided");
+    const buf = Buffer.isBuffer(f.buffer) ? f.buffer : Buffer.from(f.buffer);
+    return this.save(buf, f.originalname || f.name || `upload-${Date.now()}`);
   }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  // Optimized stats with in-memory caching
-  private statsCache: { data: any; timestamp: number } | null = null;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-// Stats system removed to prevent database errors
-  async getAllStats() {
-    // Return mock data to prevent errors
-    return { 
-      totalUsers: 0, 
-      totalNFTs: 0, 
-      totalVolume: 0, 
-      timestamp: new Date() 
-    };
-  }
-}
-
-export const storage = new DatabaseStorage();
+};

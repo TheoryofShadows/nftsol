@@ -35,10 +35,10 @@ Your NFTSol marketplace is now fully configured and ready for deployment to any 
 
 ## Deployment Platforms
 
-### 1. Replit Deployment (Recommended)
+
 ```bash
-# Already configured in .replit
-# Just click "Deploy" button in Replit dashboard
+
+
 ```
 
 ### 2. Vercel Deployment

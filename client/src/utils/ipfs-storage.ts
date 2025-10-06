@@ -1,5 +1,5 @@
 
-// Enhanced storage using Replit Object Storage for permanent file hosting
+
 
 export interface UploadResult {
   success: boolean;
@@ -17,7 +17,7 @@ export async function uploadToIPFS(file: File): Promise<UploadResult> {
     const fileExtension = file.name.split('.').pop() || 'bin';
     const uniqueFilename = `nft-${timestamp}-${randomId}.${fileExtension}`;
     
-    // Upload to server with Replit Object Storage
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('filename', uniqueFilename);

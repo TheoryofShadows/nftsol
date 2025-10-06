@@ -1,0 +1,65 @@
+// server/nft-routes.ts
+import express, { type Express, type Request, type Response } from "express";
+import multer from "multer";
+import fs from "node:fs";
+import path from "node:path";
+
+// ensure upload dirs
+const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+const TMP_DIR = path.join(UPLOAD_DIR, "tmp");
+for (const d of [UPLOAD_DIR, TMP_DIR]) fs.mkdirSync(d, { recursive: true });
+
+// multer to tmp first
+const upload = multer({ dest: TMP_DIR });
+
+export function setupNftRoutes(app: Express) {
+  // serve static uploaded files at /uploads/...
+  app.use("/uploads", express.static(UPLOAD_DIR, { fallthrough: true }));
+
+  // simple health of this module
+  app.get("/api/nft/health", (_req: Request, res: Response) => {
+    res.json({ ok: true, uploadsDir: UPLOAD_DIR });
+  });
+
+  // upload endpoint
+  app.post("/api/nft/upload", upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) return res.status(400).json({ error: "no_file" });
+
+      // sanitize + create permanent name
+      const orig = req.file.originalname || "file.bin";
+      const safeBase = orig.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+      const stamp = Date.now();
+      const filename = `${stamp}-${safeBase}`;
+      const dest = path.join(UPLOAD_DIR, filename);
+
+      // move from tmp to permanent
+      fs.renameSync(req.file.path, dest);
+
+      const url = `/uploads/${filename}`; // served by express.static above
+      return res.json({
+        success: true,
+        filename,
+        url,
+        message: "File uploaded successfully",
+      });
+    } catch (err) {
+      console.error("upload error:", err);
+      return res.status(500).json({ error: "upload_failed" });
+    }
+  });
+
+  // legacy-style download (optional mirror of static)
+  app.get("/api/storage/:filename", (req: Request, res: Response) => {
+    try {
+      const file = path.join(UPLOAD_DIR, path.basename(req.params.filename));
+      if (!fs.existsSync(file)) return res.status(404).json({ error: "not_found" });
+      res.sendFile(file);
+    } catch (err) {
+      console.error("serve file error:", err);
+      res.status(500).json({ error: "serve_failed" });
+    }
+  });
+}
+
+export default setupNftRoutes;

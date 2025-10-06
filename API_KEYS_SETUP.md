@@ -47,10 +47,10 @@ node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 
 **Example**: `https://solana-mainnet.g.alchemy.com/v2/your-api-key`
 
-## 🚀 Adding Keys to Replit
 
-### Method 1: Replit Secrets (Recommended)
-1. In your Replit workspace, click "Secrets" tab (lock icon)
+
+
+
 2. Add each key:
    - Key: `JWT_SECRET` | Value: `your-generated-secret`
    - Key: `SENTRY_DSN` | Value: `your-sentry-dsn`
@@ -78,7 +78,7 @@ Once you add the keys, you should see:
 ## 🔒 Security Notes
 
 - **Never commit API keys to git**
-- **Use Replit Secrets for development**
+
 - **Use environment variables for production**
 - **Regenerate JWT_SECRET if compromised**
 

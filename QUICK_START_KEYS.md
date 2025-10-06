@@ -10,18 +10,18 @@
 **Time**: 2 minutes
 1. Go to [sentry.io](https://sentry.io) → Sign up free
 2. Create Node.js project → Copy DSN
-3. Add to Replit Secrets: Key=`SENTRY_DSN`, Value=your DSN
+
 
 ### 2. VITE_SOLANA_RPC_URL (Blockchain Speed)
 **Time**: 1 minute (free option)
-**Quick Option**: Add to Replit Secrets:
+
 - Key: `VITE_SOLANA_RPC_URL`
 - Value: `https://api.mainnet-beta.solana.com`
 
 **Better Option** (2 minutes): 
 1. Go to [alchemy.com](https://alchemy.com) → Sign up
 2. Create Solana Mainnet app → Copy URL
-3. Add to Replit Secrets
+
 
 ## After Adding Keys
 Your marketplace will have:

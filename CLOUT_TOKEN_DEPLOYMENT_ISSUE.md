@@ -52,7 +52,7 @@ cat ~/.config/solana/id.json
 ## **Next Steps**
 
 1. **Get Correct Private Key**: Export from your wallet in array format
-2. **Update Replit Secrets**: Replace CLOUT_TREASURY_PRIVATE_KEY with correct format
+
 3. **Verify Format**: Private key should be 64 bytes (array of 64 numbers)
 4. **Deploy Token**: Run `node scripts/deploy-clout-token.js` again
 

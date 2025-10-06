@@ -1,0 +1,41 @@
+// server/nft-routes.ts
+import express, { type Express, type Request, type Response } from "express";
+import multer from "multer";
+import fs from "node:fs";
+import path from "node:path";
+// Ensure upload directories
+const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+const TMP_DIR = path.join(UPLOAD_DIR, "tmp");
+for (const d of [UPLOAD_DIR, TMP_DIR]) {
+fs.mkdirSync(d, { recursive: true });
+}
+// Multer configuration for temporary uploads
+const upload = multer({ dest: TMP_DIR });
+// Export function to set up NFT routes
+export function setupNftRoutes(app: Express) {
+// Serve static uploaded files at /uploads/...
+app.use("/uploads", express.static(UPLOAD_DIR, { fallthrough: true }));
+// Health check for this module
+app.get("/api/nft/health", (_req: Request, res: Response) => {
+res.json({ ok: true, uploadsDir: UPLOAD_DIR });
+});
+// Endpoint to upload NFT metadata or images
+app.post("/api/nft/upload", upload.single("file"), (req: Request, res: Response) => {
+if (!req.file) {
+return res.status(400).json({ error: "No file uploaded" });
+}
+const { originalname, path: tempPath } = req.file;
+const finalPath = path.join(UPLOAD_DIR, originalname);
+fs.renameSync(tempPath, finalPath); // Move from tmp to uploads
+res.json({ message: "File uploaded", url: /uploads/${originalname} });
+});
+// Example endpoint to list uploaded NFTs (stub)
+app.get("/api/nft/list", (_req: Request, res: Response) => {
+fs.readdir(UPLOAD_DIR, (err, files) => {
+if (err) {
+return res.status(500).json({ error: "Failed to read uploads" });
+}
+res.json({ files: files.filter(f => !f.startsWith("tmp")) });
+});
+});
+}

@@ -51,7 +51,7 @@ The system is using placeholder addresses. You need to set your real wallets:
 4. **Creator Escrow** (temporary royalty holding)
 
 ### **📋 Environment Variables to Set**
-Go to Replit Secrets and add:
+
 ```
 DEVELOPER_WALLET_PUBLIC_KEY=YourActualWalletAddress
 DEVELOPER_WALLET_PRIVATE_KEY=YourActualPrivateKey

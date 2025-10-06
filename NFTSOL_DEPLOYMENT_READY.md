@@ -29,8 +29,8 @@ npm run build
 ```
 This creates `/dist/public` with your static frontend.
 
-### **Step 3: Replit Static Deployment**
-In Replit Deployments tab:
+
+
 - **Build command:** `npm run build`
 - **Output directory:** `dist/public`
 - **Deploy Type:** Static Site
@@ -38,9 +38,9 @@ In Replit Deployments tab:
 ### **Step 4: Connect nftsol.app Domain**
 After deployment, add custom domain:
 - **Domain:** `nftsol.app`
-- **DNS Records:** Follow Replit's instructions for:
+
   - TXT record for verification
-  - CNAME record (www → cname.replit.com)
+
 
 ## **🎯 Revenue-Ready Features**
 

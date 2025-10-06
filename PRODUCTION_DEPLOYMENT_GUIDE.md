@@ -10,8 +10,8 @@
 
 ## 🚀 Quick Production Deployment
 
-### Step 1: Deploy to Replit
-1. Click the **Deploy** button in Replit
+
+
 2. Select "Autoscale" for high availability
 3. Configure your custom domain (optional)
 
@@ -92,7 +92,7 @@ POST /api/debug/ai-test
 ## 🎯 Next Steps for Production
 
 ### Immediate Actions
-1. **Deploy Now**: Use Replit's deploy button
+
 2. **Add OpenAI API Key**: For full AI functionality
 3. **Test CLOUT Token**: Verify in AI Studio debug panel
 
@@ -140,4 +140,3 @@ POST /api/debug/ai-test
 **Debug Tools**: Available at `/ai-studio`  
 **System Status**: All green ✅
 
-Simply click **Deploy** in Replit to go live!

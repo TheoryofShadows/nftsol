@@ -105,7 +105,7 @@ Your NFT marketplace is nearly ready for launch. Only one step remains: funding 
 - [ ] **Confirm deployment** on Solscan
 
 ### **Day 2-3: Platform Launch**
-- [ ] **Deploy to production** (Replit/Vercel)
+
 - [ ] **Configure custom domain**
 - [ ] **SSL certificate setup**
 - [ ] **Final testing** of all systems

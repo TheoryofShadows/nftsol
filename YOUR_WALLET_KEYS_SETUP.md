@@ -26,9 +26,9 @@ solana-keygen new --outfile your-developer-wallet.json
 solana-keygen pubkey your-developer-wallet.json
 ```
 
-### **Step 2: Set Environment Variables in Replit**
 
-1. Go to your Replit project
+
+
 2. Click the **Secrets** tab (🔒 icon)
 3. Add these secrets:
 

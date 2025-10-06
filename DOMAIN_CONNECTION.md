@@ -4,12 +4,12 @@
 
 Your NFTSol platform is ready to connect to your custom domain `nftsol.app`. Here's how to configure it for maximum performance and professional appearance.
 
-## **🔧 Replit Domain Configuration**
 
-### **Step 1: Configure Custom Domain in Replit**
 
-1. **Open Replit Deployments**
-   - Go to your Replit project
+
+
+
+
    - Click "Deploy" in the top right
    - Select "Deployments" tab
 
@@ -19,7 +19,7 @@ Your NFTSol platform is ready to connect to your custom domain `nftsol.app`. Her
    - Click "Add Domain"
 
 3. **Configure DNS Records**
-   - Replit will provide DNS configuration
+
    - You'll need to update your domain registrar settings
 
 ### **Step 2: DNS Configuration at Your Domain Registrar**
@@ -33,7 +33,7 @@ Value: your-repl-name.username.repl.co
 
 Type: A
 Name: @
-Value: [Replit IP Address provided in deployment]
+
 
 Type: CNAME  
 Name: api
@@ -42,7 +42,7 @@ Value: your-repl-name.username.repl.co
 
 ### **Step 3: SSL Certificate Setup**
 
-Replit automatically provides SSL certificates for custom domains:
+
 - ✅ **Free SSL**: Automatically provisioned
 - ✅ **HTTPS Redirect**: Automatically configured
 - ✅ **Security Headers**: Built-in protection
@@ -51,7 +51,7 @@ Replit automatically provides SSL certificates for custom domains:
 
 ### **Update Environment Variables**
 
-Add these to your Replit secrets:
+
 
 ```env
 DOMAIN=nftsol.app
@@ -109,7 +109,7 @@ Your `index.html` is already optimized with:
 
 1. **Enable Auto-Deploy**
    ```bash
-   # In Replit, enable automatic deployments
+
    # Every git push triggers deployment
    ```
 
@@ -121,7 +121,7 @@ Your `index.html` is already optimized with:
 ### **Option B: Manual Deployment**
 
 1. **Deploy Current Version**
-   - Click "Deploy" in Replit
+
    - Select production environment
    - Confirm domain configuration
 
@@ -134,7 +134,7 @@ Your `index.html` is already optimized with:
 ## **📊 Domain Performance Features**
 
 ### **CDN & Caching**
-- ✅ **Global CDN**: Replit provides worldwide distribution
+
 - ✅ **Static Asset Caching**: Automatic optimization
 - ✅ **Gzip Compression**: Built-in compression
 - ✅ **Image Optimization**: Automatic image processing
