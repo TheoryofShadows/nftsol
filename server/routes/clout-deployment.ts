@@ -2,7 +2,7 @@ import { Router } from "express";
 // Note: Direct import causes TypeScript rootDir issues, so we'll use dynamic import
 import fs from 'fs';
 import path from 'path';
-
+import { deployCLOUTToken } from '../scripts/deploy-clout-token';
 const router = Router();
 
 /**
@@ -10,10 +10,9 @@ const router = Router();
  */
 router.post('/deploy', async (req, res) => {
   try {
-    console.log('🚀 Starting CLOUT token deployment via API...');
+    console.log('Starting CLOUT token deployment via API...');
     
     // Dynamic import to avoid TypeScript rootDir issues
-    const { deployCLOUTToken } = await import('../../scripts/deploy-clout-token.js');
     const deploymentInfo = await deployCLOUTToken();
     
     res.json({
@@ -24,7 +23,7 @@ router.post('/deploy', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('❌ CLOUT deployment failed:', error);
+    console.error('CLOUT deployment failed:', error);
     
     res.status(500).json({
       success: false,
@@ -98,3 +97,7 @@ router.get('/instructions', (req, res) => {
 });
 
 export default router;
+
+
+
+

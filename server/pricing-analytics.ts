@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { db } from "./db";
 import { nfts, nftTransactions } from "@shared/nft-schema";
 import { eq, desc, and, sql, gte, lte, avg, count, max, min } from "drizzle-orm";
-
 interface PricingAnalytics {
   averagePrice: number;
   medianPrice: number;
@@ -114,7 +113,7 @@ async function generatePricingSuggestions(
     .map(sale => ({
       price: sale.price,
       soldAt: sale.soldAt,
-      collection: sale.collection
+      collection: sale.collection ?? undefined
     }));
 
   if (validSales.length === 0) {
@@ -345,3 +344,6 @@ function generateFallbackAnalytics(): PricingAnalytics {
     ]
   };
 }
+
+
+

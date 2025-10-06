@@ -37,38 +37,27 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
   const [isHydrating, setIsHydrating] = useState(true);
 
   useEffect(() => {
-    // Initialize available wallets
-    const wallets = walletManager.getAvailableWallets();
-    setAvailableWallets(wallets);
+    setAvailableWallets(walletManager.getAvailableWallets());
+    let cancelled = false;
 
-    // Handle mobile redirect and localStorage hydration
     const handleWalletHydration = async () => {
       try {
-        // Check for cached wallet info from mobile redirect
         const cachedPublicKey = localStorage.getItem('publicKey');
         const cachedWalletName = localStorage.getItem('walletName');
         const pendingConnection = localStorage.getItem('pendingWalletConnection');
-        
-        // Check if we're returning from a mobile wallet redirect
         const urlParams = new URLSearchParams(window.location.search);
         const fromWallet = urlParams.get('wallet') || pendingConnection;
-        
+
         if (cachedPublicKey && fromWallet) {
-          console.log('Attempting to restore wallet connection from mobile redirect');
-          
-          // Try to reconnect to the cached wallet
           try {
             const restoredWallet = await walletManager.connectWallet(fromWallet);
-            if (restoredWallet && restoredWallet.publicKey?.toString() === cachedPublicKey) {
+            if (!cancelled && restoredWallet?.publicKey?.toString() === cachedPublicKey) {
               setWallet(restoredWallet);
               setConnected(true);
-              
-              // Clean up URL params and pending connection
               window.history.replaceState({}, document.title, window.location.pathname);
               localStorage.removeItem('pendingWalletConnection');
               localStorage.removeItem('connectionTimestamp');
-              
-              console.log('Successfully restored wallet connection');
+              localStorage.setItem('walletName', cachedWalletName || restoredWallet.name || 'unknown');
               return;
             }
           } catch (error) {
@@ -76,48 +65,46 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
           }
         }
 
-        // Check for existing connection
         const currentWallet = walletManager.getCurrentWallet();
-        if (currentWallet && currentWallet.isConnected) {
+        if (!cancelled && currentWallet?.isConnected) {
           setWallet(currentWallet);
           setConnected(true);
-          
-          // Store current connection info
           if (currentWallet.publicKey) {
             localStorage.setItem('publicKey', currentWallet.publicKey.toString());
-            localStorage.setItem('walletName', currentWallet.name || 'unknown');
+            localStorage.setItem('walletName', currentWallet.name || currentWallet.wallet?.name || 'unknown');
           }
         }
       } catch (error) {
         console.error('Error during wallet hydration:', error);
       } finally {
-        setIsHydrating(false);
+        if (!cancelled) {
+          setIsHydrating(false);
+        }
       }
     };
 
-    // Delay hydration slightly to allow wallet injection
-    const timer = setTimeout(handleWalletHydration, 500);
-    return () => clearTimeout(timer);
+    const timer = window.setTimeout(handleWalletHydration, 500);
 
-    // Setup event listeners
-    const handleConnect = (connectedWallet?: UniversalWallet) => {
+    const handleConnect = async (_payload?: unknown) => {
+      if (cancelled) return;
       setConnected(true);
       setConnecting(false);
-      
-      // Store wallet info for mobile redirect recovery
-      if (connectedWallet?.publicKey) {
-        localStorage.setItem('publicKey', connectedWallet.publicKey.toString());
-        localStorage.setItem('walletName', connectedWallet.name || 'unknown');
-        localStorage.setItem('walletConnectedAt', Date.now().toString());
+      const currentWallet = walletManager.getCurrentWallet();
+      if (currentWallet) {
+        setWallet(currentWallet);
+        if (currentWallet.publicKey) {
+          localStorage.setItem('publicKey', currentWallet.publicKey.toString());
+          localStorage.setItem('walletName', currentWallet.name || currentWallet.wallet?.name || 'unknown');
+          localStorage.setItem('walletConnectedAt', Date.now().toString());
+        }
       }
     };
 
     const handleDisconnect = () => {
+      if (cancelled) return;
       setConnected(false);
       setWallet(null);
       setConnecting(false);
-      
-      // Clear stored wallet info
       localStorage.removeItem('publicKey');
       localStorage.removeItem('walletName');
       localStorage.removeItem('walletConnectedAt');
@@ -126,7 +113,9 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
     };
 
     const handleWalletsChanged = (wallets: WalletAdapter[]) => {
-      setAvailableWallets(wallets);
+      if (!cancelled) {
+        setAvailableWallets(wallets);
+      }
     };
 
     walletManager.on('connect', handleConnect);
@@ -134,6 +123,8 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
     walletManager.on('walletsChanged', handleWalletsChanged);
 
     return () => {
+      cancelled = true;
+      clearTimeout(timer);
       walletManager.off('connect', handleConnect);
       walletManager.off('disconnect', handleDisconnect);
       walletManager.off('walletsChanged', handleWalletsChanged);
@@ -168,7 +159,7 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
       
       // Check if it's a mobile redirect scenario
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile && error.message?.includes('Redirected to')) {
+      if (isMobile && error instanceof Error && error.message.includes('Redirected to')) {
         // Don't clear connecting state for mobile redirects
         console.log('Mobile wallet redirect initiated');
         return;
@@ -179,7 +170,6 @@ export function SolanaWalletProvider({ children }: UniversalWalletProviderProps)
       localStorage.removeItem('connectionTimestamp');
       throw error;
     } finally {
-      // Only clear connecting if not a mobile redirect
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       if (!isMobile) {
         setConnecting(false);
@@ -245,3 +235,5 @@ export function useSolanaWallet() {
     connected
   };
 }
+
+

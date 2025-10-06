@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-
 const MAGIC_EDEN_BASE_URL = 'https://api-mainnet.magiceden.dev/v2';
 const MAGIC_EDEN_API_KEY = process.env.MAGIC_EDEN_API_KEY;
 const HELIUS_RPC_URL = process.env.HELIUS_API_KEY 
@@ -20,10 +19,12 @@ const POPULAR_COLLECTIONS = [
   'shadowy_super_coder'
 ];
 
+const toErrorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+
 async function makeRequest(endpoint: string): Promise<any> {
   try {
     const url = `${MAGIC_EDEN_BASE_URL}${endpoint}`;
-    console.log(`🔗 Making Magic Eden request to: ${url}`);
+    console.log(`Making Magic Eden request to: ${url}`);
 
     const headers = {
       'Accept': 'application/json',
@@ -37,7 +38,7 @@ async function makeRequest(endpoint: string): Promise<any> {
       headers: headers,
     });
 
-    console.log(`📡 Magic Eden response: ${response.status} ${response.statusText}`);
+    console.log(`Magic Eden response: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -46,11 +47,12 @@ async function makeRequest(endpoint: string): Promise<any> {
     }
 
     const data = await response.json();
-    console.log(`✅ Magic Eden data received:`, Object.keys(data));
+    console.log(`Magic Eden data received:`, Object.keys(data));
     return data;
   } catch (error) {
-    console.error('Magic Eden API request failed:', error);
-    throw error;
+    const message = toErrorMessage(error);
+    console.error('Magic Eden API request failed:', message);
+    throw new Error(message);
   }
 }
 
@@ -190,7 +192,7 @@ export function setupMagicEdenRoutes(app: any) {
   // Direct API test endpoint
   app.get("/api/magiceden/test-direct", async (req: Request, res: Response) => {
     try {
-      console.log('🧪 Testing direct Magic Eden API connection...');
+      console.log('Testing direct Magic Eden API connection...');
 
       // Test multiple collections
       const results = [];
@@ -213,7 +215,7 @@ export function setupMagicEdenRoutes(app: any) {
         } catch (error) {
           results.push({
             collection,
-            error: error.message,
+            error: toErrorMessage(error),
             statsSuccess: false,
             activitiesCount: 0
           });
@@ -234,7 +236,7 @@ export function setupMagicEdenRoutes(app: any) {
       console.error("Direct API test failed:", error);
       res.status(500).json({ 
         error: "Direct API test failed",
-        message: error.message
+        message: toErrorMessage(error)
       });
     }
   });
@@ -242,10 +244,10 @@ export function setupMagicEdenRoutes(app: any) {
   // Health check
   app.get("/api/magiceden/status", async (req: Request, res: Response) => {
     try {
-      console.log('🏥 Magic Eden health check...');
+      console.log('Magic Eden health check...');
       // Test connection to Magic Eden
       const testStats = await makeRequest('/collections/mad_lads/stats').catch((error) => {
-        console.log('Health check failed:', error.message);
+        console.log('Health check failed:', toErrorMessage(error));
         return null;
       });
 
@@ -265,7 +267,7 @@ export function setupMagicEdenRoutes(app: any) {
       res.status(500).json({ 
         status: 'error',
         error: "Failed to connect to Magic Eden API",
-        message: error.message
+        message: toErrorMessage(error)
       });
     }
   });
@@ -295,3 +297,9 @@ function getFallbackNFTs() {
     }
   ];
 }
+
+
+
+
+
+

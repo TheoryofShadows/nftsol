@@ -69,7 +69,7 @@ export function CLOUTTokenVerifier() {
   }, []);
 
   const initializeWalletStatuses = () => {
-    const statuses = {};
+    const statuses: Record<string, WalletStatus> = {};
     Object.entries(PLATFORM_WALLETS).forEach(([key, wallet]) => {
       statuses[key] = {
         address: wallet.address,
@@ -111,7 +111,7 @@ export function CLOUTTokenVerifier() {
       }
       setVerificationStep(4);
 
-      if (!mockTokenInfo.deployed) {
+      if (!data.deployed) {
         toast({
           title: "CLOUT Token Not Deployed",
           description: "The CLOUT token has not been deployed to the Solana network yet",
@@ -435,3 +435,4 @@ export function CLOUTTokenVerifier() {
     </div>
   );
 }
+

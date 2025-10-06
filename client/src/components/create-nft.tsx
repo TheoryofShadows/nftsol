@@ -96,16 +96,18 @@ export default function CreateNFT() {
         attr => attr.trait_type.trim() && attr.value.trim()
       );
 
-      const metadata: NFTMetadata = {
+      const nftData: SimplifiedNFTData = {
         name: formData.name.trim(),
         description: formData.description.trim(),
-        image: "", // Will be set during minting
+        imageFile,
+        price: "0.01",
+        royalty: formData.royalty,
         collection: formData.collection.trim() || undefined,
-        royalty: Math.round(parseFloat(formData.royalty) * 100), // Convert to basis points
+        category: formData.category,
         attributes: validAttributes.length > 0 ? validAttributes : undefined
       };
 
-      const result = await mintNFT(metadata, creatorWallet, imageFile);
+      const result = await simplifiedMintNFT(nftData, creatorWallet);
 
       if (result.success) {
         toast({
@@ -343,3 +345,4 @@ export default function CreateNFT() {
     </div>
   );
 }
+

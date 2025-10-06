@@ -5,8 +5,10 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Buffer polyfill for browser compatibility
-import { Buffer } from 'buffer'
-window.Buffer = Buffer
+import { Buffer } from 'buffer';
+if (typeof window !== 'undefined' && !(window as any).Buffer) {
+  (window as any).Buffer = Buffer;
+}
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -62,7 +64,7 @@ const queryClient = new QueryClient({
         return failureCount < 1; // Reduced retries for faster response
       },
       staleTime: 1000 * 60 * 10, // 10 minutes - longer cache
-      cacheTime: 1000 * 60 * 15, // 15 minutes - longer cache
+      gcTime: 1000 * 60 * 15, // 15 minutes - garbage collection window
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: false, // Disable auto-refetch for better performance
@@ -114,3 +116,4 @@ createRoot(document.getElementById("root")!).render(
     </QueryClientProvider>
   </ErrorBoundary>
 );
+

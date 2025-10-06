@@ -19,6 +19,7 @@ export interface UniversalWallet {
   connecting: boolean;
   disconnecting: boolean;
   wallet: WalletAdapter | null;
+  name?: string;
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   sendTransaction(transaction: Transaction): Promise<string>;
@@ -256,13 +257,14 @@ export class SolanaWalletManager {
 
         for (const provider of providers) {
           if (provider.adapter && provider.adapter.publicKey?.toString() === cachedPublicKey) {
-            this.currentWallet = provider.adapter;
-            return this.createUniversalWallet(provider.adapter, provider.adapter.publicKey, {
+            const universalWallet = this.createUniversalWallet(provider.adapter, provider.adapter.publicKey, {
               name: provider.name,
               icon: '',
               url: '',
               readyState: 'Installed',
             });
+            this.currentWallet = universalWallet;
+            return universalWallet;
           }
         }
       }
@@ -317,10 +319,11 @@ export class SolanaWalletManager {
         throw new Error('Failed to get public key from wallet');
       }
 
-      this.currentWallet = adapter;
+      const universalWallet = this.createUniversalWallet(adapter, publicKey, walletInfo);
+      this.currentWallet = universalWallet;
       this.setupWalletEventListeners(adapter);
 
-      return this.createUniversalWallet(adapter, publicKey, walletInfo);
+      return universalWallet;
     } catch (error: any) {
       console.error(`Failed to connect to ${walletInfo.name}:`, error);
       console.error('Adapter details:', { 
@@ -410,7 +413,7 @@ export class SolanaWalletManager {
     }
 
     adapter.on('connect', (publicKey: any) => {
-      this.emit('connect', publicKey);
+      this.emit('connect', this.currentWallet ?? publicKey);
     });
 
     adapter.on('disconnect', () => {
@@ -429,6 +432,7 @@ export class SolanaWalletManager {
       connected: adapter.isConnected || true,
       connecting: false,
       disconnecting: false,
+      name: walletInfo.name,
       wallet: {
         name: walletInfo.name,
         icon: walletInfo.icon,
@@ -536,3 +540,5 @@ declare global {
 
 // Export singleton instance
 export const walletManager = new SolanaWalletManager();
+
+

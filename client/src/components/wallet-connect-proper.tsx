@@ -10,9 +10,9 @@ import {
 } from "@solana/wallet-adapter-react-ui";
 import {
   PhantomWalletAdapter,
-  BackpackWalletAdapter,
   SolflareWalletAdapter,
-  GlowWalletAdapter,
+  LedgerWalletAdapter,
+  CloverWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import { clusterApiUrl } from "@solana/web3.js";
 
@@ -28,9 +28,9 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ children }) => {
   
   const wallets = [
     new PhantomWalletAdapter(),
-    new BackpackWalletAdapter(),
     new SolflareWalletAdapter(),
-    new GlowWalletAdapter(),
+    new LedgerWalletAdapter(),
+    new CloverWalletAdapter(),
   ];
 
   return (
@@ -48,3 +48,5 @@ const WalletConnect: React.FC<WalletConnectProps> = ({ children }) => {
 };
 
 export default WalletConnect;
+
+

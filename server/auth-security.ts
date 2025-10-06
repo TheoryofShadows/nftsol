@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = '24h';
 
@@ -78,11 +77,11 @@ export const encryptData = (data: string): { encrypted: string; iv: string } => 
   const algorithm = 'aes-256-cbc';
   const key = crypto.createHash('sha256').update(JWT_SECRET).digest();
   const iv = crypto.randomBytes(16);
-  
-  const cipher = crypto.createCipher(algorithm, key);
+
+  const cipher = crypto.createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  
+
   return {
     encrypted,
     iv: iv.toString('hex')
@@ -94,11 +93,11 @@ export const decryptData = (encryptedData: string, ivHex: string): string => {
   const algorithm = 'aes-256-cbc';
   const key = crypto.createHash('sha256').update(JWT_SECRET).digest();
   const iv = Buffer.from(ivHex, 'hex');
-  
-  const decipher = crypto.createDecipher(algorithm, key);
+
+  const decipher = crypto.createDecipheriv(algorithm, key, iv);
   let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
-  
+
   return decrypted;
 };
 
@@ -119,7 +118,7 @@ const userAttempts = new Map<string, { count: number; lastAttempt: number }>();
 
 export const userSpecificRateLimit = (maxAttempts: number, windowMs: number) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
-    const userId = req.user?.id || req.ip;
+    const userId = req.user?.id ?? req.ip ?? 'anonymous';
     const now = Date.now();
     
     const userRecord = userAttempts.get(userId);
@@ -153,9 +152,10 @@ export const userSpecificRateLimit = (maxAttempts: number, windowMs: number) => 
 // Clean up old rate limit records periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [userId, record] of userAttempts.entries()) {
+  for (const [userId, record] of Array.from(userAttempts.entries())) {
     if (now - record.lastAttempt > 60 * 60 * 1000) { // 1 hour
       userAttempts.delete(userId);
     }
   }
 }, 5 * 60 * 1000); // Clean up every 5 minutes
+

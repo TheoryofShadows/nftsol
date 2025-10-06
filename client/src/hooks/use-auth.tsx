@@ -1,6 +1,12 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+declare global {
+  interface Window {
+    authToken?: string;
+  }
+}
+
 interface User {
   id: string;
   username: string;
@@ -105,3 +111,5 @@ export function useAuth() {
   }
   return context;
 }
+
+
