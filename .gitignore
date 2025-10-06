@@ -4,3 +4,22 @@ node_modules/
 dist/
 *.log
 .DS_Store
+# local-only assets and experiments
+.env.txt
+env.txt
+anchor_test_project*/
+anchor_test_project_backup/
+attached_assets/
+java/
+App.java
+sample.txt
+temp.txt
+temp_patch
+desktop.ini
+*.bak
+postcss.config.cjs
+tsconfig.server.json
+nodemon.json
+server/instrument.ts
+server/routes/deploy-clout-token.d.ts
+server/solana-assets.ts
