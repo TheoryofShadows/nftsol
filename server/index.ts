@@ -60,9 +60,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const duration = Date.now() - start;
     if (pathName.startsWith("/api")) {
       if (pathName.includes("/src/") || pathName.includes("vite") || res.statusCode === 304) return;
-      let logLine = ${req.method}   in ms;
+      let logLine = `${req.method} ${pathName} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine +=  :: ;
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
       if (logLine.length > 80) logLine = logLine.slice(0, 79) + ".";
       log(logLine);
@@ -201,9 +201,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   const PORT = parseInt(process.env.PORT || "3001", 10);
   const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(Server running on http://0.0.0.0:);
-    console.log(Access your app at: http://localhost:);
-    console.log(WebSocket server initialized for real-time updates);
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Access your app at: http://localhost:${PORT}`);
+    console.log("WebSocket server initialized for real-time updates");
   });
 
   setupWebSocketAPI(server);
