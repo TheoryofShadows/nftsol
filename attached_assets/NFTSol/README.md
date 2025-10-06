@@ -1,3 +1,0 @@
-# NFTSol Full Stack
-
-Instructions...
