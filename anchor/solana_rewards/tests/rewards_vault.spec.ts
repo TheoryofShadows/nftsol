@@ -3,44 +3,18 @@ import { Program } from '@coral-xyz/anchor';
 // @ts-ignore - generated after running anchor build --ts
 import { RewardsVault } from '../generated/types/rewards_vault';
 import {
-  Keypair,\n  PublicKey,\n  SystemProgram,\n  Transaction,\n  TransactionInstruction,\n  SYSVAR_RENT_PUBKEY,
+  TOKEN_PROGRAM_ID,
+  createInitializeMintInstruction,
+  getAccount,
+  getMinimumBalanceForRentExemptMint,
+  createAssociatedTokenAccountInstruction,
+} from '@solana/spl-token';
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
 } from '@solana/web3.js';
-
-const TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvR93dTqTRwpebEWBzZ7z7bP1PkHphnCwW1ns');
-
-function createInitializeMintInstruction(
-  mint: PublicKey,
-  decimals: number,
-  mintAuthority: PublicKey,
-): TransactionInstruction {
-  const data = Buffer.alloc(1 + 1 + 32 + 1);\n  data.writeUInt8(0, 0); // InitializeMint tag\n  data.writeUInt8(decimals, 1);\n  mintAuthority.toBuffer().copy(data, 2);\n  data.writeUInt8(0, 34); // no freeze authority\n  return new TransactionInstruction({\n    programId: TOKEN_PROGRAM_ID,\n    keys: [\n      { pubkey: mint, isSigner: false, isWritable: true },\n      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },\n    ],\n    data,\n  });
-}
-
-function createAssociatedTokenAccountInstruction(
-  payer: PublicKey,
-  ata: PublicKey,
-  owner: PublicKey,
-  mint: PublicKey,
-): TransactionInstruction {
-  return new TransactionInstruction({
-    programId: ASSOCIATED_TOKEN_PROGRAM_ID,
-    keys: [
-      { pubkey: payer, isSigner: true, isWritable: true },
-      { pubkey: ata, isSigner: false, isWritable: true },
-      { pubkey: owner, isSigner: false, isWritable: false },
-      { pubkey: mint, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
-    ],
-    data: Buffer.alloc(0),
-  });
-}
-
-function readTokenAmount(accountData: Buffer): bigint {
-  return accountData.readBigUInt64LE(64);
-}
 
 describe('rewards_vault program', () => {
   const provider = anchor.AnchorProvider.local();
@@ -58,7 +32,7 @@ describe('rewards_vault program', () => {
     await connection.confirmTransaction(airdropSig);
 
     const rewardMint = Keypair.generate();
-    const mintRent = await connection.getMinimumBalanceForRentExemption(82);
+    const mintRent = await getMinimumBalanceForRentExemptMint(connection);
 
     const createMintTx = new Transaction().add(
       SystemProgram.createAccount({
@@ -68,7 +42,7 @@ describe('rewards_vault program', () => {
         space: 82,
         programId: TOKEN_PROGRAM_ID,
       }),
-      createInitializeMintInstruction(rewardMint.publicKey, 9, wallet.publicKey),
+      createInitializeMintInstruction(rewardMint.publicKey, 9, wallet.publicKey, null),
     );
     await provider.sendAndConfirm(createMintTx, [rewardMint]);
 
@@ -83,7 +57,7 @@ describe('rewards_vault program', () => {
 
     const ata = PublicKey.findProgramAddressSync(
       [wallet.publicKey.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), rewardMint.publicKey.toBuffer()],
-      ASSOCIATED_TOKEN_PROGRAM_ID,
+      new PublicKey('ATokenGPvR93dTqTRwpebEWBzZ7z7bP1PkHphnCwW1ns'),
     )[0];
     const createAtaIx = createAssociatedTokenAccountInstruction(
       wallet.publicKey,
@@ -125,15 +99,9 @@ describe('rewards_vault program', () => {
       })
       .rpc();
 
-    const tokenAccount = await connection.getAccountInfo(ata);
-    if (!tokenAccount) {
-      throw new Error('Failed to fetch token account');
-    }
-    const balance = readTokenAmount(tokenAccount.data);
-    if (balance !== mintAmount.toBigInt()) {
-      throw new Error(`Unexpected reward balance ${balance.toString()}`);
+    const tokenAccount = await getAccount(connection, ata);
+    if (tokenAccount.amount.toString() !== mintAmount.toString()) {
+      throw new Error(`Unexpected reward balance ${tokenAccount.amount.toString()}`);
     }
   });
 });
-
-

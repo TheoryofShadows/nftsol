@@ -7,14 +7,14 @@ members = [
   "programs/loyalty_registry"
 ]
 
-[workspace.package]
-edition = "2021"
-version = "0.1.0"
-authors = ["NFTSol Contributors"]
-description = "Solana on-chain programs powering the NFTSol rewards platform."
-
 [workspace.dependencies]
 anchor-lang = "0.31.1"
 anchor-spl = "0.31.1"
 spl-token = { version = "4.0.2", features = ["no-entrypoint"] }
 spl-associated-token-account = { version = "6.0.0", features = ["no-entrypoint"] }
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+panic = "abort"
