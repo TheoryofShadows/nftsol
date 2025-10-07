@@ -81,8 +81,8 @@ We will implement four core programs/modules under one workspace:
 - [x] Scaffold new Anchor workspace (`anchor/solana_rewards`) replacing the tutorial program.
 - [ ] Draft account/instruction schemas for all four modules.
 - [ ] Create base tests for `rewards_vault` (init/distribute/claim flows).
-- [ ] Add build scripts (`anchor build`, `anchor test`, client generation) to
-      repo CI.
+- [x] Add build scripts (`anchor build`, `anchor test`, client generation) to
+      repo CI. (`npm run anchor:build && npm run anchor:generate` produce IDLs/types once the toolchain is installed.)
 
 ## 5. Tooling & References
 

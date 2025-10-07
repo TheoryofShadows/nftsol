@@ -20,3 +20,5 @@ idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 anchor-lang = { workspace = true }
 anchor-spl = { workspace = true }
 spl-token = { workspace = true }
+rewards_vault = { path = "../rewards_vault", features = ["no-entrypoint", "cpi"] }
+loyalty_registry = { path = "../loyalty_registry", features = ["no-entrypoint", "cpi"] }

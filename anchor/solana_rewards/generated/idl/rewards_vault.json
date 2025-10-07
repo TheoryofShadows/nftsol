@@ -1,20 +1,14 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/rewards_vault.json`.
- */
-export type RewardsVault = {
+{
   "address": "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J",
   "metadata": {
-    "name": "rewardsVault",
+    "name": "rewards_vault",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Anchor program responsible for managing CLOUT reward emissions."
   },
   "instructions": [
     {
-      "name": "initializeVault",
+      "name": "initialize_vault",
       "docs": [
         "Initialize a vault configuration that will control emission schedules",
         "and reward distribution."
@@ -31,7 +25,7 @@ export type RewardsVault = {
       ],
       "accounts": [
         {
-          "name": "vaultConfig",
+          "name": "vault_config",
           "writable": true,
           "pda": {
             "seeds": [
@@ -54,13 +48,13 @@ export type RewardsVault = {
               },
               {
                 "kind": "account",
-                "path": "rewardMint"
+                "path": "reward_mint"
               }
             ]
           }
         },
         {
-          "name": "vaultSigner",
+          "name": "vault_signer",
           "pda": {
             "seeds": [
               {
@@ -82,13 +76,13 @@ export type RewardsVault = {
               },
               {
                 "kind": "account",
-                "path": "rewardMint"
+                "path": "reward_mint"
               }
             ]
           }
         },
         {
-          "name": "rewardMint",
+          "name": "reward_mint",
           "writable": true
         },
         {
@@ -97,14 +91,14 @@ export type RewardsVault = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "mintRewards",
+      "name": "mint_rewards",
       "docs": [
         "Mint rewards directly to a recipient. In production this will be called",
         "internally by staking/escrow CPI flows."
@@ -121,11 +115,11 @@ export type RewardsVault = {
       ],
       "accounts": [
         {
-          "name": "vaultConfig",
+          "name": "vault_config",
           "writable": true
         },
         {
-          "name": "vaultSigner",
+          "name": "vault_signer",
           "pda": {
             "seeds": [
               {
@@ -147,16 +141,16 @@ export type RewardsVault = {
               },
               {
                 "kind": "account",
-                "path": "rewardMint"
+                "path": "reward_mint"
               }
             ]
           }
         },
         {
-          "name": "rewardMint",
+          "name": "reward_mint",
           "writable": true,
           "relations": [
-            "vaultConfig"
+            "vault_config"
           ]
         },
         {
@@ -167,11 +161,11 @@ export type RewardsVault = {
           "name": "authority",
           "signer": true,
           "relations": [
-            "vaultConfig"
+            "vault_config"
           ]
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -183,7 +177,7 @@ export type RewardsVault = {
       ]
     },
     {
-      "name": "setEmissionRate",
+      "name": "set_emission_rate",
       "docs": [
         "Set the number of tokens emitted per slot. Eventually we will add",
         "advanced schedules, but this lets us test program wiring on-chain."
@@ -200,20 +194,20 @@ export type RewardsVault = {
       ],
       "accounts": [
         {
-          "name": "vaultConfig",
+          "name": "vault_config",
           "writable": true
         },
         {
           "name": "authority",
           "signer": true,
           "relations": [
-            "vaultConfig"
+            "vault_config"
           ]
         }
       ],
       "args": [
         {
-          "name": "emissionRate",
+          "name": "emission_rate",
           "type": "u64"
         }
       ]
@@ -221,7 +215,7 @@ export type RewardsVault = {
   ],
   "accounts": [
     {
-      "name": "vaultConfig",
+      "name": "VaultConfig",
       "discriminator": [
         99,
         86,
@@ -237,22 +231,22 @@ export type RewardsVault = {
   "errors": [
     {
       "code": 6000,
-      "name": "unauthorized",
+      "name": "Unauthorized",
       "msg": "Only the configured authority may perform this action."
     }
   ],
   "types": [
     {
-      "name": "vaultConfig",
+      "name": "VaultConfig",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "configBump",
+            "name": "config_bump",
             "type": "u8"
           },
           {
-            "name": "signerBump",
+            "name": "signer_bump",
             "type": "u8"
           },
           {
@@ -260,15 +254,15 @@ export type RewardsVault = {
             "type": "pubkey"
           },
           {
-            "name": "rewardMint",
+            "name": "reward_mint",
             "type": "pubkey"
           },
           {
-            "name": "emissionRate",
+            "name": "emission_rate",
             "type": "u64"
           }
         ]
       }
     }
   ]
-};
+}

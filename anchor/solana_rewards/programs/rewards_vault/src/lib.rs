@@ -1,10 +1,12 @@
+#![allow(unexpected_cfgs)]
+
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
 
 pub const VAULT_CONFIG_SEED: &[u8] = b"vault-config";
 pub const VAULT_SIGNER_SEED: &[u8] = b"vault-signer";
 
-declare_id!("rewardsVault11111111111111111111111111111111");
+declare_id!("YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J");
 
 #[program]
 pub mod rewards_vault {
@@ -12,14 +14,10 @@ pub mod rewards_vault {
 
     /// Initialize a vault configuration that will control emission schedules
     /// and reward distribution.
-    pub fn initialize_vault(
-        ctx: Context<InitializeVault>,
-        config_bump: u8,
-        signer_bump: u8,
-    ) -> Result<()> {
+    pub fn initialize_vault(ctx: Context<InitializeVault>) -> Result<()> {
         let config = &mut ctx.accounts.vault_config;
-        config.config_bump = config_bump;
-        config.signer_bump = signer_bump;
+        config.config_bump = ctx.bumps.vault_config;
+        config.signer_bump = ctx.bumps.vault_signer;
         config.authority = ctx.accounts.authority.key();
         config.reward_mint = ctx.accounts.reward_mint.key();
         config.emission_rate = 0;
@@ -72,20 +70,19 @@ pub mod rewards_vault {
 }
 
 #[derive(Accounts)]
-#[instruction(config_bump: u8, signer_bump: u8)]
 pub struct InitializeVault<'info> {
     #[account(
         init,
         payer = authority,
         space = VaultConfig::LEN,
         seeds = [VAULT_CONFIG_SEED, reward_mint.key().as_ref()],
-        bump = config_bump
+        bump
     )]
     pub vault_config: Account<'info, VaultConfig>,
     /// CHECK: PDA derived in instruction, acts as mint authority.
     #[account(
         seeds = [VAULT_SIGNER_SEED, reward_mint.key().as_ref()],
-        bump = signer_bump
+        bump
     )]
     pub vault_signer: UncheckedAccount<'info>,
     #[account(mut)]

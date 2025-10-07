@@ -99,6 +99,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   app.get("/api/wallet/config", getWalletConfig);
   app.post("/api/wallet/config", updateWalletConfig);
 
+  const solanaRewardsRoutes = await import("./routes/solana-rewards");
+  app.use("/api/solana/rewards", solanaRewardsRoutes.default);
+
   registerRoutes(app);
   setupNFTRoutes(app);
   setupRecommendationRoutes(app);

@@ -17,6 +17,7 @@ cpi = ["no-entrypoint"]
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]
-anchor-lang = { workspace = true }
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
 anchor-spl = { workspace = true }
 spl-token = { workspace = true }
+rewards_vault = { path = "../rewards_vault", features = ["no-entrypoint", "cpi"] }

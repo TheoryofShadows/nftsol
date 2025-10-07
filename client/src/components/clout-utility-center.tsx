@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useSolanaRewards } from "@/hooks/use-solana-rewards";
 
 interface CloutBalance {
   total: number;
@@ -53,6 +54,51 @@ interface PremiumFeature {
   popular: boolean;
 }
 
+function renderOnchainPosition(position: OnchainPosition, loading: boolean) {
+  if (loading) {
+    return <p className="text-sm text-gray-500">Loading position…</p>;
+  }
+  if (!position) {
+    return <p className="text-sm text-gray-500">No stake detected for this wallet.</p>;
+  }
+
+  return (
+    <div className="space-y-2 text-sm">
+      <div className="flex justify-between">
+        <span className="text-gray-400">Staked</span>
+        <span className="font-semibold text-white">{position.amount}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-400">Pending Rewards</span>
+        <span className="font-semibold text-green-400">{position.pendingRewards}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-400">Last Stake</span>
+        <span className="font-semibold text-gray-200">
+          {formatTimestamp(position.lastStakeTs)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function formatTimestamp(value: string) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return "—";
+  }
+  return new Date(parsed * 1000).toLocaleString();
+}
+
+type OnchainPosition = {
+  owner: string;
+  pool: string;
+  amount: string;
+  rewardPerTokenPaid: string;
+  pendingRewards: string;
+  lastStakeTs: string;
+} | null;
+
 export default function CloutUtilityCenter() {
   const [cloutBalance, setCloutBalance] = useState<CloutBalance>({
     total: 0,
@@ -64,9 +110,24 @@ export default function CloutUtilityCenter() {
   const [premiumFeatures, setPremiumFeatures] = useState<PremiumFeature[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   const [stakeAmounts, setStakeAmounts] = useState<Record<string, string>>({});
+  const [onchainStakeAmount, setOnchainStakeAmount] = useState<string>("0");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+  const {
+    pool: onchainPool,
+    position: onchainPosition,
+    loading: onchainLoading,
+    error: onchainError,
+    requestStake: submitOnchainStake,
+    requestUnstake: submitOnchainUnstake,
+    requestHarvest: submitOnchainHarvest,
+  } = useSolanaRewards();
+  const pendingOnchainRewards = useMemo(() => {
+    if (!onchainPosition) return 0;
+    const value = Number(onchainPosition.pendingRewards);
+    return Number.isFinite(value) ? value : 0;
+  }, [onchainPosition]);
   const userId = useMemo(() => {
     if (user?.id) return user.id;
     const stored = localStorage.getItem("userId");
@@ -198,6 +259,66 @@ export default function CloutUtilityCenter() {
         title: "Staking Failed",
         description: "Failed to stake tokens. Please try again.",
         variant: "destructive"
+      });
+    }
+  };
+
+  const handleOnchainStake = async () => {
+    const parsed = Number(onchainStakeAmount);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Enter a valid number of CLOUT tokens to stake on-chain.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await submitOnchainStake(parsed);
+      setOnchainStakeAmount("0");
+    } catch (error: any) {
+      toast({
+        title: "On-chain Staking Failed",
+        description: error?.message ?? "Failed to submit stake transaction.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOnchainUnstake = async () => {
+    const parsed = Number(onchainStakeAmount);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Enter a valid number of CLOUT tokens to unstake.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await submitOnchainUnstake(parsed);
+      setOnchainStakeAmount("0");
+    } catch (error: any) {
+      toast({
+        title: "On-chain Unstake Failed",
+        description: error?.message ?? "Failed to submit unstake transaction.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleOnchainHarvest = async () => {
+    try {
+      await submitOnchainHarvest();
+      toast({
+        title: "Harvest Submitted",
+        description: "Reward harvest transaction signed successfully.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Harvest Failed",
+        description: error?.message ?? "Failed to submit harvest transaction.",
+        variant: "destructive",
       });
     }
   };
@@ -344,13 +465,17 @@ export default function CloutUtilityCenter() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-gray-800 border-gray-700">
+        <TabsList className="grid w-full grid-cols-5 bg-gray-800 border-gray-700">
           <TabsTrigger value="overview" className="data-[state=active]:bg-yellow-600">
             Overview
           </TabsTrigger>
           <TabsTrigger value="staking" className="data-[state=active]:bg-purple-600">
             <Lock className="h-4 w-4 mr-2" />
             Staking
+          </TabsTrigger>
+          <TabsTrigger value="onchain" className="data-[state=active]:bg-cyan-600">
+            <Zap className="h-4 w-4 mr-2" />
+            On-chain
           </TabsTrigger>
           <TabsTrigger value="premium" className="data-[state=active]:bg-blue-600">
             <Crown className="h-4 w-4 mr-2" />
@@ -490,6 +615,127 @@ export default function CloutUtilityCenter() {
               ))}
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="onchain" className="mt-6">
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader className="flex flex-row items-start justify-between">
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-cyan-400" />
+                  On-chain Staking (Devnet Beta)
+                </CardTitle>
+                <p className="text-sm text-gray-400">
+                  Generate and sign Anchor transactions directly from your wallet.
+                </p>
+              </div>
+              <Badge variant="outline" className="border-cyan-500 text-cyan-300">
+                Beta
+              </Badge>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {onchainError && (
+                <div className="rounded-md border border-red-500/60 bg-red-500/10 p-3 text-sm text-red-200">
+                  {onchainError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="bg-gray-900/60 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-gray-300">Pool Snapshot</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    {onchainPool ? (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Total Staked</span>
+                          <span className="text-cyan-300 font-semibold">
+                            {onchainPool.totalStaked}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Reward Rate / Slot</span>
+                          <span className="text-cyan-300 font-semibold">
+                            {onchainPool.rewardRate}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Last Update</span>
+                          <span className="text-cyan-300 font-semibold">
+                            {formatTimestamp(onchainPool.lastUpdateTs)}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-gray-500">
+                        {onchainLoading ? "Fetching pool state…" : "Pool unavailable."}
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gray-900/60 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-sm text-gray-300">Your Position</CardTitle>
+                  </CardHeader>
+                  <CardContent>{renderOnchainPosition(onchainPosition, onchainLoading)}</CardContent>
+                </Card>
+              </div>
+
+              <div className="rounded-lg border border-gray-700 bg-gray-900/40 p-4 space-y-3">
+                <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wide">
+                  Manage Position
+                </h3>
+                <div className="flex flex-col gap-3 md:flex-row">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={onchainStakeAmount}
+                    onChange={(e) => setOnchainStakeAmount(e.target.value)}
+                    className="bg-gray-900 border-gray-700 flex-1"
+                    placeholder="Amount (whole tokens)"
+                  />
+                  <div className="flex gap-2">
+                    <Button onClick={handleOnchainStake} disabled={onchainLoading}>
+                      Stake
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleOnchainUnstake}
+                      disabled={onchainLoading}
+                      className="border-gray-600 text-gray-200"
+                    >
+                      Unstake
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleOnchainHarvest}
+                      disabled={onchainLoading || pendingOnchainRewards <= 0}
+                      className="border-cyan-500 text-cyan-300"
+                    >
+                      Harvest
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Transactions are generated by the backend Anchor client and require signing in
+                  your connected wallet. Ensure you are connected to the correct network and hold
+                  CLOUT tokens in your associated token account.
+                </p>
+                {pendingOnchainRewards > 0 && (
+                  <p className="text-xs text-cyan-300">
+                    Pending rewards available: {pendingOnchainRewards}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Some transactions are pre-signed by platform authorities; your wallet will be
+                  asked to co-sign before submission.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="premium" className="mt-6">

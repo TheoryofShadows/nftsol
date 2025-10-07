@@ -6,6 +6,9 @@
     "dev": "concurrently -n server,client -c auto \"npm run dev:server\" \"npm run dev:client\"",
     "api:dev": "cd backend-advanced && node server/index.js",
     "web:dev": "cd frontend && vite",
+    "anchor:build": "wsl -e bash -lc \"cd /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards && anchor build\"",
+    "anchor:generate": "node scripts/generate-anchor-clients.mjs",
+    "prebuild": "npm run anchor:build && npm run anchor:generate",
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "dev:server": "tsx --env-file=.env --trace-uncaught server/index.ts",
@@ -13,6 +16,7 @@
     "postinstall": "patch-package"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
     "@hookform/resolvers": "^5.2.2",
     "@moralisweb3/common-evm-utils": "^2.27.2",
     "@neondatabase/serverless": "^1.0.2",
@@ -40,6 +44,7 @@
     "@solana/wallet-adapter-react-ui": "^0.9.39",
     "@solana/wallet-adapter-wallets": "^0.19.37",
     "@solana/web3.js": "^1.98.4",
+    "@solana/spl-token": "^0.4.8",
     "@tanstack/react-query": "^5.90.2",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",

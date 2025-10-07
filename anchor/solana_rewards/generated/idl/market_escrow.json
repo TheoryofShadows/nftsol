@@ -1,0 +1,939 @@
+{
+  "address": "8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX",
+  "metadata": {
+    "name": "market_escrow",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Anchor program for escrowed NFT marketplace settlements."
+  },
+  "instructions": [
+    {
+      "name": "cancel_listing",
+      "docs": [
+        "Cancels an active listing before any sale is executed."
+      ],
+      "discriminator": [
+        41,
+        183,
+        50,
+        232,
+        230,
+        233,
+        157,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "listing",
+          "writable": true
+        },
+        {
+          "name": "escrow_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "listing"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller",
+          "signer": true,
+          "relations": [
+            "listing"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_listing",
+      "docs": [
+        "Creates a new listing PDA along with an escrow vault that will hold SOL",
+        "until the sale settles."
+      ],
+      "discriminator": [
+        18,
+        168,
+        45,
+        24,
+        191,
+        31,
+        117,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "listing",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  108,
+                  105,
+                  115,
+                  116,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "account",
+                "path": "nft_mint"
+              },
+              {
+                "kind": "arg",
+                "path": "listing_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "escrow_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "listing"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "nft_mint"
+        },
+        {
+          "name": "royalty_destination"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "listing_id",
+          "type": "u64"
+        },
+        {
+          "name": "price_lamports",
+          "type": "u64"
+        },
+        {
+          "name": "expiration_ts",
+          "type": {
+            "option": "i64"
+          }
+        },
+        {
+          "name": "royalty_bps",
+          "type": "u16"
+        },
+        {
+          "name": "treasury_bps",
+          "type": "u16"
+        },
+        {
+          "name": "marketplace_fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "execute_sale",
+      "docs": [
+        "Buyer transfers SOL into escrow. Once deposited, the listing moves into",
+        "a pending settlement state awaiting admin settlement."
+      ],
+      "discriminator": [
+        37,
+        74,
+        217,
+        157,
+        79,
+        49,
+        35,
+        6
+      ],
+      "accounts": [
+        {
+          "name": "listing",
+          "writable": true
+        },
+        {
+          "name": "escrow_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "listing"
+              }
+            ]
+          }
+        },
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "seller",
+          "relations": [
+            "listing"
+          ]
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settle_sale",
+      "docs": [
+        "Settles a sale by distributing escrowed funds, minting reward tokens,",
+        "and recording loyalty activity."
+      ],
+      "discriminator": [
+        182,
+        49,
+        63,
+        248,
+        140,
+        81,
+        40,
+        126
+      ],
+      "accounts": [
+        {
+          "name": "listing",
+          "writable": true
+        },
+        {
+          "name": "escrow_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  115,
+                  99,
+                  114,
+                  111,
+                  119
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "listing"
+              }
+            ]
+          }
+        },
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "listing"
+          ]
+        },
+        {
+          "name": "buyer"
+        },
+        {
+          "name": "treasury_destination",
+          "writable": true
+        },
+        {
+          "name": "marketplace_fee_destination",
+          "writable": true
+        },
+        {
+          "name": "royalty_destination",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "listing"
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_vault",
+          "writable": true
+        },
+        {
+          "name": "vault_signer",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116,
+                  45,
+                  115,
+                  105,
+                  103,
+                  110,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "reward_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_mint",
+          "writable": true,
+          "relations": [
+            "reward_vault"
+          ]
+        },
+        {
+          "name": "buyer_reward_account",
+          "writable": true
+        },
+        {
+          "name": "reward_authority",
+          "signer": true
+        },
+        {
+          "name": "loyalty_profile",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  114,
+                  111,
+                  102,
+                  105,
+                  108,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "buyer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "loyalty_registry_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  103,
+                  105,
+                  115,
+                  116,
+                  114,
+                  121,
+                  45,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "loyalty_authority",
+          "signer": true
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "name": "rewards_vault_program",
+          "address": "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+        },
+        {
+          "name": "loyalty_program",
+          "address": "GgfPQkNHuNbSw6cyDpzHeTLbTxSA2ZPUa2F1ZascnJur"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reward_amount",
+          "type": "u64"
+        },
+        {
+          "name": "loyalty_bonus_points",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "EscrowVault",
+      "discriminator": [
+        54,
+        84,
+        41,
+        149,
+        160,
+        181,
+        85,
+        114
+      ]
+    },
+    {
+      "name": "Listing",
+      "discriminator": [
+        218,
+        32,
+        50,
+        73,
+        43,
+        134,
+        26,
+        58
+      ]
+    },
+    {
+      "name": "LoyaltyProfile",
+      "discriminator": [
+        219,
+        234,
+        102,
+        172,
+        129,
+        26,
+        164,
+        189
+      ]
+    },
+    {
+      "name": "RegistryConfig",
+      "discriminator": [
+        23,
+        118,
+        10,
+        246,
+        173,
+        231,
+        243,
+        156
+      ]
+    },
+    {
+      "name": "SaleReceipt",
+      "discriminator": [
+        114,
+        79,
+        236,
+        216,
+        212,
+        117,
+        80,
+        21
+      ]
+    },
+    {
+      "name": "VaultConfig",
+      "discriminator": [
+        99,
+        86,
+        43,
+        216,
+        184,
+        102,
+        119,
+        77
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ListingNotActive",
+      "msg": "Listing is not active."
+    },
+    {
+      "code": 6001,
+      "name": "ListingNotPending",
+      "msg": "Listing must be pending settlement for this operation."
+    },
+    {
+      "code": 6002,
+      "name": "InvalidListingPrice",
+      "msg": "Listing price must be greater than zero."
+    },
+    {
+      "code": 6003,
+      "name": "InvalidFeeConfiguration",
+      "msg": "Total fee configuration exceeds 100%."
+    },
+    {
+      "code": 6004,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow encountered."
+    },
+    {
+      "code": 6005,
+      "name": "MissingBuyer",
+      "msg": "No buyer recorded for this listing."
+    },
+    {
+      "code": 6006,
+      "name": "BuyerMismatch",
+      "msg": "Provided buyer account does not match listing state."
+    },
+    {
+      "code": 6007,
+      "name": "SellerMismatch",
+      "msg": "Provided seller account does not match listing state."
+    },
+    {
+      "code": 6008,
+      "name": "RoyaltyDestinationMismatch",
+      "msg": "Royalty destination does not match listing configuration."
+    },
+    {
+      "code": 6009,
+      "name": "InsufficientEscrowBalance",
+      "msg": "Escrow vault balance is insufficient."
+    },
+    {
+      "code": 6010,
+      "name": "OutstandingEscrowBalance",
+      "msg": "Escrow vault still holds funds; cancel not allowed."
+    },
+    {
+      "code": 6011,
+      "name": "EscrowAlreadyFunded",
+      "msg": "Escrow vault already funded for this listing."
+    },
+    {
+      "code": 6012,
+      "name": "UnauthorizedLoyaltyAuthority",
+      "msg": "Loyalty authority does not match registry configuration."
+    },
+    {
+      "code": 6013,
+      "name": "UnauthorizedRewardAuthority",
+      "msg": "Reward authority does not match vault configuration."
+    },
+    {
+      "code": 6014,
+      "name": "InvalidPayoutAccount",
+      "msg": "Destination account must be a system account."
+    },
+    {
+      "code": 6015,
+      "name": "ListingExpired",
+      "msg": "The listing has expired."
+    },
+    {
+      "code": 6016,
+      "name": "MismatchedRewardMint",
+      "msg": "Reward mint does not match vault configuration."
+    }
+  ],
+  "types": [
+    {
+      "name": "EscrowVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "listing",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_deposited",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Listing",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "escrow_bump",
+            "type": "u8"
+          },
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": {
+              "option": "pubkey"
+            }
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "listing_id",
+            "type": "u64"
+          },
+          {
+            "name": "price_lamports",
+            "type": "u64"
+          },
+          {
+            "name": "creation_ts",
+            "type": "i64"
+          },
+          {
+            "name": "expiration_ts",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "sale_ts",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "settlement_ts",
+            "type": {
+              "option": "i64"
+            }
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "ListingStatus"
+              }
+            }
+          },
+          {
+            "name": "royalty_bps",
+            "type": "u16"
+          },
+          {
+            "name": "royalty_destination",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury_bps",
+            "type": "u16"
+          },
+          {
+            "name": "marketplace_fee_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ListingStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "PendingSettlement"
+          },
+          {
+            "name": "Settled"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LoyaltyProfile",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_volume",
+            "type": "u64"
+          },
+          {
+            "name": "points",
+            "type": "u64"
+          },
+          {
+            "name": "tier",
+            "type": {
+              "defined": {
+                "name": "LoyaltyTier"
+              }
+            }
+          },
+          {
+            "name": "last_activity_ts",
+            "type": "i64"
+          },
+          {
+            "name": "delegate",
+            "type": {
+              "option": "pubkey"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "LoyaltyTier",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Bronze"
+          },
+          {
+            "name": "Silver"
+          },
+          {
+            "name": "Gold"
+          },
+          {
+            "name": "Platinum"
+          },
+          {
+            "name": "Diamond"
+          }
+        ]
+      }
+    },
+    {
+      "name": "RegistryConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "points_per_sol",
+            "type": "u64"
+          },
+          {
+            "name": "total_profiles",
+            "type": "u32"
+          },
+          {
+            "name": "last_updated_ts",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SaleReceipt",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "listing",
+            "type": "pubkey"
+          },
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_paid",
+            "type": "u64"
+          },
+          {
+            "name": "seller_proceeds",
+            "type": "u64"
+          },
+          {
+            "name": "royalty_paid",
+            "type": "u64"
+          },
+          {
+            "name": "treasury_paid",
+            "type": "u64"
+          },
+          {
+            "name": "marketplace_fee_paid",
+            "type": "u64"
+          },
+          {
+            "name": "rewards_minted",
+            "type": "u64"
+          },
+          {
+            "name": "loyalty_points_awarded",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VaultConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "config_bump",
+            "type": "u8"
+          },
+          {
+            "name": "signer_bump",
+            "type": "u8"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "emission_rate",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}
