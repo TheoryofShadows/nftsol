@@ -1,0 +1,22 @@
+[package]
+name = "market_escrow"
+version = "0.1.0"
+edition = "2021"
+description = "Anchor program for escrowed NFT marketplace settlements."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "market_escrow"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+spl-token = { workspace = true }

@@ -1,0 +1,18 @@
+[workspace]
+types = "generated/types"
+
+[registry]
+url = "https://bpf.production.clusters.solana.com"
+
+[provider]
+cluster = "Localnet"
+wallet = "${ANCHOR_WALLET:-~/.config/solana/id.json}"
+
+[programs.localnet]
+rewards_vault = "rewardsVault11111111111111111111111111111111"
+clout_staking = "cloutStaking1111111111111111111111111111111"
+market_escrow = "marketEscrow11111111111111111111111111111"
+loyalty_registry = "loyaltyReg111111111111111111111111111111"
+
+[scripts]
+test = "anchor test --skip-build"
