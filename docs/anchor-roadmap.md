@@ -78,8 +78,7 @@ We will implement four core programs/modules under one workspace:
 
 ## 4. Immediate Tasks (Sprint 1)
 
-- [ ] Scaffold new Anchor workspace (`anchor/solana_rewards`) replacing the
-      tutorial program.
+- [x] Scaffold new Anchor workspace (`anchor/solana_rewards`) replacing the tutorial program.
 - [ ] Draft account/instruction schemas for all four modules.
 - [ ] Create base tests for `rewards_vault` (init/distribute/claim flows).
 - [ ] Add build scripts (`anchor build`, `anchor test`, client generation) to
@@ -96,3 +95,5 @@ We will implement four core programs/modules under one workspace:
 
 We’ll update this roadmap at the end of each sprint. For any questions or to
 volunteer for a module, ping the `#solana-anchor` channel.
+
+
