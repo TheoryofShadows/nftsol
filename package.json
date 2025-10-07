@@ -9,7 +9,8 @@
     "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "dev:server": "tsx --env-file=.env --trace-uncaught server/index.ts",
-    "dev:client": "vite --config vite.config.client.local.js --host 127.0.0.1 --port 5173"
+    "dev:client": "vite --config vite.config.client.local.js --host 127.0.0.1 --port 5173",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
