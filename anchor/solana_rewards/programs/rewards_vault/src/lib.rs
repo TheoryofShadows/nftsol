@@ -1,6 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, MintTo, Token, TokenAccount};
 
+pub const VAULT_CONFIG_SEED: &[u8] = b"vault-config";
+pub const VAULT_SIGNER_SEED: &[u8] = b"vault-signer";
+
 declare_id!("rewardsVault11111111111111111111111111111111");
 
 #[program]
@@ -9,9 +12,14 @@ pub mod rewards_vault {
 
     /// Initialize a vault configuration that will control emission schedules
     /// and reward distribution.
-    pub fn initialize_vault(ctx: Context<InitializeVault>, bump: u8) -> Result<()> {
+    pub fn initialize_vault(
+        ctx: Context<InitializeVault>,
+        config_bump: u8,
+        signer_bump: u8,
+    ) -> Result<()> {
         let config = &mut ctx.accounts.vault_config;
-        config.bump = bump;
+        config.config_bump = config_bump;
+        config.signer_bump = signer_bump;
         config.authority = ctx.accounts.authority.key();
         config.reward_mint = ctx.accounts.reward_mint.key();
         config.emission_rate = 0;
@@ -22,7 +30,11 @@ pub mod rewards_vault {
     /// advanced schedules, but this lets us test program wiring on-chain.
     pub fn set_emission_rate(ctx: Context<UpdateVaultConfig>, emission_rate: u64) -> Result<()> {
         let config = &mut ctx.accounts.vault_config;
-        require_keys_eq!(config.authority, ctx.accounts.authority.key(), VaultError::Unauthorized);
+        require_keys_eq!(
+            config.authority,
+            ctx.accounts.authority.key(),
+            VaultError::Unauthorized,
+        );
         config.emission_rate = emission_rate;
         Ok(())
     }
@@ -31,9 +43,17 @@ pub mod rewards_vault {
     /// internally by staking/escrow CPI flows.
     pub fn mint_rewards(ctx: Context<MintRewards>, amount: u64) -> Result<()> {
         let config = &ctx.accounts.vault_config;
-        require_keys_eq!(config.authority, ctx.accounts.authority.key(), VaultError::Unauthorized);
+        require_keys_eq!(
+            config.authority,
+            ctx.accounts.authority.key(),
+            VaultError::Unauthorized,
+        );
 
-        let seeds = &[b"vault", config.reward_mint.as_ref(), &[config.bump]];
+        let seeds = [
+            VAULT_SIGNER_SEED,
+            config.reward_mint.as_ref(),
+            &[config.signer_bump],
+        ];
         let signer = &[&seeds[..]];
 
         token::mint_to(
@@ -52,20 +72,20 @@ pub mod rewards_vault {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
+#[instruction(config_bump: u8, signer_bump: u8)]
 pub struct InitializeVault<'info> {
     #[account(
         init,
         payer = authority,
         space = VaultConfig::LEN,
-        seeds = [b"vault", reward_mint.key().as_ref()],
-        bump
+        seeds = [VAULT_CONFIG_SEED, reward_mint.key().as_ref()],
+        bump = config_bump
     )]
     pub vault_config: Account<'info, VaultConfig>,
     /// CHECK: PDA derived in instruction, acts as mint authority.
     #[account(
-        seeds = [b"vault", reward_mint.key().as_ref()],
-        bump
+        seeds = [VAULT_SIGNER_SEED, reward_mint.key().as_ref()],
+        bump = signer_bump
     )]
     pub vault_signer: UncheckedAccount<'info>,
     #[account(mut)]
@@ -88,8 +108,8 @@ pub struct MintRewards<'info> {
     pub vault_config: Account<'info, VaultConfig>,
     /// CHECK: PDA signer derived from config, verified at runtime.
     #[account(
-        seeds = [b"vault", reward_mint.key().as_ref()],
-        bump = vault_config.bump
+        seeds = [VAULT_SIGNER_SEED, reward_mint.key().as_ref()],
+        bump = vault_config.signer_bump
     )]
     pub vault_signer: UncheckedAccount<'info>,
     #[account(mut)]
@@ -102,7 +122,8 @@ pub struct MintRewards<'info> {
 
 #[account]
 pub struct VaultConfig {
-    pub bump: u8,
+    pub config_bump: u8,
+    pub signer_bump: u8,
     pub authority: Pubkey,
     pub reward_mint: Pubkey,
     pub emission_rate: u64,
@@ -110,7 +131,8 @@ pub struct VaultConfig {
 
 impl VaultConfig {
     pub const LEN: usize = 8  // discriminator
-        + 1  // bump
+        + 1  // config bump
+        + 1  // signer bump
         + 32 // authority
         + 32 // reward mint
         + 8; // emission rate
