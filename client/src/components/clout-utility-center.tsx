@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +21,7 @@ import {
   Award
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 
 interface CloutBalance {
   total: number;
@@ -62,25 +63,30 @@ export default function CloutUtilityCenter() {
   const [stakingPools, setStakingPools] = useState<StakingPool[]>([]);
   const [premiumFeatures, setPremiumFeatures] = useState<PremiumFeature[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
-  const [stakeAmount, setStakeAmount] = useState("");
+  const [stakeAmounts, setStakeAmounts] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user } = useAuth();
+  const userId = useMemo(() => {
+    if (user?.id) return user.id;
+    const stored = localStorage.getItem("userId");
+    if (stored) return stored;
+    const generated = `demo-user-${Math.random().toString(36).slice(2, 11)}`;
+    localStorage.setItem("userId", generated);
+    return generated;
+  }, [user]);
 
   useEffect(() => {
     fetchCloutData();
-  }, []);
+  }, [userId]);
 
   const fetchCloutData = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      let userId = localStorage.getItem('userId');
-      
-      // If no userId exists, create a temporary demo user ID
-      if (!userId) {
-        userId = 'demo-user-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('userId', userId);
-      }
-      
       // Fetch CLOUT balance with timeout
       const balanceController = new AbortController();
       const balanceTimeout = setTimeout(() => balanceController.abort(), 5000);
@@ -152,8 +158,25 @@ export default function CloutUtilityCenter() {
   };
 
   const stakeTokens = async (poolId: string, amount: number) => {
+    if (!userId || !Number.isFinite(amount) || amount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Enter a valid amount of CLOUT to stake.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (amount > cloutBalance.available) {
+      toast({
+        title: "Insufficient Balance",
+        description: "You do not have enough available CLOUT to stake that amount.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      const userId = localStorage.getItem('userId');
       const response = await fetch('/api/clout/stake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -166,7 +189,7 @@ export default function CloutUtilityCenter() {
           description: `${amount} CLOUT tokens staked successfully`,
         });
         fetchCloutData();
-        setStakeAmount("");
+        setStakeAmounts(prev => ({ ...prev, [poolId]: "" }));
       } else {
         throw new Error('Staking failed');
       }
@@ -180,8 +203,9 @@ export default function CloutUtilityCenter() {
   };
 
   const claimRewards = async (poolId: string) => {
+    if (!userId) return;
+
     try {
-      const userId = localStorage.getItem('userId');
       const response = await fetch('/api/clout/claim-rewards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -206,8 +230,9 @@ export default function CloutUtilityCenter() {
   };
 
   const purchaseFeature = async (featureId: string) => {
+    if (!userId) return;
+
     try {
-      const userId = localStorage.getItem('userId');
       const response = await fetch('/api/clout/purchase-feature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -442,15 +467,19 @@ export default function CloutUtilityCenter() {
                         <Input
                           type="number"
                           placeholder={`Min: ${pool.minStake} CLOUT`}
-                          value={stakeAmount}
-                          onChange={(e) => setStakeAmount(e.target.value)}
+                          value={stakeAmounts[pool.id] ?? ""}
+                          onChange={(e) => setStakeAmounts(prev => ({ ...prev, [pool.id]: e.target.value }))}
                           className="bg-gray-900 border-gray-600"
                         />
                         <Button 
                           size="sm" 
                           className="w-full bg-purple-600 hover:bg-purple-700"
-                          onClick={() => stakeTokens(pool.id, parseFloat(stakeAmount))}
-                          disabled={!stakeAmount || parseFloat(stakeAmount) < pool.minStake}
+                          onClick={() => stakeTokens(pool.id, parseFloat(stakeAmounts[pool.id] ?? "0"))}
+                          disabled={
+                            !stakeAmounts[pool.id] ||
+                            parseFloat(stakeAmounts[pool.id] ?? "0") < pool.minStake ||
+                            parseFloat(stakeAmounts[pool.id] ?? "0") > cloutBalance.available
+                          }
                         >
                           Stake CLOUT
                         </Button>

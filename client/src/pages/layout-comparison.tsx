@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,7 @@ import { CheckCircle, XCircle, Zap, TrendingUp, Layers, Code, Gauge } from "luci
  */
 
 export default function LayoutComparison() {
+  const [, setLocation] = useLocation();
   const [activeComparison, setActiveComparison] = useState<'before' | 'after'>('after');
 
   const improvementMetrics = [
@@ -199,7 +201,7 @@ export default function LayoutComparison() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
-            onClick={() => window.location.href = '/old-home'} 
+            onClick={() => setLocation('/old-home')} 
             variant="outline" 
             size="lg"
           >
@@ -207,7 +209,7 @@ export default function LayoutComparison() {
             View Old System
           </Button>
           <Button 
-            onClick={() => window.location.href = '/'} 
+            onClick={() => setLocation('/')} 
             size="lg" 
             className="bg-gradient-to-r from-green-600 to-purple-600 hover:opacity-80"
           >
@@ -354,7 +356,7 @@ export default function LayoutComparison() {
       >
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
-            onClick={() => window.location.href = '/'} 
+            onClick={() => setLocation('/')} 
             size="lg" 
             className="bg-gradient-to-r from-purple-600 to-green-600 hover:opacity-80"
           >
@@ -362,7 +364,7 @@ export default function LayoutComparison() {
             Explore Optimized Platform
           </Button>
           <Button 
-            onClick={() => window.location.href = '/marketplace'} 
+            onClick={() => setLocation('/marketplace')} 
             variant="outline" 
             size="lg"
           >

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,7 @@ import PlatformWalletDashboard from "@/components/platform-wallet-dashboard";
 import WalletAnalytics from "@/components/wallet-analytics";
 
 export default function WalletPage() {
+  const [, setLocation] = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export default function WalletPage() {
       setUserId(storedUserId);
     } else {
       // If no user ID, redirect to auth page
-      window.location.href = '/auth';
+      setLocation('/auth');
     }
   }, []);
 

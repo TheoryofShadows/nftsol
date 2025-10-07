@@ -1,8 +1,9 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
 import "./index.css";
+import { queryClient } from "./lib/queryClient";
 
 // Buffer polyfill for browser compatibility
 import { Buffer } from 'buffer';
@@ -51,29 +52,6 @@ class ErrorBoundary extends React.Component<
     return this.props.children;
   }
 }
-
-// Enhanced Query Client with better error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        // Don't retry on 4xx errors
-        if (error && 'status' in error && (error.status as number) >= 400 && (error.status as number) < 500) {
-          return false;
-        }
-        return failureCount < 1; // Reduced retries for faster response
-      },
-      staleTime: 1000 * 60 * 10, // 10 minutes - longer cache
-      gcTime: 1000 * 60 * 15, // 15 minutes - garbage collection window
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false, // Disable auto-refetch for better performance
-    },
-    mutations: {
-      retry: 0, // No retries for mutations
-    },
-  },
-});
 
 // Optimized mobile viewport handling
 function setViewportHeight() {

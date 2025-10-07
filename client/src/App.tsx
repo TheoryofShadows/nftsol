@@ -1,5 +1,3 @@
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import CloutRewardsNotification from "@/components/clout-rewards-notification";
 import { useState, useEffect } from "react";
@@ -10,7 +8,6 @@ import Footer from "@/components/footer";
 import { useAnalytics } from "@/components/analytics";
 import { Suspense, lazy } from "react";
 import UnifiedOnboardingGuide from "@/components/unified-onboarding-guide";
-// import Analytics from "@/components/analytics";
 import MobileCloutTracker from "@/components/mobile-clout-tracker";
 import { Toaster } from "@/components/ui/toaster";
 import { AIChatbot } from "@/components/ai-chatbot";
@@ -85,6 +82,12 @@ function App() {
     setIsClient(true);
   }, []);
 
+  useEffect(() => {
+    if (isClient) {
+      trackPageView(window.location.pathname);
+    }
+  }, [isClient, trackPageView]);
+
   if (!isClient) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -101,44 +104,43 @@ function App() {
         console.error("App render error:", error, errorInfo);
       }}
     >
-      <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Router>
           <AuthProvider>
-            <TooltipProvider>
-            <Router>
-              <Navbar />
-              <Toaster />
-              <CloutRewardsNotification />
-              <AIChatbot />
-              <div className="pt-20 md:pt-16">
-                <Suspense fallback={<PageLoader />}>
-                  <Switch>
-                    <Route path="/" component={LazyOptimizedHome} />
-                    <Route path="/home" component={LazyHome} />
-                    <Route path="/old-home" component={LazyHome} />
-                    <Route path="/marketplace" component={LazyMarketplace} />
-                    <Route path="/portfolio" component={LazyPortfolio} />
-                    <Route path="/create" component={LazyCreate} />
-                    <Route path="/auth" component={LazyAuth} />
-                    <Route path="/admin" component={LazyAdmin} />
-                    <Route path="/clout-about" component={LazyCloutAbout} />
-                    <Route path="/clout-center" component={LazyCloutCenter} />
-                    <Route path="/recommendations" component={LazyRecommendations} />
-                    <Route path="/social-hub" component={LazySocialHub} />
-                    <Route path="/ai-enhancer" component={LazyAIEnhancer} />
-                    <Route path="/wallet" component={LazyWalletPage} />
-                    <Route path="/mint-wizard" component={LazyMintWizard} />
-                    <Route path="/ai-studio" component={LazyAIStudio} />
-                    <Route path="/layout-comparison" component={LazyLayoutComparison} />
-                    <Route path="/not-found" component={LazyNotFound} />
-                    <Route component={LazyNotFound} />
-                  </Switch>
-                </Suspense>
-              </div>
-              <Footer />
-            </Router>
-          </TooltipProvider>
+            <Navbar />
+            <Toaster />
+            <CloutRewardsNotification />
+            <MobileCloutTracker />
+            <AIChatbot />
+            <div className="pt-20 md:pt-16">
+              <Suspense fallback={<PageLoader />}>
+                <Switch>
+                  <Route path="/" component={LazyOptimizedHome} />
+                  <Route path="/home" component={LazyHome} />
+                  <Route path="/old-home" component={LazyHome} />
+                  <Route path="/marketplace" component={LazyMarketplace} />
+                  <Route path="/portfolio" component={LazyPortfolio} />
+                  <Route path="/create" component={LazyCreate} />
+                  <Route path="/auth" component={LazyAuth} />
+                  <Route path="/admin" component={LazyAdmin} />
+                  <Route path="/clout-about" component={LazyCloutAbout} />
+                  <Route path="/clout-center" component={LazyCloutCenter} />
+                  <Route path="/recommendations" component={LazyRecommendations} />
+                  <Route path="/social-hub" component={LazySocialHub} />
+                  <Route path="/ai-enhancer" component={LazyAIEnhancer} />
+                  <Route path="/wallet" component={LazyWalletPage} />
+                  <Route path="/mint-wizard" component={LazyMintWizard} />
+                  <Route path="/ai-studio" component={LazyAIStudio} />
+                  <Route path="/layout-comparison" component={LazyLayoutComparison} />
+                  <Route path="/not-found" component={LazyNotFound} />
+                  <Route component={LazyNotFound} />
+                </Switch>
+              </Suspense>
+            </div>
+            <Footer />
           </AuthProvider>
-      </QueryClientProvider>
+        </Router>
+      </TooltipProvider>
     </ErrorBoundary>
   );
 }

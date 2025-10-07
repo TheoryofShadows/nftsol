@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export default function FeaturedNFTs() {
+  const [, setLocation] = useLocation();
   const [activeFilter, setActiveFilter] = useState("All");
 
   const filters = ["All", "Art", "Gaming", "Music", "Photography"];
@@ -72,7 +74,7 @@ export default function FeaturedNFTs() {
             <div
               key={nft.id}
               className="modern-card overflow-hidden group cursor-pointer"
-              onClick={() => window.location.href = '/marketplace'}
+              onClick={() => setLocation('/marketplace')}
             >
               <img
                 src={`https://via.placeholder.com/400x300/14f195/000000?text=${encodeURIComponent(nft.name)}`}
@@ -96,7 +98,7 @@ export default function FeaturedNFTs() {
                     className="bg-gradient-solana hover:opacity-80 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300"
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.location.href = '/marketplace';
+                      setLocation('/marketplace');
                     }}
                   >
                     Place Bid

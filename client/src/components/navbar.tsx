@@ -1,55 +1,43 @@
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { 
-  Wallet, 
-  Coins, 
-  TrendingUp, 
-  User, 
-  Menu, 
-  X, 
-  Sparkles,
-  Users,
-  BarChart3,
-  Palette,
-  Trophy,
-  MessageSquare,
-  ShoppingCart,
-  Search,
-  Bell,
-  Settings,
-  LogOut
-} from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Brain } from "lucide-react";
 import Logo from "./logo";
 import { useAuth } from "@/hooks/use-auth";
 import UnifiedOnboardingGuide from "./unified-onboarding-guide";
 import SimpleWalletButton from "@/components/simple-wallet-button";
 
 export default function Navbar() {
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [userInfo, setUserInfo] = useState<{ userId: string | null; username: string | null }>({ userId: null, username: null });
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const { isAuthenticated, user, logout, isLoading } = useAuth();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     setIsClient(true);
     try {
       setUserInfo({
-        userId: localStorage.getItem('userId'),
-        username: localStorage.getItem('username')
+        userId: localStorage.getItem("userId"),
+        username: localStorage.getItem("username")
       });
     } catch (error) {
-      console.warn('Failed to load user info from localStorage:', error);
+      console.warn("Failed to load user info from localStorage:", error);
     }
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      setUserInfo({ userId: user.id, username: user.username });
+    }
+  }, [user]);
+
   const handleSearch = (query: string) => {
     if (query.trim()) {
-      // Navigate to marketplace with search query
-      window.location.href = `/marketplace?search=${encodeURIComponent(query.trim())}`;
+      setLocation(`/marketplace?search=${encodeURIComponent(query.trim())}`);
+      setIsMobileMenuOpen(false);
     }
   };
 
@@ -59,15 +47,9 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    try {
-      localStorage.removeItem('userId');
-      localStorage.removeItem('username');
-      localStorage.removeItem('token');
-      setUserInfo({ userId: null, username: null });
-      window.location.reload();
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+    logout();
+    setUserInfo({ userId: null, username: null });
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -81,9 +63,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-
-
-          {/* Navigation Links - Fixed positioning */}
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-4">
             <Link to="/" className="text-white hover:text-green-400 transition-colors duration-300 text-sm font-medium">
               Home
@@ -95,10 +75,10 @@ export default function Navbar() {
               Create
             </Link>
             <Link to="/mint-wizard" className="text-gray-300 hover:text-purple-400 transition-colors duration-300 text-sm font-medium flex items-center gap-1">
-              <span className="text-purple-400">✨</span> AI Mint
+              <Sparkles className="w-4 h-4 text-purple-400" aria-hidden="true" /> AI Mint
             </Link>
             <Link to="/ai-studio" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 text-sm font-medium flex items-center gap-1">
-              <span className="text-cyan-400">🧠</span> AI Studio
+              <Brain className="w-4 h-4 text-cyan-400" aria-hidden="true" /> AI Studio
             </Link>
             <Link to="/portfolio" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium">
               Portfolio
@@ -109,13 +89,19 @@ export default function Navbar() {
             <Link to="/wallet" className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium">
               Wallet
             </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-gray-300 hover:text-white transition-colors duration-300"
+              onClick={() => setIsGuideOpen(true)}
+            >
+              Guide
+            </Button>
 
             {isClient && userInfo.userId ? (
               <div className="flex items-center gap-4">
-                <span className="text-green-400">
-                  {userInfo.username}
-                </span>
-                <button 
+                <span className="text-green-400">{userInfo.username}</span>
+                <button
                   onClick={handleLogout}
                   className="text-red-400 hover:text-red-300 transition-colors duration-300 text-sm"
                 >
@@ -129,12 +115,12 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Action Button */}
+          {/* Mobile Wallet */}
           <div className="flex lg:hidden items-center">
             <SimpleWalletButton />
           </div>
 
-          {/* Search and Wallet - Desktop */}
+          {/* Desktop Search */}
           <div className="hidden lg:flex items-center space-x-3">
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
@@ -143,7 +129,7 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="modern-input w-48 xl:w-64"
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit(e)}
               />
               <button
                 type="submit"
@@ -160,7 +146,7 @@ export default function Navbar() {
           {/* Mobile Menu Button */}
           <div className="lg:hidden flex items-center space-x-2">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
               className="text-white hover:text-green-400 transition-colors duration-300 p-3 touch-target"
               aria-label="Toggle mobile menu"
             >
@@ -177,11 +163,11 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
       {/* Mobile Navigation Menu */}
       {isMobileMenuOpen && (
         <div className="lg:hidden modern-nav border-t border-white/10 absolute top-full left-0 right-0 z-30">
           <div className="px-4 py-6 space-y-4">
-            {/* Mobile Search */}
             <form onSubmit={handleSearchSubmit} className="relative">
               <input
                 type="text"
@@ -189,7 +175,7 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="modern-input w-full"
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchSubmit(e)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit(e)}
               />
               <button
                 type="submit"
@@ -201,57 +187,63 @@ export default function Navbar() {
               </button>
             </form>
 
-            {/* Mobile Navigation Links - Simplified */}
             <div className="grid grid-cols-2 gap-2">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-white hover:text-green-400 transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
-              <Link 
-                href="/marketplace" 
+              <Link
+                href="/marketplace"
                 className="text-gray-300 hover:text-white transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Marketplace
               </Link>
-              <Link 
-                href="/create" 
+              <Link
+                href="/create"
                 className="text-gray-300 hover:text-white transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Create NFT
               </Link>
-              <Link 
-                href="/portfolio" 
+              <Link
+                href="/portfolio"
                 className="text-gray-300 hover:text-white transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Portfolio
               </Link>
-              <Link 
-                href="/clout-about" 
+              <Link
+                href="/clout-about"
                 className="text-yellow-400 hover:text-yellow-300 transition-colors duration-300 text-center py-3 rounded bg-yellow-600/10"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 CLOUT Token
               </Link>
-              <Link 
-                href="/wallet" 
+              <Link
+                href="/wallet"
                 className="text-gray-300 hover:text-white transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Wallet
               </Link>
-
+              <button
+                type="button"
+                className="text-gray-300 hover:text-white transition-colors duration-300 text-center py-3 rounded bg-gray-800/50"
+                onClick={() => {
+                  setIsGuideOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+              >
+                Platform Guide
+              </button>
               {isClient && userInfo.userId ? (
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-green-400">
-                    {userInfo.username}
-                  </span>
-                  <button 
+                <div className="flex items-center justify-between py-2 col-span-2">
+                  <span className="text-green-400">{userInfo.username}</span>
+                  <button
                     onClick={handleLogout}
                     className="text-red-400 hover:text-red-300 transition-colors duration-300 text-sm"
                   >
@@ -259,9 +251,9 @@ export default function Navbar() {
                   </button>
                 </div>
               ) : (
-                <Link 
-                  href="/auth" 
-                  className="modern-btn text-center block"
+                <Link
+                  href="/auth"
+                  className="modern-btn text-center block col-span-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Login
@@ -272,7 +264,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* Guide moved to navbar to avoid blocking UI */}
       <UnifiedOnboardingGuide isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </nav>
   );

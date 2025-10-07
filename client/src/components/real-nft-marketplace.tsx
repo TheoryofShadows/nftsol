@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Heart, Share2, ExternalLink, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface RealNFT {
   id: string;
@@ -26,6 +27,7 @@ interface RealNFT {
 }
 
 export default function RealNFTMarketplace() {
+  const [, setLocation] = useLocation();
   const [allNfts, setAllNfts] = useState<RealNFT[]>([]);
   const [displayedNfts, setDisplayedNfts] = useState<RealNFT[]>([]);
   const [nftsLoading, setNftsLoading] = useState(true);
@@ -370,7 +372,7 @@ export default function RealNFTMarketplace() {
               </p>
               {(!searchTerm && filter === 'all') && (
                 <Button 
-                  onClick={() => window.location.href = '/create'}
+                  onClick={() => setLocation('/create')}
                   className="bg-gradient-to-r from-purple-600 to-green-600 hover:from-purple-700 hover:to-green-700 cursor-pointer select-none"
                 >
                   Create Your First NFT

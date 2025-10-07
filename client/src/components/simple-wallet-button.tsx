@@ -25,7 +25,7 @@ export default function SimpleWalletButton() {
       setWallet(connectedWallet);
       setIsConnecting(false);
       toast({
-        title: "Wallet Connected! 🎉",
+        title: "Wallet Connected!",
         description: `Connected to ${connectedWallet.name}`,
       });
     };

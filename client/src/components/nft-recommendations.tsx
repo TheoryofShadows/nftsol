@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ interface NFTRecommendationsProps {
 }
 
 export default function NFTRecommendations({ userId }: NFTRecommendationsProps) {
+  const [, setLocation] = useLocation();
   const [recommendations, setRecommendations] = useState<NFTRecommendation[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("personalized");
@@ -190,7 +192,7 @@ export default function NFTRecommendations({ userId }: NFTRecommendationsProps) 
                   onClick={() => {
                     handleInteraction(nft.id, 'view');
                     // Navigate to detailed view
-                    window.location.href = `/marketplace?nft=${nft.id}`;
+                    setLocation(`/marketplace?nft=${nft.id}`);
                   }}
                 >
                   <div className="relative overflow-hidden rounded-t-lg">
@@ -253,7 +255,7 @@ export default function NFTRecommendations({ userId }: NFTRecommendationsProps) 
                           e.stopPropagation();
                           handleInteraction(nft.id, 'purchase');
                           // Redirect to marketplace with the NFT
-                          window.location.href = `/marketplace?highlight=${nft.id}`;
+                          setLocation(`/marketplace?highlight=${nft.id}`);
                           toast({
                             title: "Redirecting to marketplace",
                             description: `Opening ${nft.name} for purchase`,
