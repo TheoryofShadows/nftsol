@@ -6,12 +6,6 @@ import {
   sendAndConfirmTransaction,
   LAMPORTS_PER_SOL 
 } from "@solana/web3.js";
-import {
-  createTransferInstruction,
-  getAssociatedTokenAddress,
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID
-} from "@solana/spl-token";
 import { solscanAPI, verifyNFTPurchase, getTransactionLink } from "./solscan-api";
 
 const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';

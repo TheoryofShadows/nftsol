@@ -7,7 +7,6 @@
  */
 
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { getAccount, getMint } from '@solana/spl-token';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -21,6 +20,15 @@ const RPC_URL = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl(NETWORK);
 const TREASURY_ADDRESS = 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM';
 
 async function checkTokenStatus() {
+  let splToken;
+  try {
+    splToken = await import('@solana/spl-token');
+  } catch (error) {
+    console.error('⚠️  @solana/spl-token is required to check token status.');
+    console.error('    Install it locally with: npm install @solana/spl-token');
+    throw error;
+  }
+  const { getAccount, getMint } = splToken;
   console.log('🔍 Checking CLOUT Token Status...');
   console.log(`Network: ${NETWORK}`);
   console.log(`Treasury: ${TREASURY_ADDRESS}`);
