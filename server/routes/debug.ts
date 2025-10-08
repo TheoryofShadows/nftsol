@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { aiFeaturesService } from "../ai-features-service";
 
+type ServiceStatus = Record<string, unknown>;
+
 const router = Router();
 
 /**
@@ -8,7 +10,19 @@ const router = Router();
  */
 router.get('/health', async (req, res) => {
   try {
-    const healthCheck = {
+    const healthCheck: {
+      timestamp: string;
+      status: 'healthy' | 'error';
+      services: ServiceStatus;
+      environment: {
+        nodeEnv: string | undefined;
+        hasOpenAI: boolean;
+        hasDatabaseUrl: boolean;
+      };
+      routes: {
+        availableRoutes: string[];
+      };
+    } = {
       timestamp: new Date().toISOString(),
       status: 'healthy',
       services: {},
@@ -80,7 +94,7 @@ router.post('/ai-test', async (req, res) => {
       category: "Art"
     };
 
-    const results = {};
+    const results: Record<string, unknown> = {};
 
     if (testType === 'basic' || testType === 'all') {
       try {
@@ -187,7 +201,11 @@ router.get('/diagnostics', async (req, res) => {
         hasDatabaseUrl: !!process.env.DATABASE_URL
       },
       routes: {
-        totalRoutes: req.app._router?.stack?.length || 'unknown'
+        totalRoutes: (() => {
+          const maybeRouter = (req.app as unknown as { _router?: { stack?: unknown[] } })._router;
+          const stack = maybeRouter?.stack;
+          return Array.isArray(stack) ? stack.length : 'unknown';
+        })()
       }
     };
 

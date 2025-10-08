@@ -43,7 +43,7 @@ export interface AIChatbotResponse {
 }
 
 // OpenAI quota tracker
-const openaiCallTracker = {
+export const openaiCallTracker = {
   count: 0,
   resetTime: Date.now() + (60 * 1000), // Reset every minute
   dailyCount: 0,
@@ -51,7 +51,7 @@ const openaiCallTracker = {
 };
 
 // Conservative OpenAI limits (adjust based on your plan)
-const OPENAI_LIMITS = {
+export const OPENAI_LIMITS = {
   perMinute: 3, // Very conservative for free tier
   perDay: 100   // Adjust based on your quota
 };
