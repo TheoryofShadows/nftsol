@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { enhancedSolanaNFTService } from "./enhanced-solana-api";
@@ -10,9 +10,10 @@ import { setupWalletRoutes } from "./wallet-system";
 import { setupNFTRoutes } from "./nft-routes";
 
 // Middleware to check if user is an admin with IP restriction
-const isAdmin = (req: any, res: any, next: any) => {
+const isAdmin: RequestHandler = async (req, res, next) => {
   // Check IP restriction first
-  const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+  const clientIP =
+    req.ip || req.connection.remoteAddress || req.socket.remoteAddress || '';
   const allowedIPs = process.env.ADMIN_ALLOWED_IPS?.split(',') || ['127.0.0.1', '::1'];
 
   if (!allowedIPs.includes(clientIP)) {
@@ -33,19 +34,15 @@ const isAdmin = (req: any, res: any, next: any) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as { userId: string, username: string };
 
-    storage.getUser(decoded.userId).then(user => {
-      if (!user || user.role !== 'admin') {
-        console.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${clientIP}`);
-        return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
-      }
+    const user = await storage.getUser(decoded.userId);
+    if (!user || user.role !== 'admin') {
+      console.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${clientIP}`);
+      return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
+    }
 
-      console.log(`[SECURITY] Admin access granted to: ${user.username} from IP: ${clientIP}`);
-      req.user = user;
-      next();
-    }).catch(err => {
-      console.error("Error fetching user:", err);
-      return res.status(500).json({ error: 'Internal server error' });
-    });
+    console.log(`[SECURITY] Admin access granted to: ${user.username} from IP: ${clientIP}`);
+    (req as any).user = user;
+    next();
   } catch (error) {
     console.error("JWT verification error:", error);
     return res.status(401).json({ error: 'Unauthorized: Invalid token' });
@@ -260,7 +257,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalUsers = userStats.totalUsers;
         }
       } catch (dbError) {
-        console.warn("Database stats unavailable, using defaults:", dbError?.message);
+        const message = dbError instanceof Error ? dbError.message : String(dbError)
+        console.warn("Database stats unavailable, using defaults:", message)
       }
 
       // Generate dynamic stats with real user data

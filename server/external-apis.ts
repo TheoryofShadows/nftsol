@@ -1,5 +1,6 @@
 
 import { Express, Request, Response } from "express";
+import { openaiCallTracker, OPENAI_LIMITS } from "./ai-features-service";
 
 // Rate limiting tracker for external APIs
 const apiCallTracker = new Map();

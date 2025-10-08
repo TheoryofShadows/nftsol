@@ -1,7 +1,14 @@
-import { Connection, Keypair, PublicKey } from "@solana/web3.js";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  VersionedTransaction,
+} from "@solana/web3.js";
 import path from "path";
 import fs from "fs";
 import { SolanaRewardsService, loadIdlFromFs } from "./solana-rewards-service";
+import type { Wallet } from "@coral-xyz/anchor";
 
 let servicePromise: Promise<SolanaRewardsService> | null = null;
 
@@ -31,21 +38,33 @@ async function createService(): Promise<SolanaRewardsService> {
   const connection = new Connection(DEFAULT_RPC, "confirmed");
   const authorityKeypair = loadKeypair();
   const signer = authorityKeypair ?? Keypair.generate();
+  const signWithAuthority = <T extends Transaction | VersionedTransaction>(
+    tx: T,
+  ): T => {
+    if (tx instanceof Transaction) {
+      tx.partialSign(signer);
+      return tx;
+    }
+
+    tx.sign([signer]);
+    return tx;
+  };
+
+  const wallet: Wallet = {
+    publicKey: signer.publicKey,
+    payer: signer,
+    async signTransaction<T extends Transaction | VersionedTransaction>(tx: T) {
+      return signWithAuthority(tx);
+    },
+    async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]) {
+      return txs.map((tx) => signWithAuthority(tx));
+    },
+  };
 
   return new SolanaRewardsService({
     connection,
     authorityKeypair,
-    wallet: {
-      publicKey: signer.publicKey,
-      signTransaction: async (tx) => {
-        tx.partialSign(signer);
-        return tx;
-      },
-      signAllTransactions: async (txs) => {
-        txs.forEach((tx) => tx.partialSign(signer));
-        return txs;
-      },
-    } as any,
+    wallet,
     rewardVaultProgramId: new PublicKey(process.env.REWARDS_VAULT_PROGRAM_ID ?? DEFAULT_REWARD_VAULT),
     stakingProgramId: new PublicKey(process.env.CLOUT_STAKING_PROGRAM_ID ?? DEFAULT_STAKING),
     escrowProgramId: new PublicKey(process.env.MARKET_ESCROW_PROGRAM_ID ?? DEFAULT_ESCROW),

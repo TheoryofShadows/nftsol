@@ -9,6 +9,10 @@ import {
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import type { CloutStaking } from "../anchor/solana_rewards/generated/types/clout_staking";
+import type { RewardsVault } from "../anchor/solana_rewards/generated/types/rewards_vault";
+import type { MarketEscrow } from "../anchor/solana_rewards/generated/types/market_escrow";
+import type { LoyaltyRegistry } from "../anchor/solana_rewards/generated/types/loyalty_registry";
 
 const VAULT_SIGNER_SEED = Buffer.from("vault-signer");
 
@@ -56,10 +60,10 @@ export type RewardsServiceConfig = {
 export class SolanaRewardsService {
   private readonly provider: AnchorProvider;
 
-  private rewardsVault?: ProgramDescriptor<Idl>;
-  private staking?: ProgramDescriptor<Idl>;
-  private escrow?: ProgramDescriptor<Idl>;
-  private loyalty?: ProgramDescriptor<Idl>;
+  private rewardsVault?: ProgramDescriptor<RewardsVault>;
+  private staking?: ProgramDescriptor<CloutStaking>;
+  private escrow?: ProgramDescriptor<MarketEscrow>;
+  private loyalty?: ProgramDescriptor<LoyaltyRegistry>;
 
   constructor(private readonly config: RewardsServiceConfig) {
     const wallet = config.wallet ?? AnchorProvider.local().wallet;
@@ -76,10 +80,22 @@ export class SolanaRewardsService {
       this.config.idlLoaders.loadLoyaltyIdl(),
     ]);
 
-    this.rewardsVault = this.instantiateProgram(rewardsVaultIdl, this.config.rewardVaultProgramId);
-    this.staking = this.instantiateProgram(stakingIdl, this.config.stakingProgramId);
-    this.escrow = this.instantiateProgram(escrowIdl, this.config.escrowProgramId);
-    this.loyalty = this.instantiateProgram(loyaltyIdl, this.config.loyaltyProgramId);
+    this.rewardsVault = this.instantiateProgram(
+      rewardsVaultIdl as RewardsVault,
+      this.config.rewardVaultProgramId,
+    );
+    this.staking = this.instantiateProgram(
+      stakingIdl as CloutStaking,
+      this.config.stakingProgramId,
+    );
+    this.escrow = this.instantiateProgram(
+      escrowIdl as MarketEscrow,
+      this.config.escrowProgramId,
+    );
+    this.loyalty = this.instantiateProgram(
+      loyaltyIdl as LoyaltyRegistry,
+      this.config.loyaltyProgramId,
+    );
   }
 
   async settleMarketplaceSale(args: {
@@ -90,7 +106,7 @@ export class SolanaRewardsService {
     seller: Signer;
     settlement: SettlementAccounts;
   }): Promise<string> {
-    const escrow = await this.requireProgram(this.escrow, "market_escrow");
+    const escrow = await this.requireProgram(() => this.escrow, "market_escrow");
     return escrow.program.methods
       .settleSale(args.rewardAmount, args.loyaltyBonusPoints)
       .accounts({
@@ -107,7 +123,7 @@ export class SolanaRewardsService {
         buyerRewardAccount: args.settlement.buyerRewardAccount,
         loyaltyProfile: args.settlement.loyaltyProfile,
         loyaltyRegistryConfig: args.settlement.loyaltyRegistryConfig,
-      })
+      } as never)
       .signers([args.seller])
       .rpc();
   }
@@ -120,7 +136,7 @@ export class SolanaRewardsService {
     volumeLamports: BN;
     bonusPoints: BN;
   }): Promise<string> {
-    const loyalty = await this.requireProgram(this.loyalty, "loyalty_registry");
+    const loyalty = await this.requireProgram(() => this.loyalty, "loyalty_registry");
     return loyalty.program.methods
       .recordActivity(args.volumeLamports, args.bonusPoints)
       .accounts({
@@ -128,22 +144,24 @@ export class SolanaRewardsService {
         actor: args.actor.publicKey,
         registryConfig: args.registryConfig,
         authority: args.authority.publicKey,
-      })
+      } as never)
       .signers([args.actor, args.authority])
       .rpc();
   }
 
   private instantiateProgram<T extends Idl>(idl: T, address: PublicKey): ProgramDescriptor<T> {
-    const program = new Program<T>(idl, address, this.provider);
+    const program = new Program<T>(idl, this.provider);
     return { idl, address, program };
   }
 
   private async requireProgram<T extends Idl>(
-    descriptor: ProgramDescriptor<T> | undefined,
+    getter: () => ProgramDescriptor<T> | undefined,
     name: string,
   ): Promise<ProgramDescriptor<T>> {
+    let descriptor = getter();
     if (!descriptor) {
       await this.refreshPrograms();
+      descriptor = getter();
     }
     if (!descriptor) {
       throw new Error(`Program ${name} is not initialised`);
@@ -154,14 +172,14 @@ export class SolanaRewardsService {
   // Staking helpers --------------------------------------------------------
 
   async fetchStakingPool(cloutMint: PublicKey) {
-    const staking = await this.requireProgram(this.staking, "clout_staking");
+    const staking = await this.requireProgram(() => this.staking, "clout_staking");
     const poolPda = this.derivePoolPda(cloutMint);
     const pool = await staking.program.account.stakingPool.fetch(poolPda);
     return { poolPda, pool };
   }
 
   async fetchStakePosition(cloutMint: PublicKey, owner: PublicKey) {
-    const staking = await this.requireProgram(this.staking, "clout_staking");
+    const staking = await this.requireProgram(() => this.staking, "clout_staking");
     const poolPda = this.derivePoolPda(cloutMint);
     const positionPda = this.derivePositionPda(poolPda, owner);
     try {
@@ -181,7 +199,7 @@ export class SolanaRewardsService {
     stakerTokenAccount: PublicKey;
     amount: BN;
   }): Promise<Transaction> {
-    const staking = await this.requireProgram(this.staking, "clout_staking");
+    const staking = await this.requireProgram(() => this.staking, "clout_staking");
     const { poolPda } = await this.fetchStakingPool(args.cloutMint);
 
     const poolVault = this.derivePoolVaultPda(args.cloutMint);
@@ -197,7 +215,7 @@ export class SolanaRewardsService {
       tokenProgram: TOKEN_PROGRAM_ID,
       systemProgram: SystemProgram.programId,
       rent: SYSVAR_RENT_PUBKEY,
-    }).transaction();
+    } as never).transaction();
 
     await this.prepareTransaction(tx, args.staker);
     return tx;
@@ -209,7 +227,7 @@ export class SolanaRewardsService {
     destinationTokenAccount: PublicKey;
     amount: BN;
   }): Promise<Transaction> {
-    const staking = await this.requireProgram(this.staking, "clout_staking");
+    const staking = await this.requireProgram(() => this.staking, "clout_staking");
     const { poolPda } = await this.fetchStakingPool(args.cloutMint);
 
     const poolVault = this.derivePoolVaultPda(args.cloutMint);
@@ -224,7 +242,7 @@ export class SolanaRewardsService {
       destinationToken: args.destinationTokenAccount,
       poolSigner,
       tokenProgram: TOKEN_PROGRAM_ID,
-    }).transaction();
+    } as never).transaction();
 
     await this.prepareTransaction(tx, args.staker);
     return tx;
@@ -240,8 +258,8 @@ export class SolanaRewardsService {
       throw new Error("Authority keypair is required to build harvest transactions.");
     }
 
-    const staking = await this.requireProgram(this.staking, "clout_staking");
-    const rewardsVault = await this.requireProgram(this.rewardsVault, "rewards_vault");
+    const staking = await this.requireProgram(() => this.staking, "clout_staking");
+    const rewardsVault = await this.requireProgram(() => this.rewardsVault, "rewards_vault");
 
     const { poolPda, pool } = await this.fetchStakingPool(args.cloutMint);
     const position = this.derivePositionPda(poolPda, args.staker);
@@ -267,7 +285,7 @@ export class SolanaRewardsService {
       poolSigner,
       tokenProgram: TOKEN_PROGRAM_ID,
       rewardsVaultProgram: this.config.rewardVaultProgramId,
-    }).transaction();
+    } as never).transaction();
 
     await this.prepareTransaction(tx, args.staker);
     tx.partialSign(authority);
@@ -286,7 +304,7 @@ export class SolanaRewardsService {
       throw new Error("Authority keypair is required to build loyalty transactions.");
     }
 
-    const loyalty = await this.requireProgram(this.loyalty, "loyalty_registry");
+    const loyalty = await this.requireProgram(() => this.loyalty, "loyalty_registry");
     const tx = await loyalty.program.methods
       .recordActivity(args.volumeLamports, args.bonusPoints)
       .accounts({
@@ -294,7 +312,7 @@ export class SolanaRewardsService {
         actor: args.actor,
         registryConfig: args.registryConfig,
         authority: authority.publicKey,
-      })
+      } as never)
       .transaction();
 
     await this.prepareTransaction(tx, args.actor);
@@ -324,9 +342,9 @@ export class SolanaRewardsService {
       throw new Error("Authority keypair is required to build settlement transactions.");
     }
 
-    const escrow = await this.requireProgram(this.escrow, "market_escrow");
-    const rewardsVault = await this.requireProgram(this.rewardsVault, "rewards_vault");
-    const loyalty = await this.requireProgram(this.loyalty, "loyalty_registry");
+    const escrow = await this.requireProgram(() => this.escrow, "market_escrow");
+    const rewardsVault = await this.requireProgram(() => this.rewardsVault, "rewards_vault");
+    const loyalty = await this.requireProgram(() => this.loyalty, "loyalty_registry");
 
     const vaultConfig = await rewardsVault.program.account.vaultConfig.fetch(args.rewardVault);
     if (!vaultConfig.authority.equals(authority.publicKey)) {
@@ -357,7 +375,7 @@ export class SolanaRewardsService {
         rewardsVaultProgram: this.config.rewardVaultProgramId,
         loyaltyProgram: this.config.loyaltyProgramId,
         systemProgram: SystemProgram.programId,
-      })
+      } as never)
       .transaction();
 
     await this.prepareTransaction(tx, args.seller);
