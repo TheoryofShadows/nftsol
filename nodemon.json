@@ -1,0 +1,5 @@
+﻿{
+  "watch": ["dist/server"],
+  "ext": "js,json",
+  "exec": "node --enable-source-maps dist/server/index.js"
+}

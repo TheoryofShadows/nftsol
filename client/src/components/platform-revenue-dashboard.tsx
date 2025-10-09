@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, DollarSign, Users, Coins, ArrowUpRight } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface PlatformStats {
   totalRevenue: number;
@@ -14,6 +15,17 @@ interface PlatformStats {
   sellerEarnings: number;
   cloutAwarded: number;
 }
+
+const FALLBACK_STATS: PlatformStats = {
+  totalRevenue: 125.67,
+  dailyRevenue: 8.45,
+  totalTransactions: 347,
+  activeUsers: 89,
+  nftsMinted: 234,
+  platformFees: 2.51,
+  sellerEarnings: 123.16,
+  cloutAwarded: 45670,
+};
 
 export default function PlatformRevenueDashboard() {
   const [stats, setStats] = useState<PlatformStats>({
@@ -27,49 +39,43 @@ export default function PlatformRevenueDashboard() {
     cloutAwarded: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const { token } = useAuth();
+  const authToken = token ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
 
   useEffect(() => {
     const fetchPlatformStats = async () => {
+      if (!authToken) {
+        setStats(FALLBACK_STATS);
+        setIsLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch('/api/platform/stats');
+        const response = await fetch('/api/platform/stats', {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : undefined,
+        });
         if (response.ok) {
           const data = await response.json();
           setStats(data);
         } else {
           // Show demo data for showcase
-          setStats({
-            totalRevenue: 125.67,
-            dailyRevenue: 8.45,
-            totalTransactions: 347,
-            activeUsers: 89,
-            nftsMinted: 234,
-            platformFees: 2.51,
-            sellerEarnings: 123.16,
-            cloutAwarded: 45670
-          });
+          setStats(FALLBACK_STATS);
         }
       } catch (error) {
         console.error('Failed to fetch platform stats:', error);
         // Show demo data
-        setStats({
-          totalRevenue: 125.67,
-          dailyRevenue: 8.45,
-          totalTransactions: 347,
-          activeUsers: 89,
-          nftsMinted: 234,
-          platformFees: 2.51,
-          sellerEarnings: 123.16,
-          cloutAwarded: 45670
-        });
+        setStats(FALLBACK_STATS);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPlatformStats();
-    const interval = setInterval(fetchPlatformStats, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
-  }, []);
+    const interval = authToken ? setInterval(fetchPlatformStats, 30000) : undefined; // Update every 30 seconds when authenticated
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [authToken]);
 
   const formatSOL = (amount: number) => `${amount.toFixed(4)} SOL`;
   const formatUSD = (amount: number) => `$${(amount * 200).toFixed(2)}`; // Assuming 1 SOL = $200

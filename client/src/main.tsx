@@ -4,6 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
 import "./index.css";
 import { queryClient } from "./lib/queryClient";
+import { SolanaWalletProvider } from "./components/solana-wallet-provider";
+import { validateConfig } from "./config/netlify";
 
 // Buffer polyfill for browser compatibility
 import { Buffer } from 'buffer';
@@ -73,6 +75,14 @@ function handleResize() {
 // Set initial viewport height
 setViewportHeight();
 
+// Validate Netlify configuration
+if (import.meta.env.PROD) {
+  const configValid = validateConfig();
+  if (!configValid) {
+    console.warn('Netlify configuration validation failed. Some features may not work correctly.');
+  }
+}
+
 // Add optimized event listeners
 window.addEventListener('resize', handleResize, { passive: true });
 window.addEventListener('orientationchange', () => {
@@ -90,7 +100,9 @@ if (import.meta.hot) {
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <SolanaWalletProvider>
+        <App />
+      </SolanaWalletProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

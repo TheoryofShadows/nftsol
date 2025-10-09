@@ -1,35 +1,48 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as crypto from "crypto";
+import {
+  PLATFORM_WALLETS as PLATFORM_WALLET_CONFIG,
+  ensurePlatformWallets,
+} from "./wallet-config";
 
-// Secure wallet configuration
+ensurePlatformWallets();
+
+// Secure wallet metadata (public keys supplied via wallet-config)
 export const PLATFORM_WALLETS = {
   developer: {
-    publicKey: process.env.DEVELOPER_WALLET_PUBLIC_KEY || "3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad",
-    privateKey: process.env.DEVELOPER_WALLET_PRIVATE_KEY || crypto.randomBytes(32).toString('hex'),
+    publicKey: PLATFORM_WALLET_CONFIG.DEVELOPER.publicKey,
     commissionRate: 0.02, // 2% total marketplace commission - 1% to developer, 1% to CLOUT treasury
-    distributionRate: 0.01, // Developer gets 1% of sale, ensuring 95.5% to seller
-    purpose: "Platform operations and development (1% of total sales)"
+    distributionRate: 0.01, // Developer gets 1% of sale
+    purpose: PLATFORM_WALLET_CONFIG.DEVELOPER.purpose,
+    source: PLATFORM_WALLET_CONFIG.DEVELOPER.source,
   },
   cloutTreasury: {
-    publicKey: process.env.CLOUT_TREASURY_WALLET || "FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM",
-    privateKey: process.env.CLOUT_TREASURY_PRIVATE_KEY || crypto.randomBytes(32).toString('hex'),
+    publicKey: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.publicKey,
     distributionRate: 0.01, // CLOUT treasury gets 1% of sale for community rewards
-    purpose: "CLOUT token distribution and community rewards (1% of total sales)",
+    purpose: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.purpose,
     multisigRequired: true, // Requires multiple signatures for large withdrawals
     maxDailyDistribution: 100000, // Max 100k CLOUT per day
-    emergencyLock: false // Can be locked in emergency
+    emergencyLock: false, // Can be locked in emergency
+    source: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.source,
   },
   marketplaceTreasury: {
-    publicKey: process.env.MARKETPLACE_TREASURY_WALLET || "MarketplaceTreasury123456789",
-    privateKey: process.env.MARKETPLACE_TREASURY_PRIVATE_KEY || crypto.randomBytes(32).toString('hex'),
-    purpose: "Platform operational funds and reserves"
+    publicKey: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.publicKey,
+    purpose: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.purpose,
+    source: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.source,
   },
   creatorEscrow: {
-    publicKey: process.env.CREATOR_ESCROW_WALLET || "CreatorEscrow123456789",
-    privateKey: process.env.CREATOR_ESCROW_PRIVATE_KEY || crypto.randomBytes(32).toString('hex'),
-    purpose: "Temporary holding for creator royalty payments"
-  }
+    publicKey: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.publicKey,
+    purpose: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.purpose,
+    source: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.source,
+  },
+};
+
+const PLATFORM_WALLET_LABELS: Record<keyof typeof PLATFORM_WALLETS, string> = {
+  developer: "Developer Wallet",
+  cloutTreasury: "CLOUT Treasury",
+  marketplaceTreasury: "Marketplace Treasury",
+  creatorEscrow: "Creator Escrow",
 };
 
 // CLOUT token configuration
@@ -235,6 +248,45 @@ export async function awardCloutTokens(userId: string, amount: number, reason: s
   
   wallet.transactionHistory.push(transaction);
   console.log(`Awarded ${amount} CLOUT to user ${userId}: ${reason}`);
+}
+
+type PlatformWalletStat = {
+  name: string;
+  address: string;
+  balance: number;
+  transactions: number;
+  purpose: string;
+  source: string;
+};
+
+export function getPlatformWalletStats(): PlatformWalletStat[] {
+  const statsMap = new Map<string, PlatformWalletStat>();
+
+  (Object.entries(PLATFORM_WALLETS) as Array<[keyof typeof PLATFORM_WALLETS, (typeof PLATFORM_WALLETS)[keyof typeof PLATFORM_WALLETS]]>).forEach(
+    ([key, walletConfig]) => {
+      statsMap.set(walletConfig.publicKey, {
+        name: PLATFORM_WALLET_LABELS[key],
+        address: walletConfig.publicKey,
+        balance: 0,
+        transactions: 0,
+        purpose: walletConfig.purpose,
+        source: walletConfig.source,
+      });
+    },
+  );
+
+  for (const wallet of userWallets.values()) {
+    for (const tx of wallet.transactionHistory) {
+      if (tx.tokenType !== 'SOL') continue;
+      const stat = statsMap.get(tx.toWallet);
+      if (stat) {
+        stat.balance += tx.amount;
+        stat.transactions += 1;
+      }
+    }
+  }
+
+  return Array.from(statsMap.values());
 }
 
 export async function processNFTPurchase(

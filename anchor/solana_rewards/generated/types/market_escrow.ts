@@ -301,11 +301,15 @@ export type MarketEscrow = {
           "name": "buyer"
         },
         {
-          "name": "treasuryDestination",
+          "name": "developerWallet",
           "writable": true
         },
         {
-          "name": "marketplaceFeeDestination",
+          "name": "rewardsPoolDestination",
+          "writable": true
+        },
+        {
+          "name": "opsTreasuryDestination",
           "writable": true
         },
         {
@@ -575,68 +579,78 @@ export type MarketEscrow = {
     },
     {
       "code": 6004,
+      "name": "unsupportedFeeConfiguration",
+      "msg": "Provided fee split is not supported by the protocol."
+    },
+    {
+      "code": 6005,
       "name": "mathOverflow",
       "msg": "Arithmetic overflow encountered."
     },
     {
-      "code": 6005,
+      "code": 6006,
       "name": "missingBuyer",
       "msg": "No buyer recorded for this listing."
     },
     {
-      "code": 6006,
+      "code": 6007,
       "name": "buyerMismatch",
       "msg": "Provided buyer account does not match listing state."
     },
     {
-      "code": 6007,
+      "code": 6008,
       "name": "sellerMismatch",
       "msg": "Provided seller account does not match listing state."
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "royaltyDestinationMismatch",
       "msg": "Royalty destination does not match listing configuration."
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "insufficientEscrowBalance",
       "msg": "Escrow vault balance is insufficient."
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "outstandingEscrowBalance",
       "msg": "Escrow vault still holds funds; cancel not allowed."
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "escrowAlreadyFunded",
       "msg": "Escrow vault already funded for this listing."
     },
     {
-      "code": 6012,
+      "code": 6013,
       "name": "unauthorizedLoyaltyAuthority",
       "msg": "Loyalty authority does not match registry configuration."
     },
     {
-      "code": 6013,
+      "code": 6014,
       "name": "unauthorizedRewardAuthority",
       "msg": "Reward authority does not match vault configuration."
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "invalidPayoutAccount",
       "msg": "Destination account must be a system account."
     },
     {
-      "code": 6015,
+      "code": 6016,
       "name": "listingExpired",
       "msg": "The listing has expired."
     },
     {
-      "code": 6016,
+      "code": 6017,
       "name": "mismatchedRewardMint",
       "msg": "Reward mint does not match vault configuration."
+    },
+    {
+      "code": 6018,
+      "name": "invalidDeveloperWallet",
+      "msg": "Developer wallet does not match the configured address."
     }
   ],
   "types": [
@@ -896,6 +910,10 @@ export type MarketEscrow = {
           },
           {
             "name": "marketplaceFeePaid",
+            "type": "u64"
+          },
+          {
+            "name": "developerPaid",
             "type": "u64"
           },
           {

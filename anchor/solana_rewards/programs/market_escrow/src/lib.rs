@@ -13,6 +13,16 @@ pub const LISTING_SEED: &[u8] = b"listing";
 pub const ESCROW_VAULT_SEED: &[u8] = b"escrow";
 pub const RECEIPT_SEED: &[u8] = b"receipt";
 const BPS_DENOMINATOR: u64 = 10_000;
+const PLATFORM_FEE_BPS: u16 = 150; // 1.50%
+const DEVELOPER_FEE_BPS: u16 = 100; // 1.00%
+const REMAINING_FEE_BPS: u16 = PLATFORM_FEE_BPS - DEVELOPER_FEE_BPS; // 0.50%
+const REWARD_FUND_RATIO_NUMERATOR: u64 = 3; // 75% of the remaining fee
+const OPS_TREASURY_RATIO_NUMERATOR: u64 = 1; // 25% of the remaining fee
+const RATIO_DENOMINATOR: u64 = REWARD_FUND_RATIO_NUMERATOR + OPS_TREASURY_RATIO_NUMERATOR;
+const OPS_TREASURY_BPS: u16 =
+    ((REMAINING_FEE_BPS as u64 * OPS_TREASURY_RATIO_NUMERATOR) / RATIO_DENOMINATOR) as u16; // ~0.125%
+const REWARD_POOL_BPS: u16 = REMAINING_FEE_BPS - OPS_TREASURY_BPS; // ~0.375%
+const DEVELOPER_WALLET: Pubkey = pubkey!("FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM");
 
 declare_id!("8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX");
 
@@ -50,8 +60,8 @@ pub mod market_escrow {
         listing.status = ListingStatus::Active;
         listing.royalty_bps = royalty_bps;
         listing.royalty_destination = ctx.accounts.royalty_destination.key();
-        listing.treasury_bps = treasury_bps;
-        listing.marketplace_fee_bps = marketplace_fee_bps;
+        listing.treasury_bps = OPS_TREASURY_BPS;
+        listing.marketplace_fee_bps = REWARD_POOL_BPS;
 
         let escrow = &mut ctx.accounts.escrow_vault;
         escrow.bump = ctx.bumps.escrow_vault;
@@ -154,15 +164,31 @@ pub mod market_escrow {
             ctx.accounts.escrow_vault.total_deposited >= listing.price_lamports,
             EscrowError::InsufficientEscrowBalance
         );
+        require_keys_eq!(
+            ctx.accounts.developer_wallet.key(),
+            DEVELOPER_WALLET,
+            EscrowError::InvalidDeveloperWallet
+        );
 
         let price = listing.price_lamports;
         let royalty_cut = compute_fee(price, listing.royalty_bps)?;
-        let treasury_cut = compute_fee(price, listing.treasury_bps)?;
-        let marketplace_cut = compute_fee(price, listing.marketplace_fee_bps)?;
-        let total_fees = royalty_cut
-            .checked_add(treasury_cut)
+        let developer_cut = compute_fee(price, DEVELOPER_FEE_BPS)?;
+        let remaining_platform_fee = compute_fee(price, REMAINING_FEE_BPS)?;
+        let reward_pool_cut = remaining_platform_fee
+            .checked_mul(REWARD_FUND_RATIO_NUMERATOR)
             .ok_or(EscrowError::MathOverflow)?
-            .checked_add(marketplace_cut)
+            .checked_div(RATIO_DENOMINATOR)
+            .ok_or(EscrowError::MathOverflow)?;
+        let ops_cut = remaining_platform_fee
+            .checked_sub(reward_pool_cut)
+            .ok_or(EscrowError::MathOverflow)?;
+        let platform_cut = developer_cut
+            .checked_add(reward_pool_cut)
+            .ok_or(EscrowError::MathOverflow)?
+            .checked_add(ops_cut)
+            .ok_or(EscrowError::MathOverflow)?;
+        let total_fees = royalty_cut
+            .checked_add(platform_cut)
             .ok_or(EscrowError::MathOverflow)?;
         require!(total_fees <= price, EscrowError::InvalidFeeConfiguration);
         let seller_payout = price
@@ -181,18 +207,25 @@ pub mod market_escrow {
                 royalty_cut,
             )?;
         }
-        if treasury_cut > 0 {
+        if developer_cut > 0 {
             disburse(
                 &ctx.accounts.escrow_vault.to_account_info(),
-                &ctx.accounts.treasury_destination.to_account_info(),
-                treasury_cut,
+                &ctx.accounts.developer_wallet.to_account_info(),
+                developer_cut,
             )?;
         }
-        if marketplace_cut > 0 {
+        if reward_pool_cut > 0 {
             disburse(
                 &ctx.accounts.escrow_vault.to_account_info(),
-                &ctx.accounts.marketplace_fee_destination.to_account_info(),
-                marketplace_cut,
+                &ctx.accounts.rewards_pool_destination.to_account_info(),
+                reward_pool_cut,
+            )?;
+        }
+        if ops_cut > 0 {
+            disburse(
+                &ctx.accounts.escrow_vault.to_account_info(),
+                &ctx.accounts.ops_treasury_destination.to_account_info(),
+                ops_cut,
             )?;
         }
 
@@ -254,8 +287,9 @@ pub mod market_escrow {
         receipt.amount_paid = price;
         receipt.seller_proceeds = seller_payout;
         receipt.royalty_paid = royalty_cut;
-        receipt.treasury_paid = treasury_cut;
-        receipt.marketplace_fee_paid = marketplace_cut;
+        receipt.treasury_paid = ops_cut;
+        receipt.marketplace_fee_paid = reward_pool_cut;
+        receipt.developer_paid = developer_cut;
         receipt.rewards_minted = reward_amount;
         receipt.loyalty_points_awarded = loyalty_bonus_points;
         receipt.timestamp = now;
@@ -336,9 +370,11 @@ pub struct SettleSale<'info> {
     /// CHECK: buyer validated against listing.buyer
     pub buyer: UncheckedAccount<'info>,
     #[account(mut)]
-    pub treasury_destination: SystemAccount<'info>,
+    pub developer_wallet: SystemAccount<'info>,
     #[account(mut)]
-    pub marketplace_fee_destination: SystemAccount<'info>,
+    pub rewards_pool_destination: SystemAccount<'info>,
+    #[account(mut)]
+    pub ops_treasury_destination: SystemAccount<'info>,
     #[account(mut)]
     pub royalty_destination: SystemAccount<'info>,
     #[account(
@@ -454,6 +490,7 @@ pub struct SaleReceipt {
     pub royalty_paid: u64,
     pub treasury_paid: u64,
     pub marketplace_fee_paid: u64,
+    pub developer_paid: u64,
     pub rewards_minted: u64,
     pub loyalty_points_awarded: u64,
     pub timestamp: i64,
@@ -470,6 +507,7 @@ impl SaleReceipt {
         + 8 // royalty paid
         + 8 // treasury paid
         + 8 // marketplace fee
+        + 8 // developer paid
         + 8 // rewards minted
         + 8 // loyalty points
         + 8; // timestamp
@@ -488,9 +526,13 @@ fn validate_fee_configuration(
     treasury_bps: u16,
     marketplace_fee_bps: u16,
 ) -> Result<()> {
-    let total = royalty_bps as u64 + treasury_bps as u64 + marketplace_fee_bps as u64;
     require!(
-        total <= BPS_DENOMINATOR,
+        treasury_bps == OPS_TREASURY_BPS && marketplace_fee_bps == REWARD_POOL_BPS,
+        EscrowError::UnsupportedFeeConfiguration
+    );
+    let total = royalty_bps as u64 + PLATFORM_FEE_BPS as u64;
+    require!(
+        total <= BPS_DENOMINATOR as u64,
         EscrowError::InvalidFeeConfiguration
     );
     Ok(())
@@ -536,6 +578,8 @@ pub enum EscrowError {
     InvalidListingPrice,
     #[msg("Total fee configuration exceeds 100%.")]
     InvalidFeeConfiguration,
+    #[msg("Provided fee split is not supported by the protocol.")]
+    UnsupportedFeeConfiguration,
     #[msg("Arithmetic overflow encountered.")]
     MathOverflow,
     #[msg("No buyer recorded for this listing.")]
@@ -562,4 +606,6 @@ pub enum EscrowError {
     ListingExpired,
     #[msg("Reward mint does not match vault configuration.")]
     MismatchedRewardMint,
+    #[msg("Developer wallet does not match the configured address.")]
+    InvalidDeveloperWallet,
 }

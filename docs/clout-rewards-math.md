@@ -36,9 +36,13 @@ Where `R` (reward funding ratio) defaults to `75%`. This produces:
 
 ```
 dev_cut          = gross_price * 0.0100
-rewards_cut      = gross_price * 0.0075   // if F = 1.5% and R = 75%
-ops_cut          = gross_price * 0.0025
+rewards_cut      = gross_price * 0.00375  // if F = 1.5% and R = 75%
+ops_cut          = gross_price * 0.00125
 ```
+
+All fee math is performed in lamports. The 0.50% residual (after the developer cut)
+is split 75/25 between rewards and ops; any rounding dust is assigned to the ops
+treasury so totals always balance.
 
 Any program or fork must enforce the `dev_cut` transfer prior to settlement to
 uphold the royalty guarantee.
@@ -113,6 +117,7 @@ Where `payout_ratio` defaults to `0.9` (90% of the pool distributed monthly;
 - Clout scoring uses Analytics/SQL in the short term. For full decentralisation, emit events (e.g., `CloutAction`) and compute `clout_raw` via an off-chain indexer feeding into the loyalty registry CPI.
 - Store monthly reward snapshots in `loyalty_registry` (new account type) so payouts can be audited and replayed.
 - Provide a `/api/solana/rewards/monthly` endpoint that surfaces `clout_score(u)`, rank, and projected reward before payouts close.
+- Sale receipts include the lamports transferred to the developer wallet so downstream analytics can reconcile the hard-baked royalty.
 
 ## 5. Future Enhancements
 

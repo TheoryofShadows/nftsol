@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Link } from "wouter";
 import Navbar from "@/components/navbar";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   BarChart, 
   Users, 
@@ -52,6 +53,8 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { token } = useAuth();
+  const authToken = token ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
 
   // Fetch current user data to check role
   const { data: userData, isLoading: userLoading } = useQuery({
@@ -92,13 +95,14 @@ export default function AdminPage() {
       const userId = localStorage.getItem("userId");
       const response = await fetch("/api/platform/stats", {
         headers: {
-          'X-User-ID': userId || ''
+          "X-User-ID": userId || "",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         }
       });
       if (!response.ok) throw new Error("Failed to fetch stats");
       return response.json();
     },
-    enabled: isAdmin && !!currentUser,
+    enabled: isAdmin && !!currentUser && !!authToken,
   });
 
   // Wallet balances query
@@ -108,13 +112,14 @@ export default function AdminPage() {
       const userId = localStorage.getItem("userId");
       const response = await fetch("/api/wallet/platform/stats", {
         headers: {
-          'X-User-ID': userId || ''
+          "X-User-ID": userId || "",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         }
       });
       if (!response.ok) throw new Error("Failed to fetch wallet stats");
       return response.json();
     },
-    enabled: isAdmin && !!currentUser,
+    enabled: isAdmin && !!currentUser && !!authToken,
   });
 
   // Mock user data (in real implementation, this would come from an API)

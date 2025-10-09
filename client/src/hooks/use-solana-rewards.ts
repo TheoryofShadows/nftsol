@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Buffer } from "buffer";
 import { BN } from "@coral-xyz/anchor";
-import { Connection, PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useSolanaWallet } from "./use-solana-wallet";
 import { useToast } from "./use-toast";
@@ -31,19 +31,12 @@ const CLOUT_MINT = new PublicKey(
 );
 
 export function useSolanaRewards() {
-  const { publicKey, connection: walletConnection } = useSolanaWallet();
+  const { publicKey, connection, sendTransaction } = useSolanaWallet();
   const { toast } = useToast();
   const [pool, setPool] = useState<StakingPoolView | null>(null);
   const [position, setPosition] = useState<StakePositionView>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const connection = useMemo(
-    () =>
-      walletConnection ??
-      new Connection(import.meta.env.VITE_SOLANA_RPC_URL ?? "https://api.devnet.solana.com"),
-    [walletConnection],
-  );
 
   const fetchState = useCallback(async () => {
     if (!publicKey) {
@@ -106,21 +99,19 @@ export function useSolanaRewards() {
       const payload = await response.json();
       const tx = Transaction.from(Buffer.from(payload.transaction, "base64"));
       tx.feePayer = publicKey;
+      const latestBlockhash = await connection.getLatestBlockhash();
+      tx.recentBlockhash = latestBlockhash.blockhash;
+      tx.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight;
 
-      const provider = (window as any).solana;
-      if (!provider?.signAndSendTransaction) {
-        throw new Error("Solana wallet provider not found");
-      }
-
-      const { signature } = await provider.signAndSendTransaction(tx);
-      await connection.confirmTransaction(signature, "confirmed");
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, "confirmed");
       toast({
         title: "Stake submitted",
         description: `Signature ${signature.slice(0, 8)}…${signature.slice(-8)}`,
       });
       await fetchState();
     },
-    [connection, fetchState, publicKey, toast],
+    [connection, fetchState, publicKey, sendTransaction, toast],
   );
 
   const requestUnstake = useCallback(
@@ -152,21 +143,19 @@ export function useSolanaRewards() {
       const payload = await response.json();
       const tx = Transaction.from(Buffer.from(payload.transaction, "base64"));
       tx.feePayer = publicKey;
+      const latestBlockhash = await connection.getLatestBlockhash();
+      tx.recentBlockhash = latestBlockhash.blockhash;
+      tx.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight;
 
-      const provider = (window as any).solana;
-      if (!provider?.signAndSendTransaction) {
-        throw new Error("Solana wallet provider not found");
-      }
-
-      const { signature } = await provider.signAndSendTransaction(tx);
-      await connection.confirmTransaction(signature, "confirmed");
+      const signature = await sendTransaction(tx, connection);
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, "confirmed");
       toast({
         title: "Unstake submitted",
         description: `Signature ${signature.slice(0, 8)}…${signature.slice(-8)}`,
       });
       await fetchState();
     },
-    [connection, fetchState, publicKey, toast],
+    [connection, fetchState, publicKey, sendTransaction, toast],
   );
 
   const requestHarvest = useCallback(async () => {
@@ -189,20 +178,18 @@ export function useSolanaRewards() {
     const payload = await response.json();
     const tx = Transaction.from(Buffer.from(payload.transaction, "base64"));
     tx.feePayer = publicKey;
+    const latestBlockhash = await connection.getLatestBlockhash();
+    tx.recentBlockhash = latestBlockhash.blockhash;
+    tx.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight;
 
-    const provider = (window as any).solana;
-    if (!provider?.signAndSendTransaction) {
-      throw new Error("Solana wallet provider not found");
-    }
-
-    const { signature } = await provider.signAndSendTransaction(tx);
-    await connection.confirmTransaction(signature, "confirmed");
+    const signature = await sendTransaction(tx, connection);
+    await connection.confirmTransaction({ signature, ...latestBlockhash }, "confirmed");
     toast({
       title: "Harvest submitted",
       description: `Signature ${signature.slice(0, 8)}.${signature.slice(-8)}`,
     });
     await fetchState();
-  }, [connection, fetchState, publicKey, toast]);
+  }, [connection, fetchState, publicKey, sendTransaction, toast]);
 
   return {
     pool,

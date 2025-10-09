@@ -7,10 +7,12 @@ import WalletConnect from "@/components/wallet-connect";
 import WalletDashboard from "@/components/wallet-dashboard";
 import PlatformWalletDashboard from "@/components/platform-wallet-dashboard";
 import WalletAnalytics from "@/components/wallet-analytics";
+import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 
 export default function WalletPage() {
   const [, setLocation] = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
+  const { walletAddress } = useSolanaWallet();
 
   useEffect(() => {
     // Get user ID from localStorage (set after login)
@@ -63,9 +65,9 @@ export default function WalletPage() {
               <div className="space-y-6">
                 <WalletDashboard userId={userId} />
                 {/* Add Solscan-powered wallet analytics if connected */}
-                {window.solana?.publicKey && (
+                {walletAddress && (
                   <WalletAnalytics 
-                    walletAddress={window.solana.publicKey.toString()} 
+                    walletAddress={walletAddress} 
                     showAnalytics={true}
                   />
                 )}

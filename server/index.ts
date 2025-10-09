@@ -80,6 +80,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     process.exit(1);
   }
 
+  app.use(helmetConfig);
+  app.use(corsConfig);
+  app.use(securityHeaders);
+  app.use(requestLogger);
+  app.use(securityLogger);
+  if (process.env.NODE_ENV === "production") {
+    app.use("/api", generalLimiter);
+  }
+  app.use(sanitizeInput);
+
   const { setupPricingRoutes } = await import("./pricing-analytics");
   setupPricingRoutes(app);
 
@@ -173,14 +183,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
       timestamp: new Date().toISOString()
     });
   });
-
-  app.use(helmetConfig);
-  app.use(corsConfig);
-  app.use(securityHeaders);
-  app.use(requestLogger);
-  app.use(securityLogger);
-  // if (process.env.NODE_ENV === "production") app.use(generalLimiter);
-  app.use(sanitizeInput);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

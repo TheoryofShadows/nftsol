@@ -160,8 +160,6 @@ router.post("/market/transactions/settle", async (req, res) => {
       receipt,
       seller,
       buyer,
-      treasuryDestination,
-      marketplaceFeeDestination,
       royaltyDestination,
       rewardVault,
       rewardMint,
@@ -177,8 +175,6 @@ router.post("/market/transactions/settle", async (req, res) => {
     const receiptPk = safePublicKey(receipt, "receipt");
     const sellerPk = safePublicKey(seller, "seller");
     const buyerPk = safePublicKey(buyer, "buyer");
-    const treasuryPk = safePublicKey(treasuryDestination, "treasuryDestination");
-    const marketplacePk = safePublicKey(marketplaceFeeDestination, "marketplaceFeeDestination");
     const royaltyPk = safePublicKey(royaltyDestination, "royaltyDestination");
     const rewardVaultPk = safePublicKey(rewardVault, "rewardVault");
     const rewardMintPk = safePublicKey(rewardMint, "rewardMint");
@@ -195,8 +191,6 @@ router.post("/market/transactions/settle", async (req, res) => {
       receipt: receiptPk,
       seller: sellerPk,
       buyer: buyerPk,
-      treasuryDestination: treasuryPk,
-      marketplaceFeeDestination: marketplacePk,
       royaltyDestination: royaltyPk,
       rewardVault: rewardVaultPk,
       rewardMint: rewardMintPk,

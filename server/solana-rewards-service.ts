@@ -9,6 +9,10 @@ import {
   SYSVAR_RENT_PUBKEY,
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import type { RewardsVault } from "../anchor/solana_rewards/generated/types/rewards_vault.ts";
+import type { CloutStaking } from "../anchor/solana_rewards/generated/types/clout_staking.ts";
+import type { MarketEscrow } from "../anchor/solana_rewards/generated/types/market_escrow.ts";
+import type { LoyaltyRegistry } from "../anchor/solana_rewards/generated/types/loyalty_registry.ts";
 
 const VAULT_SIGNER_SEED = Buffer.from("vault-signer");
 
@@ -16,10 +20,10 @@ const VAULT_SIGNER_SEED = Buffer.from("vault-signer");
  * Runtime metadata for a rewards program.
  * We memoize the Program instance alongside strongly-typed IDL definitions.
  */
-type ProgramDescriptor<T extends Idl> = {
-  idl: T;
+type ProgramDescriptor<TIdl extends Idl> = {
+  idl: TIdl;
   address: PublicKey;
-  program: Program<T>;
+  program: Program<TIdl>;
 };
 
 export type SettlementAccounts = {
@@ -31,6 +35,7 @@ export type SettlementAccounts = {
   buyerRewardAccount: PublicKey;
   loyaltyProfile: PublicKey;
   loyaltyRegistryConfig: PublicKey;
+  royaltyDestination: PublicKey;
 };
 
 export type RewardsServiceConfig = {
@@ -41,11 +46,14 @@ export type RewardsServiceConfig = {
   stakingProgramId: PublicKey;
   escrowProgramId: PublicKey;
   loyaltyProgramId: PublicKey;
+  developerWallet: PublicKey;
+  rewardsPool: PublicKey;
+  opsTreasury: PublicKey;
   idlLoaders: {
-    loadRewardsVaultIdl: () => Promise<Idl>;
-    loadStakingIdl: () => Promise<Idl>;
-    loadEscrowIdl: () => Promise<Idl>;
-    loadLoyaltyIdl: () => Promise<Idl>;
+    loadRewardsVaultIdl: () => Promise<RewardsVault>;
+    loadStakingIdl: () => Promise<CloutStaking>;
+    loadEscrowIdl: () => Promise<MarketEscrow>;
+    loadLoyaltyIdl: () => Promise<LoyaltyRegistry>;
   };
 };
 
@@ -56,10 +64,10 @@ export type RewardsServiceConfig = {
 export class SolanaRewardsService {
   private readonly provider: AnchorProvider;
 
-  private rewardsVault?: ProgramDescriptor<Idl>;
-  private staking?: ProgramDescriptor<Idl>;
-  private escrow?: ProgramDescriptor<Idl>;
-  private loyalty?: ProgramDescriptor<Idl>;
+  private rewardsVault?: ProgramDescriptor<RewardsVault>;
+  private staking?: ProgramDescriptor<CloutStaking>;
+  private escrow?: ProgramDescriptor<MarketEscrow>;
+  private loyalty?: ProgramDescriptor<LoyaltyRegistry>;
 
   constructor(private readonly config: RewardsServiceConfig) {
     const wallet = config.wallet ?? AnchorProvider.local().wallet;
@@ -91,6 +99,17 @@ export class SolanaRewardsService {
     settlement: SettlementAccounts;
   }): Promise<string> {
     const escrow = await this.requireProgram(this.escrow, "market_escrow");
+    const rewardsVault = await this.requireProgram(this.rewardsVault, "rewards_vault");
+    const authority = this.config.authorityKeypair?.publicKey ?? this.provider.wallet.publicKey;
+    const vaultConfig = await rewardsVault.program.account.vaultConfig.fetch(
+      args.settlement.rewardVault,
+    );
+    if (!vaultConfig.authority.equals(authority)) {
+      throw new Error("Configured authority does not match rewards vault authority.");
+    }
+    const vaultSigner = this.deriveVaultSigner(args.settlement.rewardMint);
+    await this.requireProgram(this.loyalty, "loyalty_registry");
+
     return escrow.program.methods
       .settleSale(args.rewardAmount, args.loyaltyBonusPoints)
       .accounts({
@@ -98,15 +117,23 @@ export class SolanaRewardsService {
         escrowVault: args.settlement.escrowVault,
         seller: args.seller.publicKey,
         buyer: args.buyer,
-        treasuryDestination: args.settlement.rewardVault,
-        marketplaceFeeDestination: args.settlement.rewardVault,
-        royaltyDestination: args.settlement.rewardVault,
+        developerWallet: this.config.developerWallet,
+        rewardsPoolDestination: this.config.rewardsPool,
+        opsTreasuryDestination: this.config.opsTreasury,
+        royaltyDestination: args.settlement.royaltyDestination,
         receipt: args.settlement.receipt,
         rewardVault: args.settlement.rewardVault,
+        vaultSigner,
         rewardMint: args.settlement.rewardMint,
         buyerRewardAccount: args.settlement.buyerRewardAccount,
+        rewardAuthority: authority,
         loyaltyProfile: args.settlement.loyaltyProfile,
         loyaltyRegistryConfig: args.settlement.loyaltyRegistryConfig,
+        loyaltyAuthority: authority,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        rewardsVaultProgram: this.config.rewardVaultProgramId,
+        loyaltyProgram: this.config.loyaltyProgramId,
+        systemProgram: SystemProgram.programId,
       })
       .signers([args.seller])
       .rpc();
@@ -308,8 +335,6 @@ export class SolanaRewardsService {
     receipt: PublicKey;
     seller: PublicKey;
     buyer: PublicKey;
-    treasuryDestination: PublicKey;
-    marketplaceFeeDestination: PublicKey;
     royaltyDestination: PublicKey;
     rewardVault: PublicKey;
     rewardMint: PublicKey;
@@ -326,7 +351,7 @@ export class SolanaRewardsService {
 
     const escrow = await this.requireProgram(this.escrow, "market_escrow");
     const rewardsVault = await this.requireProgram(this.rewardsVault, "rewards_vault");
-    const loyalty = await this.requireProgram(this.loyalty, "loyalty_registry");
+    await this.requireProgram(this.loyalty, "loyalty_registry");
 
     const vaultConfig = await rewardsVault.program.account.vaultConfig.fetch(args.rewardVault);
     if (!vaultConfig.authority.equals(authority.publicKey)) {
@@ -341,8 +366,9 @@ export class SolanaRewardsService {
         escrowVault: args.escrowVault,
         seller: args.seller,
         buyer: args.buyer,
-        treasuryDestination: args.treasuryDestination,
-        marketplaceFeeDestination: args.marketplaceFeeDestination,
+        developerWallet: this.config.developerWallet,
+        rewardsPoolDestination: this.config.rewardsPool,
+        opsTreasuryDestination: this.config.opsTreasury,
         royaltyDestination: args.royaltyDestination,
         receipt: args.receipt,
         rewardVault: args.rewardVault,
