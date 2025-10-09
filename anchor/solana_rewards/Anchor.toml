@@ -5,10 +5,22 @@ types = "generated/types"
 url = "https://bpf.production.clusters.solana.com"
 
 [provider]
-cluster = "Localnet"
+cluster = "mainnet"
 wallet = "${ANCHOR_WALLET:-~/.config/solana/id.json}"
 
 [programs.localnet]
+rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
+market_escrow = "8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX"
+loyalty_registry = "GgfPQkNHuNbSw6cyDpzHeTLbTxSA2ZPUa2F1ZascnJur"
+
+[programs.mainnet]
+rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
+market_escrow = "8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX"
+loyalty_registry = "GgfPQkNHuNbSw6cyDpzHeTLbTxSA2ZPUa2F1ZascnJur"
+
+[programs.devnet]
 rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
 clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
 market_escrow = "8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX"

@@ -2,7 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Buffer } from "buffer";
 import { BN } from "@coral-xyz/anchor";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
+
+// Helper function to derive associated token address
+function getAssociatedTokenAddressSync(mint: PublicKey, owner: PublicKey): PublicKey {
+  const [address] = PublicKey.findProgramAddressSync(
+    [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  );
+  return address;
+}
 import { useSolanaWallet } from "./use-solana-wallet";
 import { useToast } from "./use-toast";
 
