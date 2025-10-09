@@ -1,0 +1,23 @@
+[package]
+name = "rewards_vault"
+version = "0.1.0"
+edition = "2021"
+description = "Anchor program responsible for managing CLOUT reward emissions."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "rewards_vault"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }
+anchor-spl = { workspace = true }
+spl-token = { workspace = true }
+spl-associated-token-account = { workspace = true }
