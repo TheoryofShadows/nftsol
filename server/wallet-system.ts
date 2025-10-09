@@ -113,15 +113,23 @@ export function validateWalletAddress(address: string): boolean {
 }
 
 export function encryptSensitiveData(data: string, key: string): string {
-  const cipher = crypto.createCipher('aes-256-cbc', key);
+  const derivedKey = crypto.createHash('sha256').update(key).digest();
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-cbc', derivedKey, iv);
   let encrypted = cipher.update(data, 'utf8', 'hex');
   encrypted += cipher.final('hex');
-  return encrypted;
+  return `${iv.toString('hex')}:${encrypted}`;
 }
 
 export function decryptSensitiveData(encryptedData: string, key: string): string {
-  const decipher = crypto.createDecipher('aes-256-cbc', key);
-  let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
+  const [ivHex, payload] = encryptedData.split(':');
+  if (!ivHex || !payload) {
+    throw new Error('Invalid encrypted payload');
+  }
+  const derivedKey = crypto.createHash('sha256').update(key).digest();
+  const iv = Buffer.from(ivHex, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-cbc', derivedKey, iv);
+  let decrypted = decipher.update(payload, 'hex', 'utf8');
   decrypted += decipher.final('utf8');
   return decrypted;
 }
