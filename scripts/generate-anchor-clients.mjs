@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readFile, readdir, copyFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir, copyFile, writeFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,16 +22,36 @@ const run = (cmd, args) =>
     });
   });
 
+const directoryExists = async (path) => {
+  try {
+    await access(path);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return false;
+    }
+    throw error;
+  }
+};
+
 const bootstrap = async () => {
   await mkdir(generatedIdlDir, { recursive: true });
   await mkdir(generatedTypesDir, { recursive: true });
 
+  if (!(await directoryExists(targetIdlDir))) {
+    console.warn(
+      `Anchor build artifacts not found at ${targetIdlDir}. Skipping client generation.`,
+    );
+    return;
+  }
+
   const files = await readdir(targetIdlDir);
   const idlFiles = files.filter((file) => file.endsWith(".json"));
   if (idlFiles.length === 0) {
-    throw new Error(
-      `No IDL files found under ${targetIdlDir}. Did you run "anchor build" after installing the Solana toolchain?`,
+    console.warn(
+      `No IDL files found under ${targetIdlDir}. Skipping client generation.`,
     );
+    return;
   }
 
   for (const file of idlFiles) {

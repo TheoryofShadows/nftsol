@@ -32,9 +32,6 @@ FROM nginx:alpine AS runner
 # Copy built application
 COPY --from=builder /app/dist/public /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Expose port
 EXPOSE 80
 
