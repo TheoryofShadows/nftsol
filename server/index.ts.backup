@@ -59,12 +59,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Add health check endpoint
-app.get("/health", healthCheckEndpoint);
-
-// Add API caching for public endpoints
-app.use("/api/public", apiCacheMiddleware(300)); // 5 minutes cache
-
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const pathName = req.path;
@@ -159,6 +153,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   });
 
   app.get("/api/security/dashboard", getSecurityDashboard);
+
+  app.get("/health", (req: Request, res: Response) => {
+    console.log("Health check accessed");
+    res.json({ status: "healthy", timestamp: new Date().toISOString() });
+  });
 
   app.get("/api/health", (req: Request, res: Response) => {
     console.log("API health check accessed");

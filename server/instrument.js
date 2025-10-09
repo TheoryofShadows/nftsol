@@ -1,6 +1,6 @@
 // Import with `import * as Sentry from "@sentry/node"` if you are using ESM
-const Sentry = require("@sentry/node");
-const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+import * as Sentry from "@sentry/node";
+import { nodeProfilingIntegration } from "@sentry/profiling-node";
 
 // Initialize Sentry before everything else
 Sentry.init({
@@ -15,4 +15,4 @@ Sentry.init({
   environment: process.env.NODE_ENV || 'development',
 });
 
-module.exports = Sentry;
+export default Sentry;

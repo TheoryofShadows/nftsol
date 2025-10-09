@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
 import "./index.css";
 import { queryClient } from "./lib/queryClient";
+import { initPerformanceMonitoring, analyzeBundleSize } from "./utils/performance";
 
 // Buffer polyfill for browser compatibility
 import { Buffer } from 'buffer';
@@ -78,6 +79,14 @@ window.addEventListener('resize', handleResize, { passive: true });
 window.addEventListener('orientationchange', () => {
   setTimeout(setViewportHeight, 100);
 }, { passive: true });
+
+// Initialize performance monitoring
+initPerformanceMonitoring();
+
+// Analyze bundle size in development
+if (process.env.NODE_ENV === 'development') {
+  setTimeout(analyzeBundleSize, 2000);
+}
 
 // Cleanup function for development
 if (import.meta.hot) {
