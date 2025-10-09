@@ -21,6 +21,10 @@ const POPULAR_COLLECTIONS = [
 
 const toErrorMessage = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
+// Simple in-memory cache to reduce rate limits and latency
+const ME_CACHE = new Map<string, { ts: number; data: any }>();
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
 async function makeRequest(endpoint: string): Promise<any> {
   try {
     const url = `${MAGIC_EDEN_BASE_URL}${endpoint}`;
@@ -32,6 +36,12 @@ async function makeRequest(endpoint: string): Promise<any> {
       'Cache-Control': 'no-cache',
       ...(MAGIC_EDEN_API_KEY && { 'Authorization': `Bearer ${MAGIC_EDEN_API_KEY}` })
     };
+
+    // Serve from cache if fresh
+    const cached = ME_CACHE.get(url);
+    if (cached && Date.now() - cached.ts < CACHE_TTL_MS) {
+      return cached.data;
+    }
 
     const response = await fetch(url, {
       method: 'GET',
@@ -48,6 +58,7 @@ async function makeRequest(endpoint: string): Promise<any> {
 
     const data = await response.json();
     console.log(`Magic Eden data received:`, Object.keys(data));
+    ME_CACHE.set(url, { ts: Date.now(), data });
     return data;
   } catch (error) {
     const message = toErrorMessage(error);
@@ -62,6 +73,7 @@ export function setupMagicEdenRoutes(app: any) {
     try {
       const { symbol } = req.params;
       const stats = await makeRequest(`/collections/${symbol}/stats`);
+      res.set('Cache-Control', 'public, max-age=60');
       res.json(stats);
     } catch (error) {
       console.error("Failed to fetch collection stats:", error);
@@ -76,6 +88,7 @@ export function setupMagicEdenRoutes(app: any) {
       const { limit = 20, offset = 0 } = req.query;
 
       const activities = await makeRequest(`/collections/${symbol}/activities?offset=${offset}&limit=${limit}`);
+      res.set('Cache-Control', 'public, max-age=30');
       res.json(activities);
     } catch (error) {
       console.error("Failed to fetch collection activities:", error);
@@ -108,6 +121,7 @@ export function setupMagicEdenRoutes(app: any) {
         }
       }
 
+      res.set('Cache-Control', 'public, max-age=60');
       res.json(collectionsData);
     } catch (error) {
       console.error("Failed to fetch popular collections:", error);
@@ -177,6 +191,7 @@ export function setupMagicEdenRoutes(app: any) {
         marketplaceNFTs.push(...getFallbackNFTs());
       }
 
+      res.set('Cache-Control', 'public, max-age=30');
       res.json({
         nfts: marketplaceNFTs,
         total: marketplaceNFTs.length,
