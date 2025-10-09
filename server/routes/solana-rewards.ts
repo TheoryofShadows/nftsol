@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { BN } from "@coral-xyz/anchor";
+import { BN } from "bn.js";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getAssociatedTokenAddress } from "@solana/spl-token";
 import { getSolanaRewardsService } from "../solana-rewards-provider";
 
 const router = Router();
