@@ -12,7 +12,7 @@ import type { Wallet } from "@coral-xyz/anchor";
 
 let servicePromise: Promise<SolanaRewardsService> | null = null;
 
-const DEFAULT_RPC = process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com";
+const DEFAULT_RPC = process.env.SOLANA_RPC_URL ?? process.env.VITE_SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com";
 const DEFAULT_REWARD_VAULT = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J";
 const DEFAULT_STAKING = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E";
 const DEFAULT_ESCROW = "8um9wXkGXVuxs9jVCpt3DrzkmMAiLDKrKkaHSLyPqPcX";

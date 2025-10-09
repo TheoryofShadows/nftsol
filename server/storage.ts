@@ -1,10 +1,11 @@
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import path from "node:path";
+import crypto from "node:crypto";
 import { Request } from "express";
 import { sql, eq } from "drizzle-orm";
 import { db } from "./db";
-import { users, nfts } from "@shared/schema";
+import { users, nfts, type User } from "@shared/schema";
 
 const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
 async function ensureDir() { await fsp.mkdir(UPLOAD_DIR, { recursive: true }); }
@@ -23,31 +24,68 @@ export const storage = {
     return this.save(buf, f.originalname || f.name || `upload-${Date.now()}`);
   },
   async getUser(id: string) {
-    return db.query.users.findFirst({ where: eq(users.id, id) });
+    if (db) {
+      return db.query.users.findFirst({ where: eq(users.id, id) });
+    }
+    // In-memory fallback
+    const u = memory.users.find((u) => u.id === id);
+    return u ? { ...u } : null;
   },
   async getUserByUsername(username: string) {
-    return db.query.users.findFirst({ where: eq(users.username, username) });
+    if (db) {
+      return db.query.users.findFirst({ where: eq(users.username, username) });
+    }
+    // In-memory fallback
+    const u = memory.users.find((u) => u.username === username);
+    return u ? { ...u } : null;
   },
   async createUser(data: { id?: string; username: string; password: string; role: string }) {
-    const [created] = await db
-      .insert(users)
-      .values(data)
-      .returning();
-    return created;
+    if (db) {
+      const [created] = await db
+        .insert(users)
+        .values(data)
+        .returning();
+      return created;
+    }
+    // In-memory fallback
+    const created: User = {
+      id: data.id || crypto.randomUUID(),
+      username: data.username,
+      password: data.password,
+      role: data.role || "user",
+    } as User;
+    memory.users.push(created);
+    return { ...created };
   },
   async getAllStats() {
-    const [userCount] = await db
-      .select({ totalUsers: sql<number>`count(*)::int` })
-      .from(users);
+    if (db) {
+      const [userCount] = await db
+        .select({ totalUsers: sql<number>`count(*)::int` })
+        .from(users);
 
-    const [listedCount] = await db
-      .select({ totalListed: sql<number>`count(*)::int` })
-      .from(nfts)
-      .where(eq(nfts.status, 'listed'));
+      const [listedCount] = await db
+        .select({ totalListed: sql<number>`count(*)::int` })
+        .from(nfts)
+        .where(eq(nfts.status, 'listed'));
 
+      return {
+        totalUsers: userCount?.totalUsers ?? 0,
+        totalListed: listedCount?.totalListed ?? 0,
+      };
+    }
+    // In-memory fallback
     return {
-      totalUsers: userCount?.totalUsers ?? 0,
-      totalListed: listedCount?.totalListed ?? 0,
+      totalUsers: memory.users.length,
+      totalListed: memory.nfts.filter((n) => n.status === 'listed').length,
     };
   },
+};
+
+// Simple in-memory store for development when DATABASE_URL is not set
+const memory: {
+  users: Array<Pick<User, 'id' | 'username' | 'password' | 'role'>>;
+  nfts: Array<{ id: string; status: string }>;
+} = {
+  users: [],
+  nfts: [],
 };

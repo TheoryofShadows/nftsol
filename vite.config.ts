@@ -22,10 +22,21 @@ export default defineConfig({
   build: {
     outDir: distDir,
     emptyOutDir: true,
+    sourcemap: process.env.NODE_ENV !== 'production',
+    chunkSizeWarningLimit: 900,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          recharts: ['recharts'],
+          wallet: ['@solana/wallet-adapter-react', '@solana/wallet-adapter-react-ui', '@solana/wallet-adapter-wallets'],
+        },
+      },
+    },
   },
   define: {
     global: 'globalThis',
-    'process.env': {},
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
 });
 

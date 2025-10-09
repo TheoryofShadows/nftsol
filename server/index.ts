@@ -6,6 +6,7 @@ import "./instrument";
 import * as Sentry from "@sentry/node";
 
 import express, { type Request, type Response, type NextFunction } from "express";
+import compression from "compression";
 import { registerRoutes } from "./routes";
 import { setupNFTRoutes } from "./nft-routes";
 import { setupRecommendationRoutes } from "./recommendation-engine";
@@ -33,6 +34,7 @@ app.set("trust proxy", true);
 
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false, limit: "50mb" }));
+app.use(compression());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("Connection", "keep-alive");
@@ -73,11 +75,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 (async () => {
-  const requiredEnvVars = ["DATABASE_URL"];
-  const missing = requiredEnvVars.filter((env) => !process.env[env]);
-  if (missing.length > 0) {
-    console.error("Missing required environment variables:", missing);
-    process.exit(1);
+  // Only require database in production; allow dev to run without DB
+  if (process.env.NODE_ENV === "production") {
+    const requiredEnvVars = ["DATABASE_URL"];
+    const missing = requiredEnvVars.filter((env) => !process.env[env]);
+    if (missing.length > 0) {
+      console.error("Missing required environment variables:", missing);
+      process.exit(1);
+    }
+  } else if (!process.env.DATABASE_URL) {
+    console.warn("[startup] DATABASE_URL not set. Running with in-memory storage.");
   }
 
   const { setupPricingRoutes } = await import("./pricing-analytics");
@@ -174,12 +181,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     });
   });
 
+  // Apply security middleware early and enable rate limiting in production
   app.use(helmetConfig);
   app.use(corsConfig);
   app.use(securityHeaders);
+  if (process.env.NODE_ENV === "production") app.use(generalLimiter);
   app.use(requestLogger);
   app.use(securityLogger);
-  // if (process.env.NODE_ENV === "production") app.use(generalLimiter);
   app.use(sanitizeInput);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -201,6 +209,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     fs.mkdirSync(uploadsDir, { recursive: true });
   }
   app.use("/uploads", express.static(uploadsDir));
+
+  // Serve client in production
+  if (process.env.NODE_ENV === "production") {
+    const { serveStatic } = await import("./vite");
+    try {
+      serveStatic(app);
+    } catch (e) {
+      console.warn("Static serve unavailable:", (e as Error).message);
+    }
+  }
 
   const PORT = parseInt(process.env.PORT || "3001", 10);
   const server = app.listen(PORT, "0.0.0.0", () => {

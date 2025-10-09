@@ -71,7 +71,7 @@ export function setupPricingRoutes(app: Express) {
   app.get("/api/pricing/trends", async (req, res) => {
     try {
       const { timeframe = '30d' } = req.query;
-      const trends = await getMarketTrends(timeframe as string);
+      const trends = db ? await getMarketTrends(timeframe as string) : [];
       res.json(trends);
     } catch (error) {
       console.error("Failed to get market trends:", error);
@@ -90,6 +90,9 @@ async function generatePricingSuggestions(
   cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
 
   // Get recent sales data
+  if (!db) {
+    return generateFallbackAnalytics();
+  }
   const recentSales = await db
     .select({
       price: sql<number>`CAST(${nfts.price} AS DECIMAL)`,
@@ -278,6 +281,7 @@ function extractKeywords(name: string, description: string): string[] {
 }
 
 async function findSimilarNFTs(keywords: string[], collection?: string) {
+  if (!db) return [];
   if (collection) {
     return await db
       .select()
@@ -296,6 +300,7 @@ async function findSimilarNFTs(keywords: string[], collection?: string) {
 }
 
 async function getMarketTrends(timeframe: string) {
+  if (!db) return [] as any[];
   const daysAgo = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
   const trends = [];
   

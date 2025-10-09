@@ -114,6 +114,7 @@ export function setupPublicAPIRoutes(app: Express) {
 
       const whereClause = filters.length > 1 ? and(...filters) : filters[0];
 
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const baseQuery = db.select().from(nfts).where(whereClause);
       const sortKey = typeof sortBy === 'string' ? sortBy : 'newest';
       const orderedQuery = (() => {
@@ -157,6 +158,7 @@ export function setupPublicAPIRoutes(app: Express) {
   // Public collections API
   app.get("/api/public/collections", (req, res, next) => rateLimit(req, res, next), async (req: Request, res: Response) => {
     try {
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const collections = await db
         .select({
           collection: nfts.collection,
@@ -194,6 +196,7 @@ export function setupPublicAPIRoutes(app: Express) {
       const offset = (pageNum - 1) * limitNum;
 
       // Get collection stats
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const [stats] = await db
         .select({
           collection: nfts.collection,
@@ -261,6 +264,7 @@ export function setupPublicAPIRoutes(app: Express) {
       }
 
       // Get trending based on recent activity and views (simulated)
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const trending = await db
         .select({
           nft: nfts,
@@ -291,6 +295,7 @@ export function setupPublicAPIRoutes(app: Express) {
       const { address } = req.params;
       
       // Get creator stats
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const [creatorStats] = await db
         .select({
           totalCreated: sql`COUNT(*)`,
@@ -329,6 +334,7 @@ export function setupPublicAPIRoutes(app: Express) {
   app.get("/api/public/stats", (req, res, next) => rateLimit(req, res, next), async (req: Request, res: Response) => {
     try {
       // Get platform-wide statistics
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const [platformStats] = await db
         .select({
           totalNFTs: sql`COUNT(*)`,
@@ -370,6 +376,7 @@ export function setupPublicAPIRoutes(app: Express) {
     try {
       const { mintAddress } = req.params;
       
+      if (!db) return res.status(503).json({ error: "Database not configured" });
       const priceHistory = await db
         .select({
           price: nftTransactions.price,
