@@ -65,7 +65,18 @@ export function useSolanaWallet() {
 
   const handleConnect = useCallback(async () => {
     try {
-      // Simple connection simulation - in real app this would use wallet adapter
+      // Prefer real wallet if available (Phantom/standard wallet)
+      const provider: any = (window as any).solana || (window as any).phantom?.solana;
+      if (provider?.isPhantom || provider?.connect) {
+        const resp = await provider.connect();
+        const pk = new PublicKey(resp.publicKey?.toString?.() || resp.publicKey);
+        setPublicKey(pk);
+        setConnected(true);
+        await fetchBalance();
+        return;
+      }
+
+      // Fallback for environments without wallet
       const mockPublicKey = new PublicKey("11111111111111111111111111111112");
       setPublicKey(mockPublicKey);
       setConnected(true);
@@ -77,7 +88,7 @@ export function useSolanaWallet() {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast, fetchBalance]);
 
   return {
     publicKey,

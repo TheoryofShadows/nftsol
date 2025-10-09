@@ -70,9 +70,13 @@ export const helmetConfig = helmet({
 
 // CORS configuration
 export const corsConfig = cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com', 'https://nftsol.app'] 
-    : ['http://localhost:5173', 'http://localhost:5000'],
+  origin: (origin, callback) => {
+    const devOrigins = ['http://localhost:5173', 'http://localhost:5000'];
+    const prodOrigins = (process.env.CORS_ORIGINS || 'https://nftsol.app').split(',');
+    const allowList = process.env.NODE_ENV === 'production' ? prodOrigins : devOrigins;
+    if (!origin || allowList.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],

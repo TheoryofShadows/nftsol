@@ -43,7 +43,7 @@ class AIEnhancementService {
     // - Remove.bg for background removal
     // - Upscayl for upscaling
     
-    const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
+    const baseUrl = process.env.BASE_URL || `http://127.0.0.1:${process.env.PORT || 3001}`;
     const enhancedImageUrl = `${baseUrl}/uploads/${path.basename(imagePath)}`;
     
     const enhancements = {

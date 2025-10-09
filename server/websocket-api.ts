@@ -8,7 +8,12 @@ import { desc, eq } from "drizzle-orm";
 export function setupWebSocketAPI(httpServer: Server) {
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.NODE_ENV === "production" ? false : ["http://localhost:5173", "http://localhost:3000"],
+      origin: (_origin, callback) => {
+        if (process.env.NODE_ENV === 'production') return callback(null, true);
+        const devOrigins = ["http://localhost:5173", "http://localhost:3000"];
+        if (!_origin || devOrigins.includes(_origin)) return callback(null, true);
+        return callback(new Error('Not allowed by CORS'));
+      },
       methods: ["GET", "POST"]
     }
   });

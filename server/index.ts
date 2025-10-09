@@ -6,6 +6,8 @@ import "./instrument";
 import * as Sentry from "@sentry/node";
 
 import express, { type Request, type Response, type NextFunction } from "express";
+import compression from "compression";
+import hpp from "hpp";
 import { registerRoutes } from "./routes";
 import { setupNFTRoutes } from "./nft-routes";
 import { setupRecommendationRoutes } from "./recommendation-engine";
@@ -175,11 +177,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   });
 
   app.use(helmetConfig);
+  app.use(hpp());
+  app.use(compression());
   app.use(corsConfig);
   app.use(securityHeaders);
   app.use(requestLogger);
   app.use(securityLogger);
-  // if (process.env.NODE_ENV === "production") app.use(generalLimiter);
+  if (process.env.NODE_ENV === "production") app.use(generalLimiter);
   app.use(sanitizeInput);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
