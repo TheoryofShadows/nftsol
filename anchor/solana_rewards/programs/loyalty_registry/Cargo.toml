@@ -1,0 +1,20 @@
+[package]
+name = "loyalty_registry"
+version = "0.1.0"
+edition = "2021"
+description = "Anchor program tracking cross-marketplace loyalty tiers."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "loyalty_registry"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true }

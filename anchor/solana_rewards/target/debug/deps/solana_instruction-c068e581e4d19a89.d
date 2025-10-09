@@ -1,0 +1,10 @@
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/solana_instruction-c068e581e4d19a89.d: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/account_meta.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/error.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/syscalls.rs
+
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/libsolana_instruction-c068e581e4d19a89.rlib: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/account_meta.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/error.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/syscalls.rs
+
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/libsolana_instruction-c068e581e4d19a89.rmeta: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/account_meta.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/error.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/syscalls.rs
+
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/lib.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/account_meta.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/error.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/solana-instruction-2.3.0/src/syscalls.rs:

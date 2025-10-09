@@ -1,0 +1,34 @@
+[build]
+  command = "npm run build:netlify"
+  publish = "client/dist"
+  environment = { NODE_ENV = "production", NODE_VERSION = "18" }
+
+[dev]
+  command = "npm run dev"
+  port = 8888
+  targetPort = 5173
+
+[context.production.environment]
+  VITE_API_BASE_URL = "https://your-backend-domain.com"
+  VITE_WS_URL = "wss://your-backend-domain.com"
+  VITE_SOLANA_NETWORK = "mainnet-beta"
+  VITE_SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+  VITE_SOLANA_WS_URL = "wss://api.mainnet-beta.solana.com"
+  VITE_REWARDS_VAULT_PROGRAM_ID = "your-rewards-vault-program-id"
+  VITE_STAKING_PROGRAM_ID = "your-staking-program-id"
+  VITE_ESCROW_PROGRAM_ID = "your-escrow-program-id"
+  VITE_LOYALTY_PROGRAM_ID = "your-loyalty-program-id"
+  VITE_CLOUT_TOKEN_MINT = "your-clout-token-mint-address"
+  VITE_CLOUT_TOKEN_DECIMALS = "9"
+  VITE_HELIUS_API_KEY = "your-helius-api-key"
+  VITE_MORALIS_API_KEY = "your-moralis-api-key"
+  VITE_MAGIC_EDEN_API_KEY = "your-magic-eden-api-key"
+  VITE_QUICKNODE_API_KEY = "your-quicknode-api-key"
+  VITE_SENTRY_DSN = "your-sentry-dsn"
+  VITE_GOOGLE_ANALYTICS_ID = "your-ga-id"
+  VITE_ENABLE_AI_FEATURES = "true"
+  VITE_ENABLE_SOCIAL_TRADING = "true"
+  VITE_ENABLE_CLOUT_STAKING = "true"
+  VITE_ENABLE_ACHIEVEMENTS = "true"
+  VITE_DEBUG_MODE = "false"
+  VITE_MOCK_DATA = "false"

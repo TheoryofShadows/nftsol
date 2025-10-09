@@ -1,0 +1,23 @@
+[package]
+name = "clout_staking"
+version = "0.1.0"
+edition = "2021"
+description = "Anchor program governing CLOUT staking pools."
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "clout_staking"
+
+[features]
+default = []
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-spl = { workspace = true }
+spl-token = { workspace = true }
+rewards_vault = { path = "../rewards_vault", features = ["no-entrypoint", "cpi"] }

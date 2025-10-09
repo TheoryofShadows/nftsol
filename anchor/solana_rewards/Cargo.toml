@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = [
+  "programs/rewards_vault",
+  "programs/clout_staking",
+  "programs/market_escrow",
+  "programs/loyalty_registry"
+]
+
+[workspace.dependencies]
+anchor-lang = "0.31.1"
+anchor-spl = "0.31.1"
+spl-token = { version = "4.0.2", features = ["no-entrypoint"] }
+spl-associated-token-account = { version = "6.0.0", features = ["no-entrypoint"] }
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+panic = "abort"
