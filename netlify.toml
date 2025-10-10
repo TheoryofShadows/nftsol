@@ -127,3 +127,7 @@
 [context.branch-deploy]
   command = "npm run build:netlify"
 >>>>>>> 6f2378bf163d7956a3066fb4b4bfb3d6afad7766
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
