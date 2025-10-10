@@ -1,0 +1,18 @@
+diff --git a/node_modules/fast-redact/lib/parse.js b/node_modules/fast-redact/lib/parse.js
+index abdb9e4..4a9f7b2 100644
+--- a/node_modules/fast-redact/lib/parse.js
++++ b/node_modules/fast-redact/lib/parse.js
+@@ -11,8 +11,11 @@ function parse ({ paths }) {
+     var path = strPath.match(rx).map((p) => p.replace(/'|"|`/g, ''))
+     const leadingBracket = strPath[0] === '['
+     path = path.map((p) => {
+-      if (p[0] === '[') return p.substr(1, p.length - 2)
+-      else return p
++      const cleaned = p[0] === '[' ? p.substr(1, p.length - 2) : p
++      if (cleaned === '__proto__' || cleaned === 'prototype' || cleaned === 'constructor') {
++        throw new Error(`fast-redact - prototype pollution path segment detected: ${cleaned}`)
++      }
++      return cleaned
+     })
+     const star = path.indexOf('*')
+     if (star > -1) {

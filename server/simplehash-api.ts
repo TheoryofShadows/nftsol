@@ -1,4 +1,3 @@
-
 import fetch from 'node-fetch';
 
 interface SimpleHashNFT {
@@ -31,6 +30,10 @@ interface SimpleHashNFT {
   };
 }
 
+type SimpleHashCollectionResponse = {
+  nfts?: SimpleHashNFT[];
+};
+
 class SimpleHashService {
   private apiKey: string;
   private baseUrl = 'https://api.simplehash.com/api/v0';
@@ -46,16 +49,16 @@ class SimpleHashService {
         {
           headers: {
             'X-API-KEY': this.apiKey,
-            'accept': 'application/json',
-          }
-        }
+            accept: 'application/json',
+          },
+        },
       );
 
       if (!response.ok) {
         throw new Error(`SimpleHash API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SimpleHashCollectionResponse;
       return data.nfts || [];
     } catch (error) {
       console.error('SimpleHash collection fetch error:', error);
@@ -70,17 +73,16 @@ class SimpleHashService {
         {
           headers: {
             'X-API-KEY': this.apiKey,
-            'accept': 'application/json',
-          }
-        }
+            accept: 'application/json',
+          },
+        },
       );
 
       if (!response.ok) {
         throw new Error(`SimpleHash API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      return data;
+      return (await response.json()) as SimpleHashNFT;
     } catch (error) {
       console.error('SimpleHash metadata fetch error:', error);
       return null;
@@ -94,16 +96,16 @@ class SimpleHashService {
         {
           headers: {
             'X-API-KEY': this.apiKey,
-            'accept': 'application/json',
-          }
-        }
+            accept: 'application/json',
+          },
+        },
       );
 
       if (!response.ok) {
         throw new Error(`SimpleHash API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as SimpleHashCollectionResponse;
       return data.nfts || [];
     } catch (error) {
       console.error('SimpleHash wallet NFTs fetch error:', error);
@@ -111,24 +113,22 @@ class SimpleHashService {
     }
   }
 
-  // Webhook handler for real-time updates
   async handleWebhook(webhookData: any) {
     try {
       const { event_type, data } = webhookData;
-      
+
       switch (event_type) {
         case 'nft.transfer':
           console.log('NFT transferred:', data);
-          // Update ownership in your database
           break;
         case 'nft.sale':
           console.log('NFT sold:', data);
-          // Update price history and market data
           break;
         case 'nft.listing':
           console.log('NFT listed:', data);
-          // Update marketplace listings
           break;
+        default:
+          console.log('Unhandled SimpleHash webhook event:', event_type);
       }
     } catch (error) {
       console.error('Webhook processing error:', error);
@@ -137,3 +137,4 @@ class SimpleHashService {
 }
 
 export const simpleHashService = new SimpleHashService();
+

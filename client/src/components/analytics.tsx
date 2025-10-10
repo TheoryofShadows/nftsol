@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 // Only initialize in production
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = import.meta.env.MODE === 'production';
 const GA_MEASUREMENT_ID = 'G-GQJWV3M3QL';
 
 declare global {

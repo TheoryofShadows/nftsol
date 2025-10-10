@@ -1,0 +1,30 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'io.sentry:sentry-gradle-plugin:5.13.0'
+  }
+}
+
+plugins {
+  id 'java'
+  id 'io.sentry.jvm.gradle' version '5.13.0' apply false
+}
+
+apply plugin: 'io.sentry.jvm.gradle'
+
+sentry {
+  includeSourceContext = true
+  org = "nftsol"
+  projectName = "java"
+  authToken = System.getenv("SENTRY_AUTH_TOKEN")
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'io.sentry:sentry-spring-boot-starter:7.8.0'
+}

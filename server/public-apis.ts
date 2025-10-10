@@ -2,7 +2,9 @@
 import { Express, Request, Response } from "express";
 import { db } from "./db";
 import { nfts, nftTransactions, userNftStats } from "@shared/nft-schema";
-import { eq, desc, sql, and, gte, like, or } from "drizzle-orm";
+import { eq, desc, sql, and, gte, like, or, lte } from "drizzle-orm";
+import type { SQL } from "drizzle-orm";
+import type { ParsedQs } from "qs";
 
 // Rate limiting for public APIs
 const rateLimitMap = new Map();
@@ -35,63 +37,99 @@ function rateLimit(req: Request, res: Response, next: any, limit = 100) {
   next();
 }
 
+type SortOption = "newest" | "oldest" | "price_low" | "price_high";
+const SORT_OPTIONS: ReadonlySet<SortOption> = new Set(["newest", "oldest", "price_low", "price_high"]);
+
+const normalizeQueryValue = (
+  value: string | string[] | ParsedQs | ParsedQs[] | undefined,
+  fallback: string,
+): string => {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    for (const candidate of value) {
+      if (typeof candidate === "string") {
+        return candidate;
+      }
+    }
+  }
+
+  return fallback;
+};
+
 export function setupPublicAPIRoutes(app: Express) {
   // Public NFT search with advanced filters
   app.get("/api/public/nfts/search", (req, res, next) => rateLimit(req, res, next, 50), async (req: Request, res: Response) => {
     try {
-      const { 
-        q, 
-        collection, 
-        creator, 
-        minPrice, 
-        maxPrice, 
+      const {
+        q,
+        collection,
+        creator,
+        minPrice,
+        maxPrice,
         category,
-        sortBy = 'newest',
+        sortBy = "newest",
         page = 1,
-        limit = 20 
+        limit = 20,
       } = req.query;
 
-      const pageNum = parseInt(page as string);
-      const limitNum = Math.min(parseInt(limit as string), 100); // Max 100 items
+      const searchTerm = typeof q === "string" ? q : undefined;
+      const collectionFilter = typeof collection === "string" ? collection : undefined;
+      const creatorFilter = typeof creator === "string" ? creator : undefined;
+      const categoryFilter = typeof category === "string" ? category : undefined;
+      const minPriceFilter = typeof minPrice === "string" ? minPrice : undefined;
+      const maxPriceFilter = typeof maxPrice === "string" ? maxPrice : undefined;
+      const sortOption =
+        typeof sortBy === "string" && SORT_OPTIONS.has(sortBy as SortOption)
+          ? (sortBy as SortOption)
+          : "newest";
+      const pageParam = normalizeQueryValue(page, "1");
+      const limitParam = normalizeQueryValue(limit, "20");
+      const pageNum = Number.parseInt(pageParam ?? "1", 10) || 1;
+      const limitNum = Math.min(Number.parseInt(limitParam ?? "20", 10) || 20, 100); // Max 100 items
       const offset = (pageNum - 1) * limitNum;
 
-      let query = db.select().from(nfts).where(eq(nfts.status, 'listed'));
+      const filters: Array<SQL<unknown>> = [eq(nfts.status, "listed")];
 
       // Apply filters
-      if (q) {
-        query = query.where(
-          or(
-            like(nfts.name, `%${q}%`),
-            like(nfts.description, `%${q}%`)
-          )
-        );
+      if (searchTerm) {
+        filters.push(or(like(nfts.name, `%${searchTerm}%`), like(nfts.description, `%${searchTerm}%`)));
       }
 
-      if (collection) {
-        query = query.where(like(nfts.collection, `%${collection}%`));
+      if (collectionFilter) {
+        filters.push(like(nfts.collection, `%${collectionFilter}%`));
       }
 
-      if (creator) {
-        query = query.where(like(nfts.creator, `%${creator}%`));
+      if (creatorFilter) {
+        filters.push(like(nfts.creator, `%${creatorFilter}%`));
       }
 
-      if (category) {
-        query = query.where(eq(nfts.category, category as string));
+      if (categoryFilter) {
+        filters.push(eq(nfts.category, categoryFilter));
       }
 
-      if (minPrice) {
-        query = query.where(gte(nfts.price, minPrice as string));
+      if (minPriceFilter) {
+        filters.push(gte(nfts.price, minPriceFilter));
       }
+
+      if (maxPriceFilter) {
+        filters.push(lte(nfts.price, maxPriceFilter));
+      }
+
+      const combinedFilter = filters.length === 1 ? filters[0] : and(...filters);
+      let query = db.select().from(nfts).where(combinedFilter);
 
       // Sort options
-      switch (sortBy) {
-        case 'price_low':
+      switch (sortOption) {
+        case "price_low":
           query = query.orderBy(sql`CAST(${nfts.price} AS DECIMAL) ASC`);
           break;
-        case 'price_high':
+        case "price_high":
           query = query.orderBy(sql`CAST(${nfts.price} AS DECIMAL) DESC`);
           break;
-        case 'oldest':
+        case "oldest":
           query = query.orderBy(nfts.createdAt);
           break;
         default:
@@ -104,7 +142,7 @@ export function setupPublicAPIRoutes(app: Express) {
       const [totalCount] = await db
         .select({ count: sql`COUNT(*)` })
         .from(nfts)
-        .where(eq(nfts.status, 'listed'));
+        .where(combinedFilter);
 
       res.json({
         nfts: results,

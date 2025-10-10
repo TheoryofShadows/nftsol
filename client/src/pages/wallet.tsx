@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,9 +7,12 @@ import WalletConnect from "@/components/wallet-connect";
 import WalletDashboard from "@/components/wallet-dashboard";
 import PlatformWalletDashboard from "@/components/platform-wallet-dashboard";
 import WalletAnalytics from "@/components/wallet-analytics";
+import { useSolanaWallet } from "@/hooks/use-solana-wallet";
 
 export default function WalletPage() {
+  const [, setLocation] = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
+  const { walletAddress } = useSolanaWallet();
 
   useEffect(() => {
     // Get user ID from localStorage (set after login)
@@ -18,7 +21,7 @@ export default function WalletPage() {
       setUserId(storedUserId);
     } else {
       // If no user ID, redirect to auth page
-      window.location.href = '/auth';
+      setLocation('/auth');
     }
   }, []);
 
@@ -62,9 +65,9 @@ export default function WalletPage() {
               <div className="space-y-6">
                 <WalletDashboard userId={userId} />
                 {/* Add Solscan-powered wallet analytics if connected */}
-                {window.solana?.publicKey && (
+                {walletAddress && (
                   <WalletAnalytics 
-                    walletAddress={window.solana.publicKey.toString()} 
+                    walletAddress={walletAddress} 
                     showAnalytics={true}
                   />
                 )}

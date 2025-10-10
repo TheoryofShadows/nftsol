@@ -5,7 +5,7 @@ export interface PublicNFT {
   mint: string;
   name: string;
   image: string;
-  description: string;
+  description?: string;
   collection: string;
   creator: string;
   price?: number;
@@ -249,14 +249,20 @@ export function getFallbackNFTs(): PublicNFT[] {
 
 // Search NFTs by name or collection
 export function searchNFTs(nfts: PublicNFT[], query: string): PublicNFT[] {
-  if (!query) return nfts;
-  
-  const lowercaseQuery = query.toLowerCase();
-  return nfts.filter(nft => 
-    nft.name.toLowerCase().includes(lowercaseQuery) ||
-    nft.collection.toLowerCase().includes(lowercaseQuery) ||
-    nft.description.toLowerCase().includes(lowercaseQuery)
-  );
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return nfts;
+
+  return nfts.filter(nft => {
+    const name = nft.name?.toLowerCase() ?? '';
+    const collection = nft.collection?.toLowerCase() ?? '';
+    const description = nft.description?.toLowerCase() ?? '';
+
+    return (
+      name.includes(normalizedQuery) ||
+      collection.includes(normalizedQuery) ||
+      description.includes(normalizedQuery)
+    );
+  });
 }
 
 // Filter NFTs by collection

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
+import { simplifiedMintNFT, type SimplifiedNFTData } from '@/utils/simplified-nft-minting';
 import { 
   Upload, 
   Wand2, 
@@ -214,21 +215,86 @@ export function NFTMintingWizard() {
     }));
   };
 
-  // Mint NFT
+  // Mint NFT using the simplified mint flow that talks to our backend
   const mintNFT = async () => {
+    if (!uploadedFile) {
+      toast({
+        title: "Artwork Required",
+        description: "Please upload the artwork you want to mint.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!metadata.title.trim()) {
+      toast({
+        title: "Missing Title",
+        description: "Give your NFT a title before minting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!metadata.description.trim()) {
+      toast({
+        title: "Missing Description",
+        description: "Add a description so collectors know what your NFT is about.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!window.solana?.isConnected || !window.solana.publicKey) {
+      toast({
+        title: "Wallet Not Connected",
+        description: "Connect a wallet to sign the minting transaction.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const priceValue = Math.max(
+      0.01,
+      Number.isFinite(metadata.priceRange.suggested)
+        ? metadata.priceRange.suggested
+        : metadata.priceRange.min
+    );
+    const formattedAttributes = metadata.attributes
+      .map(attr => ({
+        trait_type: attr.trait_type.trim(),
+        value: attr.value.trim()
+      }))
+      .filter(attr => attr.trait_type && attr.value);
+
+    const nftData: SimplifiedNFTData = {
+      name: metadata.title.trim(),
+      description: metadata.description.trim(),
+      imageFile: uploadedFile,
+      price: priceValue.toFixed(2),
+      royalty: "5",
+      category: metadata.category || "art",
+      attributes: formattedAttributes.length ? formattedAttributes : undefined
+    };
+
     setIsMinting(true);
     try {
-      // Here you would integrate with your NFT minting service
-      // For now, we'll simulate the process
-      
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
+      const creatorWallet = window.solana.publicKey!.toString();
+      const result = await simplifiedMintNFT(nftData, creatorWallet);
+
+      if (!result.success) {
+        toast({
+          title: "Minting Failed",
+          description: result.error || "Unable to mint NFT right now.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       toast({
         title: "NFT Minted Successfully!",
-        description: "Your NFT has been created and is now available on the marketplace"
+        description: `Mint address: ${result.mintAddress ?? "pending"} | Listed for ${priceValue.toFixed(2)} SOL`
       });
-      
-      // Reset wizard
+
       setCurrentStep(1);
       setUploadedFile(null);
       setPreviewUrl('');
@@ -241,7 +307,10 @@ export function NFTMintingWizard() {
         tags: [],
         priceRange: { min: 0.1, max: 10, suggested: 1 }
       });
-      
+      setAdditionalContext('');
+      setNewAttribute({ trait_type: '', value: '' });
+      setNewTag('');
+      setShowAIPreview(false);
     } catch (error) {
       toast({
         title: "Minting Failed",

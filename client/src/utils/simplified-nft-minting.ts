@@ -4,6 +4,9 @@ export interface SimplifiedNFTData {
   imageFile: File | null;
   price: string;
   royalty: string;
+  collection?: string;
+  category?: string;
+  attributes?: Array<{ trait_type: string; value: string }>;
 }
 
 export interface NFTMintResult {
@@ -19,19 +22,18 @@ export async function simplifiedMintNFT(
   creatorWallet: string
 ): Promise<NFTMintResult> {
   try {
-    // Validate inputs
     if (!nftData.name.trim()) {
       return { success: false, error: "NFT name is required" };
     }
-    
+
     if (!nftData.description.trim()) {
       return { success: false, error: "NFT description is required" };
     }
-    
+
     if (!nftData.price || parseFloat(nftData.price) <= 0) {
       return { success: false, error: "Valid price is required" };
     }
-    
+
     if (!nftData.imageFile) {
       return { success: false, error: "Image file is required" };
     }
@@ -40,73 +42,81 @@ export async function simplifiedMintNFT(
       return { success: false, error: "Wallet not connected" };
     }
 
-    // Create FormData to include image file
     const formData = new FormData();
-    formData.append('name', nftData.name);
-    formData.append('description', nftData.description);
-    formData.append('price', nftData.price);
-    formData.append('royalty', nftData.royalty);
-    formData.append('creatorWallet', creatorWallet);
-    if (nftData.imageFile) {
-      formData.append('image', nftData.imageFile);
+    formData.append("name", nftData.name);
+    formData.append("description", nftData.description);
+    formData.append("price", nftData.price);
+    formData.append("royalty", nftData.royalty);
+    formData.append("creatorWallet", creatorWallet);
+
+    if (nftData.collection) {
+      formData.append("collection", nftData.collection);
     }
 
-    // Send to backend for minting with image upload
-    const response = await fetch('/api/nfts/mint', {
-      method: 'POST',
-      body: formData, // FormData automatically sets correct Content-Type
+    if (nftData.category) {
+      formData.append("category", nftData.category);
+    }
+
+    if (nftData.attributes?.length) {
+      formData.append("attributes", JSON.stringify(nftData.attributes));
+    }
+
+    if (nftData.imageFile) {
+      formData.append("image", nftData.imageFile);
+    }
+
+    const response = await fetch("/api/nfts/mint", {
+      method: "POST",
+      body: formData,
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      return { 
-        success: false, 
-        error: errorData.error || 'Failed to mint NFT' 
+      const errorData = (await response.json()) as { error?: string };
+      return {
+        success: false,
+        error: errorData.error || "Failed to mint NFT",
       };
     }
 
-    const result = await response.json();
-    
+    const result = (await response.json()) as NFTMintResult;
+
     if (result.success) {
       return {
         success: true,
         mintAddress: result.mintAddress,
         metadataUri: result.metadataUri,
-        signature: result.signature
-      };
-    } else {
-      return {
-        success: false,
-        error: result.error || 'NFT minting failed'
+        signature: result.signature,
       };
     }
 
-  } catch (error) {
-    console.error('NFT minting error:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: result.error || "NFT minting failed",
+    };
+  } catch (error) {
+    console.error("NFT minting error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
     };
   }
 }
 
-// Helper function to validate file
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
   const maxSize = 10 * 1024 * 1024; // 10MB
-  const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+  const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
 
   if (file.size > maxSize) {
-    return { valid: false, error: 'File size must be less than 10MB' };
+    return { valid: false, error: "File size must be less than 10MB" };
   }
 
   if (!allowedTypes.includes(file.type)) {
-    return { valid: false, error: 'File must be PNG, JPG, or GIF' };
+    return { valid: false, error: "File must be PNG, JPG, or GIF" };
   }
 
   return { valid: true };
 }
 
-// Helper function to estimate gas fees
 export function estimateMintingCosts(price: string) {
   const priceNum = parseFloat(price) || 0;
   const mintingFee = 0.01; // SOL
@@ -118,6 +128,7 @@ export function estimateMintingCosts(price: string) {
     platformFee,
     networkFee,
     total: mintingFee + networkFee,
-    sellerReceives: priceNum * 0.955 // Industry-leading 95.5% seller rate
+    sellerReceives: priceNum * 0.955,
   };
 }
+

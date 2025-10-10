@@ -1,10 +1,4 @@
 import { Connection, PublicKey, Keypair, Transaction } from '@solana/web3.js';
-import { 
-  createMint, 
-  getOrCreateAssociatedTokenAccount, 
-  mintTo, 
-  getMint 
-} from '@solana/spl-token';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,6 +14,15 @@ const INITIAL_SUPPLY = 1000000; // 1 million CLOUT tokens
 const TREASURY_ADDRESS = 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM';
 
 async function deployCLOUTToken() {
+  let splToken;
+  try {
+    splToken = await import('@solana/spl-token');
+  } catch (error) {
+    console.error('⚠️  @solana/spl-token is required to run this script.');
+    console.error('    Install it locally with: npm install @solana/spl-token');
+    throw error;
+  }
+  const { createMint, getOrCreateAssociatedTokenAccount, mintTo, getMint } = splToken;
   console.log('🚀 Starting CLOUT Token Deployment...');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   

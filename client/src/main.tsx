@@ -1,12 +1,17 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
 import "./index.css";
+import { queryClient } from "./lib/queryClient";
+import { SolanaWalletProvider } from "./components/solana-wallet-provider";
+import { validateConfig } from "./config/netlify";
 
 // Buffer polyfill for browser compatibility
-import { Buffer } from 'buffer'
-window.Buffer = Buffer
+import { Buffer } from 'buffer';
+if (typeof window !== 'undefined' && !(window as any).Buffer) {
+  (window as any).Buffer = Buffer;
+}
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -50,29 +55,6 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Enhanced Query Client with better error handling
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: (failureCount, error) => {
-        // Don't retry on 4xx errors
-        if (error && 'status' in error && (error.status as number) >= 400 && (error.status as number) < 500) {
-          return false;
-        }
-        return failureCount < 1; // Reduced retries for faster response
-      },
-      staleTime: 1000 * 60 * 10, // 10 minutes - longer cache
-      cacheTime: 1000 * 60 * 15, // 15 minutes - longer cache
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false, // Disable auto-refetch for better performance
-    },
-    mutations: {
-      retry: 0, // No retries for mutations
-    },
-  },
-});
-
 // Optimized mobile viewport handling
 function setViewportHeight() {
   try {
@@ -93,6 +75,14 @@ function handleResize() {
 // Set initial viewport height
 setViewportHeight();
 
+// Validate Netlify configuration
+if (import.meta.env.PROD) {
+  const configValid = validateConfig();
+  if (!configValid) {
+    console.warn('Netlify configuration validation failed. Some features may not work correctly.');
+  }
+}
+
 // Add optimized event listeners
 window.addEventListener('resize', handleResize, { passive: true });
 window.addEventListener('orientationchange', () => {
@@ -110,7 +100,10 @@ if (import.meta.hot) {
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <SolanaWalletProvider>
+        <App />
+      </SolanaWalletProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );
+

@@ -1,6 +1,5 @@
 
 import fetch from 'node-fetch';
-
 interface QuickNodeNFT {
   mint: string;
   name: string;
@@ -15,6 +14,16 @@ interface QuickNodeNFT {
   owner: string;
   price?: number;
 }
+
+type QuickNodeCollectionResponse = {
+  result?: {
+    nfts?: QuickNodeNFT[];
+  };
+};
+
+type QuickNodeMetadataResponse = {
+  result?: QuickNodeNFT;
+};
 
 class QuickNodeNFTService {
   private apiKey: string;
@@ -33,14 +42,14 @@ class QuickNodeNFTService {
           'X-API-KEY': this.apiKey,
           'Content-Type': 'application/json',
         },
-        params: { limit: limit.toString() }
+/* params removed; build URL with ?limit=... instead */
       });
 
       if (!response.ok) {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as QuickNodeCollectionResponse;
       return data.result?.nfts || [];
     } catch (error) {
       console.error('QuickNode NFT fetch error:', error);
@@ -62,7 +71,7 @@ class QuickNodeNFTService {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as QuickNodeMetadataResponse;
       return data.result || null;
     } catch (error) {
       console.error('QuickNode metadata fetch error:', error);
@@ -84,7 +93,7 @@ class QuickNodeNFTService {
         throw new Error(`QuickNode API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as QuickNodeCollectionResponse;
       return data.result?.nfts || [];
     } catch (error) {
       console.error('QuickNode wallet NFTs fetch error:', error);
@@ -94,3 +103,9 @@ class QuickNodeNFTService {
 }
 
 export const quickNodeService = new QuickNodeNFTService();
+
+
+
+
+
+

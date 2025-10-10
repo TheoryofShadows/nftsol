@@ -16,6 +16,7 @@ export const nfts = pgTable(
     price: decimal("price", { precision: 18, scale: 9 }), // SOL price (null if not for sale)
     royalty: decimal("royalty", { precision: 5, scale: 2 }).default("2.50"), // Royalty percentage
     collection: text("collection"),
+    category: text("category"),
     attributes: jsonb("attributes").$type<Array<{ trait_type: string; value: string | number }>>(),
     status: text("status").notNull().default("minted"), // minted, listed, sold, unlisted
     listedAt: timestamp("listed_at"),
@@ -30,6 +31,7 @@ export const nfts = pgTable(
       ownerIdx: index("owner_idx").on(table.owner),
       statusIdx: index("status_idx").on(table.status),
       collectionIdx: index("collection_idx").on(table.collection),
+      categoryIdx: index("category_idx").on(table.category),
     };
   }
 );

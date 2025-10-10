@@ -1,8 +1,6 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+﻿import { Connection, PublicKey } from '@solana/web3.js';
 import { quickNodeService } from './quicknode-api';
 import { simpleHashService } from './simplehash-api';
-import { moralisService } from './moralis-api';
-
 // Enhanced RPC endpoints including Alchemy
 const RPC_ENDPOINTS = [
   process.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
@@ -495,3 +493,6 @@ class EnhancedSolanaNFTService {
 }
 
 export const enhancedSolanaNFTService = new EnhancedSolanaNFTService();
+
+
+

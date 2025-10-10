@@ -1,4 +1,7 @@
+import { useLocation } from "wouter";
+
 export default function TrendingCollections() {
+  const [, setLocation] = useLocation();
   const collections = [
     {
       id: 1,
@@ -46,7 +49,7 @@ export default function TrendingCollections() {
             <div
               key={collection.id}
               className="bg-card-bg backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-solana-purple/50 transition-all duration-300 group cursor-pointer"
-              onClick={() => window.location.href = '/marketplace'}
+              onClick={() => setLocation('/marketplace')}
             >
               <div className="relative">
                 <img

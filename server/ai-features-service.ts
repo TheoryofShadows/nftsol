@@ -43,7 +43,7 @@ export interface AIChatbotResponse {
 }
 
 // OpenAI quota tracker
-const openaiCallTracker = {
+export const openaiCallTracker = {
   count: 0,
   resetTime: Date.now() + (60 * 1000), // Reset every minute
   dailyCount: 0,
@@ -51,7 +51,7 @@ const openaiCallTracker = {
 };
 
 // Conservative OpenAI limits (adjust based on your plan)
-const OPENAI_LIMITS = {
+export const OPENAI_LIMITS = {
   perMinute: 3, // Very conservative for free tier
   perDay: 100   // Adjust based on your quota
 };
@@ -161,9 +161,9 @@ export class AIFeaturesService {
           seoKeywords: [category.toLowerCase(), 'nft', 'solana', 'digital art', 'collectible'],
           marketingCopy: `Discover this exceptional ${category} NFT - ${title}. Limited availability on Solana blockchain.`,
           socialMediaCaptions: {
-            twitter: `🎨 New ${category} NFT: ${title} \n#NFT #Solana #DigitalArt`,
-            instagram: `✨ ${title} ✨\nNew ${category} NFT now available!\n#NFT #Solana #Art`,
-            discord: `🚀 Check out this amazing ${category} NFT: ${title}! Available now on our marketplace.`
+            twitter: `≡ƒÄ¿ New ${category} NFT: ${title} \n#NFT #Solana #DigitalArt`,
+            instagram: `Γ£¿ ${title} Γ£¿\nNew ${category} NFT now available!\n#NFT #Solana #Art`,
+            discord: `≡ƒÜÇ Check out this amazing ${category} NFT: ${title}! Available now on our marketplace.`
           },
           confidence: 0.6
         };

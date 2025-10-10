@@ -1,92 +1,88 @@
-import { PublicKey, Connection } from '@solana/web3.js';
-import { useCallback, useEffect, useState } from 'react';
-import { useToast } from './use-toast';
+import { useCallback, useEffect, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { useSolanaConnection } from "@/components/solana-wallet-provider";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { useToast } from "./use-toast";
 
 export function useSolanaWallet() {
-  const [connected, setConnected] = useState(false);
-  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const { toast } = useToast();
+  const { connection } = useSolanaConnection();
+  const {
+    publicKey,
+    connected,
+    connecting,
+    disconnect,
+    sendTransaction,
+    select,
+    wallets,
+  } = useWallet();
+  const { setVisible } = useWalletModal();
+
   const [balance, setBalance] = useState<number | null>(null);
-  
-  // Create connection instance
-  const connection = new Connection(
-    import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
-    'confirmed'
-  );
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch SOL balance
   const fetchBalance = useCallback(async () => {
-    if (publicKey && connected) {
-      try {
-        const lamports = await connection.getBalance(publicKey);
-        setBalance(lamports / 1000000000); // Convert lamports to SOL
-      } catch (error) {
-        console.error('Error fetching balance:', error);
-        setBalance(null);
-      }
-    } else {
+    if (!connected || !publicKey) {
       setBalance(null);
+      return;
     }
-  }, [publicKey, connected, connection]);
+    try {
+      setRefreshing(true);
+      const lamports = await connection.getBalance(publicKey);
+      setBalance(lamports / LAMPORTS_PER_SOL);
+    } catch (error) {
+      console.error("[useSolanaWallet] Failed to fetch balance:", error);
+      setBalance(null);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [connection, connected, publicKey]);
 
-  // Fetch balance when wallet connects or public key changes
   useEffect(() => {
-    fetchBalance();
+    void fetchBalance();
   }, [fetchBalance]);
 
-  // Show connection status toasts
   useEffect(() => {
     if (connected && publicKey) {
       toast({
-        title: "Wallet Connected! 🎉",
-        description: `Connected to ${publicKey.toString().slice(0, 4)}...${publicKey.toString().slice(-4)}`,
+        title: "Wallet connected",
+        description: `${publicKey.toBase58().slice(0, 4)}...${publicKey
+          .toBase58()
+          .slice(-4)}`,
       });
     }
   }, [connected, publicKey, toast]);
 
-  const handleDisconnect = useCallback(async () => {
-    try {
-      setConnected(false);
-      setPublicKey(null);
-      setBalance(null);
-      toast({
-        title: "Wallet Disconnected",
-        description: "Successfully disconnected from wallet",
-      });
-    } catch (error) {
-      console.error('Disconnect error:', error);
-      toast({
-        title: "Disconnect Error",
-        description: "Failed to disconnect wallet",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
+  const openModal = useCallback(() => {
+    setVisible(true);
+  }, [setVisible]);
 
-  const handleConnect = useCallback(async () => {
-    try {
-      // Simple connection simulation - in real app this would use wallet adapter
-      const mockPublicKey = new PublicKey("11111111111111111111111111111112");
-      setPublicKey(mockPublicKey);
-      setConnected(true);
-    } catch (error) {
-      console.error('Connect error:', error);
-      toast({
-        title: "Connection Error",
-        description: "Failed to connect wallet",
-        variant: "destructive",
-      });
+  const connectWallet = useCallback(() => {
+    if (!connected) {
+      setVisible(true);
     }
-  }, [toast]);
+  }, [connected, setVisible]);
+
+  const disconnectWallet = useCallback(async () => {
+    await disconnect();
+    setBalance(null);
+  }, [disconnect]);
 
   return {
+    connection,
     publicKey,
     connected,
+    connecting,
+    connect: connectWallet,
+    disconnect: disconnectWallet,
+    openModal,
+    selectWallet: select,
+    wallets,
+    sendTransaction,
     balance,
-    connection,
-    disconnect: handleDisconnect,
-    connect: handleConnect,
+    refreshingBalance: refreshing,
     refreshBalance: fetchBalance,
-    walletAddress: publicKey?.toString() || null,
+    walletAddress: publicKey?.toBase58() ?? null,
   };
 }

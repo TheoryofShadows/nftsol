@@ -6,49 +6,74 @@ import { insertUserSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { setupWalletRoutes } from "./wallet-system";
+import { setupWalletRoutes, getPlatformWalletStats } from "./wallet-system";
 import { setupNFTRoutes } from "./nft-routes";
 
+const normalizeIP = (ip?: string | null): string => {
+  if (!ip) return "";
+  const trimmed = ip.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("::ffff:")) {
+    return trimmed.slice(7);
+  }
+  if (trimmed === "::1") {
+    return "127.0.0.1";
+  }
+  return trimmed;
+};
+
 // Middleware to check if user is an admin with IP restriction
-const isAdmin = (req: any, res: any, next: any) => {
-  // Check IP restriction first
-  const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
-  const allowedIPs = process.env.ADMIN_ALLOWED_IPS?.split(',') || ['127.0.0.1', '::1'];
-
-  if (!allowedIPs.includes(clientIP)) {
-    console.warn(`[SECURITY] Admin access denied from unauthorized IP: ${clientIP}`);
-    return res.status(403).json({ error: 'Access denied: Unauthorized IP address' });
-  }
-
-  const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: No token provided' });
-  }
-
+const isAdmin = async (req: any, res: any, next: any) => {
   try {
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined in environment variables.");
+    const candidateIPs: string[] = [];
+    if (req.ip) candidateIPs.push(req.ip);
+    if (Array.isArray(req.ips)) candidateIPs.push(...req.ips);
+    if (req.connection?.remoteAddress) candidateIPs.push(req.connection.remoteAddress);
+    if (req.socket?.remoteAddress) candidateIPs.push(req.socket.remoteAddress);
+
+    const rawClientIP = candidateIPs.find(Boolean) || "";
+    const normalizedClientIP = normalizeIP(rawClientIP);
+
+    const allowedIPs = (process.env.ADMIN_ALLOWED_IPS?.split(",") || ["127.0.0.1", "::1"])
+      .map((ip: string) => ip.trim())
+      .filter(Boolean);
+
+    const allowedSet = new Set<string>();
+    for (const ip of allowedIPs) {
+      allowedSet.add(ip);
+      allowedSet.add(normalizeIP(ip));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as { userId: string, username: string };
+    if (allowedSet.size > 0 && !allowedSet.has(rawClientIP) && !allowedSet.has(normalizedClientIP)) {
+      console.warn(`[SECURITY] Admin access denied from unauthorized IP: ${rawClientIP}`);
+      return res.status(403).json({ error: "Access denied: Unauthorized IP address" });
+    }
 
-    storage.getUser(decoded.userId).then(user => {
-      if (!user || user.role !== 'admin') {
-        console.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${clientIP}`);
-        return res.status(403).json({ error: 'Forbidden: Insufficient privileges' });
-      }
+    const token = req.headers.authorization?.split(" ")[1];
 
-      console.log(`[SECURITY] Admin access granted to: ${user.username} from IP: ${clientIP}`);
-      req.user = user;
-      next();
-    }).catch(err => {
-      console.error("Error fetching user:", err);
-      return res.status(500).json({ error: 'Internal server error' });
-    });
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables.");
+      return res.status(500).json({ error: "Server configuration error" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as { userId: string; username: string };
+    const user = await storage.getUser(decoded.userId);
+
+    if (!user || user.role !== "admin") {
+      console.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${rawClientIP}`);
+      return res.status(403).json({ error: "Forbidden: Insufficient privileges" });
+    }
+
+    console.log(`[SECURITY] Admin access granted to: ${user.username} from IP: ${rawClientIP}`);
+    req.user = user;
+    next();
   } catch (error) {
-    console.error("JWT verification error:", error);
-    return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    console.error("Admin guard error:", error);
+    return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
 };
 
@@ -229,6 +254,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Setup wallet system routes
   setupWalletRoutes(app);
+  app.get("/api/wallet/platform/stats", isAdmin, (_req, res) => {
+    const stats = getPlatformWalletStats();
+    res.json(stats);
+  });
 
   // Setup NFT marketplace routes
   setupNFTRoutes(app);

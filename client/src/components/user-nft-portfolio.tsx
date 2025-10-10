@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ interface UserNFTPortfolioProps {
 }
 
 export default function UserNFTPortfolio({ walletAddress, onListNFT }: UserNFTPortfolioProps) {
+  const [, setLocation] = useLocation();
   const [nfts, setNfts] = useState<UserNFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -268,7 +270,7 @@ export default function UserNFTPortfolio({ walletAddress, onListNFT }: UserNFTPo
               You don't have any NFTs in your wallet yet. Create your first NFT to get started!
             </p>
             <Button 
-              onClick={() => window.location.href = '/create'}
+              onClick={() => setLocation('/create')}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               Create Your First NFT

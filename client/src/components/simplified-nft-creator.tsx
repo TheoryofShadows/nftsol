@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { simplifiedMintNFT, type SimplifiedNFTData } from "@/utils/simplified-nf
 import PricingSuggestions from "./pricing-suggestions";
 
 export default function SimplifiedNFTCreator() {
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState<SimplifiedNFTData>({
     name: "",
     description: "",
@@ -108,7 +110,7 @@ export default function SimplifiedNFTCreator() {
 
         // Navigate to marketplace
         setTimeout(() => {
-          window.location.href = '/marketplace';
+          setLocation('/marketplace');
         }, 2000);
 
       } else {

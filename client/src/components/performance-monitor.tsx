@@ -10,8 +10,9 @@ export default function PerformanceMonitor() {
         entries.forEach((entry) => {
           if (entry.entryType === 'navigation') {
             const navEntry = entry as PerformanceNavigationTiming;
-            if (navEntry.loadEventEnd - navEntry.navigationStart > 3000) {
-              console.warn('Slow page load detected:', navEntry.loadEventEnd - navEntry.navigationStart, 'ms');
+            const navigationStart = navEntry.startTime || 0;
+            if (navEntry.loadEventEnd - navigationStart > 3000) {
+              console.warn('Slow page load detected:', navEntry.loadEventEnd - navigationStart, 'ms');
             }
           }
         });
@@ -40,3 +41,5 @@ export default function PerformanceMonitor() {
 
   return null;
 }
+
+

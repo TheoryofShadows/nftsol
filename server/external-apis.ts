@@ -1,9 +1,6 @@
 
 import { Express, Request, Response } from "express";
-
-// Rate limiting tracker for external APIs
-const apiCallTracker = new Map();
-const resetInterval = 60 * 1000; // 1 minute
+import { OPENAI_LIMITS, openaiCallTracker } from "./ai-features-service";
 
 // API Limits per service (conservative estimates)
 const API_LIMITS = {
@@ -15,38 +12,45 @@ const API_LIMITS = {
   birdeye: { perMinute: 5, perHour: 300 } // Requires API key
 };
 
-function checkRateLimit(service: string): boolean {
+type ExternalService = keyof typeof API_LIMITS;
+
+interface RateLimitCounter {
+  count: number;
+  resetTime: number;
+}
+
+const minuteIntervalMs = 60 * 1000;
+const hourIntervalMs = minuteIntervalMs * 60;
+
+// Rate limiting tracker for external APIs
+const apiCallTracker = new Map<string, RateLimitCounter>();
+
+function ensureCounter(key: string, durationMs: number, now: number): RateLimitCounter {
+  const existing = apiCallTracker.get(key);
+  if (existing && now <= existing.resetTime) {
+    return existing;
+  }
+
+  const counter: RateLimitCounter = { count: 0, resetTime: now + durationMs };
+  apiCallTracker.set(key, counter);
+  return counter;
+}
+
+function checkRateLimit(service: ExternalService): boolean {
   const now = Date.now();
   const key = `${service}_minute`;
   const hourKey = `${service}_hour`;
-  
-  if (!apiCallTracker.has(key)) {
-    apiCallTracker.set(key, { count: 0, resetTime: now + resetInterval });
-    apiCallTracker.set(hourKey, { count: 0, resetTime: now + (60 * resetInterval) });
-  }
-  
-  const minuteData = apiCallTracker.get(key);
-  const hourData = apiCallTracker.get(hourKey);
-  
-  // Reset counters if time window passed
-  if (now > minuteData.resetTime) {
-    minuteData.count = 0;
-    minuteData.resetTime = now + resetInterval;
-  }
-  
-  if (now > hourData.resetTime) {
-    hourData.count = 0;
-    hourData.resetTime = now + (60 * resetInterval);
-  }
-  
-  const limits = API_LIMITS[service as keyof typeof API_LIMITS];
-  if (!limits) return true;
-  
+
+  const minuteData = ensureCounter(key, minuteIntervalMs, now);
+  const hourData = ensureCounter(hourKey, hourIntervalMs, now);
+
+  const limits = API_LIMITS[service];
+
   // Check both minute and hour limits
   if (minuteData.count >= limits.perMinute || hourData.count >= limits.perHour) {
     return false;
   }
-  
+
   minuteData.count++;
   hourData.count++;
   return true;
@@ -349,18 +353,30 @@ export function setupExternalAPIRoutes(app: Express) {
       };
 
       // Get current usage stats
-      const usageStats: any = {};
-      for (const [service] of Object.entries(API_LIMITS)) {
+      interface UsageWindow {
+        used: number;
+        limit: number;
+      }
+
+      interface UsageSummary {
+        minute: UsageWindow;
+        hour?: UsageWindow;
+        day?: UsageWindow;
+        available: boolean;
+      }
+
+      const usageStats: Record<string, UsageSummary> = {};
+      for (const service of Object.keys(API_LIMITS) as ExternalService[]) {
         const minuteKey = `${service}_minute`;
         const hourKey = `${service}_hour`;
-        const minuteData = apiCallTracker.get(minuteKey) || { count: 0 };
-        const hourData = apiCallTracker.get(hourKey) || { count: 0 };
-        const limits = API_LIMITS[service as keyof typeof API_LIMITS];
-        
+        const minuteCount = apiCallTracker.get(minuteKey)?.count ?? 0;
+        const hourCount = apiCallTracker.get(hourKey)?.count ?? 0;
+        const limits = API_LIMITS[service];
+
         usageStats[service] = {
-          minute: { used: minuteData.count, limit: limits.perMinute },
-          hour: { used: hourData.count, limit: limits.perHour },
-          available: minuteData.count < limits.perMinute && hourData.count < limits.perHour
+          minute: { used: minuteCount, limit: limits.perMinute },
+          hour: { used: hourCount, limit: limits.perHour },
+          available: minuteCount < limits.perMinute && hourCount < limits.perHour
         };
       }
 
