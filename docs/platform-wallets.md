@@ -61,7 +61,8 @@ Each command should print `Signature verified`, confirming the format is correct
 ## 4. Configure the backend
 
 * The server now reads all wallet public keys from environment variables via `server/wallet-config.ts`.
-* Missing variables throw an error in production; during local development the code falls back to placeholder addresses and logs a warning.
+* Missing variables throw an error in production; during local development the code falls back to placeholder addresses, **but** the API marks them as unconfigured so the dashboard and on-chain flows refuse to use them.
+* The admin UI and purchase flow will now block transactions (and disable copy buttons) until real public keys are provided, preventing accidental transfers to placeholders.
 * No private keys are generated or stored. Any actions requiring a signature (e.g., monthly reward distribution) should be initiated from a secure workstation where Phantom can sign the transaction.
 
 Restart the backend after updating the environment. The health endpoint

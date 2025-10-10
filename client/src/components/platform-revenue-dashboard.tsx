@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, DollarSign, Users, Coins, ArrowUpRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { fetchPlatformWallets, type PlatformWalletMap } from "@/utils/platform-wallets";
 
 interface PlatformStats {
   totalRevenue: number;
@@ -38,6 +39,7 @@ export default function PlatformRevenueDashboard() {
     sellerEarnings: 0,
     cloutAwarded: 0
   });
+  const [wallets, setWallets] = useState<PlatformWalletMap | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { token } = useAuth();
   const authToken = token ?? (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
@@ -76,6 +78,12 @@ export default function PlatformRevenueDashboard() {
       if (interval) clearInterval(interval);
     };
   }, [authToken]);
+
+  useEffect(() => {
+    fetchPlatformWallets()
+      .then(setWallets)
+      .catch((error) => console.error('Failed to load platform wallets:', error));
+  }, []);
 
   const formatSOL = (amount: number) => `${amount.toFixed(4)} SOL`;
   const formatUSD = (amount: number) => `$${(amount * 200).toFixed(2)}`; // Assuming 1 SOL = $200
@@ -240,7 +248,12 @@ export default function PlatformRevenueDashboard() {
               <div>
                 <div className="font-medium text-white">Developer Wallet</div>
                 <div className="text-sm text-gray-400">Platform development and maintenance</div>
-                <div className="text-xs text-gray-500 mt-1">3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {wallets?.developer?.address ?? 'Not configured'}
+                  {!wallets?.developer?.configured && wallets?.developer?.placeholderAddress && (
+                    <span className="text-yellow-500"> (placeholder: {wallets.developer.placeholderAddress})</span>
+                  )}
+                </div>
               </div>
               <div className="text-right">
                 <div className="font-bold text-green-400">1.0%</div>
@@ -248,12 +261,17 @@ export default function PlatformRevenueDashboard() {
                 <div className="text-xs text-green-500">of total sales</div>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
               <div>
                 <div className="font-medium text-white">CLOUT Treasury</div>
                 <div className="text-sm text-gray-400">Community rewards and token distribution</div>
-                <div className="text-xs text-gray-500 mt-1">FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {wallets?.cloutTreasury?.address ?? 'Not configured'}
+                  {!wallets?.cloutTreasury?.configured && wallets?.cloutTreasury?.placeholderAddress && (
+                    <span className="text-yellow-500"> (placeholder: {wallets.cloutTreasury.placeholderAddress})</span>
+                  )}
+                </div>
               </div>
               <div className="text-right">
                 <div className="font-bold text-yellow-400">1.0%</div>

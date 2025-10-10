@@ -7,17 +7,10 @@ import {
   LAMPORTS_PER_SOL 
 } from "@solana/web3.js";
 import { solscanAPI, verifyNFTPurchase, getTransactionLink } from "./solscan-api";
+import { requireConfiguredWallet } from "./platform-wallets";
 
 const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const connection = new Connection(RPC_URL, 'confirmed');
-
-// Platform wallet addresses
-const PLATFORM_WALLETS = {
-  developer: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
-  cloutTreasury: 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',
-  marketplaceTreasury: 'MarketplaceTreasury123456789',
-  creatorEscrow: 'CreatorEscrow123456789'
-};
 
 export interface NFTPurchaseParams {
   buyerPublicKey: string;
@@ -38,6 +31,8 @@ export interface TransactionResult {
     platformFee: number;
     creatorRoyalty: number;
     totalPaid: number;
+    developerCommission?: number;
+    cloutTreasuryFee?: number;
   };
 }
 
@@ -50,15 +45,22 @@ export async function processNFTPurchase(params: NFTPurchaseParams): Promise<Tra
     const creatorRoyaltyRate = 0.025; // 2.5% creator royalty
     
     const platformFee = nftPrice * platformFeeRate;
+    const developerCommission = platformFee / 2;
+    const cloutTreasuryFee = platformFee / 2;
     const creatorRoyalty = creatorPublicKey ? nftPrice * creatorRoyaltyRate : 0;
     const sellerAmount = nftPrice * 0.955; // Exactly 95.5% to seller
-    
+
     const breakdown = {
       sellerAmount,
       platformFee,
       creatorRoyalty,
-      totalPaid: nftPrice
+      totalPaid: nftPrice,
+      developerCommission,
+      cloutTreasuryFee
     };
+
+    const developerWallet = await requireConfiguredWallet('developer');
+    const cloutTreasuryWallet = await requireConfiguredWallet('cloutTreasury');
 
     // Validate wallet connection
     if (!window.solana?.isConnected) {
@@ -84,12 +86,20 @@ export async function processNFTPurchase(params: NFTPurchaseParams): Promise<Tra
         })
       );
       
-      // Transfer platform commission (2%)
+      // Transfer platform commission split (1% developer, 1% CLOUT treasury)
       transaction.add(
         SystemProgram.transfer({
           fromPubkey: new PublicKey(buyerPublicKey),
-          toPubkey: new PublicKey(PLATFORM_WALLETS.developer),
-          lamports: Math.floor(platformFee * LAMPORTS_PER_SOL),
+          toPubkey: new PublicKey(developerWallet.address),
+          lamports: Math.floor(developerCommission * LAMPORTS_PER_SOL),
+        })
+      );
+
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: new PublicKey(buyerPublicKey),
+          toPubkey: new PublicKey(cloutTreasuryWallet.address),
+          lamports: Math.floor(cloutTreasuryFee * LAMPORTS_PER_SOL),
         })
       );
       

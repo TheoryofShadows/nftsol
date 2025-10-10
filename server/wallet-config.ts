@@ -15,6 +15,7 @@ interface WalletSpec {
 interface ResolvedWallet extends WalletSpec {
   publicKey: string;
   source: WalletSource;
+  configured: boolean;
 }
 
 const WALLET_SPECS: Record<PlatformWalletKey, WalletSpec> = {
@@ -47,14 +48,22 @@ const WALLET_SPECS: Record<PlatformWalletKey, WalletSpec> = {
 function resolveWallet(spec: WalletSpec): ResolvedWallet {
   const rawValue = process.env[spec.envVar]?.trim();
   if (rawValue) {
+    if (!validateSolanaAddress(rawValue)) {
+      throw new Error(
+        `[wallet-config] Invalid ${spec.label} address provided via ${spec.envVar}: ${rawValue}`,
+      );
+    }
+
     return {
       ...spec,
       publicKey: rawValue,
       source: "env",
+      configured: true,
     };
   }
 
-  const strict = process.env.NODE_ENV === "production";
+  const allowPlaceholders = process.env.ALLOW_PLACEHOLDER_WALLETS === "true";
+  const strict = process.env.NODE_ENV === "production" && !allowPlaceholders;
   if (strict) {
     throw new Error(
       `[wallet-config] Missing required env var ${spec.envVar} (${spec.label}). ` +
@@ -68,10 +77,17 @@ function resolveWallet(spec: WalletSpec): ResolvedWallet {
       "Update your .env file with the real Phantom wallet as soon as possible.",
   );
 
+  if (!validateSolanaAddress(spec.fallback)) {
+    throw new Error(
+      `[wallet-config] Placeholder address for ${spec.label} is invalid: ${spec.fallback}`,
+    );
+  }
+
   return {
     ...spec,
     publicKey: spec.fallback,
     source: "placeholder",
+    configured: false,
   };
 }
 
@@ -98,7 +114,7 @@ export function ensurePlatformWallets(strict = process.env.NODE_ENV === "product
 
   if (strict) {
     const placeholders = Object.entries(PLATFORM_WALLETS).filter(
-      ([, wallet]) => wallet.source !== "env",
+      ([, wallet]) => !wallet.configured,
     );
     if (placeholders.length > 0) {
       const details = placeholders
@@ -115,33 +131,25 @@ export function ensurePlatformWallets(strict = process.env.NODE_ENV === "product
 export function getWalletConfigStatus() {
   return {
     developer: {
-      configured:
-        PLATFORM_WALLETS.DEVELOPER.source === "env" &&
-        validateSolanaAddress(PLATFORM_WALLETS.DEVELOPER.publicKey),
+      configured: PLATFORM_WALLETS.DEVELOPER.configured,
       address: PLATFORM_WALLETS.DEVELOPER.publicKey,
       source: PLATFORM_WALLETS.DEVELOPER.source,
       purpose: PLATFORM_WALLETS.DEVELOPER.purpose,
     },
     cloutTreasury: {
-      configured:
-        PLATFORM_WALLETS.CLOUT_TREASURY.source === "env" &&
-        validateSolanaAddress(PLATFORM_WALLETS.CLOUT_TREASURY.publicKey),
+      configured: PLATFORM_WALLETS.CLOUT_TREASURY.configured,
       address: PLATFORM_WALLETS.CLOUT_TREASURY.publicKey,
       source: PLATFORM_WALLETS.CLOUT_TREASURY.source,
       purpose: PLATFORM_WALLETS.CLOUT_TREASURY.purpose,
     },
     marketplaceTreasury: {
-      configured:
-        PLATFORM_WALLETS.MARKETPLACE_TREASURY.source === "env" &&
-        validateSolanaAddress(PLATFORM_WALLETS.MARKETPLACE_TREASURY.publicKey),
+      configured: PLATFORM_WALLETS.MARKETPLACE_TREASURY.configured,
       address: PLATFORM_WALLETS.MARKETPLACE_TREASURY.publicKey,
       source: PLATFORM_WALLETS.MARKETPLACE_TREASURY.source,
       purpose: PLATFORM_WALLETS.MARKETPLACE_TREASURY.purpose,
     },
     creatorEscrow: {
-      configured:
-        PLATFORM_WALLETS.CREATOR_ESCROW.source === "env" &&
-        validateSolanaAddress(PLATFORM_WALLETS.CREATOR_ESCROW.publicKey),
+      configured: PLATFORM_WALLETS.CREATOR_ESCROW.configured,
       address: PLATFORM_WALLETS.CREATOR_ESCROW.publicKey,
       source: PLATFORM_WALLETS.CREATOR_ESCROW.source,
       purpose: PLATFORM_WALLETS.CREATOR_ESCROW.purpose,

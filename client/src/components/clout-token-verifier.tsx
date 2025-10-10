@@ -6,9 +6,9 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { 
-  Coins, 
-  ExternalLink, 
+import {
+  Coins,
+  ExternalLink,
   Copy, 
   Check, 
   RefreshCw, 
@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Wallet
 } from 'lucide-react';
+import { fetchPlatformWallets, type PlatformWalletMap } from '@/utils/platform-wallets';
 
 interface TokenInfo {
   deployed: boolean;
@@ -30,54 +31,30 @@ interface TokenInfo {
   reason?: string;
 }
 
-interface WalletStatus {
-  address: string;
-  configured: boolean;
-  balance?: number;
-  purpose?: string;
-}
-
-const PLATFORM_WALLETS = {
-  DEVELOPER: {
-    address: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
-    purpose: 'Development and platform operations'
-  },
-  CLOUT_TREASURY: {
-    address: 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',
-    purpose: 'CLOUT token distribution and rewards'
-  },
-  MARKETPLACE_TREASURY: {
-    address: 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs',
-    purpose: 'Marketplace transaction fees'
-  },
-  CREATOR_ESCROW: {
-    address: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
-    purpose: 'Creator royalty payments'
-  }
-};
-
 export function CLOUTTokenVerifier() {
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
-  const [walletStatuses, setWalletStatuses] = useState<{ [key: string]: WalletStatus }>({});
+  const [walletStatuses, setWalletStatuses] = useState<PlatformWalletMap | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [verificationStep, setVerificationStep] = useState(0);
   const [copiedItems, setCopiedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkTokenStatus();
-    initializeWalletStatuses();
+    loadWalletStatuses();
   }, []);
 
-  const initializeWalletStatuses = () => {
-    const statuses: Record<string, WalletStatus> = {};
-    Object.entries(PLATFORM_WALLETS).forEach(([key, wallet]) => {
-      statuses[key] = {
-        address: wallet.address,
-        configured: true,
-        purpose: wallet.purpose
-      };
-    });
-    setWalletStatuses(statuses);
+  const loadWalletStatuses = async () => {
+    try {
+      const wallets = await fetchPlatformWallets(true);
+      setWalletStatuses(wallets);
+    } catch (error) {
+      console.error('Failed to fetch platform wallets', error);
+      toast({
+        title: 'Wallet lookup failed',
+        description: 'Unable to load platform wallet configuration.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const checkTokenStatus = async () => {
@@ -131,7 +108,16 @@ export function CLOUTTokenVerifier() {
     }
   };
 
-  const copyToClipboard = async (text: string, itemKey: string) => {
+  const copyToClipboard = async (text: string | null | undefined, itemKey: string) => {
+    if (!text) {
+      toast({
+        title: 'Address unavailable',
+        description: 'Configure the wallet public key in the server environment before copying.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(text);
       setCopiedItems(prev => new Set(prev).add(itemKey));
@@ -371,31 +357,45 @@ export function CLOUTTokenVerifier() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">
-            {Object.entries(walletStatuses).map(([key, wallet]) => (
-              <div key={key} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium">{key.replace(/_/g, ' ')}</h4>
-                    <Badge variant={wallet.configured ? 'default' : 'destructive'}>
-                      {wallet.configured ? 'Configured' : 'Not Configured'}
-                    </Badge>
+            {walletStatuses &&
+              Object.entries(walletStatuses).map(([key, wallet]) => {
+                const label = key
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/^./, (ch) => ch.toUpperCase());
+                const copyTarget = wallet.address ?? undefined;
+
+                return (
+                  <div key={key} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium">{label}</h4>
+                        <Badge variant={wallet.configured ? 'default' : 'destructive'}>
+                          {wallet.configured ? 'Configured' : 'Not Configured'}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">{wallet.purpose}</p>
+                      {!wallet.configured && wallet.placeholderAddress && (
+                        <p className="text-xs text-yellow-500 mb-1">
+                          Placeholder: {wallet.placeholderAddress}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <code className="text-xs bg-background px-2 py-1 rounded">
+                          {wallet.address ?? 'Not configured'}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={!copyTarget}
+                          onClick={() => copyToClipboard(copyTarget, key)}
+                        >
+                          {copiedItems.has(key) ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">{wallet.purpose}</p>
-                  <div className="flex items-center gap-2">
-                    <code className="text-xs bg-background px-2 py-1 rounded">
-                      {wallet.address}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(wallet.address, key)}
-                    >
-                      {copiedItems.has(key) ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+                );
+              })}
           </div>
         </CardContent>
       </Card>
