@@ -6,7 +6,7 @@ import { insertUserSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { setupWalletRoutes, getPlatformWalletStats } from "./wallet-system";
+import { setupWalletRoutes, getPlatformWalletStats, PLATFORM_WALLETS } from "./wallet-system";
 import { setupNFTRoutes } from "./nft-routes";
 
 const normalizeIP = (ip?: string | null): string => {
@@ -337,6 +337,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const cloutTreasuryFee = platformFee * 0.5; // 1% to CLOUT treasury
 
       // Simulate transaction
+      const developerWallet = PLATFORM_WALLETS.developer.configured
+        ? PLATFORM_WALLETS.developer.publicKey
+        : null;
+      const cloutWallet = PLATFORM_WALLETS.cloutTreasury.configured
+        ? PLATFORM_WALLETS.cloutTreasury.publicKey
+        : null;
+
       const transactionResult = {
         success: true,
         transactionId: `test_tx_${Date.now()}_${Math.random().toString(36).substring(7)}`,
@@ -358,8 +365,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         wallets: {
           buyer: buyerWallet || 'BuyerWallet123456789',
           seller: sellerWallet || 'SellerWallet123456789',
-          developer: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
-          cloutTreasury: 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM'
+          developer: developerWallet,
+          cloutTreasury: cloutWallet,
         },
         cloutReward: Math.floor(price * 10), // 10 CLOUT per SOL spent
         gasEstimate: {

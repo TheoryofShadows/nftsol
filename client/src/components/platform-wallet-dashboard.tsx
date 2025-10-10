@@ -8,19 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Shield, Wallet, TrendingUp, Users, Coins, DollarSign, Award, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-interface PlatformWallet {
-  address: string;
-  purpose: string;
-  commissionRate?: number;
-}
-
-interface PlatformWallets {
-  developer: PlatformWallet;
-  cloutTreasury: PlatformWallet;
-  marketplaceTreasury: PlatformWallet;
-  creatorEscrow: PlatformWallet;
-}
+import {
+  fetchPlatformWallets,
+  type PlatformWalletMap,
+} from "@/utils/platform-wallets";
 
 interface SecurityHealth {
   status: string;
@@ -31,7 +22,7 @@ interface SecurityHealth {
 }
 
 export default function PlatformWalletDashboard() {
-  const [wallets, setWallets] = useState<PlatformWallets | null>(null);
+  const [wallets, setWallets] = useState<PlatformWalletMap | null>(null);
   const [securityHealth, setSecurityHealth] = useState<SecurityHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [testForm, setTestForm] = useState({
@@ -50,17 +41,17 @@ export default function PlatformWalletDashboard() {
 
   const fetchPlatformData = async () => {
     try {
-      const [walletsRes, securityRes] = await Promise.all([
-        fetch('/api/platform/wallets'),
+      const [walletsData, securityRes] = await Promise.all([
+        fetchPlatformWallets(true),
         fetch('/api/wallet/security/health')
       ]);
 
-      if (walletsRes.ok && securityRes.ok) {
-        const walletsData = await walletsRes.json();
+      if (securityRes.ok) {
         const securityData = await securityRes.json();
-        setWallets(walletsData);
         setSecurityHealth(securityData);
       }
+
+      setWallets(walletsData);
     } catch (error) {
       console.error('Failed to fetch platform data:', error);
     } finally {
@@ -139,23 +130,35 @@ export default function PlatformWalletDashboard() {
                     <h3 className="font-semibold text-white capitalize">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </h3>
-                    {wallet.commissionRate && (
-                      <Badge className="bg-green-600">
-                        {(wallet.commissionRate * 100).toFixed(1)}% Commission
+                    <div className="flex items-center gap-2">
+                      {(wallet.commissionRate ?? wallet.distributionRate) !== undefined && (
+                        <Badge className="bg-green-600">
+                          {(((wallet.commissionRate ?? wallet.distributionRate) || 0) * 100).toFixed(1)}%
+                          {wallet.commissionRate !== undefined ? ' Commission' : ' Distribution'}
+                        </Badge>
+                      )}
+                      <Badge className={wallet.configured ? 'bg-blue-600' : 'bg-red-600'}>
+                        {wallet.configured ? 'Configured' : 'Needs .env update'}
                       </Badge>
-                    )}
+                    </div>
                   </div>
                   <p className="text-sm text-gray-400 mb-2">{wallet.purpose}</p>
+                  {!wallet.configured && wallet.placeholderAddress && (
+                    <p className="text-xs text-yellow-500 mb-2">
+                      Placeholder address: {wallet.placeholderAddress}
+                    </p>
+                  )}
                   <div className="flex items-center space-x-2">
                     <code className="px-2 py-1 bg-gray-800 rounded text-sm text-green-400 font-mono">
-                      {wallet.address}
+                      {wallet.address ?? 'Not configured'}
                     </code>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigator.clipboard.writeText(wallet.address)}
+                      disabled={!wallet.address}
+                      onClick={() => wallet.address && navigator.clipboard.writeText(wallet.address)}
                     >
-                      Copy
+                      {wallet.address ? 'Copy' : 'Configure first'}
                     </Button>
                   </div>
                 </div>

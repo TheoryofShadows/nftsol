@@ -16,6 +16,7 @@ export const PLATFORM_WALLETS = {
     distributionRate: 0.01, // Developer gets 1% of sale
     purpose: PLATFORM_WALLET_CONFIG.DEVELOPER.purpose,
     source: PLATFORM_WALLET_CONFIG.DEVELOPER.source,
+    configured: PLATFORM_WALLET_CONFIG.DEVELOPER.configured,
   },
   cloutTreasury: {
     publicKey: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.publicKey,
@@ -25,16 +26,19 @@ export const PLATFORM_WALLETS = {
     maxDailyDistribution: 100000, // Max 100k CLOUT per day
     emergencyLock: false, // Can be locked in emergency
     source: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.source,
+    configured: PLATFORM_WALLET_CONFIG.CLOUT_TREASURY.configured,
   },
   marketplaceTreasury: {
     publicKey: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.publicKey,
     purpose: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.purpose,
     source: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.source,
+    configured: PLATFORM_WALLET_CONFIG.MARKETPLACE_TREASURY.configured,
   },
   creatorEscrow: {
     publicKey: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.publicKey,
     purpose: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.purpose,
     source: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.source,
+    configured: PLATFORM_WALLET_CONFIG.CREATOR_ESCROW.configured,
   },
 };
 
@@ -265,6 +269,7 @@ type PlatformWalletStat = {
   transactions: number;
   purpose: string;
   source: string;
+  configured: boolean;
 };
 
 export function getPlatformWalletStats(): PlatformWalletStat[] {
@@ -279,6 +284,7 @@ export function getPlatformWalletStats(): PlatformWalletStat[] {
         transactions: 0,
         purpose: walletConfig.purpose,
         source: walletConfig.source,
+        configured: walletConfig.configured,
       });
     },
   );
@@ -306,6 +312,14 @@ export async function processNFTPurchase(
   creatorRoyaltyRate: number = 0.025 // 2.5% default creator royalty (more seller-friendly)
 ): Promise<{ success: boolean; transactionId?: string; error?: string; breakdown?: any }> {
   try {
+    if (!PLATFORM_WALLETS.developer.configured || !PLATFORM_WALLETS.cloutTreasury.configured) {
+      return {
+        success: false,
+        error:
+          'Platform wallets are not fully configured. Configure DEVELOPER_WALLET_PUBLIC_KEY and CLOUT_TREASURY_WALLET before processing live purchases.',
+      };
+    }
+
     const buyerWallet = userWallets.get(buyerId);
     const sellerWallet = userWallets.get(sellerId);
     const creatorWallet = creatorId ? userWallets.get(creatorId) : null;
@@ -319,7 +333,11 @@ export async function processNFTPurchase(
     }
     
     // Calculate all fees and distributions  
-    const platformCommission = priceSOL * PLATFORM_WALLETS.developer.commissionRate; // 2%
+    const developerCommission =
+      priceSOL * PLATFORM_WALLETS.developer.distributionRate; // 1% developer share
+    const cloutTreasuryCommission =
+      priceSOL * PLATFORM_WALLETS.cloutTreasury.distributionRate; // 1% treasury share
+    const platformCommission = developerCommission + cloutTreasuryCommission; // Total 2%
     const creatorRoyalty = creatorWallet ? priceSOL * creatorRoyaltyRate : 0; // 2.5% if creator exists (reduced)
     const sellerAmount = priceSOL - platformCommission - creatorRoyalty;
     
@@ -329,7 +347,9 @@ export async function processNFTPurchase(
       creatorRoyalty,
       sellerAmount,
       platformCommissionRate: PLATFORM_WALLETS.developer.commissionRate,
-      creatorRoyaltyRate
+      creatorRoyaltyRate,
+      developerCommission,
+      cloutTreasuryCommission
     };
     
     // Process transaction
@@ -372,11 +392,23 @@ export async function processNFTPurchase(
     };
     
     // Record commission transaction
-    const commissionTransaction: WalletTransaction = {
+    const developerCommissionTransaction: WalletTransaction = {
       id: crypto.randomUUID(),
       fromWallet: buyerWallet.publicKey,
       toWallet: PLATFORM_WALLETS.developer.publicKey,
-      amount: platformCommission,
+      amount: developerCommission,
+      tokenType: 'SOL',
+      transactionType: 'commission',
+      nftId,
+      timestamp: new Date(),
+      status: 'confirmed'
+    };
+
+    const treasuryCommissionTransaction: WalletTransaction = {
+      id: crypto.randomUUID(),
+      fromWallet: buyerWallet.publicKey,
+      toWallet: PLATFORM_WALLETS.cloutTreasury.publicKey,
+      amount: cloutTreasuryCommission,
       tokenType: 'SOL',
       transactionType: 'commission',
       nftId,
@@ -402,11 +434,24 @@ export async function processNFTPurchase(
     }
     
     // Add transactions to history
-    buyerWallet.transactionHistory.push(purchaseTransaction, commissionTransaction);
+    buyerWallet.transactionHistory.push(
+      purchaseTransaction,
+      developerCommissionTransaction,
+      treasuryCommissionTransaction
+    );
     sellerWallet.transactionHistory.push(purchaseTransaction);
     
     console.log(`NFT Purchase processed: ${priceSOL} SOL`);
-    console.log(`- Developer commission: ${platformCommission} SOL (${(PLATFORM_WALLETS.developer.commissionRate * 100).toFixed(1)}%)`);
+    console.log(
+      `- Developer commission: ${developerCommission} SOL (${(
+        PLATFORM_WALLETS.developer.distributionRate * 100
+      ).toFixed(1)}%)`
+    );
+    console.log(
+      `- CLOUT treasury commission: ${cloutTreasuryCommission} SOL (${(
+        PLATFORM_WALLETS.cloutTreasury.distributionRate * 100
+      ).toFixed(1)}%)`
+    );
     console.log(`- Creator royalty: ${creatorRoyalty} SOL (${(creatorRoyaltyRate * 100).toFixed(1)}%)`);
     console.log(`- Seller receives: ${sellerAmount} SOL (${((sellerAmount / priceSOL) * 100).toFixed(1)}%)`);
     
@@ -497,6 +542,24 @@ export function setupWalletRoutes(app: any) {
   
   // Security health check
   app.get('/api/wallet/security/health', (req: Request, res: Response) => {
+    const sanitizeWallet = (walletKey: keyof typeof PLATFORM_WALLETS) => {
+      const wallet = PLATFORM_WALLETS[walletKey];
+      return {
+        configured: wallet.configured,
+        status: wallet.configured ? 'Active' : 'Not configured',
+        address: wallet.configured
+          ? `${wallet.publicKey.slice(0, 8)}...`
+          : undefined,
+        placeholder: wallet.configured ? undefined : wallet.publicKey,
+        purpose: wallet.purpose,
+        commissionRate:
+          'commissionRate' in wallet ? wallet.commissionRate : undefined,
+        distributionRate:
+          'distributionRate' in wallet ? wallet.distributionRate : undefined,
+        source: wallet.source,
+      };
+    };
+
     res.json({
       status: 'secure',
       timestamp: new Date(),
@@ -504,32 +567,10 @@ export function setupWalletRoutes(app: any) {
       totalTransactions: Array.from(userWallets.values())
         .reduce((sum, wallet) => sum + wallet.transactionHistory.length, 0),
       platformWallets: {
-        developer: {
-          configured: true,
-          status: "Active",
-          address: PLATFORM_WALLETS.developer.publicKey.slice(0, 8) + "...",
-          purpose: PLATFORM_WALLETS.developer.purpose,
-          commissionRate: "1% of total sales"
-        },
-        cloutTreasury: {
-          configured: true,
-          status: "Active", 
-          address: PLATFORM_WALLETS.cloutTreasury.publicKey.slice(0, 8) + "...",
-          purpose: PLATFORM_WALLETS.cloutTreasury.purpose,
-          distributionRate: "1% of total sales"
-        },
-        marketplaceTreasury: {
-          configured: true,
-          status: "Active",
-          address: PLATFORM_WALLETS.marketplaceTreasury.publicKey.slice(0, 8) + "...",
-          purpose: PLATFORM_WALLETS.marketplaceTreasury.purpose
-        },
-        creatorEscrow: {
-          configured: true,
-          status: "Active",
-          address: PLATFORM_WALLETS.creatorEscrow.publicKey.slice(0, 8) + "...",
-          purpose: PLATFORM_WALLETS.creatorEscrow.purpose
-        }
+        developer: sanitizeWallet('developer'),
+        cloutTreasury: sanitizeWallet('cloutTreasury'),
+        marketplaceTreasury: sanitizeWallet('marketplaceTreasury'),
+        creatorEscrow: sanitizeWallet('creatorEscrow'),
       },
       cloutToken: {
         configured: !!process.env.CLOUT_TOKEN_MINT_ADDRESS,
@@ -541,33 +582,27 @@ export function setupWalletRoutes(app: any) {
 
   // Get platform wallet addresses (public keys only)
   app.get('/api/platform/wallets', (req: Request, res: Response) => {
+    const serializeWallet = (walletKey: keyof typeof PLATFORM_WALLETS) => {
+      const wallet = PLATFORM_WALLETS[walletKey];
+      return {
+        address: wallet.configured ? wallet.publicKey : null,
+        placeholderAddress: wallet.configured ? undefined : wallet.publicKey,
+        purpose: wallet.purpose,
+        status: wallet.configured ? 'Active' : 'Not configured',
+        configured: wallet.configured,
+        source: wallet.source,
+        commissionRate:
+          'commissionRate' in wallet ? wallet.commissionRate : undefined,
+        distributionRate:
+          'distributionRate' in wallet ? wallet.distributionRate : undefined,
+      };
+    };
+
     res.json({
-      developer: {
-        address: PLATFORM_WALLETS.developer.publicKey,
-        purpose: PLATFORM_WALLETS.developer.purpose,
-        status: "Active",
-        configured: true,
-        commissionRate: "1% of total sales"
-      },
-      cloutTreasury: {
-        address: PLATFORM_WALLETS.cloutTreasury.publicKey,
-        purpose: PLATFORM_WALLETS.cloutTreasury.purpose,
-        status: "Active",
-        configured: true,
-        distributionRate: "1% of total sales"
-      },
-      marketplaceTreasury: {
-        address: PLATFORM_WALLETS.marketplaceTreasury.publicKey,
-        purpose: PLATFORM_WALLETS.marketplaceTreasury.purpose,
-        status: "Active",
-        configured: true
-      },
-      creatorEscrow: {
-        address: PLATFORM_WALLETS.creatorEscrow.publicKey,
-        purpose: PLATFORM_WALLETS.creatorEscrow.purpose,
-        status: "Active",
-        configured: true
-      }
+      developer: serializeWallet('developer'),
+      cloutTreasury: serializeWallet('cloutTreasury'),
+      marketplaceTreasury: serializeWallet('marketplaceTreasury'),
+      creatorEscrow: serializeWallet('creatorEscrow'),
     });
   });
 

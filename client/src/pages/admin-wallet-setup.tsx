@@ -28,24 +28,24 @@ export default function AdminWalletSetup() {
   const [showPrivateKeys, setShowPrivateKeys] = useState<Record<string, boolean>>({});
   const [walletState, setWalletState] = useState<WalletSetupState>({
     developerWallet: {
-      publicKey: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
+      publicKey: '',
       privateKey: '',
-      isConfigured: true
+      isConfigured: false
     },
     cloutTreasury: {
-      publicKey: 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',
+      publicKey: '',
       privateKey: '',
-      isConfigured: true
+      isConfigured: false
     },
     marketplaceTreasury: {
-      publicKey: 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs',
+      publicKey: '',
       privateKey: '',
-      isConfigured: true
+      isConfigured: false
     },
     creatorEscrow: {
-      publicKey: '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
+      publicKey: '',
       privateKey: '',
-      isConfigured: true
+      isConfigured: false
     },
     cloutTokenMint: '',
     encryptionKey: ''
