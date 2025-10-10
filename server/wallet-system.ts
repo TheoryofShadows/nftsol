@@ -333,7 +333,11 @@ export async function processNFTPurchase(
     }
     
     // Calculate all fees and distributions  
-    const platformCommission = priceSOL * PLATFORM_WALLETS.developer.commissionRate; // 2%
+    const developerCommission =
+      priceSOL * PLATFORM_WALLETS.developer.distributionRate; // 1% developer share
+    const cloutTreasuryCommission =
+      priceSOL * PLATFORM_WALLETS.cloutTreasury.distributionRate; // 1% treasury share
+    const platformCommission = developerCommission + cloutTreasuryCommission; // Total 2%
     const creatorRoyalty = creatorWallet ? priceSOL * creatorRoyaltyRate : 0; // 2.5% if creator exists (reduced)
     const sellerAmount = priceSOL - platformCommission - creatorRoyalty;
     
@@ -343,7 +347,9 @@ export async function processNFTPurchase(
       creatorRoyalty,
       sellerAmount,
       platformCommissionRate: PLATFORM_WALLETS.developer.commissionRate,
-      creatorRoyaltyRate
+      creatorRoyaltyRate,
+      developerCommission,
+      cloutTreasuryCommission
     };
     
     // Process transaction
@@ -386,11 +392,23 @@ export async function processNFTPurchase(
     };
     
     // Record commission transaction
-    const commissionTransaction: WalletTransaction = {
+    const developerCommissionTransaction: WalletTransaction = {
       id: crypto.randomUUID(),
       fromWallet: buyerWallet.publicKey,
       toWallet: PLATFORM_WALLETS.developer.publicKey,
-      amount: platformCommission,
+      amount: developerCommission,
+      tokenType: 'SOL',
+      transactionType: 'commission',
+      nftId,
+      timestamp: new Date(),
+      status: 'confirmed'
+    };
+
+    const treasuryCommissionTransaction: WalletTransaction = {
+      id: crypto.randomUUID(),
+      fromWallet: buyerWallet.publicKey,
+      toWallet: PLATFORM_WALLETS.cloutTreasury.publicKey,
+      amount: cloutTreasuryCommission,
       tokenType: 'SOL',
       transactionType: 'commission',
       nftId,
@@ -416,11 +434,24 @@ export async function processNFTPurchase(
     }
     
     // Add transactions to history
-    buyerWallet.transactionHistory.push(purchaseTransaction, commissionTransaction);
+    buyerWallet.transactionHistory.push(
+      purchaseTransaction,
+      developerCommissionTransaction,
+      treasuryCommissionTransaction
+    );
     sellerWallet.transactionHistory.push(purchaseTransaction);
     
     console.log(`NFT Purchase processed: ${priceSOL} SOL`);
-    console.log(`- Developer commission: ${platformCommission} SOL (${(PLATFORM_WALLETS.developer.commissionRate * 100).toFixed(1)}%)`);
+    console.log(
+      `- Developer commission: ${developerCommission} SOL (${(
+        PLATFORM_WALLETS.developer.distributionRate * 100
+      ).toFixed(1)}%)`
+    );
+    console.log(
+      `- CLOUT treasury commission: ${cloutTreasuryCommission} SOL (${(
+        PLATFORM_WALLETS.cloutTreasury.distributionRate * 100
+      ).toFixed(1)}%)`
+    );
     console.log(`- Creator royalty: ${creatorRoyalty} SOL (${(creatorRoyaltyRate * 100).toFixed(1)}%)`);
     console.log(`- Seller receives: ${sellerAmount} SOL (${((sellerAmount / priceSOL) * 100).toFixed(1)}%)`);
     
