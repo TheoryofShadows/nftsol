@@ -1,7 +1,1 @@
-
-# Netlify redirects for SPA routing
-# API routes - proxy to backend (you'll need to configure your backend URL)
-/api/*  https://your-backend-domain.com/api/:splat  200
-
-# Client-side routing - all other routes go to index.html
-/*    /index.html   200
+/*   /index.html   200
