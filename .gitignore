@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-lock.yaml
+yarn.lock
+
+# Vite / build caches
+**/.vite/
+dist/
+coverage/
+
+# Env & local config
+.env
+.env.local
+*.local.*
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
