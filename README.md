@@ -1,8 +1,8 @@
 # NFTSol Step 0 — Client + IPFS Proxy
 
-[![CI](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/ci.yml?branch=main&label=CI)](https://github.com/OWNER/REPO/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/TheoryofShadows/nftsol/ci.yml?branch=main&label=CI)](https://github.com/TheoryofShadows/nftsol/actions)
 ![License](https://img.shields.io/badge/license-MIT-informational)
-![Stars](https://img.shields.io/github/stars/OWNER/REPO?style=social)
+![Stars](https://img.shields.io/github/stars/TheoryofShadows/nftsol?style=social)
 
 A tiny, production-minded setup for:
 - **IPFS image proxy** (Node/Express, pm2) with gateway rotation + browser-like headers
