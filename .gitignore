@@ -19,3 +19,7 @@ coverage/
 Thumbs.db
 .vscode/
 /.config/solana/
+*.env
+*.env.*
+client/.env*
+server/.env*
