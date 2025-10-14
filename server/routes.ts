@@ -388,3 +388,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   return httpServer;
 }
+
+/** Lightweight IPFS image proxy:
+ *  GET /ipfs-img?u=ipfs://... or https://...
+ */
+import type { Request, Response } from 'express';
+const { fetchWithIpfs } = require('./utils/ipfs');
+
+app.get?.('/ipfs-img', async (req: Request, res: Response) => {
+  try {
+    const u = String(req.query.u || '');
+    if (!u) return res.status(400).json({ error: 'missing u' });
+    const r = await fetchWithIpfs(u, { headers: { accept: '*/*' } });
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.set('Content-Type', r.headers.get('content-type') || 'application/octet-stream');
+    const buf = Buffer.from(await r.arrayBuffer());
+    return res.status(200).send(buf);
+  } catch (e: any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+
+/** Lightweight IPFS image proxy:
+ *  GET /ipfs-img?u=ipfs://... or https://...
+ */
+import type { Request, Response } from 'express';
+const { fetchWithIpfs } = require('./utils/ipfs');
+
+app.get?.('/ipfs-img', async (req: Request, res: Response) => {
+  try {
+    const u = String(req.query.u || '');
+    if (!u) return res.status(400).json({ error: 'missing u' });
+    const r = await fetchWithIpfs(u, { headers: { accept: '*/*' } });
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.set('Content-Type', r.headers.get('content-type') || 'application/octet-stream');
+    const buf = Buffer.from(await r.arrayBuffer());
+    return res.status(200).send(buf);
+  } catch (e: any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});

@@ -1,0 +1,1 @@
+{"root":["./src/App.backup.tsx","./src/App.tsx","./src/ErrorBoundary.tsx","./src/TestIpfs.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/IpfsImage.tsx","./src/components/NftGrid.tsx","./src/components/WalletSetup.tsx","./src/lib/api.ts","./src/lib/ipfs.ts","./src/lib/ipfsUrl.ts"],"version":"5.9.3"}

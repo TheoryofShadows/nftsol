@@ -1,0 +1,20 @@
+{
+  "name": "NFTSol Dev Test",
+  "symbol": "NFSOL",
+  "description": "Developer test NFT on Solana Devnet via NFTSol.",
+  "seller_fee_basis_points": 500,
+  "image": "https://placehold.co/600x600?text=NFTSol+Dev+Test",
+  "attributes": [
+    { "trait_type": "Edition", "value": "Developer Demo" },
+    { "trait_type": "Network", "value": "Devnet" }
+  ],
+  "properties": {
+    "files": [
+      { "uri": "https://placehold.co/600x600?text=NFTSol+Dev+Test", "type": "image/png" }
+    ],
+    "category": "image",
+    "creators": [
+      { "address": "'"$(solana address)"'", "share": 100 }
+    ]
+  }
+}

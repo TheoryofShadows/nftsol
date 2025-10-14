@@ -1,5 +1,7 @@
 import React from "react";
 
+
+import { ipfsImg } from "../lib/ipfsUrl";
 type Item = { mint: string; name: string; image: string; collection: string };
 
 export default function NftGrid({ items }: { items: Item[] }) {
@@ -12,7 +14,7 @@ export default function NftGrid({ items }: { items: Item[] }) {
     }}>
       {items.map(n => (
         <div key={n.mint} style={{border:"1px solid #e5e7eb", borderRadius:12, padding:12}}>
-          <img src={n.image} alt={n.name} style={{width:"100%", borderRadius:8, aspectRatio:"1/1", objectFit:"cover"}} />
+          <img src={ipfsImg(n.image)} alt={n.name} style={{width:"100%", borderRadius:8, aspectRatio:"1/1", objectFit:"cover"}} />
           <div style={{marginTop:8, fontWeight:700}}>{n.name}</div>
           <div style={{fontSize:12, color:"#6b7280"}}>{n.collection}</div>
           <div style={{marginTop:4, fontSize:11, color:"#9ca3af", wordBreak:"break-all"}}>{n.mint}</div>

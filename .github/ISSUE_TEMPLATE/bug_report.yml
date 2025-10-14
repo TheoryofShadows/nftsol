@@ -1,0 +1,12 @@
+name: Bug report
+description: Report a problem with NFTSol_step0
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Clear steps to reproduce
+      placeholder: Tell us what you saw!
+    validations:
+      required: true

@@ -1,82 +1,32 @@
-import React, { useEffect, useMemo, useState } from "react";
-import NftGrid from "./components/NftGrid";
+import React from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
-
-function useQueryOwner() {
-  return useMemo(() => {
-    const u = new URL(window.location.href);
-    return (u.searchParams.get("owner") || "").trim();
-  }, []);
-}
+const API = import.meta.env.VITE_API_BASE || "http://localhost:3002";
+const IPFS_DEMO = "ipfs://YOUR_REAL_CID_HERE/your-image.png"
+// your current 1x1 demo image (visible because we size it)
+const TEST = "https://upload.wikimedia.org/wikipedia/commons/3/3f/PNG_demo.png";
+const SRC = `${API}/ipfs-img?u=${encodeURIComponent(TEST)}`;
 
 export default function App() {
-  const [apiOk, setApiOk] = useState<boolean>(false);
-  const [owner, setOwner] = useState<string>("");
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string>("");
-
-  const initialOwner = useQueryOwner();
-
-  useEffect(() => {
-    fetch(`${API_BASE}/healthz`).then(r=>r.json()).then(j=>setApiOk(!!j.ok)).catch(()=>setApiOk(false));
-  }, []);
-
-  useEffect(() => {
-    if (initialOwner) {
-      setOwner(initialOwner);
-      void fetchNfts(initialOwner);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialOwner]);
-
-  async function fetchNfts(pubkey: string) {
-    setLoading(true); setErr(""); setItems([]);
-    try {
-      const r = await fetch(`${API_BASE}/nfts?owner=${encodeURIComponent(pubkey)}`);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      setItems(Array.isArray(j.items) ? j.items : []);
-    } catch (e:any) {
-      setErr(e?.message || "Failed to load NFTs");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  const [err, setErr] = React.useState<string | null>(null);
   return (
-    <div style={{padding:24, fontFamily:"ui-sans-serif"}}>
-      <h1 style={{fontWeight:800}}>NFTSol — Minimal</h1>
-
-      <div style={{display:"flex", alignItems:"center", gap:8, marginBottom:12}}>
-        <span title={apiOk ? "API healthy" : "API down"} style={{
-          width:10,height:10,borderRadius:9999,display:"inline-block",
-          background:apiOk?"#22c55e":"#ef4444"
-        }} />
-        <span style={{fontSize:12,opacity:.7}}>{apiOk ? "API OK" : "API Down"}</span>
-      </div>
-
-      <div style={{display:"flex", gap:8, alignItems:"center", flexWrap:"wrap"}}>
-        <input
-          value={owner}
-          onChange={e=>setOwner(e.target.value.trim())}
-          placeholder="Paste any Solana public key (devnet/mainnet)"
-          style={{flex:"1 1 420px", minWidth:320, padding:"10px 12px", border:"1px solid #e5e7eb", borderRadius:8}}
+    <div style={{padding:20,fontFamily:"system-ui,Segoe UI,Arial"}}>
+      <h1 style={{margin:0}}>NFTSol – Proxy Test</h1>
+      <p>Fetching through <code>{API}/ipfs-img</code></p>
+      <div style={{display:"flex",gap:20,alignItems:"flex-start"}}>
+        <img
+          src={SRC}
+          width={256}
+          height={256}
+          style={{border:"1px solid #ddd", background:"#f6f6f6", borderRadius:12, objectFit:"contain"}}
+          onError={() => setErr("Failed to load image")}
+          alt="proxy test"
         />
-        <button
-          onClick={()=>owner && fetchNfts(owner)}
-          disabled={!owner || loading}
-          style={{padding:"10px 16px", borderRadius:8, border:"1px solid #e5e7eb", background:"#111827", color:"#fff", fontWeight:600}}
-        >
-          {loading ? "Loading…" : "Load"}
-        </button>
+        <div>
+          <div><b>Image URL:</b> <code style={{wordBreak:"break-all"}}>{SRC}</code></div>
+          <div><b>CID:</b> <code>{TEST}</code></div>
+          {err && <div style={{color:"crimson"}}>Error: {err}</div>}
+        </div>
       </div>
-
-      {err && <div style={{marginTop:12, color:"#ef4444"}}>Error: {err}</div>}
-      {!err && !loading && <div style={{marginTop:8, fontSize:12, color:"#6b7280"}}>Tip: try your pubkey or a well-known one.</div>}
-
-      <NftGrid items={items} />
     </div>
   );
 }
