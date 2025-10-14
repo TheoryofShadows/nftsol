@@ -1,3 +1,4 @@
+import ipfsRouter from "../routes/ipfs";
 import "./env-loader.js";
 import { cluster, HELIUS_URL } from "./env-loader.js";
 import { createServer } from "http";
@@ -180,3 +181,6 @@ app.get("/ipfs-img", async (req: Request, res: Response) => {
 });
 // ============================================================================
 
+
+// Mount hardened IPFS proxy (keeps /ipfs/:cid/*)
+app.use("/", ipfsRouter);
