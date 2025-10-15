@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist-ipfs",
+    "rootDir": "./",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": false,
+    "strict": false
+  },
+  "include": [
+    "src/ipfsProxyStandalone.ts",
+    "routes/**/*.ts",
+    "ipfs/**/*.ts"
+  ]
+}

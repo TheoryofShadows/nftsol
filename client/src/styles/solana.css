@@ -1,0 +1,16 @@
+:root{
+  --solana-purple:#9945FF; /* Solana Purple */
+  --solana-green:#14F195;  /* Solana Green  */
+}
+.sla-gradient{
+  background: linear-gradient(135deg,var(--solana-purple) 0%,var(--solana-green) 100%);
+}
+.sla-text-gradient{
+  background: linear-gradient(135deg,var(--solana-purple) 0%,var(--solana-green) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.sla-card{
+  background:#0a0f1c; border:1px solid rgba(255,255,255,0.08); border-radius:16px;
+}
+body{ background:#05080f; color:#e6f0ff; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+a{ color:#b5d8ff; }
