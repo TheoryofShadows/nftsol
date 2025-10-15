@@ -1,7 +1,12 @@
 import express from "express";
 
 const app = express();
-const PORT = Number(process.env.IPFS_PROXY_PORT || 3002);
+
+// Health endpoints
+app.get("/healthz", (_req,res)=>res.json({ ok:true, service:"ipfs-proxy" }));
+app.head("/healthz", (_req,res)=>res.status(200).end());
+
+const PORT = Number(process.env.IPFS_PROXY_PORT || process.env.SECONDARY_PORT || 3004);
 
 const GATEWAYS = [
   "https://w3s.link/ipfs/",
@@ -115,7 +120,7 @@ app.get("/ipfs-img", async (req, res) => {
 
   if (ok.body) {
     ok.body.pipeTo(new WritableStream({
-      write(chunk) { res.write(chunk); },
+      bwrite(chunk: any) { res.write(chunk); },
       close() { res.end(); },
       abort() { res.end(); }
     } as any)).catch(() => res.end());
