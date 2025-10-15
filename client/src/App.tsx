@@ -1,3 +1,4 @@
+import CloutBadge from "./components/CloutBadge";
 import MintForm from "./components/MintForm";
 import SolanaSection from "./components/SolanaSection";
 import SolanaHeader from "./components/SolanaHeader";
