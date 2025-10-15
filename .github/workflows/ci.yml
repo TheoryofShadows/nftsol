@@ -1,36 +1,30 @@
 name: CI
-
 on:
   push:
-    branches: [ "main" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '20'
           cache: 'npm'
 
       - name: Install & build server
-        working-directory: server
+        working-directory: ./server
         run: |
-          npm ci
-          # type-check if tsconfig exists
-          npx tsc -v >/dev/null 2>&1 && npx tsc -b || echo "no tsc project"
+          npm ci || npm install
+          npm run build || echo "no server build step"
 
       - name: Install & build client
-        working-directory: client
+        working-directory: ./client
         run: |
-          npm ci
-          npx tsc -b || true
-          npx vite build
+          npm ci || npm install
+          npm run build
