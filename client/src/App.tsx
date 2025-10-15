@@ -1,6 +1,9 @@
+import SolanaSection from "./components/SolanaSection";
+import SolanaHeader from "./components/SolanaHeader";
+import PhantomConnect from "./components/PhantomConnect";
 import React from "react";
 
-const API = import.meta.env.VITE_API_BASE || "http://localhost:3002";
+const API = import.meta.env.VITE_API_BASE || "http://localhost:3003";
 const IPFS_DEMO = "ipfs://YOUR_REAL_CID_HERE/your-image.png"
 // your current 1x1 demo image (visible because we size it)
 const TEST = "https://upload.wikimedia.org/wikipedia/commons/3/3f/PNG_demo.png";
@@ -8,6 +11,7 @@ const SRC = `${API}/ipfs-img?u=${encodeURIComponent(TEST)}`;
 
 export default function App() {
   const [err, setErr] = React.useState<string | null>(null);
+
   return (
     <div style={{padding:20,fontFamily:"system-ui,Segoe UI,Arial"}}>
       <h1 style={{margin:0}}>NFTSol – Proxy Test</h1>
@@ -22,7 +26,12 @@ export default function App() {
           alt="proxy test"
         />
         <div>
-          <div><b>Image URL:</b> <code style={{wordBreak:"break-all"}}>{SRC}</code></div>
+          <div><b>Image URL:</b> <code style={{wordBreak:"break-all"}}>{SRC}</code>  <SolanaSection title="Phantom Wallet">
+    <PhantomConnect />
+  </SolanaSection>
+  <PhantomConnect />
+  <ProxyCheck />
+</div>
           <div><b>CID:</b> <code>{TEST}</code></div>
           {err && <div style={{color:"crimson"}}>Error: {err}</div>}
         </div>
