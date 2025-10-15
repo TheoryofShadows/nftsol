@@ -1,3 +1,4 @@
+import MintForm from "./components/MintForm";
 import SolanaSection from "./components/SolanaSection";
 import SolanaHeader from "./components/SolanaHeader";
 import PhantomConnect from "./components/PhantomConnect";
@@ -30,6 +31,8 @@ export default function App() {
     <PhantomConnect />
   </SolanaSection>
   <PhantomConnect />
+  <ProxyCheck />
+  <SolanaHeader />
   <ProxyCheck />
 </div>
           <div><b>CID:</b> <code>{TEST}</code></div>
