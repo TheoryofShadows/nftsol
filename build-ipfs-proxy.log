@@ -1,0 +1,32 @@
+Sending build context to Docker daemon  495.6kB
+Step 1/9 : FROM node:20-alpine
+ ---> 30c8b6e55a5d
+Step 2/9 : WORKDIR /app
+ ---> Using cache
+ ---> 703262745e98
+Step 3/9 : COPY package.json package-lock.json* ./
+ ---> Using cache
+ ---> 73ce0ea18f52
+Step 4/9 : RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi  && npm install tsx
+ ---> Using cache
+ ---> 74bf78ddf7da
+Step 5/9 : COPY . .
+ ---> 8ffa9b56d7ae
+Step 6/9 : ENV NODE_ENV=production
+ ---> Running in 27ccce95c285
+ ---> Removed intermediate container 27ccce95c285
+ ---> cc3c56b8be74
+Step 7/9 : ENV PORT=3002
+ ---> Running in 6409173368b0
+ ---> Removed intermediate container 6409173368b0
+ ---> 98cc931b8dc3
+Step 8/9 : EXPOSE 3002
+ ---> Running in f563f9d3c919
+ ---> Removed intermediate container f563f9d3c919
+ ---> 094ea292f445
+Step 9/9 : CMD ["npx", "tsx", "src/ipfsProxyStandalone.ts"]
+ ---> Running in a14fb6b93c34
+ ---> Removed intermediate container a14fb6b93c34
+ ---> 6e8a5dbaf5f0
+Successfully built 6e8a5dbaf5f0
+Successfully tagged nftsol/ipfs-proxy:latest
