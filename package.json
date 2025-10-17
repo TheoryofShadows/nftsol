@@ -1,0 +1,9 @@
+{
+  "name": "nftsol-root",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "npm --prefix server ci --omit=dev && npm --prefix server run build",
+    "start": "node server/dist/index.js"
+  }
+}
