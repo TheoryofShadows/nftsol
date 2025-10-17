@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { HELIUS_URL } from "./env-loader.js";
+import { HELIUS_RPC_URL } from "./config";
 
 export type SimpleItem = {
   mint: string;
@@ -52,7 +52,7 @@ export async function getAssetsByOwner(ownerAddress: string) {
     }
   };
 
-  const res = await fetch(HELIUS_URL, {
+  const res = await fetch(HELIUS_RPC_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
