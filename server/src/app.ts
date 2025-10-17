@@ -9,6 +9,7 @@ import market from './routes/market';
 import corsAllowed from './cors-allowed';
 
 const app = express();
+app.use("/market", market);
 app.use('/api', market);
 app.use(corsAllowed);
 app.use(express.json());

@@ -130,5 +130,11 @@ app.get("/ipfs-img", async (req, res) => {
 });
 
 if (process.env.RUN_STANDALONE) { app.listen(PORT, () => { }
+// RUN_STANDALONE gate:
+if (process.env.RUN_STANDALONE) {
+  app.listen(PORT, () => {
+    console.log(`✅ IPFS proxy listening on http://localhost:${PORT}`);
+  });
+}
   console.log(`✅ IPFS proxy listening on http://localhost:${PORT}`);
 });
