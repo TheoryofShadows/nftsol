@@ -5,10 +5,11 @@ import helmet from "helmet";
 import morgan from "morgan";
 import health from "./routes/health.js";
 import nfts from "./routes/nfts.js";
-import market from '../routes/market';
-import corsAllowed from '../cors-allowed';
+import market from './routes/market';
+import corsAllowed from './cors-allowed';
 
 const app = express();
+app.use("/market", market);
 app.use('/api', market);
 app.use(corsAllowed);
 app.use(express.json());

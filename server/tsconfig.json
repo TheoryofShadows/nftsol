@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   },
   "include": [
-    "src",
+    "src/**/*.ts",
     "**/*.d.ts"
+  ],
+  "exclude": [
+    "src/ipfs-img-proxy.ts",
+    "src/ipfsProxyStandalone.ts"
   ]
 }
