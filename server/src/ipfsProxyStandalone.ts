@@ -6,7 +6,7 @@ const app = express();
 app.get("/healthz", (_req,res)=>res.json({ ok:true, service:"ipfs-proxy" }));
 app.head("/healthz", (_req,res)=>res.status(200).end());
 
-const PORT = Number(process.env.IPFS_PROXY_PORT || process.env.SECONDARY_PORT || 3004);
+const PORT = Number(process.env.AUX_PORT || process.env.IPFS_PROXY_PORT || process.env.SECONDARY_PORT || 3004);
 
 const GATEWAYS = [
   "https://w3s.link/ipfs/",
@@ -129,6 +129,6 @@ app.get("/ipfs-img", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+if (process.env.RUN_STANDALONE) { app.listen(PORT, () => { }
   console.log(`✅ IPFS proxy listening on http://localhost:${PORT}`);
 });

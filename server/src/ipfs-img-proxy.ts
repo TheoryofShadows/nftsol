@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import fetch from 'node-fetch';
 
 const app = express();
-const PORT = Number(process.env.PORT || 3003);
+const PORT = Number(process.env.AUX_PORT || process.env.PORT || 3003);
 
 // Allow your Vite app + general dev use
 app.use(cors({ origin: true, credentials: true }));
@@ -49,6 +49,6 @@ app.get('/ipfs-img', async (req, res) => {
   }
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+if (process.env.RUN_STANDALONE) { app.listen(PORT, '0.0.0.0', () => { }
   console.log(`ipfs-img-proxy listening on http://0.0.0.0:${PORT}`);
 });
