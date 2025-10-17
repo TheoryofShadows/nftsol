@@ -21,6 +21,12 @@
   ],
   "exclude": [
     "src/ipfs-img-proxy.ts",
-    "src/ipfsProxyStandalone.ts"
+    "src/ipfsProxyStandalone.ts",
+    "src/ipfs*",
+    "src/**/ipfs*",
+    "src/**/*ipfs*",
+    "src/**/ipfsProxy*",
+    "src/**/ipfs-img-proxy*",
+    "src/**/ipfsProxyStandalone*"
   ]
 }
