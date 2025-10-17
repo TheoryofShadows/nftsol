@@ -28,6 +28,10 @@ import path from "path";
 const uploadsDir = path.join(process.cwd(), "uploads");
 
 const app = express();
+import corsAllowed from './cors-allowed';
+import market from './routes/market';
+app.use(corsAllowed);
+app.use('/api', market);
 
 app.set("trust proxy", true);
 
