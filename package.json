@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build": "npm --prefix server install --include=dev && npm --prefix server run build",
+    "build": "npm --prefix server install && npm --prefix server run build",
     "start": "node server/dist/index.js"
   }
 }
