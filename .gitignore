@@ -23,3 +23,8 @@ Thumbs.db
 *.env.*
 client/.env*
 server/.env*
+
+# runtime artifacts
+logs/
+*.log
+uploads/
