@@ -1,0 +1,396 @@
+import "./env-loader.js";
+import { cluster, HELIUS_URL } from "./env-loader.js";
+import { createServer } from "http";
+import app from "./app.js";
+
+const port = Number(process.env.PORT) || 3001;
+const server = createServer(app);
+server.listen(port, () => {
+  console.log(`✅ API listening on http://localhost:${port}`);
+});
+
+
+// === IPFS image proxy (hardened) ============================================
+import type { Request, Response } from "express";
+
+const debug = String(req.query.debug || "") === "1";
+    if (!raw) return res.status(400).json({ error: "missing u" });
+
+    const list = ipfsGatewayList(raw);
+    const init: RequestInit = {
+      redirect: "follow",
+      headers: {
+        "Accept": "*/*",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    };
+
+    let ok: globalThis.Response | null = null;
+    const attempts: Array<{url:string;status?:number;ct?:string;error?:string}> = [];
+
+    for (const url of list) {
+      try {
+        const r = await fetch(url, init);
+        const ct = r.headers.get("content-type") || "";
+        attempts.push({ url, status: r.status, ct });
+
+        if (r.ok && (ct.startsWith("image/") || ct.includes("png") || ct.includes("jpeg") || ct.includes("gif") || ct.includes("webp") || ct.startsWith("application/octet-stream"))) {
+          ok = r;
+          break;
+        }
+        if (r.ok) { ok = r; break; } // some gateways omit image/*
+      } catch (e:any) {
+        attempts.push({ url, error: e?.message || String(e) });
+      }
+    }
+
+    if (debug) {
+      return res.status(ok ? 200 : 502).json({ input: raw, attempts });
+    }
+
+    if (!ok) {
+      return res.status(502).json({ error: "all gateways failed", attempts });
+    }
+
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+    res.setHeader("Content-Type", ok.headers.get("content-type") || "application/octet-stream");
+    const buf = Buffer.from(await ok.arrayBuffer());
+    return res.status(200).send(buf);
+  } catch (e:any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+// ============================================================================
+
+// === IPFS image proxy (hardened) ============================================
+// // import type { Request, Response } from "express";
+// // 
+// // const debug = String(req.query.debug || "") === "1";
+// //     if (!raw) return res.status(400).json({ error: "missing u" });
+// // 
+// //     const list = ipfsGatewayList(raw);
+// //     const init: RequestInit = {
+      redirect: "follow",
+      headers: {
+        "Accept": "*/*",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    };
+
+    let ok: globalThis.Response | null = null;
+    const attempts: Array<{url:string;status?:number;ct?:string;error?:string}> = [];
+
+    for (const url of list) {
+      try {
+        const r = await fetch(url, init);
+        const ct = r.headers.get("content-type") || "";
+        attempts.push({ url, status: r.status, ct });
+        if (r.ok && (ct.startsWith("image/") || ct.includes("png") || ct.includes("jpeg") || ct.includes("gif") || ct.includes("webp") || ct.startsWith("application/octet-stream"))) {
+          ok = r;
+          break;
+        }
+        if (r.ok) { ok = r; break; }
+      } catch (e:any) {
+        attempts.push({ url, error: e?.message || String(e) });
+      }
+    }
+
+    if (debug) {
+      return res.status(ok ? 200 : 502).json({ input: raw, attempts });
+    }
+    if (!ok) {
+      return res.status(502).json({ error: "all gateways failed", attempts });
+    }
+
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+    res.setHeader("Content-Type", ok.headers.get("content-type") || "application/octet-stream");
+    const buf = Buffer.from(await ok.arrayBuffer());
+    return res.status(200).send(buf);
+  } catch (e:any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+// ============================================================================
+
+// === IPFS image proxy (hardened) ============================================
+function ipfsGatewayList(u: string) {
+  const GWS = [
+    "https://w3s.link/ipfs/",
+    "https://cloudflare-ipfs.com/ipfs/",
+    "https://gateway.pinata.cloud/ipfs/",
+  ];
+  return u.startsWith("ipfs://") ? GWS.map(g => g + u.slice(7)) : [u];
+}
+
+app.get("/ipfs-img", async (req: Request, res: Response) => {
+  try {
+    const raw = String(req.query.u || "");
+    const debug = String(req.query.debug || "") === "1";
+    if (!raw) return res.status(400).json({ error: "missing u" });
+
+    const list = ipfsGatewayList(raw);
+    const init: RequestInit = {
+      redirect: "follow",
+      headers: {
+        "Accept": "*/*",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
+    };
+
+    let ok: globalThis.Response | null = null;
+    const attempts: Array<{url:string;status?:number;ct?:string;error?:string}> = [];
+
+    for (const url of list) {
+      try {
+        const r = await fetch(url, init);
+        const ct = r.headers.get("content-type") || "";
+        attempts.push({ url, status: r.status, ct });
+
+        if (r.ok && (ct.startsWith("image/") || ct.includes("png") || ct.includes("jpeg") || ct.includes("gif") || ct.includes("webp") || ct.startsWith("application/octet-stream"))) {
+          ok = r;
+          break;
+        }
+        if (r.ok) { ok = r; break; } // some gateways omit image/*
+      } catch (e:any) {
+        attempts.push({ url, error: e?.message || String(e) });
+      }
+    }
+
+    if (debug) {
+      return res.status(ok ? 200 : 502).json({ input: raw, attempts });
+    }
+
+    if (!ok) {
+      return res.status(502).json({ error: "all gateways failed", attempts });
+    }
+
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+    res.setHeader("Content-Type", ok.headers.get("content-type") || "application/octet-stream");
+    const buf = Buffer.from(await ok.arrayBuffer());
+    return res.status(200).send(buf);
+  } catch (e:any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+// ============================================================================
+
+
+/**
+ * === IPFS image proxy (hardened, standalone) ================================
+ * Usage:
+ *   GET /ipfs-img?u=<cid or full http(s) url>[&path=<subpath>][&debug=1]
+ * Examples:
+ *   /ipfs-img?u=bafy...&path=/metadata.json
+ *   /ipfs-img?u=https://ipfs.io/ipfs/bafy.../image.png
+ */
+app.get("/ipfs-img", async (req: Request, res: Response) => {
+  try {
+    const debug = String(req.query.debug || "") === "1";
+    const uRaw = String(req.query.u || "").trim();
+    const subpath = String(req.query.path || "").trim();
+
+    if (!uRaw) {
+      return res.status(400).json({ error: "missing query param 'u'" });
+    }
+
+    // Build a candidate URL list: if it's already http(s), try it first; otherwise treat as CID
+    const isHttp = /^https?:\/\//i.test(uRaw);
+    const safePath = subpath && subpath.startsWith("/") ? subpath : (subpath ? `/${subpath}` : "");
+    const candidates: string[] = [];
+
+    if (isHttp) {
+      // Normalize and try given URL first
+      try {
+        const given = new URL(uRaw);
+        candidates.push(given.toString());
+      } catch {
+        // fall through to CID handling if URL is malformed
+      }
+    }
+
+    // CID handling: accept bare CID or cid-with-/ipfs/
+    const cidMatch = uRaw.match(/([a-z0-9]{46,}|bafy[0-9a-z]+)/i);
+    if (cidMatch) {
+      const cid = cidMatch[1];
+      const suffix = safePath || "";
+      candidates.push(
+        `https://w3s.link/ipfs/${cid}${suffix}`,
+        `https://ipfs.io/ipfs/${cid}${suffix}`,
+        `https://cloudflare-ipfs.com/ipfs/${cid}${suffix}`,
+        `https://dweb.link/ipfs/${cid}${suffix}`
+      );
+    }
+
+    // Last-resort: if still nothing and not http, try to treat the whole thing as a URL
+    if (!candidates.length && !isHttp) {
+      try {
+        const attempted = new URL(uRaw);
+        candidates.push(attempted.toString());
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!candidates.length) {
+      return res.status(400).json({ error: "could not derive any candidate URLs from 'u'" });
+    }
+
+    const attempts: Array<{ url: string; status?: number; ok?: boolean; error?: string; contentType?: string }> = [];
+
+    let bestResp: Response | null = null;
+    let bestUrl = "";
+
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { method: "GET", redirect: "follow" as RequestRedirect, cache: "no-store" as RequestCache });
+        attempts.push({ url, status: r.status, ok: r.ok, contentType: r.headers.get("content-type") || undefined });
+        if (r.ok) {
+          bestResp = r as unknown as Response; // Node18+ global fetch Response
+          bestUrl = url;
+          break;
+        }
+      } catch (err: any) {
+        attempts.push({ url, ok: false, error: err?.message || String(err) });
+      }
+    }
+
+    if (debug) {
+      return res.status(bestResp ? 200 : 502).json({ input: { u: uRaw, path: subpath }, tried: attempts, picked: bestUrl || null });
+    }
+
+    if (!bestResp) {
+      return res.status(502).json({ error: "all gateways failed", attempts });
+    }
+
+    // Stream result
+    const ct = (bestResp.headers.get("content-type") || "application/octet-stream").toLowerCase();
+    res.setHeader("Content-Type", ct);
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+
+    // Prefer streaming to avoid buffering large files in memory
+    // @ts-ignore Node fetch Response has body as Readable
+    if (bestResp.body && typeof bestResp.body.pipe === "function") {
+      // @ts-ignore
+      return bestResp.body.pipe(res);
+    } else {
+      const buf = Buffer.from(await bestResp.arrayBuffer());
+      return res.status(200).send(buf);
+    }
+  } catch (e: any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+/** ======================================================================== */
+
+/**
+ * === IPFS image proxy (hardened, standalone) ================================
+ * Usage:
+ *   GET /ipfs-img?u=<cid or full http(s) url>[&path=<subpath>][&debug=1]
+ * Examples:
+ *   /ipfs-img?u=bafy...&path=/metadata.json
+ *   /ipfs-img?u=https://ipfs.io/ipfs/bafy.../image.png
+ */
+app.get("/ipfs-img", async (req: Request, res: Response) => {
+  try {
+    const debug = String(req.query.debug || "") === "1";
+    const uRaw = String(req.query.u || "").trim();
+    const subpath = String(req.query.path || "").trim();
+
+    if (!uRaw) {
+      return res.status(400).json({ error: "missing query param 'u'" });
+    }
+
+    // Build a candidate URL list: if it's already http(s), try it first; otherwise treat as CID
+    const isHttp = /^https?:\/\//i.test(uRaw);
+    const safePath = subpath && subpath.startsWith("/") ? subpath : (subpath ? `/${subpath}` : "");
+    const candidates: string[] = [];
+
+    if (isHttp) {
+      // Normalize and try given URL first
+      try {
+        const given = new URL(uRaw);
+        candidates.push(given.toString());
+      } catch {
+        // fall through to CID handling if URL is malformed
+      }
+    }
+
+    // CID handling: accept bare CID or cid-with-/ipfs/
+    const cidMatch = uRaw.match(/([a-z0-9]{46,}|bafy[0-9a-z]+)/i);
+    if (cidMatch) {
+      const cid = cidMatch[1];
+      const suffix = safePath || "";
+      candidates.push(
+        `https://w3s.link/ipfs/${cid}${suffix}`,
+        `https://ipfs.io/ipfs/${cid}${suffix}`,
+        `https://cloudflare-ipfs.com/ipfs/${cid}${suffix}`,
+        `https://dweb.link/ipfs/${cid}${suffix}`
+      );
+    }
+
+    // Last-resort: if still nothing and not http, try to treat the whole thing as a URL
+    if (!candidates.length && !isHttp) {
+      try {
+        const attempted = new URL(uRaw);
+        candidates.push(attempted.toString());
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!candidates.length) {
+      return res.status(400).json({ error: "could not derive any candidate URLs from 'u'" });
+    }
+
+    const attempts: Array<{ url: string; status?: number; ok?: boolean; error?: string; contentType?: string }> = [];
+
+    let bestResp: Response | null = null;
+    let bestUrl = "";
+
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { method: "GET", redirect: "follow" as RequestRedirect, cache: "no-store" as RequestCache });
+        attempts.push({ url, status: r.status, ok: r.ok, contentType: r.headers.get("content-type") || undefined });
+        if (r.ok) {
+          bestResp = r as unknown as Response; // Node18+ global fetch Response
+          bestUrl = url;
+          break;
+        }
+      } catch (err: any) {
+        attempts.push({ url, ok: false, error: err?.message || String(err) });
+      }
+    }
+
+    if (debug) {
+      return res.status(bestResp ? 200 : 502).json({ input: { u: uRaw, path: subpath }, tried: attempts, picked: bestUrl || null });
+    }
+
+    if (!bestResp) {
+      return res.status(502).json({ error: "all gateways failed", attempts });
+    }
+
+    // Stream result
+    const ct = (bestResp.headers.get("content-type") || "application/octet-stream").toLowerCase();
+    res.setHeader("Content-Type", ct);
+    res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
+
+    // Prefer streaming to avoid buffering large files in memory
+    // @ts-ignore Node fetch Response has body as Readable
+    if (bestResp.body && typeof bestResp.body.pipe === "function") {
+      // @ts-ignore
+      return bestResp.body.pipe(res);
+    } else {
+      const buf = Buffer.from(await bestResp.arrayBuffer());
+      return res.status(200).send(buf);
+    }
+  } catch (e: any) {
+    return res.status(502).json({ error: e?.message || String(e) });
+  }
+});
+/** ======================================================================== */

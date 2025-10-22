@@ -1,0 +1,62 @@
+import express from "express";
+import type { Request, Response } from "express";
+import { loadKeypair } from "./keyloader";
+
+// ---- Config (no top-level await used) ----
+const PORT = Number(process.env.PORT || 8090);
+const RPC_URL = process.env.RPC_URL || "https://api.devnet.solana.com";
+const COMMITMENT = (process.env.COMMITMENT as "processed"|"confirmed"|"finalized") || "finalized";
+
+// Optional seller/buyer keys; loadKeypair handles env/file/auto per your helper
+let sellerKp: ReturnType<typeof loadKeypair> | null = null;
+let buyerKp: ReturnType<typeof loadKeypair> | null = null;
+
+try {
+  sellerKp = loadKeypair({
+    label: "seller",
+    source: (process.env.SOLANA_SELLER_KEY as any) || "auto",
+    legacyEnvArray: "WALLET_SECRET_KEY",
+    legacyFilePath: "WALLET_KEYPAIR_PATH",
+  });
+} catch (e) {
+  // keep running even if seller is absent
+  console.warn("⚠️ seller keypair not loaded:", (e as Error).message);
+}
+
+try {
+  buyerKp = loadKeypair({
+    label: "buyer",
+    source: (process.env.SOLANA_BUYER_KEY as any) || "auto",
+    legacyEnvArray: "BUYER_SECRET_KEY",
+    legacyFilePath: "BUYER_KEYPAIR_PATH",
+  });
+} catch (e) {
+  console.warn("⚠️ buyer keypair not loaded:", (e as Error).message);
+}
+
+// ---- Express App ----
+const app = express();
+app.use(express.json());
+
+app.get("/healthz", (_req: Request, res: Response) => {
+  res.json({
+    ok: true,
+    rpc: RPC_URL,
+    commitment: COMMITMENT,
+    sellerLoaded: !!sellerKp,
+    buyerLoaded: !!buyerKp,
+  });
+});
+
+app.get("/", (_req: Request, res: Response) => {
+  res.send("✅ solana-worker up");
+});
+
+// (add your other routes here)
+
+app.listen(PORT, () => {
+  console.log(`✅ solana-worker on http://localhost:${PORT}`);
+});
+
+// Mark file as a module; avoids TS “script” parsing edge cases.
+export {};

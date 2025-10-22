@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+ROOT="/home/khk89/NFTSol"
+# CHANGE to a mainnet owner or collection-owner you want to index:
+OWNER="LLsA5pEN2CKTK3fEr5NEEyTK5vWSGn5unFyruNnG2qG"
+
+set +u
+set -a; . "$ROOT/env/prod/server.env"; set +a
+set -u
+
+: "${HELIUS_API_KEY:?Missing HELIUS_API_KEY in $ROOT/env/prod/server.env}"
+: "${SOLANA_RPC_URL:?Missing SOLANA_RPC_URL in $ROOT/env/prod/server.env}"
+
+mkdir -p "$ROOT/uploads" "$ROOT/uploads/images"
+
+RAW="$ROOT/uploads/prod_owner_raw.json"
+curl -sS -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":"nftsol","method":"getAssetsByOwner","params":{"ownerAddress":"'"$OWNER"'","page":1,"limit":500}}' \
+  "$SOLANA_RPC_URL" > "$RAW"
+
+if jq -e 'has("error")' "$RAW" >/dev/null; then
+  echo "Helius error:" >&2
+  jq '.error' "$RAW" >&2
+  exit 1
+fi
+
+jq '(.result.items // [])' "$RAW" > "$ROOT/uploads/prod_owner_items.json"
+
+jq '[ .[] | {
+  id, interface,
+  name: (.content.metadata.name // .content.name // "Unnamed"),
+  symbol: (.content.metadata.symbol // .content.symbol // ""),
+  image: (.content.links.image // (.content.files[0].cdn_uri // .content.files[0].uri // null)),
+  json_uri: (.content.json_uri // null),
+  owner: (.ownership.owner // null),
+  compressed: (.compression.compressed // false),
+  supply: (.token_info.supply // 1),
+  attributes: (.content.metadata.attributes // []),
+  creators: (.creators // []),
+  royalty_bps: (.royalty.basis_points // 0)
+}]' "$ROOT/uploads/prod_owner_items.json" > "$ROOT/uploads/prod_market_list.json"
+
+jq -r '.[].image | select(.!=null)' "$ROOT/uploads/prod_market_list.json" | sort -u > "$ROOT/uploads/prod_images.txt"
+while read -r URL; do
+  [ -z "$URL" ] && continue
+  F="$ROOT/uploads/images/$(basename "$URL" | cut -d'?' -f1)"
+  curl -sSL "$URL" -o "$F" || true
+done < "$ROOT/uploads/prod_images.txt"
+
+jq 'map(. + {local_image:
+      (if .image then ("/uploads/images/" + (.image | split("/")[-1] | split("?")[0])) else null end)
+})' "$ROOT/uploads/prod_market_list.json" > "$ROOT/uploads/prod_market_list_local.json"
+
+COUNT=$(jq 'length' "$ROOT/uploads/prod_market_list.json")
+echo "Refreshed prod market ($COUNT items): $ROOT/uploads/prod_market_list.json ($(date -Is))"

@@ -23,3 +23,5 @@ Thumbs.db
 *.env.*
 client/.env*
 server/.env*
+.env.*
+uploads/

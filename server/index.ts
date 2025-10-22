@@ -60,9 +60,13 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     const duration = Date.now() - start;
     if (pathName.startsWith("/api")) {
       if (pathName.includes("/src/") || pathName.includes("vite") || res.statusCode === 304) return;
+<<<<<<< HEAD
       let logLine = `${req.method} ${pathName} ${res.statusCode} in ${duration}ms`;
+=======
+      let logLine = ${req.method}   in ms;
+>>>>>>> 9d48334 (Refine wallet flow and fix TypeScript build)
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        logLine +=  :: ;
       }
       if (logLine.length > 80) logLine = logLine.slice(0, 79) + ".";
       log(logLine);
@@ -80,6 +84,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     process.exit(1);
   }
 
+<<<<<<< HEAD
   app.use(helmetConfig);
   app.use(corsConfig);
   app.use(securityHeaders);
@@ -90,6 +95,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
   app.use(sanitizeInput);
 
+=======
+>>>>>>> 9d48334 (Refine wallet flow and fix TypeScript build)
   const { setupPricingRoutes } = await import("./pricing-analytics");
   setupPricingRoutes(app);
 
@@ -109,9 +116,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   app.get("/api/wallet/config", getWalletConfig);
   app.post("/api/wallet/config", updateWalletConfig);
 
+<<<<<<< HEAD
   const solanaRewardsRoutes = await import("./routes/solana-rewards");
   app.use("/api/solana/rewards", solanaRewardsRoutes.default);
 
+=======
+>>>>>>> 9d48334 (Refine wallet flow and fix TypeScript build)
   registerRoutes(app);
   setupNFTRoutes(app);
   setupRecommendationRoutes(app);
@@ -184,6 +194,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     });
   });
 
+<<<<<<< HEAD
+=======
+  app.use(helmetConfig);
+  app.use(corsConfig);
+  app.use(securityHeaders);
+  app.use(requestLogger);
+  app.use(securityLogger);
+  // if (process.env.NODE_ENV === "production") app.use(generalLimiter);
+  app.use(sanitizeInput);
+
+>>>>>>> 9d48334 (Refine wallet flow and fix TypeScript build)
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -206,6 +227,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   const PORT = parseInt(process.env.PORT || "3001", 10);
   const server = app.listen(PORT, "0.0.0.0", () => {
+<<<<<<< HEAD
     console.log(`Server running on http://0.0.0.0:${PORT}`);
     console.log(`Access your app at: http://localhost:${PORT}`);
     console.log("WebSocket server initialized for real-time updates");
@@ -213,3 +235,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   setupWebSocketAPI(server);
 })();
+=======
+    console.log(Server running on http://0.0.0.0:);
+    console.log(Access your app at: http://localhost:);
+    console.log(WebSocket server initialized for real-time updates);
+  });
+
+  setupWebSocketAPI(server);
+})();
+>>>>>>> 9d48334 (Refine wallet flow and fix TypeScript build)
