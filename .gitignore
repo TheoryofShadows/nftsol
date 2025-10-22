@@ -28,3 +28,18 @@ server/.env*
 logs/
 *.log
 uploads/
+# --- secret hardening ---
+.env
+.env.*
+*.env
+*.pem
+*.p12
+*.pfx
+*.keystore
+**/secrets/**
+.local/
+.local/**
+# already added earlier:
+logs/
+*.log
+uploads/
