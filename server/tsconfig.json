@@ -1,32 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2021",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "dist",
     "rootDir": "src",
+    "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
     "types": [
       "node"
     ],
-    "noImplicitAny": false
+    "moduleResolution": "node"
   },
   "include": [
-    "src/**/*.ts",
-    "**/*.d.ts"
-  ],
-  "exclude": [
-    "src/ipfs-img-proxy.ts",
-    "src/ipfsProxyStandalone.ts",
-    "src/ipfs*",
-    "src/**/ipfs*",
-    "src/**/*ipfs*",
-    "src/**/ipfsProxy*",
-    "src/**/ipfs-img-proxy*",
-    "src/**/ipfsProxyStandalone*"
+    "src/**/*"
   ]
 }
