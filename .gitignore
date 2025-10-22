@@ -26,3 +26,12 @@ server/.env*
 
 # local uploads (do not commit)
 uploads/
+
+# local caches & artifacts
+node_modules/
+.pnpm-store/
+.local/
+dist/
+build/
+*.log
+*.tgz
