@@ -1,5 +1,6 @@
-import fetch from "node-fetch";
-import { HELIUS_RPC_URL } from "./config";
+import { getHeliusConfig } from "./config/environment";
+
+const heliusConfig = getHeliusConfig();
 
 export type SimpleItem = {
   mint: string;
@@ -10,8 +11,8 @@ export type SimpleItem = {
 
 export function toSimpleItem(it: any): SimpleItem | null {
   if (!it) return null;
-  const id =
-    it.id ?? it.mint ?? it.token_info?.mint ?? null;
+
+  const id = it.id ?? it.mint ?? it.token_info?.mint ?? null;
   if (!id) return null;
 
   const name =
@@ -30,11 +31,25 @@ export function toSimpleItem(it: any): SimpleItem | null {
     it.token_info?.token_program ??
     "Unknown Collection";
 
-  return { mint: String(id), name: String(name), image: String(image), collection: String(collection) };
+  return {
+    mint: String(id),
+    name: String(name),
+    image: String(image),
+    collection: String(collection),
+  };
 }
 
 export function toSimpleItems(items: any[]): SimpleItem[] {
   return (items || []).map(toSimpleItem).filter(Boolean) as SimpleItem[];
+}
+
+function createTimeoutController(timeoutMs: number) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return {
+    signal: controller.signal,
+    clear: () => clearTimeout(timer),
+  };
 }
 
 /** DAS owner query with correct sort casing */
@@ -48,21 +63,34 @@ export async function getAssetsByOwner(ownerAddress: string) {
       page: 1,
       limit: 100,
       sortBy: { sortBy: "recent_action", sortDirection: "desc" },
-      displayOptions: { showFungible: true }
-    }
+      displayOptions: { showFungible: true },
+    },
   };
 
-  const res = await fetch(HELIUS_RPC_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const timeout = createTimeoutController(heliusConfig.timeoutMs);
 
-  const json = await res.json();
-  if (json.error) {
-    console.warn("⚠️ Helius error:", json.error);
-    return [];
+  try {
+    const res = await fetch(heliusConfig.rpcUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: timeout.signal,
+    });
+
+    const json = await res.json();
+    if (json.error) {
+      console.warn("?? Helius error:", json.error);
+      return [];
+    }
+    const items = json.result?.items ?? [];
+    return toSimpleItems(items);
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      console.error("[helius] request timed out", { ownerAddress });
+      return [];
+    }
+    throw error;
+  } finally {
+    timeout.clear();
   }
-  const items = json.result?.items ?? [];
-  return toSimpleItems(items);
 }

@@ -1,9 +1,23 @@
 {
-  "name": "nftsol-root",
+  "name": "nftsol",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "build": "npm --prefix server install && npm --prefix server run build",
-    "start": "node server/dist/index.js"
+    "bootstrap": "npm install --prefix server && npm install --prefix client",
+    "dev": "concurrently \\\"npm run dev --prefix server\\\" \\\"npm run dev --prefix client\\\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm run build --prefix server && npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "lint": "npm run lint --prefix server || true"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

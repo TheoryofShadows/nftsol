@@ -1,60 +1,80 @@
-<!-- BADGES:BEGIN -->
-[![CI](https://github.com/TheoryofShadows/nftsol/actions/workflows/ci.yml/badge.svg)](https://github.com/TheoryofShadows/nftsol/actions/workflows/ci.yml) [![Pages](https://github.com/TheoryofShadows/nftsol/actions/workflows/pages.yml/badge.svg)](https://github.com/TheoryofShadows/nftsol/actions/workflows/pages.yml)
-<!-- BADGES:END -->
+# NFTSol Platform
 
-# NFTSol Step 0 — Client + IPFS Proxy
+Clean Solana tooling for the NFTSol stack. The repository now ships as a
+two-package workspace:
 
-[![CI](https://img.shields.io/github/actions/workflow/status/TheoryofShadows/nftsol/ci.yml?branch=main&label=CI)](https://github.com/TheoryofShadows/nftsol/actions)
-![License](https://img.shields.io/badge/license-MIT-informational)
-![Stars](https://img.shields.io/github/stars/TheoryofShadows/nftsol?style=social)
+- `server/` – Express API with Helius-powered NFT lookups
+- `client/` – Vite/React front-end wired for the proxy + wallet demo
 
-A tiny, production-minded setup for:
-- **IPFS image proxy** (Node/Express, pm2) with gateway rotation + browser-like headers
-- **Vite/React client** that loads images via the local proxy (`/ipfs-img?u=...`)
+The root `package.json` orchestrates both packages (`npm run dev`, `npm run build`, etc.).
 
-## Quick Start
+## Quick start
 
-### Proxy (pm2)
-cd server
-cp -n .env.example .env
-pm2 start ecosystem.config.cjs
-pm2 save
-pm2 status
-
-### Client
-cd ../client
-cp -n .env.example .env
-npm ci
-npm run dev -- --port 5174
-# open http://localhost:5174
-
-## Handy
-pm2 logs ipfs-proxy --lines 50
-pm2 restart ipfs-proxy
-fuser -k 5174/tcp || true
-
-<!-- LIVE-DEMO:BEGIN -->
-## Live Demo & Local Setup
-
-**GitHub Pages:** https://theoryofshadows.github.io/nftsol/
-
-### Run locally (WSL)
 ```bash
-# backend (proxy + static)
-pm2 start /server/ecosystem.config.cjs && pm2 save
-curl -I http://127.0.0.1:8088/image.png | head -n 6
+git clone https://github.com/TheoryofShadows/nftsol.git
+cd nftsol
 
-# client
-cd /client
-npm run dev -- --port 5174 --host 127.0.0.1 --strictPort
+# install root + workspace dependencies
+npm install
+npm run bootstrap
+
+# run both server and client together
+npm run dev
 ```
 
-### Configure client to use your proxy
-Create `nftsol/client/.env` with:
-```dotenv
-VITE_IMG_PROXY_BASE=http://localhost:3003
+The dev command launches:
+
+- Express API on `http://127.0.0.1:3000`
+- Vite client on `http://127.0.0.1:5173`
+
+Use `npm run dev:server` or `npm run dev:client` to run them individually.
+
+## Environment configuration
+
+- Copy `.env.example` → `.env` at the repository root for server defaults.
+- Copy `client/.env.example` → `client/.env` for client settings.
+- Render/Netlify deployment variables are defined in `render.yaml`.
+
+Key server variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | API port (default `3000`) |
+| `ALLOWED_ORIGINS` | Comma-separated production origins |
+| `DEV_ALLOWED_ORIGINS` | Comma-separated development origins |
+| `SOLANA_CLUSTER` | `mainnet-beta`, `devnet`, etc. |
+| `HELIUS_API_KEY` | Secret API key for Helius |
+| `HELIUS_RPC_URL` / `HELIUS_REST_URL` | Override RPC/REST endpoints (optional) |
+
+The new `server/src/config/environment.ts` normalises and validates these values
+using `zod`, guaranteeing consistent runtime behaviour.
+
+## Production builds
+
+```bash
+npm run build        # builds server + client
+npm run build:server # server only
+npm run build:client # client only
+npm run start        # start compiled server (uses /server/dist)
 ```
 
-If not set, the site runs in **Demo Mode** so Pages visitors still see a sample image.
-<!-- LIVE-DEMO:END -->
+## Deployment
 
+- Render deployment definitions live in `render.yaml` (staging + prod).
+- `npm run bootstrap` is used by the Render build command to install server dependencies.
+- Netlify clients can use `client/vite.config.netlify.js` for environment-specific builds.
+
+Refer to `docs/environment-setup.md` (added in this cleanup) for a full matrix of
+development vs. production variables and helper scripts.
+
+## Cleaning & structure
+
+This cleanup removed legacy artifacts:
+
+- Old monolithic server TypeScript files (now superseded by `server/src`)
+- Checked-in secret keypairs (`secrets/` now ignored with a README placeholder)
+- Routes/solana-worker scaffolding, build logs, and `.bak` files
+- React component backups (`client/src/App.bak`, etc.)
+
+The repository only tracks source code, documentation, and deployment manifests,
+making dev/prod separation explicit.

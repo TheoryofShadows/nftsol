@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getAssetsByOwner } from "../helius-api.js";
+import { getAssetsByOwner } from "../helius-api";
 
 const r = Router();
 

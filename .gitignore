@@ -3,6 +3,7 @@ node_modules/
 npm-debug.log*
 pnpm-lock.yaml
 yarn.lock
+*.log
 
 # Vite / build caches
 **/.vite/
@@ -23,3 +24,7 @@ Thumbs.db
 *.env.*
 client/.env*
 server/.env*
+anchor/
+secrets/*
+!secrets/README.md
+client/tsconfig.tsbuildinfo
