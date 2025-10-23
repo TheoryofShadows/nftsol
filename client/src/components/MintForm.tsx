@@ -24,25 +24,22 @@ export default function MintForm() {
     }
 
     setLoading(true);
-    setStatus("Minting NFT...");
+    setStatus("🚀 Minting your revolutionary NFT...");
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/mint`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          creatorWallet: publicKey.toString(),
-          name: form.name,
-          description: form.description,
-          imageUrl: form.imageUrl,
-          collection: form.collection || undefined
+          ...form,
+          creator: publicKey.toString()
         })
       });
 
       const data = await res.json();
       
-      if (data.ok) {
-        setStatus(`✅ NFT minted successfully! Mint: ${data.mintAddress}`);
+      if (data.success) {
+        setStatus("✅ NFT minted successfully! Your revolutionary creation is now live!");
         setForm({ name: "", description: "", imageUrl: "", collection: "" });
       } else {
         setStatus(`❌ Minting failed: ${data.error}`);
@@ -55,62 +52,156 @@ export default function MintForm() {
   }
 
   return (
-    <section style={{ padding: 20, border: '1px solid #e5e7eb', borderRadius: 12 }}>
-      <h2>Create New NFT</h2>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, maxWidth: 400 }}>
-        <input 
-          placeholder="NFT Name *"
-          value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
-          style={{ padding: 8, border: '1px solid #d1d5db', borderRadius: 6 }}
-        />
-        <textarea 
-          placeholder="Description *"
-          value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          style={{ padding: 8, border: '1px solid #d1d5db', borderRadius: 6, resize: 'vertical' }}
-        />
-        <input 
-          placeholder="Image URL *"
-          value={form.imageUrl}
-          onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-          style={{ padding: 8, border: '1px solid #d1d5db', borderRadius: 6 }}
-        />
-        <input 
-          placeholder="Collection (optional)"
-          value={form.collection}
-          onChange={e => setForm({ ...form, collection: e.target.value })}
-          style={{ padding: 8, border: '1px solid #d1d5db', borderRadius: 6 }}
-        />
-        <button 
-          onClick={handleMint}
-          disabled={loading || !connected}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: connected ? '#007bff' : '#6c757d',
-            color: 'white',
-            border: 'none',
-            borderRadius: 6,
-            cursor: connected ? 'pointer' : 'not-allowed',
-            fontSize: 16,
-            fontWeight: 500
-          }}
-        >
-          {loading ? 'Minting...' : connected ? 'Mint NFT' : 'Connect Wallet First'}
-        </button>
-        {status && (
-          <div style={{ 
-            padding: 12, 
-            backgroundColor: status.includes('✅') ? '#d4edda' : '#f8d7da',
-            color: status.includes('✅') ? '#155724' : '#721c24',
-            borderRadius: 6,
-            fontSize: 14
-          }}>
-            {status}
+    <div className="mint-container">
+      {!connected ? (
+        <div className="connect-wallet-prompt">
+          <div className="prompt-icon">🔗</div>
+          <h3>Connect Your Wallet</h3>
+          <p>Connect your Solana wallet to create revolutionary NFTs and earn CLOUT rewards!</p>
+        </div>
+      ) : (
+        <div className="mint-form">
+          <div className="form-header">
+            <h3>✨ Create Your Revolutionary NFT</h3>
+            <p>Join the most innovative NFT platform on Solana and earn CLOUT tokens!</p>
           </div>
-        )}
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label className="form-label">NFT Name *</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Enter a creative name for your NFT"
+                value={form.name}
+                onChange={(e) => setForm({...form, name: e.target.value})}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Description *</label>
+              <textarea
+                className="form-input"
+                rows={4}
+                placeholder="Describe your revolutionary NFT..."
+                value={form.description}
+                onChange={(e) => setForm({...form, description: e.target.value})}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Image URL *</label>
+              <input
+                type="url"
+                className="form-input"
+                placeholder="https://example.com/your-image.png"
+                value={form.imageUrl}
+                onChange={(e) => setForm({...form, imageUrl: e.target.value})}
+              />
+              <div className="form-help">
+                💡 Use IPFS, Arweave, or any public image URL
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Collection (Optional)</label>
+              <input
+                type="text"
+                className="form-input"
+                placeholder="Collection name"
+                value={form.collection}
+                onChange={(e) => setForm({...form, collection: e.target.value})}
+              />
+            </div>
+          </div>
+
+          {/* CLOUT Benefits */}
+          <div className="clout-benefits">
+            <h4>🏆 CLOUT Rewards for Creating NFTs</h4>
+            <div className="benefits-grid">
+              <div className="benefit-item">
+                <div className="benefit-icon">⚡</div>
+                <div className="benefit-text">
+                  <strong>+50 CLOUT</strong>
+                  <span>For each NFT created</span>
+                </div>
+              </div>
+              <div className="benefit-item">
+                <div className="benefit-icon">🎯</div>
+                <div className="benefit-text">
+                  <strong>Honor Boost</strong>
+                  <span>Increases your reputation</span>
+                </div>
+              </div>
+              <div className="benefit-item">
+                <div className="benefit-icon">💰</div>
+                <div className="benefit-text">
+                  <strong>Fee Discount</strong>
+                  <span>Reduced platform fees</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button 
+              onClick={handleMint}
+              disabled={loading}
+              className="btn-primary mint-button"
+            >
+              {loading ? (
+                <>
+                  <div className="loading-spinner" style={{ width: '20px', height: '20px', marginRight: '0.5rem' }}></div>
+                  Minting...
+                </>
+              ) : (
+                '🚀 Mint Revolutionary NFT'
+              )}
+            </button>
+          </div>
+
+          {status && (
+            <div className={`status-message ${status.includes('✅') ? 'success' : status.includes('❌') ? 'error' : 'info'}`}>
+              {status}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Revolutionary Features */}
+      <div className="mint-features">
+        <h4>🚀 Why Choose NFTSol?</h4>
+        <div className="features-list">
+          <div className="feature-item">
+            <div className="feature-icon">⚡</div>
+            <div className="feature-content">
+              <h5>Universal Wallet Support</h5>
+              <p>Connect with Phantom, Solflare, and any Solana wallet</p>
+            </div>
+          </div>
+          <div className="feature-item">
+            <div className="feature-icon">🏆</div>
+            <div className="feature-content">
+              <h5>CLOUT Token Economy</h5>
+              <p>Earn rewards for platform activity and good behavior</p>
+            </div>
+          </div>
+          <div className="feature-item">
+            <div className="feature-icon">🤝</div>
+            <div className="feature-content">
+              <h5>Honor-Based System</h5>
+              <p>Trust-based payments and rewards based on reputation</p>
+            </div>
+          </div>
+          <div className="feature-item">
+            <div className="feature-icon">🌐</div>
+            <div className="feature-content">
+              <h5>Cross-Platform NFTs</h5>
+              <p>View and trade NFTs from any Solana platform</p>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 }
