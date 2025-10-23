@@ -1,128 +1,169 @@
-import { Router } from "express";
-import { CrossPlatformNFTService } from "../services/crossPlatformNFTs";
+/**
+ * 🌐 Universal NFT Routes
+ * API endpoints for cross-platform NFT detection and management
+ */
+
+import { Router } from 'express';
+import { UniversalNFTDetectionService } from '../services/universalNFTDetection';
 
 const router = Router();
-const nftService = new CrossPlatformNFTService();
+const nftDetectionService = new UniversalNFTDetectionService();
 
-// Get all Solana NFTs from multiple sources
-router.get("/", async (req, res) => {
+// Get all NFTs for a wallet across all platforms
+router.get('/wallet/:address', async (req, res) => {
   try {
-    const { owner, collection, limit, offset, sources } = req.query;
+    const { address } = req.params;
     
-    const filters = {
-      owner: owner as string,
-      collection: collection as string,
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined,
-      sources: sources ? (sources as string).split(',') : undefined
-    };
-
-    const nfts = await nftService.getAllSolanaNFTs(filters);
-    res.json({ success: true, nfts, count: nfts.length });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Import external NFT to platform
-router.post("/import", async (req, res) => {
-  try {
-    const { mintAddress, ownerWallet } = req.body;
-    
-    if (!mintAddress || !ownerWallet) {
+    if (!address) {
       return res.status(400).json({ 
         success: false, 
-        error: "Missing required fields: mintAddress, ownerWallet" 
+        error: 'Wallet address is required' 
       });
     }
-
-    const result = await nftService.importExternalNFT(mintAddress, ownerWallet);
-    res.json(result);
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Search NFTs across all platforms
-router.get("/search", async (req, res) => {
-  try {
-    const { q, owner, collection, limit } = req.query;
     
-    if (!q) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Missing required parameter: q (search query)" 
-      });
-    }
-
-    const filters = {
-      owner: owner as string,
-      collection: collection as string,
-      limit: limit ? parseInt(limit as string) : 20
-    };
-
-    const nfts = await nftService.searchNFTs(q as string, filters);
-    res.json({ success: true, nfts, count: nfts.length });
-  } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
-
-// Get trending NFTs
-router.get("/trending", async (req, res) => {
-  try {
-    const { limit } = req.query;
-    const nftLimit = limit ? parseInt(limit as string) : 20;
+    console.log(`🔍 Detecting NFTs for wallet: ${address}`);
+    const nfts = await nftDetectionService.getAllNFTsForWallet(address);
     
-    const nfts = await nftService.getTrendingNFTs(nftLimit);
-    res.json({ success: true, nfts, count: nfts.length });
+    res.json({
+      success: true,
+      wallet: address,
+      nfts: nfts,
+      count: nfts.length,
+      platforms: [...new Set(nfts.map(nft => nft.platform))]
+    });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('❌ Error detecting NFTs:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Failed to detect NFTs: ${error.message}` 
+    });
   }
 });
 
 // Get NFTs by collection
-router.get("/collection/:collection", async (req, res) => {
+router.get('/collection/:collection', async (req, res) => {
   try {
     const { collection } = req.params;
-    const { limit, offset } = req.query;
+    const { page = 1, limit = 20 } = req.query;
     
-    const filters = {
-      collection,
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined
-    };
-
-    const nfts = await nftService.getAllSolanaNFTs(filters);
-    res.json({ success: true, nfts, count: nfts.length });
+    console.log(`📋 Getting NFTs for collection: ${collection}`);
+    
+    // This would implement collection-based NFT retrieval
+    // For now, return empty array
+    const nfts = [];
+    
+    res.json({
+      success: true,
+      collection: collection,
+      nfts: nfts,
+      count: nfts.length,
+      page: parseInt(page as string),
+      limit: parseInt(limit as string)
+    });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('❌ Error getting collection NFTs:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Failed to get collection NFTs: ${error.message}` 
+    });
   }
 });
 
-// Get NFT details by mint address
-router.get("/:mintAddress", async (req, res) => {
+// Search NFTs across all platforms
+router.get('/search', async (req, res) => {
   try {
-    const { mintAddress } = req.params;
+    const { q, collection, minPrice, maxPrice, platform } = req.query;
     
-    // Search for the specific NFT across all sources
-    const nfts = await nftService.getAllSolanaNFTs({ 
-      limit: 1,
-      sources: ['platform', 'helius', 'magic-eden', 'solana-rpc']
-    });
-    
-    const nft = nfts.find(n => n.mint === mintAddress);
-    
-    if (!nft) {
-      return res.status(404).json({ 
+    if (!q) {
+      return res.status(400).json({ 
         success: false, 
-        error: "NFT not found" 
+        error: 'Search query is required' 
       });
     }
-
-    res.json({ success: true, nft });
+    
+    console.log(`🔍 Searching NFTs with query: ${q}`);
+    
+    const filters = {
+      collection: collection as string,
+      minPrice: minPrice ? parseFloat(minPrice as string) : undefined,
+      maxPrice: maxPrice ? parseFloat(maxPrice as string) : undefined,
+      platform: platform as string
+    };
+    
+    const nfts = await nftDetectionService.searchNFTs(q as string, filters);
+    
+    res.json({
+      success: true,
+      query: q,
+      filters: filters,
+      nfts: nfts,
+      count: nfts.length
+    });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('❌ Error searching NFTs:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Failed to search NFTs: ${error.message}` 
+    });
+  }
+});
+
+// Get collection information
+router.get('/collection-info/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    
+    console.log(`📊 Getting collection info for: ${address}`);
+    const collectionInfo = await nftDetectionService.getCollectionInfo(address);
+    
+    if (!collectionInfo) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Collection not found' 
+      });
+    }
+    
+    res.json({
+      success: true,
+      collection: collectionInfo
+    });
+  } catch (error: any) {
+    console.error('❌ Error getting collection info:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Failed to get collection info: ${error.message}` 
+    });
+  }
+});
+
+// Get platform statistics
+router.get('/stats', async (req, res) => {
+  try {
+    console.log('📊 Getting universal NFT statistics');
+    
+    const stats = {
+      totalNFTs: 0,
+      platforms: {
+        nftsol: 0,
+        magicEden: 0,
+        metaplex: 0,
+        crossPlatform: 0
+      },
+      collections: 0,
+      totalVolume: 0,
+      lastUpdated: Date.now()
+    };
+    
+    res.json({
+      success: true,
+      stats: stats
+    });
+  } catch (error: any) {
+    console.error('❌ Error getting NFT statistics:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: `Failed to get NFT statistics: ${error.message}` 
+    });
   }
 });
 

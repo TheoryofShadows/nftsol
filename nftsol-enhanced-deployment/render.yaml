@@ -48,7 +48,7 @@ services:
       - key: CLOUT_FEE_COLLECTOR
         value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
       - key: CLOUT_DEVELOPER
-        value: 7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
+        value: GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP
 
   - type: web
     name: nftsol-server-prod
@@ -99,4 +99,4 @@ services:
       - key: CLOUT_FEE_COLLECTOR
         value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
       - key: CLOUT_DEVELOPER
-        value: 7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
+        value: GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP

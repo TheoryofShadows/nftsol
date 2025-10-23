@@ -4,10 +4,15 @@ import MintForm from "./components/MintForm";
 import NFTMarketplace from "./components/NFTMarketplace";
 import ProxyCheck from "./components/ProxyCheck";
 import CloutBadge from "./components/CloutBadge";
+import HomePage from "./components/HomePage";
+import CloutExplanation from "./components/CloutExplanation";
+import SmartContractPage from "./components/SmartContractPage";
+import TimeCapsuleSales from "./components/TimeCapsuleSales";
+import CollectionManager from "./components/CollectionManager";
 import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'marketplace' | 'mint' | 'proxy'>('marketplace');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy'>('home');
 
   return (
     <UniversalWalletProvider>
@@ -35,6 +40,12 @@ export default function App() {
         {/* Revolutionary Navigation */}
         <nav className="nav-tabs">
           <button
+            onClick={() => setActiveTab('home')}
+            className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`}
+          >
+            🏠 Home
+          </button>
+          <button
             onClick={() => setActiveTab('marketplace')}
             className={`nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
           >
@@ -47,6 +58,30 @@ export default function App() {
             ✨ Create NFT
           </button>
           <button
+            onClick={() => setActiveTab('clout')}
+            className={`nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
+          >
+            ⚡ CLOUT Token
+          </button>
+          <button
+            onClick={() => setActiveTab('smart-contract')}
+            className={`nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
+          >
+            🛡️ Smart Contracts
+          </button>
+          <button
+            onClick={() => setActiveTab('time-capsules')}
+            className={`nav-tab ${activeTab === 'time-capsules' ? 'active' : ''}`}
+          >
+            ⏰ Time Capsules
+          </button>
+          <button
+            onClick={() => setActiveTab('collections')}
+            className={`nav-tab ${activeTab === 'collections' ? 'active' : ''}`}
+          >
+            🏗️ Collections
+          </button>
+          <button
             onClick={() => setActiveTab('proxy')}
             className={`nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
           >
@@ -56,6 +91,8 @@ export default function App() {
 
         {/* Revolutionary Content */}
         <main className="content-section">
+          {activeTab === 'home' && <HomePage />}
+
           {activeTab === 'marketplace' && (
             <div className="section-card fade-in-up">
               <h2 className="section-title">
@@ -71,6 +108,28 @@ export default function App() {
                 ✨ Create Your Revolutionary NFT
               </h2>
               <MintForm />
+            </div>
+          )}
+
+          {activeTab === 'clout' && <CloutExplanation />}
+
+          {activeTab === 'smart-contract' && <SmartContractPage />}
+
+          {activeTab === 'time-capsules' && (
+            <div className="section-card fade-in-up">
+              <h2 className="section-title">
+                ⏰ Time Capsule Sales
+              </h2>
+              <TimeCapsuleSales />
+            </div>
+          )}
+
+          {activeTab === 'collections' && (
+            <div className="section-card fade-in-up">
+              <h2 className="section-title">
+                🏗️ Collection Manager
+              </h2>
+              <CollectionManager />
             </div>
           )}
 

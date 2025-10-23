@@ -140,21 +140,47 @@ export class NFTMintingService {
   }
 
   private async uploadMetadata(metadata: any): Promise<string> {
-    // Upload to Storacha or IPFS
-    // This is where you'd integrate with your Storacha setup
+    // Use enhanced IPFS service for metadata upload
     try {
-      const response = await fetch('https://api.storacha.com/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(metadata)
+      const { EnhancedIPFSService, defaultIPFSConfig } = await import('./ipfsService');
+      const ipfsService = new EnhancedIPFSService(defaultIPFSConfig);
+      
+      const result = await ipfsService.uploadNFTMetadata({
+        name: metadata.name,
+        description: metadata.description,
+        image: metadata.image,
+        attributes: metadata.attributes || [],
+        collection: metadata.collection,
+        creator: metadata.creator,
+        properties: metadata.properties,
       });
       
-      const result = await response.json();
-      return result.uri;
+      return result.url;
     } catch (error) {
-      // Fallback to local storage or IPFS
-      console.warn('Storacha upload failed, using fallback:', error);
-      return `https://ipfs.io/ipfs/${Buffer.from(JSON.stringify(metadata)).toString('base64')}`;
+      console.error('IPFS metadata upload failed:', error);
+      // Fallback to simple IPFS upload
+      try {
+        const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'pinata_api_key': process.env.PINATA_API_KEY || '',
+            'pinata_secret_api_key': process.env.PINATA_SECRET_KEY || '',
+          },
+          body: JSON.stringify({
+            pinataContent: metadata,
+            pinataMetadata: {
+              name: `nft-metadata-${Date.now()}`,
+            },
+          }),
+        });
+        
+        const result = await response.json();
+        return `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
+      } catch (fallbackError) {
+        console.error('All metadata upload methods failed:', fallbackError);
+        throw new Error('Failed to upload metadata to IPFS');
+      }
     }
   }
 }

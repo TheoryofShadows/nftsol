@@ -37,7 +37,7 @@ export class TrustPaymentSystem {
   private platformWallets = {
     feeCollector: '5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW',
     treasury: 'J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh',
-    developer: 'GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP'
+    developer: '7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio'
   };
 
   constructor() {

@@ -412,6 +412,18 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* Hidden file input */
+.hidden-file-input {
+  display: none;
+}
+
+/* Mint spinner */
+.mint-spinner {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
 /* 🎨 Form Styling */
 .form-group {
   margin-bottom: 1.5rem;
@@ -945,4 +957,211 @@ body {
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   line-height: 1.5;
+}
+
+/* Enhanced NFT Creation Form Styles */
+.input-type-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  background: var(--solana-gray);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--solana-light-gray);
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  color: var(--solana-white);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.toggle-btn:hover {
+  background: var(--solana-light-gray);
+}
+
+.toggle-btn.active {
+  background: var(--gradient-primary);
+  color: var(--solana-white);
+  box-shadow: var(--shadow-button);
+}
+
+.file-upload-container {
+  width: 100%;
+}
+
+.file-upload-area {
+  border: 2px dashed var(--solana-light-gray);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  background: var(--solana-gray);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-upload-area:hover {
+  border-color: var(--solana-purple);
+  background: var(--solana-light-gray);
+}
+
+.file-upload-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-icon {
+  font-size: 2rem;
+  opacity: 0.7;
+}
+
+.upload-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.upload-text strong {
+  color: var(--solana-white);
+  font-size: 1.1rem;
+}
+
+.upload-text span {
+  color: var(--solana-light-gray);
+  font-size: 0.9rem;
+}
+
+.upload-hint {
+  color: var(--solana-light-gray);
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+  background: var(--solana-light-gray);
+  border-radius: 0.5rem;
+  border: 1px solid var(--solana-purple);
+}
+
+.file-icon {
+  font-size: 1.5rem;
+}
+
+.file-info {
+  flex: 1;
+  text-align: left;
+}
+
+.file-name {
+  color: var(--solana-white);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.file-size {
+  color: var(--solana-light-gray);
+  font-size: 0.9rem;
+}
+
+.remove-file {
+  background: var(--solana-gray);
+  border: 1px solid var(--solana-light-gray);
+  color: var(--solana-white);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.remove-file:hover {
+  background: #ff4444;
+  border-color: #ff4444;
+}
+
+.url-input-container {
+  width: 100%;
+}
+
+.image-preview {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.preview-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 0.5rem;
+  border: 2px solid var(--solana-light-gray);
+  object-fit: cover;
+  box-shadow: var(--shadow-card);
+}
+
+/* Drag and Drop Styles */
+.file-upload-area.drag-over {
+  border-color: var(--solana-purple);
+  background: var(--solana-light-gray);
+  transform: scale(1.02);
+}
+
+/* Loading States */
+.file-upload-area.uploading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.file-upload-area.uploading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border: 2px solid var(--solana-purple);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hidden file input */
+.hidden-file-input {
+  display: none;
+}
+
+/* Mint spinner */
+.mint-spinner {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
 }

@@ -7,7 +7,10 @@ import nfts from "./routes/nfts.js";
 import market from "./routes/market";
 import clout from "./routes/clout";
 import universalNFTs from "./routes/universalNFTs";
+import timeCapsules from "./routes/timeCapsules";
+import collections from "./routes/collections";
 import { getAppConfig } from "./config/environment";
+import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
 
 const appConfig = getAppConfig();
 const app = express();
@@ -31,11 +34,17 @@ app.use("/market", market);
 app.use("/api", market);
 app.use("/api/clout", clout);
 app.use("/api/universal-nfts", universalNFTs);
+app.use("/api/time-capsules", timeCapsules);
+app.use("/api/collections", collections);
 app.use("/healthz", health);
 app.use("/health", health);
 app.use("/nfts", nfts);
 
 app.get("/", (_req, res) => res.json({ ok: true }));
+
+// Initialize automated maintenance
+const maintenanceService = new AutomatedMaintenanceService();
+maintenanceService.startAutomatedMaintenance();
 
 // Error handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

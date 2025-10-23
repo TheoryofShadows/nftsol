@@ -27,7 +27,7 @@ npm install && npm install --save-dev @types/node && npm run build
 ## 🔧 Environment Variables for Render
 
 ```
-CLOUT_DEVELOPER=GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP
+CLOUT_DEVELOPER=7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
 CLOUT_FEE_COLLECTOR=5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
 CLOUT_MINT=4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
 CLOUT_TREASURY=J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh

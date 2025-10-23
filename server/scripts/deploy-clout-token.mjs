@@ -107,7 +107,7 @@ async function deployCLOUTToken() {
     const platformWallets = {
       treasury: 'J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh',
       feeCollector: '5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW',
-      developer: 'GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP'
+      developer: '7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio'
     };
     
     console.log("Creating token accounts for platform wallets...");

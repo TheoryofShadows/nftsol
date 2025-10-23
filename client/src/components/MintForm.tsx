@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useUniversalWallet } from '../wallet/UniversalWalletAdapter';
 
 export default function MintForm() {
@@ -11,6 +11,68 @@ export default function MintForm() {
   });
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inputType, setInputType] = useState<'upload' | 'url'>('upload');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setStatus("❌ Please select a valid image file");
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setStatus("❌ File size must be less than 10MB");
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle URL input
+  const handleUrlInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const url = event.target.value;
+    setForm({...form, imageUrl: url});
+    if (url) {
+      setImagePreview(url);
+    }
+  };
+
+  // Upload file to IPFS
+  const uploadFileToIPFS = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE}/api/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      if (data.success && data.ipfsUrl) {
+        return data.ipfsUrl;
+      } else {
+        throw new Error(data.error || 'Upload failed');
+      }
+    } catch (error) {
+      throw new Error(`Failed to upload to IPFS: ${error}`);
+    }
+  };
 
   async function handleMint() {
     if (!connected || !publicKey) {
@@ -18,20 +80,43 @@ export default function MintForm() {
       return;
     }
 
-    if (!form.name || !form.description || !form.imageUrl) {
-      setStatus("❌ Please fill in all required fields");
+    if (!form.name || !form.description) {
+      setStatus("❌ Please fill in name and description");
+      return;
+    }
+
+    if (inputType === 'upload' && !selectedFile) {
+      setStatus("❌ Please select an image file");
+      return;
+    }
+
+    if (inputType === 'url' && !form.imageUrl) {
+      setStatus("❌ Please enter an image URL");
       return;
     }
 
     setLoading(true);
-    setStatus("🚀 Minting your revolutionary NFT...");
+    setStatus("🚀 Processing your revolutionary NFT...");
 
     try {
+      let finalImageUrl = form.imageUrl;
+
+      // Handle file upload
+      if (inputType === 'upload' && selectedFile) {
+        setStatus("📤 Uploading image to IPFS...");
+        finalImageUrl = await uploadFileToIPFS(selectedFile);
+        setStatus("✅ Image uploaded! Minting NFT...");
+      }
+
+      // Mint the NFT
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/mint`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
+          name: form.name,
+          description: form.description,
+          imageUrl: finalImageUrl,
+          collection: form.collection,
           creator: publicKey.toString()
         })
       });
@@ -41,6 +126,8 @@ export default function MintForm() {
       if (data.success) {
         setStatus("✅ NFT minted successfully! Your revolutionary creation is now live!");
         setForm({ name: "", description: "", imageUrl: "", collection: "" });
+        setSelectedFile(null);
+        setImagePreview('');
       } else {
         setStatus(`❌ Minting failed: ${data.error}`);
       }
@@ -90,17 +177,104 @@ export default function MintForm() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Image URL *</label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://example.com/your-image.png"
-                value={form.imageUrl}
-                onChange={(e) => setForm({...form, imageUrl: e.target.value})}
-              />
-              <div className="form-help">
-                💡 Use IPFS, Arweave, or any public image URL
+              <label className="form-label">Image *</label>
+              
+              {/* Input Type Toggle */}
+              <div className="input-type-toggle">
+                <button 
+                  type="button"
+                  className={`toggle-btn ${inputType === 'upload' ? 'active' : ''}`}
+                  onClick={() => setInputType('upload')}
+                >
+                  📁 Upload from Device
+                </button>
+                <button 
+                  type="button"
+                  className={`toggle-btn ${inputType === 'url' ? 'active' : ''}`}
+                  onClick={() => setInputType('url')}
+                >
+                  🔗 Use Image URL
+                </button>
               </div>
+
+              {/* File Upload Input */}
+              {inputType === 'upload' && (
+                <div className="file-upload-container">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden-file-input"
+                    aria-label="Upload image file"
+                  />
+                  <div 
+                    className="file-upload-area"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {selectedFile ? (
+                      <div className="file-selected">
+                        <div className="file-icon">📁</div>
+                        <div className="file-info">
+                          <div className="file-name">{selectedFile.name}</div>
+                          <div className="file-size">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</div>
+                        </div>
+                        <button 
+                          type="button"
+                          className="remove-file"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedFile(null);
+                            setImagePreview('');
+                            if (fileInputRef.current) fileInputRef.current.value = '';
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="file-upload-prompt">
+                        <div className="upload-icon">📤</div>
+                        <div className="upload-text">
+                          <strong>Click to upload image</strong>
+                          <span>or drag and drop</span>
+                        </div>
+                        <div className="upload-hint">
+                          PNG, JPG, GIF up to 10MB
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* URL Input */}
+              {inputType === 'url' && (
+                <div className="url-input-container">
+                  <input
+                    type="url"
+                    className="form-input"
+                    placeholder="https://example.com/your-image.png"
+                    value={form.imageUrl}
+                    onChange={handleUrlInput}
+                  />
+                  <div className="form-help">
+                    💡 Use IPFS, Arweave, or any public image URL
+                  </div>
+                </div>
+              )}
+
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="image-preview">
+                  <img 
+                    src={imagePreview} 
+                    alt="Preview" 
+                    className="preview-image"
+                    onError={() => setImagePreview('')}
+                  />
+                </div>
+              )}
             </div>
 
             <div className="form-group">
@@ -151,7 +325,7 @@ export default function MintForm() {
             >
               {loading ? (
                 <>
-                  <div className="loading-spinner" style={{ width: '20px', height: '20px', marginRight: '0.5rem' }}></div>
+                  <div className="loading-spinner mint-spinner"></div>
                   Minting...
                 </>
               ) : (
