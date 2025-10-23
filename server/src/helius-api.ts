@@ -1,6 +1,12 @@
 import { getHeliusConfig } from "./config/environment";
 
-const heliusConfig = getHeliusConfig();
+const heliusConfig = {
+  ...getHeliusConfig(),
+  timeoutMs: 5000,
+  retryAttempts: 3,
+  batchSize: 50, // Batch requests for efficiency
+  cacheTimeout: 300000 // 5 minutes cache
+};
 
 export type SimpleItem = {
   mint: string;

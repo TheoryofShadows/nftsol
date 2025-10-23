@@ -41,12 +41,40 @@ interface UniversalWalletContextType {
 
 const UniversalWalletContext = createContext<UniversalWalletContextType | null>(null);
 
-// Supported wallet providers
+// Enhanced wallet detection
+const detectWallet = (walletName: string): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  switch (walletName) {
+    case 'phantom':
+      return !!(window as any).phantom?.solana?.isPhantom;
+    case 'solflare':
+      return !!(window as any).solflare?.isSolflare;
+    case 'backpack':
+      return !!(window as any).backpack;
+    case 'glow':
+      return !!(window as any).glow;
+    case 'sollet':
+      return !!(window as any).sollet;
+    case 'slope':
+      return !!(window as any).Slope;
+    case 'torus':
+      return !!(window as any).torus;
+    case 'coinbase':
+      return !!(window as any).coinbaseSolana;
+    case 'ledger':
+      return !!(window as any).solana?.isLedger;
+    default:
+      return false;
+  }
+};
+
+// Supported wallet providers with enhanced detection
 const WALLET_PROVIDERS: WalletProvider[] = [
   {
     name: 'phantom',
     icon: '👻',
-    isInstalled: false,
+    isInstalled: detectWallet('phantom'),
     connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
     disconnect: async () => {},
     signTransaction: async (tx) => tx,
@@ -55,7 +83,7 @@ const WALLET_PROVIDERS: WalletProvider[] = [
   {
     name: 'solflare',
     icon: '☀️',
-    isInstalled: false,
+    isInstalled: detectWallet('solflare'),
     connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
     disconnect: async () => {},
     signTransaction: async (tx) => tx,
@@ -64,7 +92,7 @@ const WALLET_PROVIDERS: WalletProvider[] = [
   {
     name: 'backpack',
     icon: '🎒',
-    isInstalled: false,
+    isInstalled: detectWallet('backpack'),
     connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
     disconnect: async () => {},
     signTransaction: async (tx) => tx,
@@ -73,7 +101,34 @@ const WALLET_PROVIDERS: WalletProvider[] = [
   {
     name: 'glow',
     icon: '✨',
-    isInstalled: false,
+    isInstalled: detectWallet('glow'),
+    connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
+    disconnect: async () => {},
+    signTransaction: async (tx) => tx,
+    signAllTransactions: async (txs) => txs
+  },
+  {
+    name: 'sollet',
+    icon: '🔗',
+    isInstalled: detectWallet('sollet'),
+    connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
+    disconnect: async () => {},
+    signTransaction: async (tx) => tx,
+    signAllTransactions: async (txs) => txs
+  },
+  {
+    name: 'slope',
+    icon: '📈',
+    isInstalled: detectWallet('slope'),
+    connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
+    disconnect: async () => {},
+    signTransaction: async (tx) => tx,
+    signAllTransactions: async (txs) => txs
+  },
+  {
+    name: 'coinbase',
+    icon: '🔵',
+    isInstalled: detectWallet('coinbase'),
     connect: async () => ({ publicKey: new PublicKey(''), connected: false, connecting: false }),
     disconnect: async () => {},
     signTransaction: async (tx) => tx,
@@ -181,6 +236,106 @@ class SolflareWalletProvider implements WalletProvider {
   }
 }
 
+// Backpack wallet implementation
+class BackpackWalletProvider implements WalletProvider {
+  name = 'backpack';
+  icon = '🎒';
+  isInstalled = false;
+  private provider: any = null;
+
+  constructor() {
+    this.detectProvider();
+  }
+
+  private detectProvider() {
+    if (typeof window !== 'undefined' && 'backpack' in window) {
+      this.provider = (window as any).backpack;
+      this.isInstalled = !!this.provider;
+    }
+  }
+
+  async connect(): Promise<WalletConnection> {
+    if (!this.provider) throw new Error('Backpack not installed');
+    
+    try {
+      const response = await this.provider.connect();
+      return {
+        publicKey: response.publicKey,
+        connected: true,
+        connecting: false
+      };
+    } catch (error: any) {
+      throw new Error(`Failed to connect to Backpack: ${error.message}`);
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.provider) {
+      await this.provider.disconnect();
+    }
+  }
+
+  async signTransaction(transaction: Transaction): Promise<Transaction> {
+    if (!this.provider) throw new Error('Backpack not connected');
+    return await this.provider.signTransaction(transaction);
+  }
+
+  async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+    if (!this.provider) throw new Error('Backpack not connected');
+    return await this.provider.signAllTransactions(transactions);
+  }
+}
+
+// Glow wallet implementation
+class GlowWalletProvider implements WalletProvider {
+  name = 'glow';
+  icon = '✨';
+  isInstalled = false;
+  private provider: any = null;
+
+  constructor() {
+    this.detectProvider();
+  }
+
+  private detectProvider() {
+    if (typeof window !== 'undefined' && 'glow' in window) {
+      this.provider = (window as any).glow;
+      this.isInstalled = !!this.provider;
+    }
+  }
+
+  async connect(): Promise<WalletConnection> {
+    if (!this.provider) throw new Error('Glow not installed');
+    
+    try {
+      const response = await this.provider.connect();
+      return {
+        publicKey: response.publicKey,
+        connected: true,
+        connecting: false
+      };
+    } catch (error: any) {
+      throw new Error(`Failed to connect to Glow: ${error.message}`);
+    }
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.provider) {
+      await this.provider.disconnect();
+    }
+  }
+
+  async signTransaction(transaction: Transaction): Promise<Transaction> {
+    if (!this.provider) throw new Error('Glow not connected');
+    return await this.provider.signTransaction(transaction);
+  }
+
+  async signAllTransactions(transactions: Transaction[]): Promise<Transaction[]> {
+    if (!this.provider) throw new Error('Glow not connected');
+    return await this.provider.signAllTransactions(transactions);
+  }
+}
+
 // Universal Wallet Provider Component
 export function UniversalWalletProvider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
@@ -197,7 +352,8 @@ export function UniversalWalletProvider({ children }: { children: React.ReactNod
     const providers: WalletProvider[] = [
       new PhantomWalletProvider(),
       new SolflareWalletProvider(),
-      // Add more wallet providers here
+      new BackpackWalletProvider(),
+      new GlowWalletProvider(),
     ];
 
     const installed = providers.filter(wallet => wallet.isInstalled);

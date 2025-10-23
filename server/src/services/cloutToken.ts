@@ -27,7 +27,7 @@ export class CloutTokenService {
     this.platformWallets = {
       treasury: 'J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh',
       feeCollector: '5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW',
-      developer: 'GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP'
+      developer: '7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio'
     };
   }
 
@@ -165,6 +165,7 @@ export class CloutTokenService {
       symbol: 'CLOUT',
       decimals: 9,
       totalSupply: 1_000_000_000, // 1 billion
+      logo: '/assets/clout-logo.svg', // CLOUT token logo
       utilities: [
         'Fee reduction (up to 50%)',
         'Premium marketplace features',
@@ -173,6 +174,94 @@ export class CloutTokenService {
         'Creator bonuses',
         'Early access to new features'
       ]
+    };
+  }
+
+  // Automated daily CLOUT distribution
+  async distributeDailyCloutRewards() {
+    try {
+      console.log('🎁 Starting daily CLOUT distribution...');
+      
+      // Get all active users from database
+      const activeUsers = await this.getActiveUsers();
+      
+      let totalDistributed = 0;
+      const distributionResults = [];
+      
+      for (const user of activeUsers) {
+        try {
+          // Calculate daily rewards based on honor score
+          const honorScore = await this.calculateUserHonorScore(user.walletAddress);
+          const dailyReward = this.calculateDailyReward(honorScore);
+          
+          if (dailyReward > 0) {
+            const result = await this.distributeCloutRewards(
+              user.walletAddress,
+              dailyReward,
+              honorScore.benefits.cloutMultiplier
+            );
+            
+            if (result.success) {
+              totalDistributed += dailyReward;
+              distributionResults.push({
+                wallet: user.walletAddress,
+                amount: dailyReward,
+                honorScore: honorScore.total
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to distribute CLOUT to ${user.walletAddress}:`, error);
+        }
+      }
+      
+      console.log(`✅ Daily CLOUT distribution complete: ${totalDistributed} CLOUT distributed to ${distributionResults.length} users`);
+      
+      return {
+        success: true,
+        totalDistributed,
+        userCount: distributionResults.length,
+        results: distributionResults
+      };
+      
+    } catch (error) {
+      console.error('Failed to distribute daily CLOUT rewards:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get active users for daily distribution
+  private async getActiveUsers() {
+    try {
+      // This would query your database for active users
+      // For now, return a placeholder
+      return [
+        { walletAddress: 'placeholder1', lastActivity: new Date() },
+        { walletAddress: 'placeholder2', lastActivity: new Date() }
+      ];
+    } catch (error) {
+      console.error('Failed to get active users:', error);
+      return [];
+    }
+  }
+
+  // Calculate daily reward based on honor score
+  private calculateDailyReward(honorScore: any): number {
+    const baseReward = 10; // Base 10 CLOUT per day
+    const honorMultiplier = honorScore.benefits.cloutMultiplier;
+    const stakingBonus = Math.floor(honorScore.total / 100); // 1 CLOUT per 100 honor points
+    
+    return Math.floor(baseReward * honorMultiplier + stakingBonus);
+  }
+
+  // Calculate user honor score (simplified version)
+  private async calculateUserHonorScore(walletAddress: string) {
+    // This would integrate with your honor system
+    return {
+      total: 50, // Placeholder
+      benefits: {
+        cloutMultiplier: 1.2
+      }
     };
   }
 }
