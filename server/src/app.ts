@@ -32,6 +32,7 @@ app.use("/api", market);
 app.use("/api/clout", clout);
 app.use("/api/universal-nfts", universalNFTs);
 app.use("/healthz", health);
+app.use("/health", health);
 app.use("/nfts", nfts);
 
 app.get("/", (_req, res) => res.json({ ok: true }));
