@@ -7,5 +7,8 @@ export default defineConfig({
     host: true,        // accepts 0.0.0.0 / LAN
     port: 5173,
     strictPort: true
+  },
+  define: {
+    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'https://nftsol-server-prod.onrender.com')
   }
 });

@@ -39,6 +39,16 @@ services:
         value: 1000000
       - key: TIP_ACCOUNTS
         value: 4ACfpUFoaSD9bfPdeu6DBt89gB6ENTeHBXCAi87NhDEE,D2L6yPZ2FmmmTKPgzaMKdhu6EWZcTpLy1Vhx8uvZe7NZ,9bnz4RShgq1hAnLnZbP8kbgBg1kEmcJBYQq3gQbmnSta
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUT_MINT
+        value: 4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+      - key: CLOUT_TREASURY
+        value: J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+      - key: CLOUT_FEE_COLLECTOR
+        value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+      - key: CLOUT_DEVELOPER
+        value: GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP
 
   - type: web
     name: nftsol-server-prod
@@ -80,3 +90,13 @@ services:
         value: 1000000
       - key: TIP_ACCOUNTS
         value: 4ACfpUFoaSD9bfPdeu6DBt89gB6ENTeHBXCAi87NhDEE,D2L6yPZ2FmmmTKPgzaMKdhu6EWZcTpLy1Vhx8uvZe7NZ,9bnz4RShgq1hAnLnZbP8kbgBg1kEmcJBYQq3gQbmnSta
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUT_MINT
+        value: 4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+      - key: CLOUT_TREASURY
+        value: J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+      - key: CLOUT_FEE_COLLECTOR
+        value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+      - key: CLOUT_DEVELOPER
+        value: GJC1rQwWxbpc9KWhVJV7eBzPEGA2jyqCdNjmYhFGvEZP

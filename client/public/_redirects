@@ -1,7 +1,6 @@
 
-# Netlify redirects for SPA routing
-# API routes - proxy to backend (you'll need to configure your backend URL)
-/api/*  https://your-backend-domain.com/api/:splat  200
+# API routes - proxy to your Render backend
+/api/*  https://nftsol-server-prod.onrender.com/api/:splat  200
 
 # Client-side routing - all other routes go to index.html
 /*    /index.html   200
