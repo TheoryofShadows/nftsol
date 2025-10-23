@@ -1,95 +1,118 @@
 import React, { useState } from "react";
-import SolanaHeader from "./components/SolanaHeader";
-import SolanaSection from "./components/SolanaSection";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
 import MintForm from "./components/MintForm";
 import NFTMarketplace from "./components/NFTMarketplace";
 import ProxyCheck from "./components/ProxyCheck";
 import CloutBadge from "./components/CloutBadge";
+import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'mint' | 'marketplace' | 'proxy'>('marketplace');
+  const [activeTab, setActiveTab] = useState<'marketplace' | 'mint' | 'proxy'>('marketplace');
 
   return (
     <UniversalWalletProvider>
-      <div style={{ padding: 24, fontFamily: "system-ui, Segoe UI, Arial" }}>
-        <SolanaHeader />
+      <div className="app">
+        {/* Revolutionary Header */}
+        <header className="hero-header">
+          <div className="hero-content">
+            <div className="logo-section">
+              <div className="solana-logo">
+                <div className="solana-icon">⚡</div>
+                <h1 className="brand-title">NFTSol</h1>
+              </div>
+              <div className="tagline">
+                The Most Revolutionary NFT Platform on Solana
+              </div>
+            </div>
+            
+            <div className="wallet-section">
+              <WalletSelector />
+              <CloutBadge />
+            </div>
+          </div>
+        </header>
 
-        <SolanaSection title="Connect Wallet">
-          <WalletSelector />
-        </SolanaSection>
+        {/* Revolutionary Navigation */}
+        <nav className="nav-tabs">
+          <button
+            onClick={() => setActiveTab('marketplace')}
+            className={`nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
+          >
+            🏪 Marketplace
+          </button>
+          <button
+            onClick={() => setActiveTab('mint')}
+            className={`nav-tab ${activeTab === 'mint' ? 'active' : ''}`}
+          >
+            ✨ Create NFT
+          </button>
+          <button
+            onClick={() => setActiveTab('proxy')}
+            className={`nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
+          >
+            🔧 Proxy Test
+          </button>
+        </nav>
 
-      {/* Navigation Tabs */}
-      <div style={{ marginBottom: 24, display: 'flex', gap: 8 }}>
-        <button
-          onClick={() => setActiveTab('marketplace')}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: activeTab === 'marketplace' ? '#007bff' : '#f8f9fa',
-            color: activeTab === 'marketplace' ? 'white' : 'black',
-            border: '1px solid #dee2e6',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: 500
-          }}
-        >
-          Marketplace
-        </button>
-        <button
-          onClick={() => setActiveTab('mint')}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: activeTab === 'mint' ? '#007bff' : '#f8f9fa',
-            color: activeTab === 'mint' ? 'white' : 'black',
-            border: '1px solid #dee2e6',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: 500
-          }}
-        >
-          Create NFT
-        </button>
-        <button
-          onClick={() => setActiveTab('proxy')}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: activeTab === 'proxy' ? '#007bff' : '#f8f9fa',
-            color: activeTab === 'proxy' ? 'white' : 'black',
-            border: '1px solid #dee2e6',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: 500
-          }}
-        >
-          Proxy Test
-        </button>
-      </div>
+        {/* Revolutionary Content */}
+        <main className="content-section">
+          {activeTab === 'marketplace' && (
+            <div className="section-card fade-in-up">
+              <h2 className="section-title">
+                🏪 Revolutionary NFT Marketplace
+              </h2>
+              <NFTMarketplace />
+            </div>
+          )}
 
-      {/* Tab Content */}
-      {activeTab === 'marketplace' && (
-        <SolanaSection title="NFT Marketplace">
-          <NFTMarketplace />
-        </SolanaSection>
-      )}
+          {activeTab === 'mint' && (
+            <div className="section-card fade-in-up">
+              <h2 className="section-title">
+                ✨ Create Your Revolutionary NFT
+              </h2>
+              <MintForm />
+            </div>
+          )}
 
-      {activeTab === 'mint' && (
-        <SolanaSection title="Create NFT">
-          <MintForm />
-        </SolanaSection>
-      )}
+          {activeTab === 'proxy' && (
+            <div className="section-card fade-in-up">
+              <h2 className="section-title">
+                🔧 IPFS Proxy Test
+              </h2>
+              <ProxyCheck />
+            </div>
+          )}
+        </main>
 
-      {activeTab === 'proxy' && (
-        <SolanaSection title="IPFS Proxy Test">
-          <ProxyCheck />
-        </SolanaSection>
-      )}
-
-        <div style={{ marginTop: 24 }}>
-          <CloutBadge />
-        </div>
+        {/* Revolutionary Footer */}
+        <footer className="hero-header" style={{ marginTop: '4rem', padding: '3rem 0' }}>
+          <div className="hero-content">
+            <div className="logo-section">
+              <div className="solana-logo">
+                <div className="solana-icon">⚡</div>
+                <h3 className="brand-title" style={{ fontSize: '1.5rem' }}>NFTSol</h3>
+              </div>
+              <div className="tagline" style={{ fontSize: '0.9rem', opacity: 0.7 }}>
+                The Most Revolutionary NFT Platform on Solana
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-green)' }}>CLOUT</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Revolutionary Token</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-blue)' }}>Honor</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Trust-Based Rewards</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-purple)' }}>Universal</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>All Solana NFTs</div>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </UniversalWalletProvider>
   );
