@@ -1,0 +1,102 @@
+services:
+  - type: web
+    name: nftsol-server-staging
+    rootDir: server
+    env: node
+    plan: starter
+    branch: develop
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: npm start
+    autoDeploy: true
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SOLANA_CLUSTER
+        value: devnet
+      - key: PORT
+        value: 3000
+      - key: LOG_LEVEL
+        value: info
+      - key: WS_ENABLED
+        value: true
+      - key: SENDER_ENABLED
+        value: true
+      - key: TIPS_ENABLED
+        value: true
+      # Set these values in the Render UI:
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://staging.nftsol.app,https://staging.market.nftsol.app
+      - key: HELIUS_SENDER_URL
+        value: https://sender.helius-rpc.com/fast
+      - key: DEFAULT_TIP_LAMPORTS
+        value: 1000000
+      - key: TIP_ACCOUNTS
+        value: 4ACfpUFoaSD9bfPdeu6DBt89gB6ENTeHBXCAi87NhDEE,D2L6yPZ2FmmmTKPgzaMKdhu6EWZcTpLy1Vhx8uvZe7NZ,9bnz4RShgq1hAnLnZbP8kbgBg1kEmcJBYQq3gQbmnSta
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUT_MINT
+        value: 4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+      - key: CLOUT_TREASURY
+        value: J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+      - key: CLOUT_FEE_COLLECTOR
+        value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+      - key: CLOUT_DEVELOPER
+        value: 7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
+
+  - type: web
+    name: nftsol-server-prod
+    rootDir: server
+    env: node
+    plan: starter
+    branch: main
+    buildCommand: |
+      npm install
+      npm run build
+    startCommand: npm start
+    autoDeploy: false
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SOLANA_CLUSTER
+        value: mainnet-beta
+      - key: PORT
+        value: 3000
+      - key: LOG_LEVEL
+        value: info
+      - key: WS_ENABLED
+        value: true
+      - key: SENDER_ENABLED
+        value: true
+      - key: TIPS_ENABLED
+        value: true
+      # Set these values in the Render UI:
+      - key: HELIUS_API_KEY
+        sync: false
+      - key: WEBHOOK_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://nftsol.app,https://market.nftsol.app
+      - key: HELIUS_SENDER_URL
+        value: https://sender.helius-rpc.com/fast
+      - key: DEFAULT_TIP_LAMPORTS
+        value: 1000000
+      - key: TIP_ACCOUNTS
+        value: 4ACfpUFoaSD9bfPdeu6DBt89gB6ENTeHBXCAi87NhDEE,D2L6yPZ2FmmmTKPgzaMKdhu6EWZcTpLy1Vhx8uvZe7NZ,9bnz4RShgq1hAnLnZbP8kbgBg1kEmcJBYQq3gQbmnSta
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUT_MINT
+        value: 4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+      - key: CLOUT_TREASURY
+        value: J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+      - key: CLOUT_FEE_COLLECTOR
+        value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+      - key: CLOUT_DEVELOPER
+        value: 7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio

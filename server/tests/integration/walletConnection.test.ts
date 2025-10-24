@@ -267,3 +267,4 @@ describe('Wallet Connection Integration', () => {
     });
   });
 });
+

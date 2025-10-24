@@ -470,7 +470,7 @@ export class EnhancedIPFSService {
 
 // Default configuration
 export const defaultIPFSConfig: IPFSServiceConfig = {
-  primaryGateway: 'https://w3s.link',
+  primaryGateway: 'https://api.pinata.cloud',
   fallbackGateways: [
     'https://ipfs.io',
     'https://cloudflare-ipfs.com',

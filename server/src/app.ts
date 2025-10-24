@@ -9,6 +9,7 @@ import clout from "./routes/clout";
 import universalNFTs from "./routes/universalNFTs";
 import timeCapsules from "./routes/timeCapsules";
 import collections from "./routes/collections";
+import upload from "./routes/upload";
 import { getAppConfig } from "./config/environment";
 import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
 
@@ -36,6 +37,7 @@ app.use("/api/clout", clout);
 app.use("/api/universal-nfts", universalNFTs);
 app.use("/api/time-capsules", timeCapsules);
 app.use("/api/collections", collections);
+app.use("/api/upload", upload);
 app.use("/healthz", health);
 app.use("/health", health);
 app.use("/nfts", nfts);
