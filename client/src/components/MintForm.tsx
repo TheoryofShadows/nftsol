@@ -321,15 +321,19 @@ export default function MintForm() {
             <button 
               onClick={handleMint}
               disabled={loading}
-              className="btn-primary mint-button"
+              className="btn-primary mint-button revolutionary-button"
             >
               {loading ? (
                 <>
                   <div className="loading-spinner mint-spinner"></div>
-                  Minting...
+                  <span>Minting Revolutionary NFT...</span>
                 </>
               ) : (
-                '🚀 Mint Revolutionary NFT'
+                <>
+                  <span className="button-icon">🚀</span>
+                  <span>Mint Revolutionary NFT</span>
+                  <span className="button-badge">+50 CLOUT</span>
+                </>
               )}
             </button>
           </div>
