@@ -140,47 +140,20 @@ export class NFTMintingService {
   }
 
   private async uploadMetadata(metadata: any): Promise<string> {
-    // Use enhanced IPFS service for metadata upload
     try {
-      const { EnhancedIPFSService, defaultIPFSConfig } = await import('./ipfsService');
-      const ipfsService = new EnhancedIPFSService(defaultIPFSConfig);
+      const { SimpleIPFSService } = await import('./simpleIPFSService');
+      const ipfsService = new SimpleIPFSService();
       
-      const result = await ipfsService.uploadNFTMetadata({
-        name: metadata.name,
-        description: metadata.description,
-        image: metadata.image,
-        attributes: metadata.attributes || [],
-        collection: metadata.collection,
-        creator: metadata.creator,
-        properties: metadata.properties,
-      });
+      const result = await ipfsService.uploadJSON(metadata, `nft-metadata-${metadata.name}-${Date.now()}`);
       
-      return result.url;
+      if (result.success && result.ipfsUrl) {
+        return result.ipfsUrl;
+      } else {
+        throw new Error(result.error || 'IPFS upload failed');
+      }
     } catch (error) {
       console.error('IPFS metadata upload failed:', error);
-      // Fallback to simple IPFS upload
-      try {
-        const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'pinata_api_key': process.env.PINATA_API_KEY || '',
-            'pinata_secret_api_key': process.env.PINATA_SECRET_KEY || '',
-          },
-          body: JSON.stringify({
-            pinataContent: metadata,
-            pinataMetadata: {
-              name: `nft-metadata-${Date.now()}`,
-            },
-          }),
-        });
-        
-        const result = await response.json();
-        return `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
-      } catch (fallbackError) {
-        console.error('All metadata upload methods failed:', fallbackError);
-        throw new Error('Failed to upload metadata to IPFS');
-      }
+      throw new Error('Failed to upload metadata to IPFS');
     }
   }
 }

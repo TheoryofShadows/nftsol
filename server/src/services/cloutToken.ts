@@ -186,7 +186,11 @@ export class CloutTokenService {
       const activeUsers = await this.getActiveUsers();
       
       let totalDistributed = 0;
-      const distributionResults = [];
+      const distributionResults: Array<{
+        wallet: string;
+        amount: number;
+        honorScore: number;
+      }> = [];
       
       for (const user of activeUsers) {
         try {
@@ -224,7 +228,7 @@ export class CloutTokenService {
         results: distributionResults
       };
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to distribute daily CLOUT rewards:', error);
       return { success: false, error: error.message };
     }
