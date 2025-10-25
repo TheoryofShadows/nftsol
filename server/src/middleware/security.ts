@@ -29,28 +29,58 @@ export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 auth attem
 export const apiLimiter = createRateLimiter(60 * 1000, 30); // 30 API calls per minute
 export const uploadLimiter = createRateLimiter(60 * 1000, 10); // 10 uploads per minute
 
-// Enhanced CORS configuration
+// Enhanced CORS configuration with proper environment separation
 export const corsConfig = cors({
   origin: (origin, callback) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://nftsol.app',
-      'https://nftsol.netlify.app'
-    ];
+    const isProduction = process.env.NODE_ENV === 'production';
+    const isStaging = process.env.NODE_ENV === 'staging';
     
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
+    let allowedOrigins: string[] = [];
+    
+    if (isProduction) {
+      // Production: Only allow production domains
+      allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+        'https://nftsol.app',
+        'https://www.nftsol.app',
+        'https://market.nftsol.app'
+      ];
+    } else if (isStaging) {
+      // Staging: Allow staging domains
+      allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+        'https://staging.nftsol.app',
+        'https://staging.market.nftsol.app'
+      ];
+    } else {
+      // Development: Allow localhost and development domains
+      allowedOrigins = process.env.DEV_ALLOWED_ORIGINS?.split(',') || [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174'
+      ];
+    }
+    
+    // Allow requests with no origin (mobile apps, curl, etc.) in development only
+    if (!origin) {
+      if (isProduction) {
+        return callback(new Error('CORS: Origin required in production'), false);
+      }
+      return callback(null, true);
+    }
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn(`🚨 CORS: Blocked origin "${origin}" in ${process.env.NODE_ENV} mode`);
+      callback(new Error(`CORS: Origin "${origin}" not allowed in ${process.env.NODE_ENV} mode`));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-CSRF-Token'],
+  optionsSuccessStatus: 200
 });
 
 // Enhanced Helmet configuration
@@ -76,7 +106,7 @@ export const helmetConfig = helmet({
   }
 });
 
-// JWT Authentication middleware
+// JWT Authentication middleware with secure secret validation
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -85,10 +115,23 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key';
+  const jwtSecret = process.env.JWT_SECRET;
+  
+  // SECURITY: JWT_SECRET must be set in environment
+  if (!jwtSecret) {
+    console.error('🚨 SECURITY: JWT_SECRET not set in environment');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+  
+  // SECURITY: JWT_SECRET must be strong (minimum 32 characters)
+  if (jwtSecret.length < 32) {
+    console.error('🚨 SECURITY: JWT_SECRET too weak (minimum 32 characters required)');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
   
   jwt.verify(token, jwtSecret, (err: any, user: any) => {
     if (err) {
+      console.warn(`🚨 JWT: Invalid token attempt from ${req.ip}`);
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
     

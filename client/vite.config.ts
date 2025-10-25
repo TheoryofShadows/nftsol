@@ -72,7 +72,12 @@ export default defineConfig({
     strictPort: true
   },
   define: {
-    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'https://nftsol-server-prod.onrender.com')
+    'import.meta.env.VITE_API_BASE': JSON.stringify(
+      process.env.NODE_ENV === 'production' 
+        ? process.env.VITE_API_BASE || 'https://nftsol-server-prod.onrender.com'
+        : process.env.VITE_API_BASE || 'http://localhost:3000'
+    ),
+    'import.meta.env.VITE_NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
   },
   build: {
     outDir: 'dist',
