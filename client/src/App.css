@@ -1231,4 +1231,57 @@ body {
   width: 20px;
   height: 20px;
   margin-right: 0.5rem;
+}/* 📱 Mobile PWA Optimizations */
+@media (max-width: 768px) {
+  .app {
+    padding-bottom: 80px; /* Space for install button */
+  }
+  
+  .hero-header {
+    padding: 1rem;
+  }
+  
+  .hero-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .nav-tabs {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .nav-tab {
+    flex: 1;
+    min-width: calc(50% - 0.25rem);
+    font-size: 12px;
+    padding: 8px 4px;
+  }
+  
+  .section-card {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .brand-title {
+    font-size: 1.5rem;
+  }
+  
+  .tagline {
+    font-size: 0.8rem;
+  }
 }
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+  .app {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .hero-header {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+}
+
