@@ -1,0 +1,26 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.devnet]
+clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
+loyalty_registry = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+market_escrow = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+
+[programs.mainnet]
+clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
+loyalty_registry = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
+market_escrow = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
+rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+

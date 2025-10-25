@@ -1,0 +1,15 @@
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/thiserror-bfcc65a828da844c.d: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/provide.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/build/thiserror-a3dc2b7e2dc8b631/out/private.rs
+
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/libthiserror-bfcc65a828da844c.rlib: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/provide.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/build/thiserror-a3dc2b7e2dc8b631/out/private.rs
+
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/deps/libthiserror-bfcc65a828da844c.rmeta: /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/provide.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs /home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/build/thiserror-a3dc2b7e2dc8b631/out/private.rs
+
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/lib.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/aserror.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/display.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/provide.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/var.rs:
+/home/khk89/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thiserror-2.0.17/src/private.rs:
+/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/build/thiserror-a3dc2b7e2dc8b631/out/private.rs:
+
+# env-dep:OUT_DIR=/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/debug/build/thiserror-a3dc2b7e2dc8b631/out
