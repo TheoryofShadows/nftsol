@@ -50,19 +50,51 @@ app.use(securityLogger);
 app.use(requestSizeLimiter);
 app.use(sanitizeInput);
 
-// Session configuration with Redis
-const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
-});
+// Session configuration with optional Redis
+let redisClient: any = null;
+let sessionStore: any = null;
 
-redisClient.on('error', (err) => {
-  console.warn('Redis connection error:', err);
-});
+// Try to connect to Redis, but don't fail if it's not available
+try {
+  redisClient = createClient({
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    socket: {
+      reconnectStrategy: (retries) => {
+        if (retries > 3) {
+          console.log('⚠️ Redis connection failed, continuing without Redis');
+          return false; // Stop trying to reconnect
+        }
+        return Math.min(retries * 50, 500);
+      }
+    }
+  });
 
-redisClient.connect().catch(console.warn);
+  redisClient.on('error', (err: any) => {
+    console.log('⚠️ Redis connection error (continuing without Redis):', err.message);
+  });
 
+  redisClient.on('connect', () => {
+    console.log('✅ Redis connected successfully');
+  });
+
+  // Try to connect, but don't block if it fails
+  redisClient.connect().catch((err: any) => {
+    console.log('⚠️ Redis not available, continuing without Redis:', err.message);
+    redisClient = null;
+  });
+
+  // Only use Redis store if client is available
+  if (redisClient) {
+    sessionStore = new RedisStore({ client: redisClient });
+  }
+} catch (error) {
+  console.log('⚠️ Redis initialization failed, continuing without Redis');
+  redisClient = null;
+}
+
+// Session configuration with fallback to memory store
 app.use(session({
-  store: new RedisStore({ client: redisClient }),
+  store: sessionStore || undefined, // Use memory store if Redis is not available
   secret: process.env.SESSION_SECRET || 'fallback-session-secret',
   resave: false,
   saveUninitialized: false,
