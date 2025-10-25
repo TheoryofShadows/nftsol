@@ -52,7 +52,12 @@ export default function App() {
           <div className="hero-content">
             <div className="logo-section">
               <div className="solana-logo">
-                <div className="solana-icon">⚡</div>
+                <img 
+                  src="/assets/nftsol-logo.svg" 
+                  alt="NFTSol Logo" 
+                  className="custom-logo"
+                  style={{ width: '60px', height: '60px', marginRight: '12px' }}
+                />
                 <h1 className="brand-title">NFTSol</h1>
               </div>
               <div className="tagline">
@@ -203,7 +208,12 @@ export default function App() {
           <div className="hero-content">
             <div className="logo-section">
               <div className="solana-logo">
-                <div className="solana-icon">⚡</div>
+                <img 
+                  src="/assets/nftsol-logo.svg" 
+                  alt="NFTSol Logo" 
+                  className="custom-logo"
+                  style={{ width: '40px', height: '40px', marginRight: '8px' }}
+                />
                 <h3 className="brand-title" style={{ fontSize: '1.5rem' }}>NFTSol</h3>
               </div>
               <div className="tagline" style={{ fontSize: '0.9rem', opacity: 0.7 }}>
