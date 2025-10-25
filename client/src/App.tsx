@@ -13,11 +13,12 @@ import InstallButton from "./components/InstallButton";
 import OfflineIndicator from "./components/OfflineIndicator";
 import UserAuth from "./components/UserAuth";
 import UserDashboard from "./components/UserDashboard";
+import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import { logError } from "./utils/errorHandler";
 import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics'>('home');
   const [user, setUser] = useState<any>(null);
 
   // Global error handling
@@ -124,6 +125,12 @@ export default function App() {
               👤 Dashboard
             </button>
           )}
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+          >
+            📊 Analytics
+          </button>
         </nav>
 
         {/* Revolutionary Content */}
@@ -181,7 +188,9 @@ export default function App() {
           
           {activeTab === 'dashboard' && user && <UserDashboard user={user} />}
           
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && (
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+          
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && (
             <UserAuth 
               onUserLogin={setUser}
               onUserLogout={() => setUser(null)}
