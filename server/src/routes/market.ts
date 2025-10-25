@@ -10,7 +10,7 @@ const nftMintingService = new NFTMintingService();
 const marketplaceService = new MarketplaceService();
 
 // Mint NFT
-router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req, res) => {
+router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req, res, next) => {
   try {
     const { 
       creatorWallet, 
@@ -21,13 +21,7 @@ router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req
       collection 
     } = req.body;
 
-    if (!creatorWallet || !name || !description || !imageUrl) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: "Missing required fields: creatorWallet, name, description, imageUrl" 
-      });
-    }
-
+    // Validation already done by Zod schema, but keeping for reference
     const result = await nftMintingService.mintNFT({
       name,
       description,
@@ -37,86 +31,57 @@ router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req
     });
 
     res.json({ ok: true, ...result });
-
   } catch (error: any) {
     console.error('Mint error:', error);
-    res.status(500).json({ 
-      ok: false, 
-      error: error.message || "Minting failed" 
-    });
+    next(error); // Pass to error handler
   }
 });
 
 // List NFT for sale
-router.post("/list", apiLimiter as any, validateInput(listingSchema), async (req, res) => {
+router.post("/list", apiLimiter as any, validateInput(listingSchema), async (req, res, next) => {
   try {
     const { mintAddress, price, sellerWallet } = req.body;
 
-    if (!mintAddress || !price || !sellerWallet) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: "Missing required fields: mintAddress, price, sellerWallet" 
-      });
-    }
-
     const result = await marketplaceService.listNFT(mintAddress, price, sellerWallet);
     res.json({ ok: true, ...result });
-
   } catch (error: any) {
     console.error('List error:', error);
-    res.status(500).json({ 
-      ok: false, 
-      error: error.message || "Listing failed" 
-    });
+    next(error); // Pass to error handler
   }
 });
 
 // Buy NFT
-router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req, res) => {
+router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req, res, next) => {
   try {
     const { mintAddress, buyerWallet, price } = req.body;
 
-    if (!mintAddress || !buyerWallet || !price) {
-      return res.status(400).json({ 
-        ok: false, 
-        error: "Missing required fields: mintAddress, buyerWallet, price" 
-      });
-    }
-
     const result = await marketplaceService.buyNFT(mintAddress, buyerWallet, price);
     res.json({ ok: true, ...result });
-
   } catch (error: any) {
     console.error('Buy error:', error);
-    res.status(500).json({ 
-      ok: false, 
-      error: error.message || "Purchase failed" 
-    });
+    next(error); // Pass to error handler
   }
 });
 
 // Get NFTs
-router.get("/nfts", validateInput(searchSchema), async (req, res) => {
+router.get("/nfts", async (req, res, next) => {
   try {
     const { owner, status, collection, limit, offset } = req.query;
     
+    // Validate and sanitize query parameters
     const filters = {
       owner: owner as string,
       status: status as string,
       collection: collection as string,
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined
+      limit: limit ? parseInt(limit as string, 10) : undefined,
+      offset: offset ? parseInt(offset as string, 10) : undefined
     };
 
     const nfts = await marketplaceService.getNFTs(filters);
     res.json({ ok: true, nfts });
-
   } catch (error: any) {
     console.error('Get NFTs error:', error);
-    res.status(500).json({ 
-      ok: false, 
-      error: error.message || "Failed to get NFTs" 
-    });
+    next(error); // Pass to error handler
   }
 });
 

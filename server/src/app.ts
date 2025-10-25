@@ -48,7 +48,6 @@ app.use(corsConfig);
 app.use(securityHeaders);
 app.use(securityLogger);
 app.use(requestSizeLimiter);
-app.use(sanitizeInput);
 
 // Session configuration with optional Redis
 let redisClient: any = null;
@@ -112,7 +111,10 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Logging
 app.use(morgan(appConfig.logLevel === "debug" ? "dev" : "tiny"));
 
-// Rate limiting - apply to all routes
+// Input sanitization (AFTER body parsing)
+app.use(sanitizeInput);
+
+// Rate limiting - apply to all routes (AFTER session/auth, BEFORE routes)
 app.use(generalLimiter as any);
 
 // API routes
@@ -157,10 +159,28 @@ const performanceService = new PerformanceService({
 // Schedule automated backups
 backupService.scheduleBackups();
 
-// Error handler
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Unhandled error", err);
-  res.status(500).json({ error: "Internal Server Error" });
+// Error handler middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Log error details
+  console.error(`Error [${req.method} ${req.path}]:`, {
+    message: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    timestamp: new Date().toISOString()
+  });
+
+  // Determine status code
+  const statusCode = err.statusCode || err.status || 500;
+  
+  // Don't leak error details in production
+  const message = statusCode === 500 && process.env.NODE_ENV === 'production'
+    ? 'Internal Server Error'
+    : err.message || 'An error occurred';
+
+  res.status(statusCode).json({
+    ok: false,
+    error: message,
+    ...(process.env.NODE_ENV === 'development' && { details: err })
+  });
 });
 
 export default app;
