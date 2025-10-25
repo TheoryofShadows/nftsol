@@ -1,0 +1,57 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="coinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14F195;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9945FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#14F195;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#9945FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B6B;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Coin Background -->
+  <circle cx="100" cy="100" r="95" fill="#1a1a1a" stroke="url(#coinGradient)" stroke-width="4"/>
+  
+  <!-- Coin Rim -->
+  <circle cx="100" cy="100" r="90" fill="none" stroke="url(#coinGradient)" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="100" cy="100" r="85" fill="#2a2a2a" opacity="0.8"/>
+  
+  <!-- NFTSOL Text (Top Arc) -->
+  <path id="topArc" d="M 50 100 A 50 50 0 0 1 150 100" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="url(#textGradient)" filter="url(#glow)">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">NFTSOL</textPath>
+  </text>
+  
+  <!-- CLOUT Text (Center) -->
+  <text x="100" y="110" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#textGradient)" text-anchor="middle" filter="url(#glow)">CLOUT</text>
+  
+  <!-- Solana Logo (Center) -->
+  <g transform="translate(100, 130)">
+    <!-- Solana Logo Shapes -->
+    <rect x="-15" y="-8" width="30" height="6" fill="url(#textGradient)" rx="2" transform="rotate(-15)"/>
+    <rect x="-15" y="-2" width="30" height="6" fill="url(#textGradient)" rx="2" transform="rotate(-15)"/>
+    <rect x="-15" y="4" width="30" height="6" fill="url(#textGradient)" rx="2" transform="rotate(-15)"/>
+  </g>
+  
+  <!-- Powered by The Vault Text (Bottom Arc) -->
+  <path id="bottomArc" d="M 150 100 A 50 50 0 0 0 50 100" fill="none"/>
+  <text font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="url(#textGradient)" filter="url(#glow)">
+    <textPath href="#bottomArc" startOffset="50%" text-anchor="middle">POWERED BY THE VAULT</textPath>
+  </text>
+  
+  <!-- Metallic Highlights -->
+  <ellipse cx="100" cy="100" rx="80" ry="40" fill="url(#coinGradient)" opacity="0.1" transform="rotate(-30 100 100)"/>
+  <ellipse cx="100" cy="100" rx="60" ry="30" fill="url(#coinGradient)" opacity="0.05" transform="rotate(-30 100 100)"/>
+</svg>

@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "bootstrap": "npm install --prefix server && npm install --prefix client",
-    "dev": "concurrently \\\"npm run dev --prefix server\\\" \\\"npm run dev --prefix client\\\"",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
     "build": "npm run build --prefix server && npm run build --prefix client",
@@ -16,6 +16,18 @@
     "build:client": "npm run build --prefix client",
     "start": "npm run start --prefix server",
     "lint": "npm run lint --prefix server || true"
+  },
+  "dependencies": {
+    "@solana/spl-token": "^0.1.8",
+    "@solana/wallet-adapter-wallets": "^0.19.33",
+    "bigint-buffer": "^1.1.5",
+    "drizzle-kit": "^0.18.1",
+    "esbuild": "^0.25.11",
+    "express-validator": "^7.3.0",
+    "fast-redact": "^3.5.0",
+    "nanoid": "^5.1.6",
+    "parse-duration": "^2.1.4",
+    "validator": "^13.15.15"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"

@@ -50,29 +50,65 @@ export const useWallet = () => {
   return context;
 };
 
-// Enhanced wallet detection
+// Enhanced wallet detection for mobile and desktop
 const detectWallet = (walletName: string): boolean => {
   if (typeof window === 'undefined') return false;
   
+  // Check for mobile wallet detection
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
   switch (walletName) {
     case 'phantom':
-      return !!(window as any).phantom?.solana?.isPhantom;
+      // Enhanced Phantom detection for mobile and desktop
+      return !!(
+        (window as any).phantom?.solana?.isPhantom ||
+        (window as any).solana?.isPhantom ||
+        (isMobile && (window as any).phantom) ||
+        (window as any).phantom
+      );
     case 'solflare':
-      return !!(window as any).solflare?.isSolflare;
+      // Enhanced Solflare detection
+      return !!(
+        (window as any).solflare?.isSolflare ||
+        (window as any).solana?.isSolflare ||
+        (isMobile && (window as any).solflare) ||
+        (window as any).solflare
+      );
     case 'backpack':
-      return !!(window as any).backpack;
+      return !!(
+        (window as any).backpack ||
+        (window as any).solana?.isBackpack
+      );
     case 'glow':
-      return !!(window as any).glow;
+      return !!(
+        (window as any).glow ||
+        (window as any).solana?.isGlow
+      );
     case 'sollet':
-      return !!(window as any).sollet;
+      return !!(
+        (window as any).sollet ||
+        (window as any).solana?.isSollet
+      );
     case 'slope':
-      return !!(window as any).Slope;
+      return !!(
+        (window as any).Slope ||
+        (window as any).solana?.isSlope
+      );
     case 'torus':
-      return !!(window as any).torus;
+      return !!(
+        (window as any).torus ||
+        (window as any).solana?.isTorus
+      );
     case 'coinbase':
-      return !!(window as any).coinbaseSolana;
+      return !!(
+        (window as any).coinbaseSolana ||
+        (window as any).solana?.isCoinbase
+      );
     case 'ledger':
-      return !!(window as any).solana?.isLedger;
+      return !!(
+        (window as any).solana?.isLedger ||
+        (window as any).ledger
+      );
     default:
       return false;
   }
@@ -358,7 +394,7 @@ export function UniversalWalletProvider({ children }: { children: React.ReactNod
   const [installedWallets, setInstalledWallets] = useState<WalletProvider[]>([]);
 
   useEffect(() => {
-    // Delay wallet detection to ensure window object is fully loaded
+    // Enhanced wallet detection with multiple attempts for mobile
     const detectWallets = () => {
       const providers: WalletProvider[] = [
         new PhantomWalletProvider(),
@@ -367,19 +403,49 @@ export function UniversalWalletProvider({ children }: { children: React.ReactNod
         new GlowWalletProvider(),
       ];
 
+      // Re-detect wallet installation status
+      providers.forEach(provider => {
+        if (provider instanceof PhantomWalletProvider) {
+          provider.isInstalled = detectWallet('phantom') || !!(window as any).phantomDetected;
+        } else if (provider instanceof SolflareWalletProvider) {
+          provider.isInstalled = detectWallet('solflare') || !!(window as any).solflareDetected;
+        } else if (provider instanceof BackpackWalletProvider) {
+          provider.isInstalled = detectWallet('backpack') || !!(window as any).backpackDetected;
+        } else if (provider instanceof GlowWalletProvider) {
+          provider.isInstalled = detectWallet('glow') || !!(window as any).glowDetected;
+        }
+      });
+
       const installed = providers.filter(wallet => wallet.isInstalled);
       
       setAvailableWallets(providers);
       setInstalledWallets(installed);
       
       console.log(`🔗 Detected ${installed.length} wallet(s):`, installed.map(w => w.name));
+      console.log('🔍 All available wallets:', providers.map(w => `${w.name}: ${w.isInstalled ? '✅' : '❌'}`));
     };
 
-    // Detect wallets immediately and after a short delay
-    detectWallets();
-    const timeoutId = setTimeout(detectWallets, 1000);
+    // Listen for mobile wallet detection events
+    const handleMobileWalletsDetected = (event: any) => {
+      console.log('📱 Mobile wallets detected:', event.detail);
+      detectWallets();
+    };
 
-    return () => clearTimeout(timeoutId);
+    // Detect wallets immediately and with multiple delays for mobile
+    detectWallets();
+    const timeoutId1 = setTimeout(detectWallets, 500);
+    const timeoutId2 = setTimeout(detectWallets, 1500);
+    const timeoutId3 = setTimeout(detectWallets, 3000);
+
+    // Listen for mobile wallet detection events
+    window.addEventListener('mobileWalletsDetected', handleMobileWalletsDetected);
+
+    return () => {
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
+      window.removeEventListener('mobileWalletsDetected', handleMobileWalletsDetected);
+    };
   }, []);
 
   // Connect to a specific wallet
@@ -490,40 +556,86 @@ export function WalletSelector() {
   }
 
   return (
-    <div style={{ padding: 16, background: '#f8fafc', borderRadius: 8, border: '1px solid #e2e8f0' }}>
-      <h3>🔗 Connect Wallet</h3>
-      <p>Choose your preferred Solana wallet:</p>
+    <div style={{ 
+      padding: '20px', 
+      background: 'rgba(255, 255, 255, 0.95)', 
+      borderRadius: '12px', 
+      border: '1px solid rgba(153, 69, 255, 0.2)',
+      maxWidth: '400px',
+      width: '100%',
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <h3 style={{ 
+          margin: '0 0 8px 0', 
+          color: '#1a1a1a', 
+          fontSize: '1.2rem',
+          fontWeight: '600'
+        }}>🔗 Connect Wallet</h3>
+        <p style={{ 
+          margin: 0, 
+          color: '#666', 
+          fontSize: '0.9rem' 
+        }}>Choose your preferred Solana wallet:</p>
+      </div>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {installedWallets.map((wallet) => (
           <button
             key={wallet.name}
             onClick={() => connect(wallet.name)}
             disabled={connecting}
             style={{
-              padding: '12px 16px',
-              background: connecting ? '#f1f5f9' : '#3b82f6',
+              padding: '16px 20px',
+              background: connecting ? '#f1f5f9' : 'linear-gradient(135deg, #9945FF 0%, #14F195 100%)',
               color: connecting ? '#64748b' : 'white',
               border: 'none',
-              borderRadius: 6,
+              borderRadius: '8px',
               cursor: connecting ? 'not-allowed' : 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
-              fontSize: 16,
-              fontWeight: 500
+              justifyContent: 'center',
+              gap: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+              transition: 'all 0.3s ease',
+              boxShadow: connecting ? 'none' : '0 4px 16px rgba(153, 69, 255, 0.3)'
+            }}
+            onMouseEnter={(e) => {
+              if (!connecting) {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(153, 69, 255, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!connecting) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 16px rgba(153, 69, 255, 0.3)';
+              }
             }}
           >
-            <span>{wallet.icon}</span>
+            <span style={{ fontSize: '20px' }}>{wallet.icon}</span>
             <span>Connect {wallet.name.charAt(0).toUpperCase() + wallet.name.slice(1)}</span>
           </button>
         ))}
       </div>
 
       {installedWallets.length === 0 && (
-        <div style={{ padding: 16, background: '#fef3c7', borderRadius: 6, marginTop: 12 }}>
-          <p style={{ margin: 0, color: '#92400e' }}>
-            No Solana wallets detected. Please install Phantom, Solflare, or another Solana wallet.
+        <div style={{ 
+          padding: '16px', 
+          background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', 
+          borderRadius: '8px', 
+          marginTop: '16px',
+          border: '1px solid #f59e0b'
+        }}>
+          <p style={{ 
+            margin: 0, 
+            color: '#92400e', 
+            fontSize: '0.9rem',
+            textAlign: 'center',
+            fontWeight: '500'
+          }}>
+            🔍 No Solana wallets detected. Please install Phantom, Solflare, or another Solana wallet from your app store.
           </p>
         </div>
       )}
