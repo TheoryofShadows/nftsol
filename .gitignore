@@ -1,68 +1,43 @@
-# Dependencies
-node_modules/
+# Environment files - NEVER COMMIT
+.env
+.env.*
+!.env.example
+server/.env*
+client/.env*
+*.env.local
+*.env.production
+*.env.development
+
+# Secrets and keys
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+keys/
+
+# Logs
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-
-# Production builds
-dist/
-build/
-*.tgz
-*.tar.gz
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# IDE/Editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
-logs/
-*.log
 
 # Runtime data
-pids/
+pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory used by tools like istanbul
+# Coverage directory
 coverage/
-*.lcov
+.nyc_output
 
-# nyc test coverage
-.nyc_output/
+# Dependencies
+node_modules/
 
-# Dependency directories
-jspm_packages/
-
-# Optional npm cache directory
+# Optional npm cache
 .npm
-
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
@@ -73,93 +48,48 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# next.js build output
-.next
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# nuxt.js build output
-.nuxt
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
 
-# vuepress build output
-.vuepress/dist
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# Temporary folders
+# Temporary files
 tmp/
 temp/
 
-# Backup files
-*.bak
-*.backup
-*.old
-*.orig
-
-# Archive files
-*.zip
-*.rar
-*.7z
+# Security audit files
+secrets_backup_*.txt
+security-audit-results.txt
 
 # Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# Redis dump files
-dump.rdb
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
 
-# PM2 files
-.pm2/
-
-# TypeScript build info
-*.tsbuildinfo
-
-# Vite cache
-.vite/
-
-# PWA files
-sw.js
-workbox-*.js
-
-# Build artifacts
-*.map
-
-# Test coverage
-coverage/
-
-# Deployment archives
-nftsol-*-deployment/
-nftsol-*-production/
-*-deployment.zip
-*-production.zip
-
-# Status reports (keep only essential ones)
-*_STATUS_*.md
-*_SUMMARY_*.md
-*_REPORT_*.md
-*_COMPLETE_*.md
-*_FIXES_*.md
-*_GUIDE_*.md
-
-# Keep only essential documentation
-!README.md
-!docs/
-!TESTING_GUIDE.md
-!DEPLOYMENT_GUIDE.md
-!NFTSOL_WHITEPAPER.md
+# Environment specific
+.env.test
+.env.staging
+.env.production.local
+.env.development.local
+.env.test.local

@@ -13,14 +13,14 @@ export const createRateLimiter = (windowMs: number, max: number, message?: strin
     message: message || 'Too many requests, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (req: any, res: any) => {
       res.status(429).json({
         error: 'Rate limit exceeded',
         message: message || 'Too many requests, please try again later.',
         retryAfter: Math.ceil(windowMs / 1000)
       });
     }
-  });
+  }) as any; // Type assertion to work around Express type issues
 };
 
 // Different rate limits for different endpoints
