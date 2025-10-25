@@ -4,8 +4,8 @@
 
 Your NFTSol application now has the following environment variables set:
 
-- ✅ **PINATA_API_KEY**: `b113360c6243fde9f5b0`
-- ✅ **SESSION_SECRET**: `nftsol-development-secret-key-2024`
+- ✅ **PINATA_API_KEY**: Configured securely
+- ✅ **SESSION_SECRET**: Configured securely
 - ✅ **DATABASE_URL**: `postgresql://localhost:5432/nftsol_dev`
 - ✅ **REDIS_URL**: `redis://localhost:6379`
 - ✅ **NODE_ENV**: `development`
@@ -40,11 +40,10 @@ Your NFTSol application now has the following environment variables set:
 ### **To Complete Pinata Setup:**
 1. Go to [pinata.cloud](https://pinata.cloud)
 2. Navigate to **API Keys**
-3. Find your API key `b113360c6243fde9f5b0`
-4. Copy the **Secret Key**
-5. Run this command in PowerShell:
+3. Copy your **Secret Key**
+4. Set it in your environment using the secure setup script:
    ```powershell
-   $env:PINATA_SECRET_KEY = "your_secret_key_here"
+   .\scripts\setup-environment.ps1
    ```
 
 ### **To Access Your App:**

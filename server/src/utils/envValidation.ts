@@ -4,6 +4,7 @@ export interface EnvironmentStatus {
   isValid: boolean;
   missing: string[];
   warnings: string[];
+  securityIssues: string[];
   services: {
     database: boolean;
     helius: boolean;
@@ -15,17 +16,26 @@ export interface EnvironmentStatus {
 export function validateEnvironment(): EnvironmentStatus {
   const missing: string[] = [];
   const warnings: string[] = [];
+  const securityIssues: string[] = [];
   
   // Required environment variables
   const required = [
-    'DATABASE_URL',
-    'HELIUS_API_KEY'
+    'NODE_ENV',
+    'SESSION_SECRET'
+  ];
+  
+  // Production-specific required variables
+  const productionRequired = [
+    'JWT_SECRET',
+    'HELIUS_API_KEY',
+    'PINATA_API_KEY',
+    'PINATA_SECRET_KEY'
   ];
   
   // Optional but recommended
   const recommended = [
-    'PINATA_API_KEY',
-    'PINATA_SECRET_KEY',
+    'DATABASE_URL',
+    'REDIS_URL',
     'OPENAI_API_KEY'
   ];
   
@@ -36,11 +46,40 @@ export function validateEnvironment(): EnvironmentStatus {
     }
   }
   
+  // Check production-specific requirements
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (isProduction) {
+    for (const envVar of productionRequired) {
+      if (!process.env[envVar]) {
+        missing.push(`${envVar} (required in production)`);
+      }
+    }
+  }
+  
   // Check recommended variables
   for (const envVar of recommended) {
     if (!process.env[envVar]) {
       warnings.push(`${envVar} is not set - some features may be limited`);
     }
+  }
+  
+  // Security validations
+  if (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length < 32) {
+    securityIssues.push('SESSION_SECRET is too weak (minimum 32 characters required)');
+  }
+
+  if (process.env.JWT_SECRET && process.env.JWT_SECRET.length < 32) {
+    securityIssues.push('JWT_SECRET is too weak (minimum 32 characters required)');
+  }
+
+  // Check for common weak secrets
+  const weakSecrets = ['secret', 'password', '123456', 'admin', 'test'];
+  if (process.env.SESSION_SECRET && weakSecrets.some(weak => process.env.SESSION_SECRET!.toLowerCase().includes(weak))) {
+    securityIssues.push('SESSION_SECRET appears to be weak or default');
+  }
+
+  if (process.env.JWT_SECRET && weakSecrets.some(weak => process.env.JWT_SECRET!.toLowerCase().includes(weak))) {
+    securityIssues.push('JWT_SECRET appears to be weak or default');
   }
   
   // Check service availability
@@ -52,9 +91,10 @@ export function validateEnvironment(): EnvironmentStatus {
   };
   
   return {
-    isValid: missing.length === 0,
+    isValid: missing.length === 0 && securityIssues.length === 0,
     missing,
     warnings,
+    securityIssues,
     services
   };
 }
@@ -76,6 +116,11 @@ export function logEnvironmentStatus(): void {
     status.missing.forEach(env => console.log(`   - ${env}`));
   }
   
+  if (status.securityIssues.length > 0) {
+    console.log('🚨 Security Issues:');
+    status.securityIssues.forEach(issue => console.log(`   - ${issue}`));
+  }
+  
   if (status.warnings.length > 0) {
     console.log('⚠️  Warnings:');
     status.warnings.forEach(warning => console.log(`   - ${warning}`));
@@ -86,4 +131,22 @@ export function logEnvironmentStatus(): void {
   console.log(`   Helius: ${status.services.helius ? '✅' : '❌'}`);
   console.log(`   IPFS: ${status.services.ipfs ? '✅' : '❌'}`);
   console.log(`   CLOUT: ${status.services.clout ? '✅' : '❌'}`);
+}
+
+export function validateEnvironmentAndExit(): void {
+  const result = validateEnvironment();
+  
+  if (!result.isValid) {
+    console.error('🚨 Environment validation failed!');
+    logEnvironmentStatus();
+    process.exit(1);
+  }
+  
+  if (result.securityIssues.length > 0) {
+    console.error('🚨 Security issues detected!');
+    logEnvironmentStatus();
+    process.exit(1);
+  }
+  
+  logEnvironmentStatus();
 }
