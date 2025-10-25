@@ -33,7 +33,12 @@ export interface HeliusConfig {
 }
 
 const DEFAULT_DEV_ORIGINS = ["http://localhost:3000", "http://localhost:5173"];
-const DEFAULT_PROD_ORIGINS = ["https://nftsol.app", "https://www.nftsol.app"];
+const DEFAULT_PROD_ORIGINS = [
+  "https://nftsol.app", 
+  "https://www.nftsol.app",
+  "https://nftsol.netlify.app",
+  "https://nftsol-server-prod.onrender.com"
+];
 const DEFAULT_REST_URL = "https://api.helius.xyz/v0";
 const DEFAULT_TIMEOUT_MS = 15000;
 

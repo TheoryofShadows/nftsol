@@ -60,7 +60,7 @@ services:
       npm install
       npm run build
     startCommand: npm start
-    autoDeploy: false
+    autoDeploy: true
     healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
