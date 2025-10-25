@@ -41,6 +41,15 @@ interface UniversalWalletContextType {
 
 const UniversalWalletContext = createContext<UniversalWalletContextType | null>(null);
 
+// Custom hook to use the wallet context
+export const useWallet = () => {
+  const context = useContext(UniversalWalletContext);
+  if (!context) {
+    throw new Error('useWallet must be used within a UniversalWalletProvider');
+  }
+  return context;
+};
+
 // Enhanced wallet detection
 const detectWallet = (walletName: string): boolean => {
   if (typeof window === 'undefined') return false;

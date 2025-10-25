@@ -25,14 +25,13 @@ router.post("/mint", async (req, res) => {
       });
     }
 
-    const result = await nftMintingService.mintNFT(
-      creatorWallet,
+    const result = await nftMintingService.mintNFT({
       name,
       description,
       imageUrl,
-      attributes,
+      creatorWallet,
       collection
-    );
+    });
 
     res.json({ ok: true, ...result });
 
