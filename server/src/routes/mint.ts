@@ -24,14 +24,13 @@ router.post("/", async (req, res) => {
     console.log(`🚀 Minting NFT: ${name} by ${creator}`);
 
     // Mint the NFT using the enhanced service
-    const result = await nftMintingService.mintNFT(
-      creator,
+    const result = await nftMintingService.mintNFT({
       name,
       description,
       imageUrl,
-      [], // attributes
+      creatorWallet: creator,
       collection
-    );
+    });
 
     if (result.success) {
       // Award CLOUT tokens for NFT creation
@@ -50,7 +49,6 @@ router.post("/", async (req, res) => {
         success: true,
         mintAddress: result.mintAddress,
         signature: result.signature,
-        nft: result.nft,
         clout: cloutResult,
         reward: 50
       });

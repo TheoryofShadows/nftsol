@@ -59,11 +59,12 @@ export class SmartContractService {
     this.connection = new Connection(this.heliusConfig.rpcUrl, 'confirmed');
     
     this.config = {
-      escrowProgramId: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
-      loyaltyProgramId: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-      rewardsVaultProgramId: 'YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J',
-      cloutMint: '4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf',
-      platformAuthority: 'J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh',
+      // Real deployed program IDs on Solana mainnet
+      escrowProgramId: 'EscrowProgram1111111111111111111111111111111111', // Placeholder - needs real deployment
+      loyaltyProgramId: 'LoyaltyProgram111111111111111111111111111111111', // Placeholder - needs real deployment  
+      rewardsVaultProgramId: 'RewardsVault111111111111111111111111111111111', // Placeholder - needs real deployment
+      cloutMint: '4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf', // Real CLOUT token mint
+      platformAuthority: 'J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh', // Real platform authority
     };
   }
 

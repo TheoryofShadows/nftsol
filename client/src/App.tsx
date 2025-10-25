@@ -11,11 +11,14 @@ import TimeCapsuleSales from "./components/TimeCapsuleSales";
 import CollectionManager from "./components/CollectionManager";
 import InstallButton from "./components/InstallButton";
 import OfflineIndicator from "./components/OfflineIndicator";
+import UserAuth from "./components/UserAuth";
+import UserDashboard from "./components/UserDashboard";
 import { logError } from "./utils/errorHandler";
 import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard'>('home');
+  const [user, setUser] = useState<any>(null);
 
   // Global error handling
   useEffect(() => {
@@ -113,6 +116,14 @@ export default function App() {
           >
             🔧 Proxy Test
           </button>
+          {user && (
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+            >
+              👤 Dashboard
+            </button>
+          )}
         </nav>
 
         {/* Revolutionary Content */}
@@ -166,6 +177,15 @@ export default function App() {
               </h2>
               <ProxyCheck />
             </div>
+          )}
+          
+          {activeTab === 'dashboard' && user && <UserDashboard user={user} />}
+          
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && (
+            <UserAuth 
+              onUserLogin={setUser}
+              onUserLogout={() => setUser(null)}
+            />
           )}
         </main>
 
