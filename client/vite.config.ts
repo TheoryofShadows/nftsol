@@ -73,5 +73,18 @@ export default defineConfig({
   },
   define: {
     'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'https://nftsol-server-prod.onrender.com')
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          solana: ['@solana/web3.js', '@solana/spl-token'],
+          wallet: ['@solana/wallet-adapter-base', '@solana/wallet-adapter-react']
+        }
+      }
+    }
   }
 });
