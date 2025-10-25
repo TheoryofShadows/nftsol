@@ -89,6 +89,7 @@ export class UserService {
       };
 
       // Store user profile (in a real implementation, this would be stored in a database)
+      // For now, we'll use in-memory storage for CI/testing
       console.log(`✅ User profile created for ${walletAddress}`);
       
       return {
