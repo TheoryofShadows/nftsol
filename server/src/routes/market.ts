@@ -1,13 +1,16 @@
 import { Router } from "express";
 import { NFTMintingService } from "../services/nftMinting";
 import { MarketplaceService } from "../services/marketplace";
+import { apiLimiter } from "../middleware/security";
+import { nftMintSchema, listingSchema, purchaseSchema, searchSchema } from "../middleware/validation";
+import { validateInput } from "../middleware/security";
 
 const router = Router();
 const nftMintingService = new NFTMintingService();
 const marketplaceService = new MarketplaceService();
 
 // Mint NFT
-router.post("/mint", async (req, res) => {
+router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req, res) => {
   try {
     const { 
       creatorWallet, 
@@ -45,7 +48,7 @@ router.post("/mint", async (req, res) => {
 });
 
 // List NFT for sale
-router.post("/list", async (req, res) => {
+router.post("/list", apiLimiter as any, validateInput(listingSchema), async (req, res) => {
   try {
     const { mintAddress, price, sellerWallet } = req.body;
 
@@ -69,7 +72,7 @@ router.post("/list", async (req, res) => {
 });
 
 // Buy NFT
-router.post("/buy", async (req, res) => {
+router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req, res) => {
   try {
     const { mintAddress, buyerWallet, price } = req.body;
 
@@ -93,7 +96,7 @@ router.post("/buy", async (req, res) => {
 });
 
 // Get NFTs
-router.get("/nfts", async (req, res) => {
+router.get("/nfts", validateInput(searchSchema), async (req, res) => {
   try {
     const { owner, status, collection, limit, offset } = req.query;
     

@@ -113,7 +113,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(morgan(appConfig.logLevel === "debug" ? "dev" : "tiny"));
 
 // Rate limiting - apply to all routes
-// app.use(generalLimiter); // Commented out due to TypeScript issues
+app.use(generalLimiter as any);
 
 // API routes
 app.use("/market", market);
