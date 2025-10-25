@@ -12,6 +12,8 @@ const EnvSchema = z.object({
   HELIUS_RPC_URL: z.string().optional(),
   HELIUS_REST_URL: z.string().optional(),
   HELIUS_TIMEOUT_MS: z.coerce.number().optional(),
+  NEAR_NETWORK_ID: z.string().default('mainnet'),
+  NEAR_NODE_URL: z.string().default('https://rpc.mainnet.near.org'),
 });
 
 export type AppEnvironment = z.infer<typeof EnvSchema>;
@@ -30,6 +32,11 @@ export interface HeliusConfig {
   restUrl: string;
   timeoutMs: number;
   cluster: string;
+}
+
+export interface NearConfig {
+  networkId: string;
+  nodeUrl: string;
 }
 
 const DEFAULT_DEV_ORIGINS = ["http://localhost:3000", "http://localhost:5173"];
@@ -52,6 +59,7 @@ function splitOrigins(value?: string | null): string[] {
 
 let cachedAppConfig: AppConfig | null = null;
 let cachedHeliusConfig: HeliusConfig | null = null;
+let cachedNearConfig: NearConfig | null = null;
 
 export function getAppConfig(): AppConfig {
   if (cachedAppConfig) {
@@ -132,4 +140,21 @@ export function getHeliusConfig(): HeliusConfig {
   }
 
   return cachedHeliusConfig;
+}
+
+export function getNearConfig(): NearConfig {
+  if (cachedNearConfig) {
+    return cachedNearConfig;
+  }
+
+  const parsed = EnvSchema.parse(process.env);
+  const networkId = parsed.NEAR_NETWORK_ID?.trim() || 'mainnet';
+  const nodeUrl = parsed.NEAR_NODE_URL?.trim() || 'https://rpc.mainnet.near.org';
+
+  cachedNearConfig = {
+    networkId,
+    nodeUrl,
+  };
+
+  return cachedNearConfig;
 }
