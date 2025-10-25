@@ -137,7 +137,13 @@ export class PerformanceService {
    */
   private async queryNFTs(filters: any): Promise<any[]> {
     // Simplified query for now to avoid TypeScript issues
-    return await db.select().from(sql`nfts`).limit(filters.limit || 20);
+    try {
+      const result = await db.select().from(sql`nfts`).limit(filters.limit || 20);
+      return Array.isArray(result) ? result : [];
+    } catch (error) {
+      console.error('Query error:', error);
+      return [];
+    }
   }
 
   /**

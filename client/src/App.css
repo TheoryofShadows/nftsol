@@ -62,6 +62,7 @@ body {
 /* 🎨 Revolutionary Header */
 .hero-header {
   background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.9) 100%);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(153, 69, 255, 0.2);
   padding: 2rem 0;
@@ -152,6 +153,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-smooth);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
@@ -199,6 +201,7 @@ body {
   border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 20px;
   padding: 2rem;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   box-shadow: var(--shadow-card);
   transition: var(--transition-smooth);
@@ -318,6 +321,7 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -336,6 +340,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-smooth);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -360,6 +365,7 @@ body {
   border-radius: 16px;
   overflow: hidden;
   transition: var(--transition-smooth);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   position: relative;
 }
@@ -512,6 +518,7 @@ body {
   color: white;
   font-size: 1rem;
   transition: var(--transition-smooth);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -587,6 +594,7 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: var(--transition-smooth);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -616,6 +624,7 @@ body {
   background: rgba(42, 42, 42, 0.4);
   border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   min-width: 100px;
 }
@@ -741,6 +750,7 @@ body {
   background: rgba(42, 42, 42, 0.3);
   border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 20px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -833,6 +843,7 @@ body {
   border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 20px;
   padding: 2rem;
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -971,6 +982,7 @@ body {
   background: rgba(42, 42, 42, 0.3);
   border: 1px solid rgba(153, 69, 255, 0.2);
   border-radius: 20px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
