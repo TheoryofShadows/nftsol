@@ -12,9 +12,13 @@ import collections from "./routes/collections";
 import upload from "./routes/upload";
 import { getAppConfig } from "./config/environment";
 import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
+import { logEnvironmentStatus } from "./utils/envValidation";
 
 const appConfig = getAppConfig();
 const app = express();
+
+// Log environment status on startup
+logEnvironmentStatus();
 
 app.use(
   cors({

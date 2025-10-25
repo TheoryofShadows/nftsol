@@ -349,17 +349,28 @@ export function UniversalWalletProvider({ children }: { children: React.ReactNod
   const [installedWallets, setInstalledWallets] = useState<WalletProvider[]>([]);
 
   useEffect(() => {
-    const providers: WalletProvider[] = [
-      new PhantomWalletProvider(),
-      new SolflareWalletProvider(),
-      new BackpackWalletProvider(),
-      new GlowWalletProvider(),
-    ];
+    // Delay wallet detection to ensure window object is fully loaded
+    const detectWallets = () => {
+      const providers: WalletProvider[] = [
+        new PhantomWalletProvider(),
+        new SolflareWalletProvider(),
+        new BackpackWalletProvider(),
+        new GlowWalletProvider(),
+      ];
 
-    const installed = providers.filter(wallet => wallet.isInstalled);
-    
-    setAvailableWallets(providers);
-    setInstalledWallets(installed);
+      const installed = providers.filter(wallet => wallet.isInstalled);
+      
+      setAvailableWallets(providers);
+      setInstalledWallets(installed);
+      
+      console.log(`🔗 Detected ${installed.length} wallet(s):`, installed.map(w => w.name));
+    };
+
+    // Detect wallets immediately and after a short delay
+    detectWallets();
+    const timeoutId = setTimeout(detectWallets, 1000);
+
+    return () => clearTimeout(timeoutId);
   }, []);
 
   // Connect to a specific wallet

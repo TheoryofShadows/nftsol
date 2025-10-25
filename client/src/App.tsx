@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
 import MintForm from "./components/MintForm";
 import NFTMarketplace from "./components/NFTMarketplace";
@@ -11,10 +11,30 @@ import TimeCapsuleSales from "./components/TimeCapsuleSales";
 import CollectionManager from "./components/CollectionManager";
 import InstallButton from "./components/InstallButton";
 import OfflineIndicator from "./components/OfflineIndicator";
+import { logError } from "./utils/errorHandler";
 import "./App.css";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy'>('home');
+
+  // Global error handling
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      logError(event.error, 'Global Error Handler');
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      logError(new Error(event.reason), 'Unhandled Promise Rejection');
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
 
   return (
     <UniversalWalletProvider>
