@@ -9,6 +9,8 @@ import CloutExplanation from "./components/CloutExplanation";
 import SmartContractPage from "./components/SmartContractPage";
 import TimeCapsuleSales from "./components/TimeCapsuleSales";
 import CollectionManager from "./components/CollectionManager";
+import InstallButton from "./components/InstallButton";
+import OfflineIndicator from "./components/OfflineIndicator";
 import "./App.css";
 
 export default function App() {
@@ -17,6 +19,10 @@ export default function App() {
   return (
     <UniversalWalletProvider>
       <div className="app">
+        {/* PWA Components */}
+        <OfflineIndicator />
+        <InstallButton />
+        
         {/* Revolutionary Header */}
         <header className="hero-header">
           <div className="hero-content">
