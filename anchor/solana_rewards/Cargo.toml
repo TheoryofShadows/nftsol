@@ -1,0 +1,22 @@
+[package]
+name = "solana_rewards"
+version = "0.1.0"
+description = "Revolutionary CLOUT token and NFT platform on Solana"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "solana_rewards"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = "0.29.0"
+anchor-spl = "0.29.0"
+solana-program = "~1.18.0"
+
