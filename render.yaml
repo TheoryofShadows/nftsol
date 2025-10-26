@@ -80,6 +80,13 @@ services:
       # Set these values in the Render UI:
       - key: HELIUS_API_KEY
         sync: false
+      # Production API credentials - set in Render UI:
+      - key: PINATA_API_KEY
+        sync: false
+      - key: PINATA_SECRET_KEY
+        sync: false
+      - key: HELIUS_RPC_URL
+        sync: false
       - key: WEBHOOK_SECRET
         sync: false
       - key: ALLOWED_ORIGINS
