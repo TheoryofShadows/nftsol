@@ -19,3 +19,8 @@ export const handleError = (error: Error, context?: string) => {
   console.error(`Error${context ? ` in ${context}` : ''}:`, error);
   return error;
 };
+
+export const logError = (error: Error, context?: string) => {
+  console.error(`Error${context ? ` in ${context}` : ''}:`, error);
+  return error;
+};
