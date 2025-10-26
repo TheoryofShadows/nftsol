@@ -57,40 +57,49 @@ let redisClient: any = null;
 let sessionStore: any = null;
 
 // Try to connect to Redis, but don't fail if it's not available
+let redisConnected = false;
+
 try {
-  redisClient = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-    socket: {
-      reconnectStrategy: (retries) => {
-        if (retries > 3) {
-          console.log('⚠️ Redis connection failed, continuing without Redis');
-          return false; // Stop trying to reconnect
+  // Only attempt Redis connection if REDIS_URL is explicitly provided
+  if (process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379') {
+    redisClient = createClient({
+      url: process.env.REDIS_URL,
+      socket: {
+        reconnectStrategy: (retries) => {
+          if (retries > 3) {
+            console.log('⚠️ Redis connection failed after 3 attempts, continuing without Redis');
+            redisClient = null;
+            return false;
+          }
+          return Math.min(retries * 50, 500);
         }
-        return Math.min(retries * 50, 500);
       }
-    }
-  });
+    });
 
-  redisClient.on('error', (err: any) => {
-    console.log('⚠️ Redis connection error (continuing without Redis):', err.message);
-  });
+    redisClient.on('error', (err: any) => {
+      if (redisConnected) {
+        console.warn('⚠️ Redis connection error:', err.message);
+      }
+    });
 
-  redisClient.on('connect', () => {
-    console.log('✅ Redis connected successfully');
-  });
+    redisClient.on('connect', () => {
+      console.log('✅ Redis connected successfully');
+      redisConnected = true;
+    });
 
-  // Try to connect, but don't block if it fails
-  redisClient.connect().catch((err: any) => {
-    console.log('⚠️ Redis not available, continuing without Redis:', err.message);
+    // Try to connect, but don't block if it fails
+    redisClient.connect().then(() => {
+      redisConnected = true;
+    }).catch((err: any) => {
+      console.log('⚠️ Redis not available, using in-memory sessions:', err.message);
+      redisClient = null;
+    });
+  } else {
+    console.log('ℹ️ Redis not configured, using in-memory sessions');
     redisClient = null;
-  });
-
-  // Only use Redis store if client is available
-  if (redisClient) {
-    sessionStore = new RedisStore({ client: redisClient });
   }
-} catch (error) {
-  console.log('⚠️ Redis initialization failed, continuing without Redis');
+} catch (error: any) {
+  console.log('⚠️ Redis initialization failed, using in-memory sessions:', error.message);
   redisClient = null;
 }
 
