@@ -17,7 +17,9 @@ import collections from "./routes/collections";
 import upload from "./routes/upload";
 import users from "./routes/users";
 import monitoring from "./routes/monitoring";
+import transparency from "./routes/transparency";
 import { getAppConfig } from "./config/environment";
+import { trackUsage, trackAPICalls, performanceMonitoring } from "./middleware/usageTracking";
 import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
 import { BackupService } from "./services/backupService";
 import { PerformanceService } from "./services/performanceService";
@@ -160,6 +162,11 @@ app.use((req: any, res: any, next: any) => {
   next();
 });
 
+// Usage tracking and performance monitoring
+app.use(trackUsage);
+app.use(trackAPICalls);
+app.use(performanceMonitoring);
+
 // Input sanitization (AFTER body parsing)
 app.use(sanitizeInput);
 
@@ -176,6 +183,7 @@ app.use("/api/collections", collections);
 app.use("/api/upload", upload);
 app.use("/api/users", users);
 app.use("/api/monitoring", monitoring);
+app.use("/api/transparency", transparency);
 app.use("/healthz", health);
 app.use("/health", health);
 app.use("/nfts", nfts);

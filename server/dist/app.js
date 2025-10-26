@@ -19,7 +19,9 @@ const collections_1 = __importDefault(require("./routes/collections"));
 const upload_1 = __importDefault(require("./routes/upload"));
 const users_1 = __importDefault(require("./routes/users"));
 const monitoring_1 = __importDefault(require("./routes/monitoring"));
+const transparency_1 = __importDefault(require("./routes/transparency"));
 const environment_1 = require("./config/environment");
+const usageTracking_1 = require("./middleware/usageTracking");
 const automatedMaintenance_1 = require("./services/automatedMaintenance");
 const backupService_1 = require("./services/backupService");
 const performanceService_1 = require("./services/performanceService");
@@ -132,6 +134,10 @@ app.use((req, res, next) => {
     });
     next();
 });
+// Usage tracking and performance monitoring
+app.use(usageTracking_1.trackUsage);
+app.use(usageTracking_1.trackAPICalls);
+app.use(usageTracking_1.performanceMonitoring);
 // Input sanitization (AFTER body parsing)
 app.use(security_1.sanitizeInput);
 // Rate limiting - apply to all routes (AFTER session/auth, BEFORE routes)
@@ -146,6 +152,7 @@ app.use("/api/collections", collections_1.default);
 app.use("/api/upload", upload_1.default);
 app.use("/api/users", users_1.default);
 app.use("/api/monitoring", monitoring_1.default);
+app.use("/api/transparency", transparency_1.default);
 app.use("/healthz", simple_health_1.default);
 app.use("/health", simple_health_1.default);
 app.use("/nfts", nfts_1.default);
