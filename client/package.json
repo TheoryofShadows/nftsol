@@ -9,23 +9,36 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
+    "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-candy-machine": "^4.0.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.2.1",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-slot": "^1.0.2",
     "@solana/spl-token": "^0.4.1",
     "@solana/wallet-adapter-base": "^0.9.24",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",
     "@solana/wallet-adapter-wallets": "^0.19.33",
     "@solana/web3.js": "^1.98.4",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.400.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-hook-form": "^7.52.1",
     "react-toastify": "^10.0.5",
-    "workbox-window": "^7.0.0"
+    "tailwind-merge": "^2.2.1",
+    "tailwindcss-animate": "^1.0.7",
+    "workbox-window": "^7.0.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/react": "^18.3.6",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.17",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.6.3",
     "vite": "^5.0.0",
     "vite-plugin-pwa": "^1.1.0"
