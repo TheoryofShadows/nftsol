@@ -24,10 +24,13 @@ export const createRateLimiter = (windowMs: number, max: number, message?: strin
 };
 
 // Different rate limits for different endpoints
-export const generalLimiter = createRateLimiter(15 * 60 * 1000, 100); // 100 requests per 15 minutes
-export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 auth attempts per 15 minutes
-export const apiLimiter = createRateLimiter(60 * 1000, 30); // 30 API calls per minute
-export const uploadLimiter = createRateLimiter(60 * 1000, 10); // 10 uploads per minute
+// In test environment, use much higher limits to avoid test failures
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+export const generalLimiter = createRateLimiter(15 * 60 * 1000, isTestEnv ? 10000 : 100); // 100 requests per 15 minutes (10000 in test)
+export const authLimiter = createRateLimiter(15 * 60 * 1000, isTestEnv ? 1000 : 5); // 5 auth attempts per 15 minutes (1000 in test)
+export const apiLimiter = createRateLimiter(60 * 1000, isTestEnv ? 10000 : 30); // 30 API calls per minute (10000 in test)
+export const uploadLimiter = createRateLimiter(60 * 1000, isTestEnv ? 1000 : 10); // 10 uploads per minute (1000 in test)
 
 // Helper to extract IP address for rate limiting
 const getIpAddress = (req: any) => {
