@@ -1,0 +1,388 @@
+/* SocialShareBar.css - Social Sharing Component */
+
+.social-share-bar {
+  position: relative;
+  z-index: 1000;
+}
+
+.social-share-bar.floating {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+}
+
+.social-share-bar.inline {
+  position: relative;
+  margin: 1rem 0;
+}
+
+/* Toggle Button */
+.share-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(153, 69, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(153, 69, 255, 0.4);
+}
+
+.share-toggle:active {
+  transform: translateY(0);
+}
+
+.share-icon {
+  font-size: 1.2rem;
+}
+
+.share-text {
+  font-size: 0.9rem;
+}
+
+/* Share Options */
+.share-options {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 15px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(153, 69, 255, 0.3);
+  min-width: 300px;
+  max-width: 400px;
+  overflow: hidden;
+}
+
+.social-share-bar.inline .share-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Share Header */
+.share-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.share-header h4 {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-options {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a0a0a0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.close-options:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+  border-color: #ff3b30;
+}
+
+/* Share Buttons */
+.share-buttons {
+  padding: 1rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.share-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.share-button:hover {
+  background: var(--platform-color, rgba(153, 69, 255, 0.2));
+  border-color: var(--platform-color, #9945FF);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.share-button.copy-link {
+  --platform-color: #14F195;
+}
+
+.share-button.screenshot {
+  --platform-color: #FF6B35;
+}
+
+.platform-icon {
+  font-size: 1.5rem;
+}
+
+.platform-name {
+  font-size: 0.8rem;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Content Preview */
+.content-preview {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.preview-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.preview-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.preview-text h5 {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.preview-text p {
+  color: #a0a0a0;
+  font-size: 0.8rem;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.preview-url {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #14F195;
+  font-size: 0.7rem;
+  font-family: 'Courier New', monospace;
+}
+
+.preview-url span:last-child {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* Quick Actions */
+.quick-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.quick-action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.quick-action:hover:not(:disabled) {
+  background: rgba(153, 69, 255, 0.1);
+  color: #9945FF;
+  border-color: #9945FF;
+}
+
+.quick-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .social-share-bar.floating {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .share-options {
+    min-width: 280px;
+    max-width: calc(100vw - 2rem);
+    right: -1rem;
+  }
+
+  .social-share-bar.inline .share-options {
+    left: -1rem;
+    right: -1rem;
+  }
+
+  .share-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .share-button {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .platform-icon {
+    font-size: 1.2rem;
+  }
+
+  .platform-name {
+    font-size: 0.7rem;
+  }
+
+  .content-preview {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .preview-image {
+    width: 100%;
+    height: 80px;
+  }
+
+  .quick-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .share-toggle {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .share-text {
+    display: none;
+  }
+
+  .share-options {
+    min-width: 250px;
+  }
+
+  .share-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animation for floating position */
+.social-share-bar.floating .share-toggle {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Accessibility */
+.share-button:focus,
+.quick-action:focus,
+.close-options:focus {
+  outline: 2px solid #9945FF;
+  outline-offset: 2px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .share-options {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .social-share-bar.floating .share-toggle {
+    animation: none;
+  }
+  
+  .share-button:hover,
+  .quick-action:hover {
+    transform: none;
+  }
+}

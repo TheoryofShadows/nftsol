@@ -16,7 +16,10 @@
     "test:all": "npm run test:compliance && npm run test:coverage",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "seed:devnet": "node scripts/seed-marketplace.mjs devnet",
+    "seed:mainnet": "node scripts/seed-marketplace.mjs mainnet-beta",
+    "seed:custom": "node scripts/seed-marketplace.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",

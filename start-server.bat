@@ -1,17 +1,25 @@
 @echo off
 echo Setting up NFTSol server environment...
 
-set PINATA_API_KEY=***REMOVED***
-set PINATA_SECRET_KEY=***REMOVED***
-set HELIUS_API_KEY=33d5c12f-895d-4192-bc26-a86d5ffa5cbc
-set JWT_SECRET=a8f5f167f44f4964e6c998dee827110c
-set SESSION_SECRET=b9e6e278g55g5075f7d009eff938221d
+REM Load from .env file (DO NOT HARDCODE SECRETS)
+REM Create server/.env file with your actual credentials
+if exist server\.env (
+    echo Loading environment from server\.env...
+) else (
+    echo WARNING: server\.env not found. Please create it with your credentials.
+    echo Example format:
+    echo PINATA_API_KEY=your_key_here
+    echo HELIUS_API_KEY=your_key_here
+    echo JWT_SECRET=your_secret_here
+    echo SESSION_SECRET=your_secret_here
+)
+
 set NODE_ENV=development
 
 REM Set database URL for development
 set DATABASE_URL=postgresql://localhost:5432/nftsol_dev
 
-echo Environment variables set
+echo Environment variables configured
 echo Starting NFTSol server...
 
 cd server

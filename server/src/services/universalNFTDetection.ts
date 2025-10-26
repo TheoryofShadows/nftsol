@@ -1,11 +1,12 @@
 /**
- * 🌐 Universal NFT Detection Service
- * Detects and aggregates NFTs from all Solana platforms
+ * 🌐 Universal NFT Detection Service - 2026 Standards
+ * Detects and aggregates NFTs from all Solana platforms using Metaplex v3 and DAS API
  */
 
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import { getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
 import { getHeliusConfig } from '../config/environment';
+import MetaplexService, { DASAsset } from './metaplexService';
 
 export interface UniversalNFT {
   mint: string;
@@ -16,11 +17,22 @@ export interface UniversalNFT {
   owner: string;
   price?: number;
   status: 'listed' | 'available' | 'sold';
-  platform: 'nftsol' | 'magic-eden' | 'opensea' | 'metaplex' | 'unknown';
+  platform: 'nftsol' | 'magic-eden' | 'opensea' | 'metaplex' | 'compressed' | 'unknown';
   metadata: any;
   attributes?: any[];
   rarity?: number;
   lastUpdated: number;
+  compressed?: boolean;
+  royalty?: number;
+  creators?: Array<{ address: string; share: number; verified: boolean }>;
+  verified?: boolean;
+  animation_url?: string;
+  external_url?: string;
+  youtube_url?: string;
+  properties?: {
+    files: Array<{ uri: string; type: string; cdn?: boolean }>;
+    category: 'image' | 'video' | 'audio' | '3d' | 'html';
+  };
 }
 
 export interface CollectionInfo {
@@ -43,17 +55,19 @@ export interface CollectionInfo {
 export class UniversalNFTDetectionService {
   private connection: Connection;
   private heliusConfig: any;
+  private metaplexService: MetaplexService;
 
   constructor() {
     this.heliusConfig = getHeliusConfig();
     this.connection = new Connection(this.heliusConfig.rpcUrl, 'confirmed');
+    this.metaplexService = new MetaplexService();
   }
 
   /**
-   * Get all NFTs for a wallet across all platforms
+   * Get all NFTs for a wallet across all platforms using DAS API
    */
   async getAllNFTsForWallet(walletAddress: string): Promise<UniversalNFT[]> {
-    console.log(`🔍 Detecting NFTs for wallet: ${walletAddress}`);
+    console.log(`🔍 Detecting NFTs for wallet: ${walletAddress} using DAS API`);
     
     const allNFTs: UniversalNFT[] = [];
     
@@ -62,13 +76,11 @@ export class UniversalNFTDetectionService {
       const [
         nftsolNFTs,
         magicEdenNFTs,
-        metaplexNFTs,
-        crossPlatformNFTs
+        dasAssets
       ] = await Promise.allSettled([
         this.getNFTSolNFTs(walletAddress),
         this.getMagicEdenNFTs(walletAddress),
-        this.getMetaplexNFTs(walletAddress),
-        this.getCrossPlatformNFTs(walletAddress)
+        this.getDASAssets(walletAddress)
       ]);
 
       // Combine results
@@ -78,17 +90,15 @@ export class UniversalNFTDetectionService {
       if (magicEdenNFTs.status === 'fulfilled') {
         allNFTs.push(...magicEdenNFTs.value);
       }
-      if (metaplexNFTs.status === 'fulfilled') {
-        allNFTs.push(...metaplexNFTs.value);
-      }
-      if (crossPlatformNFTs.status === 'fulfilled') {
-        allNFTs.push(...crossPlatformNFTs.value);
+      if (dasAssets.status === 'fulfilled') {
+        allNFTs.push(...dasAssets.value);
       }
 
       // Remove duplicates based on mint address
       const uniqueNFTs = this.removeDuplicates(allNFTs);
       
       console.log(`✅ Found ${uniqueNFTs.length} unique NFTs across all platforms`);
+      console.log(`📊 Platform breakdown:`, this.getPlatformBreakdown(uniqueNFTs));
       return uniqueNFTs;
       
     } catch (error) {
@@ -156,52 +166,61 @@ export class UniversalNFTDetectionService {
   }
 
   /**
-   * Get NFTs from Metaplex standard
+   * Get NFTs using Helius DAS API (includes both regular and compressed NFTs)
    */
-  private async getMetaplexNFTs(walletAddress: string): Promise<UniversalNFT[]> {
+  private async getDASAssets(walletAddress: string): Promise<UniversalNFT[]> {
     try {
-      const wallet = new PublicKey(walletAddress);
+      console.log(`🔍 Fetching DAS assets for wallet: ${walletAddress}`);
       
-      // Get token accounts for the wallet
-      const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
-        wallet,
-        { programId: new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA') }
-      );
-
-      const nfts: UniversalNFT[] = [];
-
-      for (const account of tokenAccounts.value) {
-        const tokenData = account.account.data.parsed.info;
+      // Get all assets using DAS API
+      const dasAssets = await this.metaplexService.getAssetsByOwner(walletAddress, 1000);
+      
+      // Convert DAS assets to Universal NFT format
+      const nfts: UniversalNFT[] = dasAssets.map(asset => {
+        const universalNFT = this.metaplexService.convertDASAssetToUniversalNFT(asset);
         
-        // Check if it's an NFT (amount = 1, decimals = 0)
-        if (tokenData.tokenAmount.amount === '1' && tokenData.tokenAmount.decimals === 0) {
-          try {
-            const metadata = await this.getNFTMetadata(new PublicKey(tokenData.mint));
-            
-            nfts.push({
-              mint: tokenData.mint,
-              name: metadata.name || 'Unknown NFT',
-              description: metadata.description || '',
-              image: metadata.image || '',
-              collection: metadata.collection?.name || 'Unknown Collection',
-              owner: walletAddress,
-              status: 'available' as const,
-              platform: 'metaplex' as const,
-              metadata: metadata,
-              attributes: metadata.attributes,
-              lastUpdated: Date.now()
-            });
-          } catch (metadataError) {
-            console.warn(`Failed to get metadata for ${tokenData.mint}:`, metadataError);
+        // Add 2026 metadata fields
+        const metadata = asset.content?.metadata || {};
+        const files = asset.content?.files || [];
+        
+        return {
+          ...universalNFT,
+          animation_url: metadata.animation_url,
+          external_url: metadata.external_url,
+          youtube_url: metadata.youtube_url,
+          properties: {
+            files: files.map(file => ({
+              uri: file.uri,
+              type: file.mime,
+              cdn: !!file.cdn_uri
+            })),
+            category: this.determineCategory(files)
           }
-        }
-      }
+        };
+      });
 
+      console.log(`✅ Found ${nfts.length} DAS assets (${nfts.filter(n => n.compressed).length} compressed)`);
       return nfts;
     } catch (error) {
-      console.error('❌ Error fetching Metaplex NFTs:', error);
+      console.error('❌ Error fetching DAS assets:', error);
       return [];
     }
+  }
+
+  /**
+   * Determine content category based on files
+   */
+  private determineCategory(files: Array<{ mime: string }>): 'image' | 'video' | 'audio' | '3d' | 'html' {
+    if (!files || files.length === 0) return 'image';
+    
+    const mimeTypes = files.map(f => f.mime);
+    
+    if (mimeTypes.some(m => m.startsWith('video/'))) return 'video';
+    if (mimeTypes.some(m => m.startsWith('audio/'))) return 'audio';
+    if (mimeTypes.some(m => m.includes('gltf') || m.includes('glb'))) return '3d';
+    if (mimeTypes.some(m => m.includes('html'))) return 'html';
+    
+    return 'image';
   }
 
   /**
@@ -299,24 +318,33 @@ export class UniversalNFTDetectionService {
   }
 
   /**
-   * Get collection information
+   * Get platform breakdown for analytics
+   */
+  private getPlatformBreakdown(nfts: UniversalNFT[]): Record<string, number> {
+    const breakdown: Record<string, number> = {};
+    nfts.forEach(nft => {
+      breakdown[nft.platform] = (breakdown[nft.platform] || 0) + 1;
+    });
+    return breakdown;
+  }
+
+  /**
+   * Get collection information using DAS API
    */
   async getCollectionInfo(collectionAddress: string): Promise<CollectionInfo | null> {
     try {
-      // This would integrate with various collection APIs
-      // For now, return basic info
-      return {
-        name: 'Unknown Collection',
-        symbol: 'UNK',
-        description: 'Collection detected on NFTSol',
-        image: '',
-        totalSupply: 0,
-        floorPrice: 0,
-        volume24h: 0,
-        marketCap: 0,
-        verified: false,
-        socialLinks: {}
-      };
+      console.log(`📊 Getting collection info for: ${collectionAddress}`);
+      
+      // Use MetaplexService to get collection info via DAS API
+      const collectionInfo = await this.metaplexService.getCollectionInfo(collectionAddress);
+      
+      if (!collectionInfo) {
+        console.log(`❌ Collection not found: ${collectionAddress}`);
+        return null;
+      }
+
+      console.log(`✅ Collection info retrieved: ${collectionInfo.name}`);
+      return collectionInfo;
     } catch (error) {
       console.error('❌ Error getting collection info:', error);
       return null;
@@ -324,20 +352,70 @@ export class UniversalNFTDetectionService {
   }
 
   /**
-   * Search NFTs across all platforms
+   * Search NFTs across all platforms using DAS API
    */
   async searchNFTs(query: string, filters?: {
     collection?: string;
     minPrice?: number;
     maxPrice?: number;
     platform?: string;
+    ownerAddress?: string;
   }): Promise<UniversalNFT[]> {
     try {
       console.log(`🔍 Searching NFTs with query: ${query}`);
       
-      // This would implement cross-platform search
-      // For now, return empty array
-      return [];
+      // Use DAS API for search
+      const searchParams: any = {
+        limit: 100
+      };
+
+      if (filters?.ownerAddress) {
+        searchParams.ownerAddress = filters.ownerAddress;
+      }
+
+      if (filters?.collection) {
+        searchParams.groupBy = 'collection';
+        searchParams.groupValue = filters.collection;
+      }
+
+      const { items } = await this.metaplexService.searchAssets(searchParams);
+      
+      // Convert DAS assets to Universal NFT format
+      const nfts: UniversalNFT[] = items.map(asset => {
+        const universalNFT = this.metaplexService.convertDASAssetToUniversalNFT(asset);
+        
+        // Add 2026 metadata fields
+        const metadata = asset.content?.metadata || {};
+        const files = asset.content?.files || [];
+        
+        return {
+          ...universalNFT,
+          animation_url: metadata.animation_url,
+          external_url: metadata.external_url,
+          youtube_url: metadata.youtube_url,
+          properties: {
+            files: files.map(file => ({
+              uri: file.uri,
+              type: file.mime,
+              cdn: !!file.cdn_uri
+            })),
+            category: this.determineCategory(files)
+          }
+        };
+      });
+
+      // Apply additional filters
+      let filteredNFTs = nfts;
+
+      if (filters?.platform) {
+        filteredNFTs = filteredNFTs.filter(nft => nft.platform === filters.platform);
+      }
+
+      // Note: Price filtering would need marketplace integration
+      // For now, we'll skip minPrice/maxPrice filtering
+
+      console.log(`✅ Found ${filteredNFTs.length} NFTs matching search criteria`);
+      return filteredNFTs;
     } catch (error) {
       console.error('❌ Error searching NFTs:', error);
       return [];

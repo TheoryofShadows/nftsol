@@ -14,6 +14,27 @@ pnpm-debug.log*
 client/.env.local
 server/.env
 
+# Add environment files with secrets (but keep examples)
+*.env
+*.env.*
+!*.env.example
+!.env.example
+env.development
+env.production
+client/env.development
+client/env.production
+server/env.development
+server/env.production
+!client/env.example
+!server/env.example
+!env.example
+
+# Batch files with hardcoded secrets (ignore the actual file but keep template)
+start-production.bat
+
+# Archive documentation with leaked keys
+docs/archive/
+
 # Build outputs
 client/dist/
 server/dist/

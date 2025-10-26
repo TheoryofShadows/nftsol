@@ -1,0 +1,593 @@
+/* CloutQuickStart.css - CLOUT Quick Start Guide */
+
+.clout-quick-start {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(153, 69, 255, 0.3);
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a0a0a0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
+
+.close-button:hover {
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+  border-color: #ff3b30;
+  transform: scale(1.1);
+}
+
+/* Header */
+.quick-start-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.quick-start-header h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.quick-start-header p {
+  color: #a0a0a0;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+/* Section Tabs */
+.section-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.section-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.section-tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.section-tab.active {
+  background: var(--tab-color, #9945FF);
+  color: #fff;
+  border-color: var(--tab-color, #9945FF);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tab-icon {
+  font-size: 1.2rem;
+}
+
+.tab-title {
+  font-size: 1rem;
+}
+
+/* Section Content */
+.section-content {
+  min-height: 500px;
+}
+
+.section-description {
+  color: #a0a0a0;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Earn Section */
+.earn-section h3,
+.benefits-section h3,
+.tokenomics-section h3 {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.earn-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.earn-method {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.earn-method:hover {
+  background: rgba(20, 241, 149, 0.1);
+  border-color: #14F195;
+  transform: translateY(-2px);
+}
+
+.method-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.method-icon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, #9945FF 0%, #14F195 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.method-info h4 {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.reward {
+  color: #14F195;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.method-description {
+  color: #a0a0a0;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+.method-multiplier {
+  color: #9945FF;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+.trust-score-info {
+  background: rgba(153, 69, 255, 0.1);
+  border: 1px solid #9945FF;
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.trust-score-info h4 {
+  color: #14F195;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.trust-score-info p {
+  color: #a0a0a0;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.trust-levels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.trust-level {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.level {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.multiplier {
+  color: #14F195;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Benefits Section */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.benefit-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.benefit-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.benefit-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.benefit-icon {
+  font-size: 1.5rem;
+}
+
+.benefit-header h4 {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.benefit-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.level-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: 1rem;
+  align-items: center;
+}
+
+.level-clout {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.level-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.level-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.level-reduction {
+  color: #14F195;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.benefit-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.benefit-features li {
+  color: #a0a0a0;
+  padding: 0.5rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.4;
+}
+
+.benefit-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #14F195;
+  font-weight: bold;
+}
+
+/* Tokenomics Section */
+.tokenomics-overview {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.total-supply h4 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.supply-amount {
+  color: #14F195;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.distribution-chart {
+  margin-bottom: 2rem;
+}
+
+.distribution-chart h4 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chart-segment {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.segment-bar {
+  height: 40px;
+  background: var(--segment-color, #9945FF);
+  border-radius: 8px;
+  transform-origin: left;
+}
+
+.segment-info {
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  right: 1rem;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.segment-category {
+  flex: 1;
+}
+
+.segment-percentage {
+  margin: 0 1rem;
+  color: var(--segment-color, #9945FF);
+}
+
+.segment-amount {
+  color: #a0a0a0;
+  font-size: 0.8rem;
+}
+
+.tokenomics-features {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid #FF6B35;
+  border-radius: 15px;
+  padding: 1.5rem;
+}
+
+.tokenomics-features h4 {
+  color: #FF6B35;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.tokenomics-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tokenomics-features li {
+  color: #a0a0a0;
+  padding: 0.5rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.4;
+}
+
+.tokenomics-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #FF6B35;
+  font-weight: bold;
+}
+
+/* Footer */
+.quick-start-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.quick-start-footer p {
+  color: #a0a0a0;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.cta-link {
+  color: #14F195;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.cta-link:hover {
+  color: #9945FF;
+}
+
+.whitepaper-link-text {
+  color: #9945FF;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.whitepaper-link-text:hover {
+  color: #14F195;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .clout-quick-start {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+
+  .quick-start-header h2 {
+    font-size: 2rem;
+  }
+
+  .section-tabs {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .section-tab {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  .earn-methods,
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-levels {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .level-row {
+    grid-template-columns: 60px 1fr 50px;
+    gap: 0.5rem;
+  }
+
+  .segment-info {
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+  }
+
+  .segment-percentage {
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .clout-quick-start {
+    padding: 1rem;
+    margin: 0.5rem;
+  }
+
+  .quick-start-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .earn-method,
+  .benefit-card {
+    padding: 1rem;
+  }
+
+  .trust-levels {
+    grid-template-columns: 1fr;
+  }
+
+  .level-row {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 0.25rem;
+  }
+}
+
+/* Animation for chart segments */
+@keyframes chartFill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.segment-bar {
+  animation: chartFill 0.5s ease-out;
+}
+
+/* Accessibility */
+.section-tab:focus,
+.cta-link:focus,
+.whitepaper-link-text:focus {
+  outline: 2px solid #9945FF;
+  outline-offset: 2px;
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .clout-quick-start {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
