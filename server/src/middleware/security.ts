@@ -81,11 +81,10 @@ export const corsConfig = cors({
       ];
     }
     
-    // Allow requests with no origin (mobile apps, curl, etc.) in development only
+    // Allow requests with no origin (mobile apps, curl, health checks, etc.)
+    // This is needed for Render's internal health checks and other network requests
     if (!origin) {
-      if (isProduction) {
-        return callback(new Error('CORS: Origin required in production'), false);
-      }
+      // Allow all requests without origin to pass through (CORS will still validate with proper origin headers)
       return callback(null, true);
     }
     
