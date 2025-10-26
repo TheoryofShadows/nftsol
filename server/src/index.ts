@@ -15,8 +15,10 @@ console.log(`   Helius RPC: ${heliusConfig.rpcUrl}`);
 console.log(`   Helius Key: ${heliusConfig.apiKey ? `${heliusConfig.apiKey.slice(0, 8)}...` : 'Not configured'}`);
 
 const host = "0.0.0.0";
+const PORT = Number(process.env.PORT || appConfig.port || 3000);
 
-app.listen(appConfig.port, host, () => {
-  console.log(`✅ NFTSol API listening on http://${host}:${appConfig.port}`);
+app.listen(PORT, host, () => {
+  console.log(`✅ NFTSol API listening on http://${host}:${PORT}`);
   console.log(`🔒 Security: Environment validation passed`);
+  console.log(`🔗 Health check: http://${host}:${PORT}/healthz`);
 });
