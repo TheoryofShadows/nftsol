@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/start-minimal.js",
+    "start": "node dist/index.js",
     "build": "tsc -p tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -38,6 +38,7 @@
     "dotenv": "^16.6.1",
     "drizzle-kit": "^0.20.0",
     "drizzle-orm": "^0.44.6",
+    "drizzle-zod": "^0.8.3",
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
     "express-session": "^1.18.2",

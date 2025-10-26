@@ -25,6 +25,7 @@
     "@solana/wallet-adapter-wallets": "^0.19.33",
     "bigint-buffer": "^1.1.5",
     "drizzle-kit": "^0.31.5",
+    "drizzle-zod": "^0.8.3",
     "esbuild": "^0.25.11",
     "express-validator": "^7.1.0",
     "fast-redact": "^3.5.0",

@@ -60,10 +60,17 @@ let sessionStore: any = null;
 let redisConnected = false;
 
 try {
-  // Only attempt Redis connection if REDIS_URL is explicitly provided
-  if (process.env.REDIS_URL && process.env.REDIS_URL !== 'redis://localhost:6379') {
+  // Only attempt Redis connection if REDIS_URL is explicitly provided and valid
+  const redisUrl = process.env.REDIS_URL;
+  const hasValidRedisUrl = redisUrl && 
+                          redisUrl !== 'redis://localhost:6379' && 
+                          redisUrl !== 'localhost' &&
+                          redisUrl.trim().length > 0 &&
+                          !redisUrl.includes('undefined');
+  
+  if (hasValidRedisUrl) {
     redisClient = createClient({
-      url: process.env.REDIS_URL,
+      url: redisUrl,
       socket: {
         reconnectStrategy: (retries) => {
           if (retries > 3) {
@@ -175,31 +182,39 @@ app.use("/nfts", nfts);
 
 app.get("/", (_req, res) => res.json({ ok: true }));
 
-// Initialize services
-const maintenanceService = new AutomatedMaintenanceService();
-maintenanceService.startAutomatedMaintenance();
+// Initialize services only if required environment variables are available
+const hasDatabase = !!process.env.DATABASE_URL;
+const hasRedis = !!process.env.REDIS_URL && process.env.REDIS_URL.trim() !== '';
 
-// Initialize backup service
-const backupService = new BackupService({
-  databaseUrl: process.env.DATABASE_URL || '',
-  backupDir: './backups',
-  s3Bucket: process.env.S3_BACKUP_BUCKET,
-  s3Region: process.env.S3_BACKUP_REGION,
-  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  retentionDays: 30
-});
+if (hasDatabase) {
+  // Initialize services
+  const maintenanceService = new AutomatedMaintenanceService();
+  maintenanceService.startAutomatedMaintenance();
 
-// Initialize performance service
-const performanceService = new PerformanceService({
-  redisUrl: process.env.REDIS_URL,
-  cacheTimeout: 300, // 5 minutes
-  maxConnections: 10,
-  connectionTimeout: 5000
-});
+  // Initialize backup service
+  const backupService = new BackupService({
+    databaseUrl: process.env.DATABASE_URL || '',
+    backupDir: './backups',
+    s3Bucket: process.env.S3_BACKUP_BUCKET,
+    s3Region: process.env.S3_BACKUP_REGION,
+    awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    retentionDays: 30
+  });
 
-// Schedule automated backups
-backupService.scheduleBackups();
+  // Schedule automated backups
+  backupService.scheduleBackups();
+}
+
+if (hasRedis) {
+  // Initialize performance service
+  const performanceService = new PerformanceService({
+    redisUrl: process.env.REDIS_URL,
+    cacheTimeout: 300, // 5 minutes
+    maxConnections: 10,
+    connectionTimeout: 5000
+  });
+}
 
 // Error handler middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

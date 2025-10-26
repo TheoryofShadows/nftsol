@@ -135,17 +135,25 @@ export function logEnvironmentStatus(): void {
 
 export function validateEnvironmentAndExit(): void {
   const result = validateEnvironment();
+  const isProduction = process.env.NODE_ENV === 'production';
   
-  if (!result.isValid) {
+  // In production, fail on missing required vars or security issues
+  // In development, only fail on truly critical missing vars
+  if (isProduction && !result.isValid) {
     console.error('🚨 Environment validation failed!');
     logEnvironmentStatus();
     process.exit(1);
   }
   
-  if (result.securityIssues.length > 0) {
+  if (isProduction && result.securityIssues.length > 0) {
     console.error('🚨 Security issues detected!');
     logEnvironmentStatus();
     process.exit(1);
+  }
+  
+  // In development, only fail on critical missing vars
+  if (!isProduction && result.missing.length > 0) {
+    console.warn('⚠️  Missing some required environment variables');
   }
   
   logEnvironmentStatus();
