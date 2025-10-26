@@ -2,6 +2,11 @@ import React from 'react';
 import './HomePage.css';
 
 export default function HomePage() {
+  const navigate = (tab: string) => {
+    // Dispatch custom event to change tab
+    window.dispatchEvent(new CustomEvent('change-tab', { detail: tab }));
+  };
+
   return (
     <div className="home-page">
       {/* Hero Section */}
@@ -175,8 +180,18 @@ export default function HomePage() {
           <h2>Ready to Experience the Future?</h2>
           <p>Join thousands of users already experiencing the most revolutionary NFT platform on Solana.</p>
           <div className="cta-buttons">
-            <button className="btn-primary">Start Trading</button>
-            <button className="btn-secondary">Learn More</button>
+            <button 
+              className="btn-primary" 
+              onClick={() => navigate('marketplace')}
+            >
+              Start Trading
+            </button>
+            <button 
+              className="btn-secondary"
+              onClick={() => navigate('clout')}
+            >
+              Learn More
+            </button>
           </div>
         </div>
       </section>
