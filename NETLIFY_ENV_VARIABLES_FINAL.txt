@@ -1,0 +1,63 @@
+# =============================================================================
+# NETLIFY ENVIRONMENT VARIABLES - FINAL WITH REAL VALUES
+# Copy and paste these into Netlify Dashboard > Site Settings > Environment Variables
+# =============================================================================
+
+# Application Configuration
+NODE_ENV=production
+PORT=8888
+LOG_LEVEL=info
+
+# Security Configuration (REAL VALUES)
+JWT_SECRET=a8f5f167f44f4964e6c998dee827110c
+SESSION_SECRET=b9e6e278g55g5075f7d009eff938221d
+
+# Database Configuration (FROM RENDER)
+# Replace with your actual Render PostgreSQL connection string
+DATABASE_URL=postgresql://username:password@host:5432/database_name
+
+# Solana / Helius Configuration (REAL VALUES)
+HELIUS_API_KEY=33d5c12f-895d-4192-bc26-a86d5ffa5cbc
+SOLANA_CLUSTER=mainnet-beta
+HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=33d5c12f-895d-4192-bc26-a86d5ffa5cbc
+HELIUS_REST_URL=https://api.helius.xyz/v0
+
+# CORS Configuration
+# Replace with your actual Netlify domain
+ALLOWED_ORIGINS=https://your-app.netlify.app,https://nftsol-server-prod.onrender.com
+DEV_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# Pinata IPFS Configuration (REAL VALUES)
+PINATA_API_KEY=***REMOVED***
+PINATA_SECRET_KEY=***REMOVED***
+PINATA_JWT=your-pinata-jwt-token-here
+
+# Rate Limiting
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Admin Configuration
+ADMIN_IPS=127.0.0.1,::1
+
+# CLOUT Token Configuration (REAL VALUES)
+CLOUT_MINT=4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+CLOUT_TREASURY=J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+CLOUT_FEE_COLLECTOR=5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+CLOUT_DEVELOPER=7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
+
+# Security Headers
+HELMET_CSP_ENABLED=true
+TRUST_PROXY=1
+
+# =============================================================================
+# VALUES YOU STILL NEED TO REPLACE:
+# =============================================================================
+# 1. DATABASE_URL - Get from Render PostgreSQL dashboard
+#    Format: postgresql://user:password@host:port/database
+# 
+# 2. ALLOWED_ORIGINS - Replace with your actual Netlify domain
+#    Example: https://your-site-name.netlify.app
+#
+# 3. PINATA_JWT - Get from Pinata dashboard (optional, only if using JWT auth)
+#    Go to: https://pinata.cloud -> API Keys -> Generate JWT
+# =============================================================================

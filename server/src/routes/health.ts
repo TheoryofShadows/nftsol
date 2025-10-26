@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Connection } from '@solana/web3.js';
 import { getHeliusConfig } from '../config/environment';
-import { db } from '../db';
+import { checkDatabaseHealth } from '../db';
 
 const router = Router();
 
@@ -68,9 +68,18 @@ router.get("/detailed", async (_req, res) => {
 // Test database connection
 async function testDatabase() {
   try {
-    // Simple database query test
-    await db.execute('SELECT 1');
-    return { status: 'healthy', connected: true };
+    // Use the dedicated health check function
+    const health = await checkDatabaseHealth();
+    
+    if (health.healthy) {
+      return { status: 'healthy', connected: true };
+    } else {
+      return { 
+        status: 'error', 
+        connected: false,
+        error: health.error || 'Database connection failed'
+      };
+    }
   } catch (error) {
     return { 
       status: 'error', 

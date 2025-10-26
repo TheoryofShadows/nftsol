@@ -1,6 +1,6 @@
 import { CloutTokenService } from './cloutToken';
 import { HonorSystem } from './honorSystem';
-import { db } from '../db';
+import { checkDatabaseHealth } from '../db';
 
 export class AutomatedMaintenanceService {
   private cloutService: CloutTokenService;
@@ -159,8 +159,11 @@ export class AutomatedMaintenanceService {
     const issues: string[] = [];
     
     try {
-      // Test database connection
-      await db.execute('SELECT 1');
+      // Test database connection using the dedicated health check
+      const dbHealth = await checkDatabaseHealth();
+      if (!dbHealth.healthy) {
+        issues.push(`Database connection failed: ${dbHealth.error || 'Unknown error'}`);
+      }
     } catch (error) {
       issues.push('Database connection failed');
     }
@@ -204,8 +207,16 @@ export class AutomatedMaintenanceService {
     try {
       // Attempt to reconnect to database
       console.log('🔧 Attempting database reconnection...');
-      // Implementation would depend on your database setup
-      console.log('✅ Database reconnection attempted');
+      
+      // The database module will automatically attempt reconnection
+      // when checkDatabaseHealth is called
+      const health = await checkDatabaseHealth();
+      
+      if (health.healthy) {
+        console.log('✅ Database reconnection successful');
+      } else {
+        console.log('⚠️ Database still unhealthy:', health.error);
+      }
     } catch (error) {
       console.error('❌ Database healing failed:', error);
     }
