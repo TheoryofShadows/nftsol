@@ -1,6 +1,6 @@
 import { getAppConfig, getHeliusConfig } from "./config/environment";
 import { validateEnvironmentAndExit } from "./utils/envValidation";
-import app from "./app";
+import { server } from "./app";
 
 // Validate environment before starting server
 validateEnvironmentAndExit();
@@ -17,8 +17,9 @@ console.log(`   Helius Key: ${heliusConfig.apiKey ? `${heliusConfig.apiKey.slice
 const host = "0.0.0.0";
 const PORT = Number(process.env.PORT || appConfig.port || 3000);
 
-app.listen(PORT, host, () => {
+server.listen(PORT, host, () => {
   console.log(`✅ NFTSol API listening on http://${host}:${PORT}`);
   console.log(`🔒 Security: Environment validation passed`);
   console.log(`🔗 Health check: http://${host}:${PORT}/healthz`);
+  console.log(`🔌 WebSocket: ${process.env.WS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
 });

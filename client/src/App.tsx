@@ -1,26 +1,32 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "react-responsive";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
-import MintForm from "./components/MintForm";
-import NFTMarketplace from "./components/NFTMarketplace";
-import ProxyCheck from "./components/ProxyCheck";
 import CloutBadge from "./components/CloutBadge";
-import HomePage from "./components/HomePage";
-import CloutExplanation from "./components/CloutExplanation";
-import SmartContractPage from "./components/SmartContractPage";
-import TimeCapsuleSales from "./components/TimeCapsuleSales";
-import CollectionManager from "./components/CollectionManager";
 import InstallButton from "./components/InstallButton";
 import OfflineIndicator from "./components/OfflineIndicator";
-import UserAuth from "./components/UserAuth";
-import UserDashboard from "./components/UserDashboard";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import TransparencyDashboard from "./components/TransparencyDashboard";
 import { logError } from "./utils/errorHandler";
 import "./App.css";
+
+// Lazy load components for code splitting
+const HomePage = lazy(() => import("./components/HomePage"));
+const NFTMarketplace = lazy(() => import("./components/NFTMarketplace"));
+const MintForm = lazy(() => import("./components/MintForm"));
+const CloutExplanation = lazy(() => import("./components/CloutExplanation"));
+const SmartContractPage = lazy(() => import("./components/SmartContractPage"));
+const TimeCapsuleSales = lazy(() => import("./components/TimeCapsuleSales"));
+const CollectionManager = lazy(() => import("./components/CollectionManager"));
+const ProxyCheck = lazy(() => import("./components/ProxyCheck"));
+const UserAuth = lazy(() => import("./components/UserAuth"));
+const UserDashboard = lazy(() => import("./components/UserDashboard"));
+const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"));
+const TransparencyDashboard = lazy(() => import("./components/TransparencyDashboard"));
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
   const [user, setUser] = useState<any>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isMobile = useMediaQuery({ maxWidth: 768 });
 
   // Listen for custom tab change events from buttons
   useEffect(() => {
@@ -54,9 +60,37 @@ export default function App() {
     };
   }, []);
 
+  // Keyboard navigation support
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Close mobile menu on Escape
+      if (event.key === 'Escape' && isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+      
+      // Navigate with number keys (1-9 for different tabs)
+      if (event.key >= '1' && event.key <= '9' && !event.ctrlKey && !event.metaKey) {
+        const tabIndex = parseInt(event.key) - 1;
+        const tabs = ['home', 'marketplace', 'mint', 'clout', 'smart-contract', 'time-capsules', 'collections', 'proxy', 'dashboard'];
+        if (tabs[tabIndex]) {
+          setActiveTab(tabs[tabIndex] as any);
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileMenuOpen]);
+
   return (
     <UniversalWalletProvider>
       <div className="app">
+        {/* Skip to content link for accessibility */}
+        <a href="#main-content" className="skip-to-content">
+          Skip to main content
+        </a>
+        
         {/* PWA Components */}
         <OfflineIndicator />
         <InstallButton />
@@ -88,79 +122,220 @@ export default function App() {
 
         {/* Revolutionary Navigation */}
         <nav className="nav-tabs">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`}
-          >
-            🏠 Home
-          </button>
-          <button
-            onClick={() => setActiveTab('marketplace')}
-            className={`nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
-          >
-            🏪 Marketplace
-          </button>
-          <button
-            onClick={() => setActiveTab('mint')}
-            className={`nav-tab ${activeTab === 'mint' ? 'active' : ''}`}
-          >
-            ✨ Create NFT
-          </button>
-          <button
-            onClick={() => setActiveTab('clout')}
-            className={`nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
-          >
-            ⚡ CLOUT Token
-          </button>
-          <button
-            onClick={() => setActiveTab('smart-contract')}
-            className={`nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
-          >
-            🛡️ Smart Contracts
-          </button>
-          <button
-            onClick={() => setActiveTab('time-capsules')}
-            className={`nav-tab ${activeTab === 'time-capsules' ? 'active' : ''}`}
-          >
-            ⏰ Time Capsules
-          </button>
-          <button
-            onClick={() => setActiveTab('collections')}
-            className={`nav-tab ${activeTab === 'collections' ? 'active' : ''}`}
-          >
-            🏗️ Collections
-          </button>
-          <button
-            onClick={() => setActiveTab('proxy')}
-            className={`nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
-          >
-            🔧 Proxy Test
-          </button>
-          {user && (
+          {/* Mobile Hamburger Menu */}
+          {isMobile && (
             <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+              className="mobile-menu-toggle"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+              aria-expanded={isMobileMenuOpen}
             >
-              👤 Dashboard
+              <motion.span
+                className="hamburger-line"
+                animate={isMobileMenuOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+              <motion.span
+                className="hamburger-line"
+                animate={isMobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                transition={{ duration: 0.3 }}
+              />
+              <motion.span
+                className="hamburger-line"
+                animate={isMobileMenuOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.3 }}
+              />
             </button>
           )}
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          >
-            📊 Analytics
-          </button>
-          <button
-            onClick={() => setActiveTab('transparency')}
-            className={`nav-tab ${activeTab === 'transparency' ? 'active' : ''}`}
-          >
-            🔍 Transparency
-          </button>
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <div className="desktop-nav">
+              <button
+                onClick={() => setActiveTab('home')}
+                className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`}
+                aria-label="Navigate to Home"
+              >
+                🏠 Home
+              </button>
+              <button
+                onClick={() => setActiveTab('marketplace')}
+                className={`nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
+                aria-label="Navigate to Marketplace"
+              >
+                🏪 Marketplace
+              </button>
+              <button
+                onClick={() => setActiveTab('mint')}
+                className={`nav-tab ${activeTab === 'mint' ? 'active' : ''}`}
+                aria-label="Navigate to Create NFT"
+              >
+                ✨ Create NFT
+              </button>
+              <button
+                onClick={() => setActiveTab('clout')}
+                className={`nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
+                aria-label="Navigate to CLOUT Token"
+              >
+                ⚡ CLOUT Token
+              </button>
+              <button
+                onClick={() => setActiveTab('smart-contract')}
+                className={`nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
+                aria-label="Navigate to Smart Contracts"
+              >
+                🛡️ Smart Contracts
+              </button>
+              <button
+                onClick={() => setActiveTab('time-capsules')}
+                className={`nav-tab ${activeTab === 'time-capsules' ? 'active' : ''}`}
+                aria-label="Navigate to Time Capsules"
+              >
+                ⏰ Time Capsules
+              </button>
+              <button
+                onClick={() => setActiveTab('collections')}
+                className={`nav-tab ${activeTab === 'collections' ? 'active' : ''}`}
+                aria-label="Navigate to Collections"
+              >
+                🏗️ Collections
+              </button>
+              <button
+                onClick={() => setActiveTab('proxy')}
+                className={`nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
+                aria-label="Navigate to Proxy Test"
+              >
+                🔧 Proxy Test
+              </button>
+              {user && (
+                <button
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+                  aria-label="Navigate to Dashboard"
+                >
+                  👤 Dashboard
+                </button>
+              )}
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+                aria-label="Navigate to Analytics"
+              >
+                📊 Analytics
+              </button>
+              <button
+                onClick={() => setActiveTab('transparency')}
+                className={`nav-tab ${activeTab === 'transparency' ? 'active' : ''}`}
+                aria-label="Navigate to Transparency"
+              >
+                🔍 Transparency
+              </button>
+            </div>
+          )}
+
+          {/* Mobile Navigation Menu */}
+          <AnimatePresence>
+            {isMobile && isMobileMenuOpen && (
+              <motion.div
+                className="mobile-nav-menu"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <button
+                  onClick={() => { setActiveTab('home'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'home' ? 'active' : ''}`}
+                  aria-label="Navigate to Home"
+                >
+                  🏠 Home
+                </button>
+                <button
+                  onClick={() => { setActiveTab('marketplace'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
+                  aria-label="Navigate to Marketplace"
+                >
+                  🏪 Marketplace
+                </button>
+                <button
+                  onClick={() => { setActiveTab('mint'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'mint' ? 'active' : ''}`}
+                  aria-label="Navigate to Create NFT"
+                >
+                  ✨ Create NFT
+                </button>
+                <button
+                  onClick={() => { setActiveTab('clout'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
+                  aria-label="Navigate to CLOUT Token"
+                >
+                  ⚡ CLOUT Token
+                </button>
+                <button
+                  onClick={() => { setActiveTab('smart-contract'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
+                  aria-label="Navigate to Smart Contracts"
+                >
+                  🛡️ Smart Contracts
+                </button>
+                <button
+                  onClick={() => { setActiveTab('time-capsules'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'time-capsules' ? 'active' : ''}`}
+                  aria-label="Navigate to Time Capsules"
+                >
+                  ⏰ Time Capsules
+                </button>
+                <button
+                  onClick={() => { setActiveTab('collections'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'collections' ? 'active' : ''}`}
+                  aria-label="Navigate to Collections"
+                >
+                  🏗️ Collections
+                </button>
+                <button
+                  onClick={() => { setActiveTab('proxy'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
+                  aria-label="Navigate to Proxy Test"
+                >
+                  🔧 Proxy Test
+                </button>
+                {user && (
+                  <button
+                    onClick={() => { setActiveTab('dashboard'); setIsMobileMenuOpen(false); }}
+                    className={`mobile-nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
+                    aria-label="Navigate to Dashboard"
+                  >
+                    👤 Dashboard
+                  </button>
+                )}
+                <button
+                  onClick={() => { setActiveTab('analytics'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
+                  aria-label="Navigate to Analytics"
+                >
+                  📊 Analytics
+                </button>
+                <button
+                  onClick={() => { setActiveTab('transparency'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'transparency' ? 'active' : ''}`}
+                  aria-label="Navigate to Transparency"
+                >
+                  🔍 Transparency
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </nav>
 
         {/* Revolutionary Content */}
-        <main className="content-section">
-          {activeTab === 'home' && <HomePage />}
+        <main id="main-content" className="content-section" role="main" aria-label="Main content">
+          <Suspense fallback={
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading...</p>
+            </div>
+          }>
+            {activeTab === 'home' && <HomePage />}
 
           {activeTab === 'marketplace' && (
             <div className="section-card fade-in-up">
@@ -223,6 +398,7 @@ export default function App() {
               onUserLogout={() => setUser(null)}
             />
           )}
+          </Suspense>
         </main>
 
         {/* Revolutionary Footer */}

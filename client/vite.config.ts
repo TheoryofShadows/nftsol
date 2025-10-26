@@ -82,14 +82,60 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info']
+      }
+    },
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          solana: ['@solana/web3.js', '@solana/spl-token'],
-          wallet: ['@solana/wallet-adapter-base', '@solana/wallet-adapter-react']
+          solana: ['@solana/web3.js', '@solana/spl-token', '@metaplex-foundation/mpl-token-metadata'],
+          wallet: ['@solana/wallet-adapter-base', '@solana/wallet-adapter-react', '@solana/wallet-adapter-react-ui'],
+          animations: ['framer-motion'],
+          query: ['@tanstack/react-query'],
+          utils: ['react-intersection-observer', 'react-responsive']
+        },
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk';
+          return `js/[name]-[hash].js`;
+        },
+        entryFileNames: 'js/[name]-[hash].js',
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const ext = info[info.length - 1];
+          if (/\.(css)$/.test(assetInfo.name)) {
+            return `css/[name]-[hash].${ext}`;
+          }
+          if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name)) {
+            return `images/[name]-[hash].${ext}`;
+          }
+          return `assets/[name]-[hash].${ext}`;
         }
       }
+    },
+    chunkSizeWarningLimit: 1000,
+    target: 'esnext',
+    modulePreload: {
+      polyfill: false
     }
+  },
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      '@solana/web3.js',
+      '@solana/spl-token',
+      'framer-motion',
+      '@tanstack/react-query',
+      'react-intersection-observer',
+      'react-responsive',
+      'socket.io-client'
+    ],
+    exclude: ['@vite/client', '@vite/env']
   }
 });

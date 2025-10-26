@@ -1,42 +1,181 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useUniversalWallet } from '../wallet/UniversalWalletAdapter';
 import './HomePage.css';
 
 export default function HomePage() {
+  const { connected, publicKey } = useUniversalWallet();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalNFTs: 0,
+    totalVolume: 0,
+    cloutEarned: 0
+  });
+
   const navigate = (tab: string) => {
     // Dispatch custom event to change tab
     window.dispatchEvent(new CustomEvent('change-tab', { detail: tab }));
   };
+
+  // Animated counter effect
+  useEffect(() => {
+    const animateCounters = () => {
+      const duration = 2000; // 2 seconds
+      const steps = 60;
+      const stepDuration = duration / steps;
+      
+      let step = 0;
+      const interval = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        
+        setStats({
+          totalUsers: Math.floor(progress * 12500),
+          totalNFTs: Math.floor(progress * 45000),
+          totalVolume: Math.floor(progress * 2500),
+          cloutEarned: Math.floor(progress * 180000)
+        });
+        
+        if (step >= steps) {
+          clearInterval(interval);
+        }
+      }, stepDuration);
+    };
+
+    animateCounters();
+  }, []);
 
   return (
     <div className="home-page">
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <div className="hero-badge">
+          <motion.div 
+            className="hero-badge"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             🚀 Revolutionary NFT Platform
-          </div>
-          <h1 className="hero-title">
+            <motion.span 
+              className="live-indicator"
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              • LIVE
+            </motion.span>
+          </motion.div>
+          
+          <motion.h1 
+            className="hero-title"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
             The Future of NFTs is Here
-          </h1>
-          <p className="hero-description">
+          </motion.h1>
+          
+          <motion.p 
+            className="hero-description"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
             NFTSol introduces the world's first trust-based payment system, 
             CLOUT token economy, and universal wallet support. Experience 
             NFTs like never before with our revolutionary platform.
-          </p>
-          <div className="hero-stats">
-            <div className="stat">
-              <div className="stat-number">100%</div>
-              <div className="stat-label">Universal Wallet Support</div>
-            </div>
-            <div className="stat">
-              <div className="stat-number">50%</div>
-              <div className="stat-label">Fee Reduction with CLOUT</div>
-            </div>
-            <div className="stat">
-              <div className="stat-number">∞</div>
-              <div className="stat-label">Cross-Platform NFTs</div>
-            </div>
-          </div>
+          </motion.p>
+
+          {/* Enhanced CTAs */}
+          <motion.div 
+            className="hero-ctas"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            {!connected ? (
+              <motion.button
+                className="btn-primary connect-wallet-cta"
+                onClick={() => navigate('marketplace')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label="Connect wallet to start trading"
+              >
+                🔗 Connect Wallet
+                <span className="cta-subtitle">Start Trading in Seconds</span>
+              </motion.button>
+            ) : (
+              <motion.button
+                className="btn-primary mint-now-cta"
+                onClick={() => navigate('mint')}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                aria-label="Mint your first NFT"
+              >
+                ✨ Mint Now
+                <span className="cta-subtitle">Create for 0.01 SOL</span>
+              </motion.button>
+            )}
+            
+            <motion.button
+              className="btn-secondary learn-more-cta"
+              onClick={() => navigate('clout')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Learn more about CLOUT token"
+            >
+              ⚡ Learn About CLOUT
+            </motion.button>
+          </motion.div>
+
+          {/* Animated Stats */}
+          <motion.div 
+            className="hero-stats"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+          >
+            <motion.div 
+              className="stat"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="stat-number">
+                {stats.totalUsers.toLocaleString()}+
+              </div>
+              <div className="stat-label">Active Users</div>
+            </motion.div>
+            <motion.div 
+              className="stat"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="stat-number">
+                {stats.totalNFTs.toLocaleString()}+
+              </div>
+              <div className="stat-label">NFTs Traded</div>
+            </motion.div>
+            <motion.div 
+              className="stat"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="stat-number">
+                {stats.totalVolume.toLocaleString()}+ SOL
+              </div>
+              <div className="stat-label">Volume Traded</div>
+            </motion.div>
+            <motion.div 
+              className="stat"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="stat-number">
+                {stats.cloutEarned.toLocaleString()}+
+              </div>
+              <div className="stat-label">CLOUT Earned</div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { NFTMintingService } from "../services/nftMinting";
 import { MarketplaceService } from "../services/marketplace";
+import { webSocketService } from "../app";
 import { apiLimiter } from "../middleware/security";
 import { nftMintSchema, listingSchema, purchaseSchema, searchSchema } from "../middleware/validation";
 import { validateInput } from "../middleware/security";
@@ -55,6 +56,22 @@ router.post("/list", apiLimiter as any, validateInput(listingSchema), async (req
     const { mintAddress, price, sellerWallet } = req.body;
 
     const result = await marketplaceService.listNFT(mintAddress, price, sellerWallet);
+    
+    // Emit real-time update if WebSocket is available
+    if (webSocketService && result.success) {
+      // Get NFT details for the update
+      const nft = await marketplaceService.getNFTByMintAddress(mintAddress);
+      if (nft) {
+        webSocketService.emitNFTListed(nft, 'nftsol');
+        webSocketService.emitMarketplaceActivity('nft-listed', {
+          nft,
+          price,
+          seller: sellerWallet,
+          timestamp: Date.now()
+        });
+      }
+    }
+    
     return successResponse(res, result, 201);
   } catch (error: any) {
     console.error('List error:', error);
@@ -68,6 +85,22 @@ router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req
     const { mintAddress, buyerWallet, price } = req.body;
 
     const result = await marketplaceService.buyNFT(mintAddress, buyerWallet, price);
+    
+    // Emit real-time update if WebSocket is available
+    if (webSocketService && result.success) {
+      // Get NFT details for the update
+      const nft = await marketplaceService.getNFTByMintAddress(mintAddress);
+      if (nft) {
+        webSocketService.emitNFTSold(nft, buyerWallet, price);
+        webSocketService.emitMarketplaceActivity('nft-purchased', {
+          nft,
+          buyer: buyerWallet,
+          price,
+          timestamp: Date.now()
+        });
+      }
+    }
+    
     return successResponse(res, result);
   } catch (error: any) {
     console.error('Buy error:', error);

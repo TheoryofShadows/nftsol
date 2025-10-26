@@ -2,6 +2,7 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { db } from '../db';
 import { nfts, nftTransactions } from '../schema';
 import { eq, and, SQL, sql } from 'drizzle-orm';
+import { cacheService } from './cacheService';
 
 export class MarketplaceService {
   private connection: Connection;
@@ -36,6 +37,9 @@ export class MarketplaceService {
         })
         .where(eq(nfts.mintAddress, mintAddress))
         .returning();
+
+      // Invalidate marketplace cache
+      await cacheService.invalidateMarketplaceCache();
 
       return {
         success: true,
@@ -92,6 +96,10 @@ export class MarketplaceService {
         blockTime: new Date()
       });
 
+      // Invalidate caches
+      await cacheService.invalidateMarketplaceCache();
+      await cacheService.invalidateNFTCache(nft.id);
+
       return {
         success: true,
         nft: updatedNFT,
@@ -112,6 +120,15 @@ export class MarketplaceService {
     offset?: number;
   } = {}) {
     try {
+      // Create cache key based on filters
+      const cacheKey = `nfts:${JSON.stringify(filters)}`;
+      
+      // Try to get from cache first
+      const cached = await cacheService.get(cacheKey, { ttl: 60 }); // 1 minute cache
+      if (cached) {
+        return cached;
+      }
+
       const conditions: SQL[] = [];
       
       if (filters.owner) {
@@ -142,7 +159,7 @@ export class MarketplaceService {
         .limit(filters.limit || 50)
         .offset(filters.offset || 0);
 
-      return {
+      const result = {
         data: results,
         pagination: {
           total: count,
@@ -151,6 +168,11 @@ export class MarketplaceService {
           totalPages: Math.ceil(count / (filters.limit || 50))
         }
       };
+
+      // Cache the result
+      await cacheService.set(cacheKey, result, { ttl: 60 });
+
+      return result;
 
     } catch (error) {
       console.error('Failed to get NFTs:', error);

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { CloutTokenService } from "../services/cloutToken";
 import { HonorSystem } from "../services/honorSystem";
 import { TrustPaymentSystem } from "../services/trustPaymentSystem";
+import { webSocketService } from "../app";
 
 const router = Router();
 const cloutService = new CloutTokenService();
@@ -23,6 +24,12 @@ router.get("/balance/:wallet", async (req, res) => {
   try {
     const { wallet } = req.params;
     const balance = await cloutService.getCloutBalance(wallet);
+    
+    // Emit real-time update if WebSocket is available
+    if (webSocketService) {
+      webSocketService.emitCloutUpdate(wallet, balance.balance || 0, balance.cloutEarned || 0);
+    }
+    
     res.json({ success: true, ...balance });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
@@ -117,6 +124,12 @@ router.post("/distribute", async (req, res) => {
       baseAmount,
       honorMultiplier || 1.0
     );
+
+    // Emit real-time update if WebSocket is available
+    if (webSocketService && result.success) {
+      const balance = await cloutService.getCloutBalance(recipientWallet);
+      webSocketService.emitCloutUpdate(recipientWallet, balance.balance || 0, balance.cloutEarned || 0);
+    }
 
     res.json(result);
   } catch (error: any) {

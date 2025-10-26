@@ -5,8 +5,10 @@ import morgan from "morgan";
 import session from "express-session";
 import compression from "compression";
 import crypto from "crypto";
+import { createServer } from "http";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
+import { WebSocketService } from "./services/websocketService";
 import health from "./routes/health";
 import nfts from "./routes/nfts";
 import market from "./routes/market";
@@ -41,6 +43,7 @@ import {
 
 const appConfig = getAppConfig();
 const app = express();
+const server = createServer(app);
 
 // Log environment status on startup
 logEnvironmentStatus();
@@ -269,4 +272,17 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   });
 });
 
+// Initialize WebSocket service
+let webSocketService: WebSocketService | null = null;
+if (process.env.WS_ENABLED === 'true') {
+  try {
+    webSocketService = new WebSocketService(server);
+    console.log('✅ WebSocket service initialized');
+  } catch (error) {
+    console.error('❌ Failed to initialize WebSocket service:', error);
+  }
+}
+
+// Export both app and server for different use cases
+export { app, server, webSocketService };
 export default app;
