@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Mint};
+use solana_program::compute_budget;
 
 declare_id!("7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU");
 
@@ -35,6 +36,9 @@ pub mod loyalty_registry {
         transaction_value: u64,
         transaction_type: TransactionType,
     ) -> Result<()> {
+        // Set compute unit limit for transaction recording (low complexity)
+        compute_budget::set_compute_unit_limit(60_000);
+        
         let profile = &mut ctx.accounts.profile;
         let clock = Clock::get()?;
 

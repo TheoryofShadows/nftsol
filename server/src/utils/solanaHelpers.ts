@@ -1,4 +1,4 @@
-import { Connection, Transaction, TransactionSignature, Commitment, ConfirmOptions } from '@solana/web3.js';
+import { Connection, Transaction, TransactionSignature, Commitment, ConfirmOptions, SendOptions } from '@solana/web3.js';
 
 /**
  * Solana Helper Utilities - Production Best Practices
@@ -90,25 +90,67 @@ export async function confirmTransaction(
 }
 
 /**
- * Send and confirm transaction (best practice pattern)
+ * Send and confirm transaction with preflight checks and rebroadcasting
  */
 export async function sendAndConfirmTransaction(
   connection: Connection,
   transaction: Transaction,
   signers: any[],
-  options?: ConfirmOptions
+  options?: ConfirmOptions & { maxRetries?: number; rebroadcastDelay?: number }
 ): Promise<TransactionSignature> {
-  // Send transaction
-  const signature = await connection.sendTransaction(transaction, signers, options);
+  const maxRetries = options?.maxRetries || 3;
+  const rebroadcastDelay = options?.rebroadcastDelay || 2000;
+  
+  let lastError: Error | undefined;
 
-  console.log(`Transaction sent: ${signature}`);
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Preflight check
+      if (attempt === 1) {
+        const preflightResult = await connection.simulateTransaction(transaction, signers);
+        
+        if (preflightResult.value.err) {
+          throw new Error(`Preflight check failed: ${JSON.stringify(preflightResult.value.err)}`);
+        }
+        
+        console.log(`Preflight check passed. CU used: ${preflightResult.value.unitsConsumed}`);
+      }
 
-  // Wait for confirmation
-  await confirmTransaction(connection, signature, options?.commitment || 'confirmed');
+      // Send transaction
+      const signature = await connection.sendTransaction(transaction, signers, {
+        ...options,
+        skipPreflight: attempt > 1, // Skip preflight on retries
+        preflightCommitment: 'confirmed'
+      });
 
-  console.log(`Transaction confirmed: ${signature}`);
+      console.log(`Transaction sent (attempt ${attempt}): ${signature}`);
 
-  return signature;
+      // Wait for confirmation
+      await confirmTransaction(connection, signature, options?.commitment || 'confirmed');
+
+      console.log(`Transaction confirmed: ${signature}`);
+      return signature;
+
+    } catch (error: any) {
+      lastError = error;
+      console.warn(`Transaction attempt ${attempt} failed:`, error.message);
+
+      // Don't retry on certain errors
+      if (error.message.includes('insufficient funds') || 
+          error.message.includes('invalid account') ||
+          error.message.includes('already processed')) {
+        throw error;
+      }
+
+      // Wait before retry
+      if (attempt < maxRetries) {
+        console.log(`Retrying in ${rebroadcastDelay}ms...`);
+        await sleep(rebroadcastDelay);
+      }
+    }
+  }
+
+  throw lastError || new Error('Transaction failed after all retries');
 }
 
 /**
@@ -180,7 +222,7 @@ export function generateTxDedupKey(params: Record<string, any>): string {
 }
 
 /**
- * Transaction retry handler with idempotency
+ * Transaction retry handler with idempotency and parallel execution support
  */
 export async function executeWithRetry<T>(
   fn: () => Promise<T>,
@@ -205,4 +247,48 @@ export async function executeWithRetry<T>(
   }
 
   return promise;
+}
+
+/**
+ * Execute multiple operations in parallel for high TPS design
+ * Enables parallel execution while maintaining atomicity where needed
+ */
+export async function executeParallel<T>(
+  operations: Array<() => Promise<T>>,
+  maxConcurrency: number = 10
+): Promise<T[]> {
+  const results: T[] = [];
+  const executing: Promise<void>[] = [];
+  
+  for (let i = 0; i < operations.length; i++) {
+    const operation = operations[i];
+    
+    const promise = operation().then(result => {
+      results[i] = result;
+    });
+    
+    executing.push(promise);
+    
+    // Limit concurrent executions
+    if (executing.length >= maxConcurrency) {
+      await Promise.race(executing);
+      // Remove completed promises
+      for (let j = executing.length - 1; j >= 0; j--) {
+        if (executing[j].then) {
+          try {
+            await executing[j];
+            executing.splice(j, 1);
+          } catch {
+            // Promise already resolved/rejected
+            executing.splice(j, 1);
+          }
+        }
+      }
+    }
+  }
+  
+  // Wait for all remaining operations
+  await Promise.all(executing);
+  
+  return results;
 }

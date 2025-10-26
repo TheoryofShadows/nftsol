@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
+use solana_program::compute_budget;
 
 declare_id!("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM");
 
@@ -14,6 +15,9 @@ pub mod market_escrow {
         trust_level: u8,
         escrow_duration: i64,
     ) -> Result<()> {
+        // Set compute unit limit for escrow creation (low complexity)
+        compute_budget::set_compute_unit_limit(50_000);
+        
         let escrow = &mut ctx.accounts.escrow;
         let clock = Clock::get()?;
 
@@ -39,6 +43,9 @@ pub mod market_escrow {
 
     /// Make initial payment based on trust level
     pub fn make_initial_payment(ctx: Context<MakePayment>) -> Result<()> {
+        // Set compute unit limit for payment processing (medium complexity)
+        compute_budget::set_compute_unit_limit(100_000);
+        
         let escrow = &mut ctx.accounts.escrow;
         let clock = Clock::get()?;
 
@@ -132,6 +139,9 @@ pub mod market_escrow {
         resolution: DisputeResolution,
         refund_amount: u64,
     ) -> Result<()> {
+        // Set compute unit limit for dispute resolution (high complexity)
+        compute_budget::set_compute_unit_limit(150_000);
+        
         let escrow = &mut ctx.accounts.escrow;
 
         require!(escrow.status == EscrowStatus::Disputed, ErrorCode::NoActiveDispute);
