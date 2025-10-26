@@ -1,5 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Mint, Transfer};
+use solana_program::compute_budget;
 
 declare_id!("4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E");
 
@@ -34,6 +35,9 @@ pub mod clout_staking {
 
     /// Stake CLOUT tokens to earn rewards
     pub fn stake(ctx: Context<Stake>, amount: u64) -> Result<()> {
+        // Set compute unit limit for staking operation (medium complexity)
+        compute_budget::set_compute_unit_limit(120_000);
+        
         require!(amount > 0, ErrorCode::InvalidAmount);
 
         let pool = &mut ctx.accounts.pool;
@@ -80,6 +84,9 @@ pub mod clout_staking {
 
     /// Unstake CLOUT tokens
     pub fn unstake(ctx: Context<Unstake>, amount: u64) -> Result<()> {
+        // Set compute unit limit for unstaking operation (medium complexity)
+        compute_budget::set_compute_unit_limit(120_000);
+        
         require!(amount > 0, ErrorCode::InvalidAmount);
 
         let pool = &mut ctx.accounts.pool;
@@ -124,6 +131,9 @@ pub mod clout_staking {
 
     /// Harvest accumulated rewards
     pub fn harvest(ctx: Context<Harvest>) -> Result<()> {
+        // Set compute unit limit for reward harvesting (high complexity)
+        compute_budget::set_compute_unit_limit(140_000);
+        
         let pool = &mut ctx.accounts.pool;
         let position = &mut ctx.accounts.position;
         let clock = Clock::get()?;

@@ -7,12 +7,14 @@ clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
 loyalty_registry = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
 market_escrow = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
 rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+governance = "GvnmNTy8XJ3c2d4K9vR7wE1sP5qA8bC2fH6jL9mN3pQ7"
 
 [programs.mainnet]
 clout_staking = "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
 loyalty_registry = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
 market_escrow = "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM"
 rewards_vault = "YBSSnuhAgYq6SN1yofjNt8XyLW7B3mQQQFUBF8gwH6J"
+governance = "GvnmNTy8XJ3c2d4K9vR7wE1sP5qA8bC2fH6jL9mN3pQ7"
 
 [registry]
 url = "https://api.apr.dev"
