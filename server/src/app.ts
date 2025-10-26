@@ -7,8 +7,8 @@ import compression from "compression";
 import crypto from "crypto";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
-import health from "./routes/health.js";
-import nfts from "./routes/nfts.js";
+import health from "./routes/health";
+import nfts from "./routes/nfts";
 import market from "./routes/market";
 import clout from "./routes/clout";
 import universalNFTs from "./routes/universalNFTs";
@@ -129,7 +129,11 @@ app.use((req: any, res: any, next: any) => {
   const start = Date.now();
   res.on('finish', () => {
     const duration = Date.now() - start;
-    res.setHeader('X-Response-Time', `${duration}ms`);
+    
+    // Only set header if not already sent
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', `${duration}ms`);
+    }
     
     // Log slow requests
     if (duration > 1000) {
