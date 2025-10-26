@@ -23,7 +23,7 @@ export interface BenchmarkResult {
   recommendations: string[];
 }
 
-class ComputeUnitMonitor {
+export class ComputeUnitMonitor {
   private metrics: ComputeUnitMetrics[] = [];
   private readonly maxMetrics = 1000; // Keep last 1000 measurements
 
