@@ -6,7 +6,17 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
 // Rate limiting configurations
-export const createRateLimiter = (windowMs: number, max: number, message?: string) => {
+// Skip rate limiting in test environment
+const isTestEnv = process.env.NODE_ENV === 'test';
+
+export const createRateLimiter = (windowMs: number, max: number, message?: string): any => {
+  // In test environment, return a no-op middleware
+  if (isTestEnv) {
+    return (req: Request, res: Response, next: NextFunction) => {
+      next();
+    };
+  }
+
   return rateLimit({
     windowMs,
     max,
@@ -20,17 +30,14 @@ export const createRateLimiter = (windowMs: number, max: number, message?: strin
         retryAfter: Math.ceil(windowMs / 1000)
       });
     }
-  }) as any; // Type assertion to work around Express type issues
+  }); // No type assertion needed
 };
 
 // Different rate limits for different endpoints
-// In test environment, use much higher limits to avoid test failures
-const isTestEnv = process.env.NODE_ENV === 'test';
-
-export const generalLimiter = createRateLimiter(15 * 60 * 1000, isTestEnv ? 10000 : 100); // 100 requests per 15 minutes (10000 in test)
-export const authLimiter = createRateLimiter(15 * 60 * 1000, isTestEnv ? 1000 : 5); // 5 auth attempts per 15 minutes (1000 in test)
-export const apiLimiter = createRateLimiter(60 * 1000, isTestEnv ? 10000 : 30); // 30 API calls per minute (10000 in test)
-export const uploadLimiter = createRateLimiter(60 * 1000, isTestEnv ? 1000 : 10); // 10 uploads per minute (1000 in test)
+export const generalLimiter = createRateLimiter(15 * 60 * 1000, 100); // 100 requests per 15 minutes
+export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 auth attempts per 15 minutes
+export const apiLimiter = createRateLimiter(60 * 1000, 30); // 30 API calls per minute
+export const uploadLimiter = createRateLimiter(60 * 1000, 10); // 10 uploads per minute
 
 // Helper to extract IP address for rate limiting
 const getIpAddress = (req: any) => {
