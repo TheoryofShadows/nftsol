@@ -1,0 +1,105 @@
+# =============================================================================
+# NETLIFY ENVIRONMENT VARIABLES
+# Copy this entire file to Netlify Dashboard > Site Settings > Environment Variables
+# Add each variable one by one, or use Netlify CLI: netlify env:set KEY value
+# =============================================================================
+
+# =============================================================================
+# APPLICATION CONFIGURATION
+# =============================================================================
+NODE_ENV=production
+PORT=8888
+LOG_LEVEL=info
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+# Generate these with: openssl rand -base64 32
+JWT_SECRET=your-super-secure-jwt-secret-minimum-32-characters-long
+SESSION_SECRET=your-super-secure-session-secret-minimum-32-characters-long
+
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
+# Your Render PostgreSQL connection string
+DATABASE_URL=postgresql://username:password@host:5432/database_name
+
+# =============================================================================
+# SOLANA / HELIUS CONFIGURATION
+# =============================================================================
+# Get this from https://helius.xyz -> Get API Key
+HELIUS_API_KEY=your-helius-api-key-here
+SOLANA_CLUSTER=mainnet-beta
+HELIUS_RPC_URL=https://mainnet.helius-rpc.com/?api-key=your-helius-api-key-here
+HELIUS_REST_URL=https://api.helius.xyz/v0
+
+# =============================================================================
+# CORS CONFIGURATION
+# =============================================================================
+# Your Netlify domain (update with your actual domain)
+ALLOWED_ORIGINS=https://your-app.netlify.app,https://nftsol-server-prod.onrender.com
+DEV_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+
+# =============================================================================
+# OPENAI CONFIGURATION (Optional)
+# =============================================================================
+OPENAI_API_KEY=your-openai-api-key-here
+
+# =============================================================================
+# PINATA IPFS CONFIGURATION (Optional)
+# =============================================================================
+PINATA_API_KEY=your-pinata-api-key-here
+PINATA_SECRET_KEY=your-pinata-secret-key-here
+PINATA_JWT=your-pinata-jwt-token-here
+
+# =============================================================================
+# REDIS CONFIGURATION (Optional)
+# =============================================================================
+REDIS_URL=your-redis-url-here
+
+# =============================================================================
+# AWS S3 CONFIGURATION (Optional)
+# =============================================================================
+AWS_ACCESS_KEY_ID=your-aws-access-key
+AWS_SECRET_ACCESS_KEY=your-aws-secret-key
+S3_BACKUP_BUCKET=your-backup-bucket
+S3_BACKUP_REGION=us-east-1
+
+# =============================================================================
+# RATE LIMITING
+# =============================================================================
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# =============================================================================
+# ADMIN CONFIGURATION
+# =============================================================================
+ADMIN_IPS=127.0.0.1,::1
+
+# =============================================================================
+# CLOUT TOKEN CONFIGURATION
+# =============================================================================
+CLOUT_MINT=4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+CLOUT_TREASURY=your-clout-treasury-address
+CLOUT_FEE_COLLECTOR=your-clout-fee-collector-address
+CLOUT_DEVELOPER=your-clout-developer-address
+
+# =============================================================================
+# SECURITY HEADERS
+# =============================================================================
+HELMET_CSP_ENABLED=true
+TRUST_PROXY=1
+
+# =============================================================================
+# HOW TO ADD TO NETLIFY
+# =============================================================================
+# 1. Go to Netlify Dashboard
+# 2. Select your site
+# 3. Go to Site Settings > Environment Variables
+# 4. Click "Add a variable"
+# 5. Add each variable above one by one
+#    - Key: NODE_ENV
+#    - Value: production
+# 6. Click "Save"
+# 7. Repeat for each variable
+# =============================================================================

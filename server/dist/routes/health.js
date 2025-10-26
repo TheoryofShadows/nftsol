@@ -99,9 +99,18 @@ router.get("/detailed", async (_req, res) => {
 // Test database connection
 async function testDatabase() {
     try {
-        // Simple database query test
-        await db_1.db.execute('SELECT 1');
-        return { status: 'healthy', connected: true };
+        // Use the dedicated health check function
+        const health = await (0, db_1.checkDatabaseHealth)();
+        if (health.healthy) {
+            return { status: 'healthy', connected: true };
+        }
+        else {
+            return {
+                status: 'error',
+                connected: false,
+                error: health.error || 'Database connection failed'
+            };
+        }
     }
     catch (error) {
         return {
