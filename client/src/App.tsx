@@ -14,11 +14,12 @@ import OfflineIndicator from "./components/OfflineIndicator";
 import UserAuth from "./components/UserAuth";
 import UserDashboard from "./components/UserDashboard";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import TransparencyDashboard from "./components/TransparencyDashboard";
 import { logError } from "./utils/errorHandler";
 import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
   const [user, setUser] = useState<any>(null);
 
   // Listen for custom tab change events from buttons
@@ -149,6 +150,12 @@ export default function App() {
           >
             📊 Analytics
           </button>
+          <button
+            onClick={() => setActiveTab('transparency')}
+            className={`nav-tab ${activeTab === 'transparency' ? 'active' : ''}`}
+          >
+            🔍 Transparency
+          </button>
         </nav>
 
         {/* Revolutionary Content */}
@@ -208,7 +215,9 @@ export default function App() {
           
           {activeTab === 'analytics' && <AnalyticsDashboard />}
           
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && (
+          {activeTab === 'transparency' && <TransparencyDashboard />}
+          
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && (
             <UserAuth 
               onUserLogin={setUser}
               onUserLogout={() => setUser(null)}
