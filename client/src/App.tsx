@@ -26,7 +26,13 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const isMobile = useMediaQuery({ maxWidth: 768 });
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Listen for custom tab change events from buttons
   useEffect(() => {
@@ -83,6 +89,18 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isMobileMenuOpen]);
 
+  // Show loading state during hydration
+  if (!isClient) {
+    return (
+      <div className="app">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading NFTSol...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <UniversalWalletProvider>
       <div className="app">
@@ -123,7 +141,7 @@ export default function App() {
         {/* Revolutionary Navigation */}
         <nav className="nav-tabs">
           {/* Mobile Hamburger Menu */}
-          {isMobile && (
+          {isClient && isMobile && (
             <button
               className="mobile-menu-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -149,7 +167,7 @@ export default function App() {
           )}
 
           {/* Desktop Navigation */}
-          {!isMobile && (
+          {isClient && !isMobile && (
             <div className="desktop-nav">
               <button
                 onClick={() => setActiveTab('home')}
@@ -235,7 +253,7 @@ export default function App() {
 
           {/* Mobile Navigation Menu */}
           <AnimatePresence>
-            {isMobile && isMobileMenuOpen && (
+            {isClient && isMobile && isMobileMenuOpen && (
               <motion.div
                 className="mobile-nav-menu"
                 initial={{ opacity: 0, height: 0 }}
