@@ -95,11 +95,10 @@ router.get("/nfts", async (req, res, next) => {
       offset
     };
 
-    const nfts = await marketplaceService.getNFTs(filters);
+    const result = await marketplaceService.getNFTs(filters);
     
-    // For now, return simple success response
-    // TODO: Update marketplaceService to return count for pagination
-    return successResponse(res, nfts);
+    // Return paginated response
+    return paginatedResponse(res, result.data, Math.floor(offset / limit) + 1, limit, result.pagination.total);
   } catch (error: any) {
     console.error('Get NFTs error:', error);
     next(error); // Pass to error handler
