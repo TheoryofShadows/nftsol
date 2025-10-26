@@ -1,13 +1,10 @@
-import "./styles/solana.css";
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App";
-import ErrorBoundary from "./ErrorBoundary";
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App'
+import './globals.css'
 
-createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>
-);
+    <App />
+  </React.StrictMode>,
+)

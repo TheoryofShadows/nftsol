@@ -1,39 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
-import MintForm from "./components/MintForm";
+import { Button } from "./components/ui/button";
+import { Card, CardContent } from "./components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./components/ui/dialog";
+import { Input } from "./components/ui/input";
+import { Wallet, Plus, Search, Menu, X } from "lucide-react";
+import "./globals.css";
+
+// Import existing components
 import NFTMarketplace from "./components/NFTMarketplace";
-import ProxyCheck from "./components/ProxyCheck";
-import CloutBadge from "./components/CloutBadge";
-import HomePage from "./components/HomePage";
-import CloutExplanation from "./components/CloutExplanation";
-import SmartContractPage from "./components/SmartContractPage";
-import TimeCapsuleSales from "./components/TimeCapsuleSales";
-import CollectionManager from "./components/CollectionManager";
-import InstallButton from "./components/InstallButton";
-import OfflineIndicator from "./components/OfflineIndicator";
-import UserAuth from "./components/UserAuth";
-import UserDashboard from "./components/UserDashboard";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import TransparencyDashboard from "./components/TransparencyDashboard";
+import MintForm from "./components/MintForm";
 import { logError } from "./utils/errorHandler";
-import "./App.css";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
-  const [user, setUser] = useState<any>(null);
-
-  // Listen for custom tab change events from buttons
-  useEffect(() => {
-    const handleTabChange = (event: CustomEvent) => {
-      const tab = event.detail as any;
-      setActiveTab(tab);
-    };
-
-    window.addEventListener('change-tab', handleTabChange as EventListener);
-    return () => {
-      window.removeEventListener('change-tab', handleTabChange as EventListener);
-    };
-  }, []);
+  const [activeTab, setActiveTab] = useState<'marketplace' | 'mint'>('marketplace');
+  const [isMintDialogOpen, setIsMintDialogOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Global error handling
   useEffect(() => {
@@ -56,206 +39,174 @@ export default function App() {
 
   return (
     <UniversalWalletProvider>
-      <div className="app">
-        {/* PWA Components */}
-        <OfflineIndicator />
-        <InstallButton />
-        
-        {/* Revolutionary Header */}
-        <header className="hero-header">
-          <div className="hero-content">
-            <div className="logo-section">
-              <div className="solana-logo">
-                <img 
-                  src="/assets/nftsol-logo.svg" 
-                  alt="NFTSol Logo" 
-                  className="custom-logo"
-                  style={{ width: '60px', height: '60px', marginRight: '12px' }}
-                />
-                <h1 className="brand-title">NFTSol</h1>
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-solana-dark to-black">
+        {/* Header */}
+        <header className="sticky top-0 z-50 w-full border-b border-solana-purple/20 bg-solana-dark/80 backdrop-blur-md">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center justify-between">
+              {/* Logo */}
+              <div className="flex items-center space-x-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg solana-gradient">
+                  <span className="text-lg font-bold text-white">N</span>
+                </div>
+                <span className="text-xl font-bold text-white">NFTSol</span>
               </div>
-              <div className="tagline">
-                The Most Revolutionary NFT Platform on Solana
+
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center space-x-8">
+                <Button
+                  variant={activeTab === 'marketplace' ? 'solana' : 'ghost'}
+                  onClick={() => setActiveTab('marketplace')}
+                  className="text-white"
+                >
+                  Marketplace
+                </Button>
+                <Button
+                  variant={activeTab === 'mint' ? 'solana' : 'ghost'}
+                  onClick={() => setActiveTab('mint')}
+                  className="text-white"
+                >
+                  Mint NFT
+                </Button>
+              </nav>
+
+              {/* Search Bar - Desktop */}
+              <div className="hidden lg:flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search NFTs..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-64 pl-10 bg-solana-gray/50 border-solana-purple/20 text-white placeholder:text-muted-foreground"
+                  />
+                </div>
+                <WalletSelector />
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="flex items-center space-x-2 md:hidden">
+                <WalletSelector />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="text-white"
+                >
+                  {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </Button>
               </div>
             </div>
-            
-            <div className="wallet-section">
-              <WalletSelector />
-              <CloutBadge />
-            </div>
+
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+              <div className="md:hidden border-t border-solana-purple/20 py-4">
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search NFTs..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 bg-solana-gray/50 border-solana-purple/20 text-white placeholder:text-muted-foreground"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <Button
+                      variant={activeTab === 'marketplace' ? 'solana' : 'ghost'}
+                      onClick={() => {
+                        setActiveTab('marketplace');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="justify-start text-white"
+                    >
+                      Marketplace
+                    </Button>
+                    <Button
+                      variant={activeTab === 'mint' ? 'solana' : 'ghost'}
+                      onClick={() => {
+                        setActiveTab('mint');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="justify-start text-white"
+                    >
+                      Mint NFT
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
-        {/* Revolutionary Navigation */}
-        <nav className="nav-tabs">
-          <button
-            onClick={() => setActiveTab('home')}
-            className={`nav-tab ${activeTab === 'home' ? 'active' : ''}`}
-          >
-            🏠 Home
-          </button>
-          <button
-            onClick={() => setActiveTab('marketplace')}
-            className={`nav-tab ${activeTab === 'marketplace' ? 'active' : ''}`}
-          >
-            🏪 Marketplace
-          </button>
-          <button
-            onClick={() => setActiveTab('mint')}
-            className={`nav-tab ${activeTab === 'mint' ? 'active' : ''}`}
-          >
-            ✨ Create NFT
-          </button>
-          <button
-            onClick={() => setActiveTab('clout')}
-            className={`nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
-          >
-            ⚡ CLOUT Token
-          </button>
-          <button
-            onClick={() => setActiveTab('smart-contract')}
-            className={`nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
-          >
-            🛡️ Smart Contracts
-          </button>
-          <button
-            onClick={() => setActiveTab('time-capsules')}
-            className={`nav-tab ${activeTab === 'time-capsules' ? 'active' : ''}`}
-          >
-            ⏰ Time Capsules
-          </button>
-          <button
-            onClick={() => setActiveTab('collections')}
-            className={`nav-tab ${activeTab === 'collections' ? 'active' : ''}`}
-          >
-            🏗️ Collections
-          </button>
-          <button
-            onClick={() => setActiveTab('proxy')}
-            className={`nav-tab ${activeTab === 'proxy' ? 'active' : ''}`}
-          >
-            🔧 Proxy Test
-          </button>
-          {user && (
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`}
-            >
-              👤 Dashboard
-            </button>
-          )}
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`nav-tab ${activeTab === 'analytics' ? 'active' : ''}`}
-          >
-            📊 Analytics
-          </button>
-          <button
-            onClick={() => setActiveTab('transparency')}
-            className={`nav-tab ${activeTab === 'transparency' ? 'active' : ''}`}
-          >
-            🔍 Transparency
-          </button>
-        </nav>
-
-        {/* Revolutionary Content */}
-        <main className="content-section">
-          {activeTab === 'home' && <HomePage />}
-
+        {/* Main Content */}
+        <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {activeTab === 'marketplace' && (
-            <div className="section-card fade-in-up">
-              <h2 className="section-title">
-                🏪 Revolutionary NFT Marketplace
-              </h2>
-              <NFTMarketplace />
+            <div className="space-y-8">
+              {/* Hero Section */}
+              <div className="text-center space-y-4">
+                <h1 className="text-4xl md:text-6xl font-bold text-white">
+                  Discover & Trade
+                  <span className="block solana-gradient bg-clip-text text-transparent">
+                    Solana NFTs
+                  </span>
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                  Explore the most innovative NFT collections on Solana. 
+                  Buy, sell, and mint with lightning-fast transactions.
+                </p>
+              </div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="nft-card">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-solana-purple">1.2K+</div>
+                    <div className="text-muted-foreground">NFTs Listed</div>
+                  </CardContent>
+                </Card>
+                <Card className="nft-card">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-solana-teal">500+</div>
+                    <div className="text-muted-foreground">Active Users</div>
+                  </CardContent>
+                </Card>
+                <Card className="nft-card">
+                  <CardContent className="p-6 text-center">
+                    <div className="text-3xl font-bold text-solana-purple">2.5K</div>
+                    <div className="text-muted-foreground">SOL Volume</div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* NFT Marketplace */}
+              <NFTMarketplace searchQuery={searchQuery} />
             </div>
           )}
 
           {activeTab === 'mint' && (
-            <div className="section-card fade-in-up">
-              <h2 className="section-title">
-                ✨ Create Your Revolutionary NFT
-              </h2>
+            <div className="max-w-2xl mx-auto">
+              <div className="text-center space-y-4 mb-8">
+                <h1 className="text-4xl font-bold text-white">
+                  Create Your
+                  <span className="block solana-gradient bg-clip-text text-transparent">
+                    Unique NFT
+                  </span>
+                </h1>
+                <p className="text-xl text-muted-foreground">
+                  Mint your own NFT on Solana with just a few clicks.
+                </p>
+              </div>
               <MintForm />
             </div>
           )}
-
-          {activeTab === 'clout' && <CloutExplanation />}
-
-          {activeTab === 'smart-contract' && <SmartContractPage />}
-
-          {activeTab === 'time-capsules' && (
-            <div className="section-card fade-in-up">
-              <h2 className="section-title">
-                ⏰ Time Capsule Sales
-              </h2>
-              <TimeCapsuleSales />
-            </div>
-          )}
-
-          {activeTab === 'collections' && (
-            <div className="section-card fade-in-up">
-              <h2 className="section-title">
-                🏗️ Collection Manager
-              </h2>
-              <CollectionManager />
-            </div>
-          )}
-
-          {activeTab === 'proxy' && (
-            <div className="section-card fade-in-up">
-              <h2 className="section-title">
-                🔧 IPFS Proxy Test
-              </h2>
-              <ProxyCheck />
-            </div>
-          )}
-          
-          {activeTab === 'dashboard' && user && <UserDashboard user={user} />}
-          
-          {activeTab === 'analytics' && <AnalyticsDashboard />}
-          
-          {activeTab === 'transparency' && <TransparencyDashboard />}
-          
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && (
-            <UserAuth 
-              onUserLogin={setUser}
-              onUserLogout={() => setUser(null)}
-            />
-          )}
         </main>
 
-        {/* Revolutionary Footer */}
-        <footer className="hero-header" style={{ marginTop: '4rem', padding: '3rem 0' }}>
-          <div className="hero-content">
-            <div className="logo-section">
-              <div className="solana-logo">
-                <img 
-                  src="/assets/nftsol-logo.svg" 
-                  alt="NFTSol Logo" 
-                  className="custom-logo"
-                  style={{ width: '40px', height: '40px', marginRight: '8px' }}
-                />
-                <h3 className="brand-title" style={{ fontSize: '1.5rem' }}>NFTSol</h3>
-              </div>
-              <div className="tagline" style={{ fontSize: '0.9rem', opacity: 0.7 }}>
-                The Most Revolutionary NFT Platform on Solana
-              </div>
-            </div>
-            
-            <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-green)' }}>CLOUT</div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Revolutionary Token</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-blue)' }}>Honor</div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>Trust-Based Rewards</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.2rem', fontWeight: '700', color: 'var(--solana-purple)' }}>Universal</div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>All Solana NFTs</div>
-              </div>
+        {/* Footer */}
+        <footer className="border-t border-solana-purple/20 bg-solana-dark/50 backdrop-blur-md mt-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center text-muted-foreground">
+              <p>&copy; 2024 NFTSol. Built on Solana with ❤️</p>
             </div>
           </div>
         </footer>

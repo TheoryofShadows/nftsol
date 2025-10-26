@@ -1,0 +1,137 @@
+# NFTSol - Solana NFT Marketplace Development Rules
+
+## Project Overview
+This is a production-ready Solana NFT marketplace built with React, TypeScript, Tailwind CSS, and Shadcn/ui components.
+
+## Tech Stack
+- **Frontend**: React 18, TypeScript, Vite
+- **Styling**: Tailwind CSS with custom Solana theme
+- **UI Components**: Shadcn/ui (Radix UI primitives)
+- **Blockchain**: Solana Web3.js, Metaplex JS SDK
+- **State Management**: React hooks, React Hook Form
+- **Validation**: Zod schemas
+- **Icons**: Lucide React
+
+## Code Style & Standards
+
+### TypeScript
+- Use strict TypeScript configuration
+- Define proper interfaces for all data structures
+- Use type assertions sparingly and with proper checks
+- Prefer `interface` over `type` for object shapes
+- Export types and interfaces from component files
+
+### React
+- Use functional components with hooks
+- Prefer `const` over `let` and avoid `var`
+- Use proper dependency arrays in useEffect
+- Implement proper error boundaries
+- Use React.memo for performance optimization when needed
+
+### Styling
+- Use Tailwind CSS utility classes
+- Follow the custom Solana theme colors:
+  - `solana-purple`: #9945FF
+  - `solana-teal`: #14F195
+  - `solana-dark`: #0D1117
+  - `solana-gray`: #161B22
+- Use custom CSS classes for complex animations
+- Maintain responsive design (mobile-first approach)
+
+### Component Structure
+- Place UI components in `src/components/ui/`
+- Place feature components in `src/components/`
+- Use proper prop interfaces
+- Implement loading and error states
+- Add proper ARIA labels for accessibility
+
+### File Organization
+```
+src/
+├── components/
+│   ├── ui/           # Shadcn/ui components
+│   ├── NFTCard.tsx   # NFT display component
+│   ├── MintForm.tsx  # NFT minting form
+│   └── ...
+├── lib/
+│   └── utils.ts      # Utility functions
+├── wallet/           # Wallet integration
+└── ...
+```
+
+## Solana Integration
+
+### Wallet Integration
+- Use `@solana/wallet-adapter-react` for wallet connection
+- Support Phantom, Backpack, and other major wallets
+- Handle wallet disconnection gracefully
+- Show proper loading states during transactions
+
+### Metaplex Integration
+- Use `@metaplex-foundation/js` for NFT operations
+- Implement proper error handling for blockchain operations
+- Use compression for cost-effective minting
+- Handle transaction simulation and confirmation
+
+### Error Handling
+- Implement global error boundary
+- Use toast notifications for user feedback
+- Log errors properly for debugging
+- Handle network failures gracefully
+
+## Performance
+- Implement lazy loading for images
+- Use proper memoization for expensive operations
+- Optimize bundle size (no unnecessary dependencies)
+- Use proper loading states
+
+## Accessibility
+- Add proper ARIA labels
+- Ensure keyboard navigation works
+- Use semantic HTML elements
+- Test with screen readers
+- Maintain proper color contrast
+
+## Security
+- Validate all user inputs
+- Sanitize image URLs
+- Use proper CSP headers
+- Implement rate limiting for API calls
+- Never expose private keys
+
+## Development Workflow
+1. Create feature branches from main
+2. Write TypeScript interfaces first
+3. Implement components with proper error handling
+4. Add tests for critical functionality
+5. Test on multiple screen sizes
+6. Test wallet integration thoroughly
+
+## Common Patterns
+
+### Form Handling
+```typescript
+const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  resolver: zodResolver(schema)
+});
+```
+
+### Loading States
+```typescript
+const [loading, setLoading] = useState(false);
+// Show spinner during async operations
+```
+
+### Error Boundaries
+```typescript
+<ErrorBoundary fallback={<ErrorFallback />}>
+  <Component />
+</ErrorBoundary>
+```
+
+## Notes
+- Keep bundle size minimal
+- Use modern React patterns
+- Follow Solana best practices
+- Maintain production-ready code quality
+- Test thoroughly before deployment
