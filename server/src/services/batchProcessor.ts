@@ -282,7 +282,7 @@ export class BatchProcessor {
     });
   }
 
-  async getBalance(publicKey: string, priority: 'high' | 'normal' | 'low' = 'normal'): Promise<BatchResult<number>> {
+  async getBalance(publicKey: string, priority: 'high' | 'normal' | 'low' = 'normal'): Promise<BatchResult<{ publicKey: string }>> {
     return this.addOperation({
       id: `balance-${Date.now()}-${Math.random()}`,
       type: 'getBalance',
@@ -300,7 +300,7 @@ export class BatchProcessor {
     });
   }
 
-  async updateNFT(id: string, updateData: any, priority: 'high' | 'normal' | 'low' = 'normal'): Promise<BatchResult<void>> {
+  async updateNFT(id: string, updateData: any, priority: 'high' | 'normal' | 'low' = 'normal'): Promise<BatchResult<{ id: string; updateData: any }>> {
     return this.addOperation({
       id: `update-nft-${Date.now()}-${Math.random()}`,
       type: 'updateNFT',

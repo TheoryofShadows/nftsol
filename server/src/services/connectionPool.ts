@@ -176,7 +176,7 @@ export class SolanaConnectionPool {
 
     try {
       this.updateConnectionStats(pooledConn);
-      return await pooledConn.connection.sendTransaction(transaction);
+      return await pooledConn.connection.sendTransaction(transaction as any);
     } catch (error) {
       pooledConn.errorCount++;
       logError(error as Error, 'ConnectionPool.sendTransaction');

@@ -90,14 +90,14 @@ export class CacheService {
         this.stats.hits++;
         
         // Check if value is compressed
-        if (value.startsWith('COMPRESSED:')) {
+        if (typeof value === 'string' && value.startsWith('COMPRESSED:')) {
           const compressedData = value.substring(11);
           const buffer = Buffer.from(compressedData, 'base64');
           const decompressed = await gunzipAsync(buffer);
           const jsonString = decompressed.toString();
           return JSON.parse(jsonString) as T;
         } else {
-          return JSON.parse(value) as T;
+          return JSON.parse(value as string) as T;
         }
       }
       
@@ -309,10 +309,11 @@ export class CacheService {
     }
 
     try {
-      const memory = await this.client.memoryUsage();
+      // Redis doesn't have memoryUsage method, use info instead
+      const info = await this.client.info('memory');
       return { 
         connected: true, 
-        memory,
+        memory: info,
         performance: { ...this.stats },
         tagCount: this.tagIndex.size
       };

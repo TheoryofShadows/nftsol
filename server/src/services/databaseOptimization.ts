@@ -41,7 +41,7 @@ export class DatabaseOptimizationService {
       .from(nfts)
       .where(whereClause)
       .orderBy(
-        sortOrder === 'desc' ? desc(nfts[sortBy as keyof typeof nfts]) : asc(nfts[sortBy as keyof typeof nfts])
+        sortOrder === 'desc' ? desc(nfts[sortBy as keyof typeof nfts] as any) : asc(nfts[sortBy as keyof typeof nfts] as any)
       )
       .limit(limit)
       .offset(offset);
@@ -226,7 +226,7 @@ export class DatabaseOptimizationService {
         .from(nfts)
         .where(whereClause)
         .orderBy(
-          sortOrder === 'desc' ? desc(nfts[sortBy as keyof typeof nfts]) : asc(nfts[sortBy as keyof typeof nfts])
+          sortOrder === 'desc' ? desc(nfts[sortBy as keyof typeof nfts] as any) : asc(nfts[sortBy as keyof typeof nfts] as any)
         )
         .limit(limit)
         .offset(offset)
@@ -259,9 +259,10 @@ export class DatabaseOptimizationService {
       conditions.push(eq(nfts.collection, filters.collection));
     }
 
-    if (filters.platform) {
-      conditions.push(eq(nfts.platform, filters.platform));
-    }
+    // Platform filter removed - platform field doesn't exist in schema
+    // if (filters.platform) {
+    //   conditions.push(eq(nfts.platform, filters.platform));
+    // }
 
     if (filters.minPrice) {
       conditions.push(gte(sql`cast(${nfts.price} as numeric)`, filters.minPrice));

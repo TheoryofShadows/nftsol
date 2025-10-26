@@ -131,7 +131,7 @@ router.get("/nfts", async (req, res, next) => {
     const result = await marketplaceService.getNFTs(filters);
     
     // Return paginated response
-    return paginatedResponse(res, result.data, Math.floor(offset / limit) + 1, limit, result.pagination.total);
+    return paginatedResponse(res, (result as any).data, Math.floor(offset / limit) + 1, limit, (result as any).pagination.total);
   } catch (error: any) {
     console.error('Get NFTs error:', error);
     next(error); // Pass to error handler

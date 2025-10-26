@@ -179,4 +179,18 @@ export class MarketplaceService {
       throw error;
     }
   }
+
+  async getNFTByMintAddress(mintAddress: string) {
+    try {
+      const [nft] = await db
+        .select()
+        .from(nfts)
+        .where(eq(nfts.mintAddress, mintAddress));
+
+      return nft;
+    } catch (error) {
+      console.error('Failed to get NFT by mint address:', error);
+      throw error;
+    }
+  }
 }

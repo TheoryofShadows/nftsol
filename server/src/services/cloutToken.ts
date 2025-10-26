@@ -113,14 +113,16 @@ export class CloutTokenService {
       return {
         balance: Number(accountInfo.amount),
         decimals: accountInfo.mint.toString(),
-        wallet: walletAddress
+        wallet: walletAddress,
+        cloutEarned: Number(accountInfo.amount) // For now, cloutEarned equals balance
       };
     } catch (error) {
       // Account doesn't exist or other error
       return {
         balance: 0,
         decimals: this.cloutMint.toString(),
-        wallet: walletAddress
+        wallet: walletAddress,
+        cloutEarned: 0
       };
     }
   }
