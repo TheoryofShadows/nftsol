@@ -205,17 +205,27 @@ export class AutomatedMaintenanceService {
   // Heal database connection
   private async healDatabaseConnection() {
     try {
-      // Attempt to reconnect to database
-      console.log('🔧 Attempting database reconnection...');
-      
-      // The database module will automatically attempt reconnection
-      // when checkDatabaseHealth is called
+      // First, check current health
       const health = await checkDatabaseHealth();
       
       if (health.healthy) {
+        console.log('✅ Database connection is healthy');
+        return;
+      }
+      
+      // If unhealthy, attempt to reconnect
+      console.log('🔧 Attempting database reconnection...');
+      
+      // Import initializeDatabase dynamically to avoid circular dependency
+      const { initializeDatabase } = await import('../db');
+      await initializeDatabase();
+      
+      // Verify reconnection
+      const newHealth = await checkDatabaseHealth();
+      if (newHealth.healthy) {
         console.log('✅ Database reconnection successful');
       } else {
-        console.log('⚠️ Database still unhealthy:', health.error);
+        console.log('⚠️ Database still unhealthy:', newHealth.error);
       }
     } catch (error) {
       console.error('❌ Database healing failed:', error);
