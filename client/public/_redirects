@@ -1,6 +1,6 @@
 
 # API routes - proxy to your Render backend
-/api/*  https://nftsol-server-prod.onrender.com/api/:splat  200
+/api/*  https://nftsol.onrender.com/api/:splat  200
 
 # Client-side routing - all other routes go to index.html
 /*    /index.html   200
