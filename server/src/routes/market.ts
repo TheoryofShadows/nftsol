@@ -1,13 +1,25 @@
 import { Router } from "express";
+import { z } from "zod";
 import { NFTMintingService } from "../services/nftMinting";
 import { MarketplaceService } from "../services/marketplace";
 import { apiLimiter } from "../middleware/security";
 import { nftMintSchema, listingSchema, purchaseSchema, searchSchema } from "../middleware/validation";
 import { validateInput } from "../middleware/security";
+import { successResponse, errorResponse, paginatedResponse } from "../utils/response";
+import { PAGINATION } from "../config/constants";
 
 const router = Router();
 const nftMintingService = new NFTMintingService();
 const marketplaceService = new MarketplaceService();
+
+// Query parameter validation schema for GET /nfts
+const nftQuerySchema = z.object({
+  owner: z.string().min(32).max(44).optional(),
+  status: z.string().optional(),
+  collection: z.string().optional(),
+  limit: z.coerce.number().min(1).max(PAGINATION.MAX_LIMIT).optional().default(PAGINATION.DEFAULT_LIMIT),
+  offset: z.coerce.number().min(0).optional().default(0)
+});
 
 // Mint NFT
 router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req, res, next) => {
@@ -30,7 +42,7 @@ router.post("/mint", apiLimiter as any, validateInput(nftMintSchema), async (req
       collection
     });
 
-    res.json({ ok: true, ...result });
+    return successResponse(res, result, 201);
   } catch (error: any) {
     console.error('Mint error:', error);
     next(error); // Pass to error handler
@@ -43,7 +55,7 @@ router.post("/list", apiLimiter as any, validateInput(listingSchema), async (req
     const { mintAddress, price, sellerWallet } = req.body;
 
     const result = await marketplaceService.listNFT(mintAddress, price, sellerWallet);
-    res.json({ ok: true, ...result });
+    return successResponse(res, result, 201);
   } catch (error: any) {
     console.error('List error:', error);
     next(error); // Pass to error handler
@@ -56,7 +68,7 @@ router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req
     const { mintAddress, buyerWallet, price } = req.body;
 
     const result = await marketplaceService.buyNFT(mintAddress, buyerWallet, price);
-    res.json({ ok: true, ...result });
+    return successResponse(res, result);
   } catch (error: any) {
     console.error('Buy error:', error);
     next(error); // Pass to error handler
@@ -66,19 +78,28 @@ router.post("/buy", apiLimiter as any, validateInput(purchaseSchema), async (req
 // Get NFTs
 router.get("/nfts", async (req, res, next) => {
   try {
-    const { owner, status, collection, limit, offset } = req.query;
+    // Validate query parameters
+    const validated = nftQuerySchema.safeParse(req.query);
     
-    // Validate and sanitize query parameters
+    if (!validated.success) {
+      return errorResponse(res, 'Invalid query parameters', 400, validated.error.errors);
+    }
+    
+    const { owner, status, collection, limit, offset } = validated.data;
+
     const filters = {
-      owner: owner as string,
-      status: status as string,
-      collection: collection as string,
-      limit: limit ? parseInt(limit as string, 10) : undefined,
-      offset: offset ? parseInt(offset as string, 10) : undefined
+      owner,
+      status,
+      collection,
+      limit,
+      offset
     };
 
     const nfts = await marketplaceService.getNFTs(filters);
-    res.json({ ok: true, nfts });
+    
+    // For now, return simple success response
+    // TODO: Update marketplaceService to return count for pagination
+    return successResponse(res, nfts);
   } catch (error: any) {
     console.error('Get NFTs error:', error);
     next(error); // Pass to error handler

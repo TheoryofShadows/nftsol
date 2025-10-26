@@ -3,6 +3,8 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import session from "express-session";
+import compression from "compression";
+import crypto from "crypto";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
 import health from "./routes/health.js";
@@ -20,6 +22,7 @@ import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
 import { BackupService } from "./services/backupService";
 import { PerformanceService } from "./services/performanceService";
 import { logEnvironmentStatus } from "./utils/envValidation";
+import { REQUEST_LIMITS, SESSION_CONFIG } from "./config/constants";
 import { 
   corsConfig, 
   helmetConfig, 
@@ -97,19 +100,45 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'fallback-session-secret',
   resave: false,
   saveUninitialized: false,
+  name: SESSION_CONFIG.COOKIE_NAME,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: SESSION_CONFIG.MAX_AGE,
+    sameSite: 'strict' // Additional security
   }
 }));
 
 // Body parsing with size limits
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: REQUEST_LIMITS.JSON_BODY }));
+app.use(express.urlencoded({ extended: true, limit: REQUEST_LIMITS.URL_ENCODED }));
 
 // Logging
 app.use(morgan(appConfig.logLevel === "debug" ? "dev" : "tiny"));
+
+// Compression middleware
+app.use(compression() as any);
+
+// Request ID and performance tracking middleware
+app.use((req: any, res: any, next: any) => {
+  // Generate request ID
+  req.id = crypto.randomUUID();
+  res.setHeader('X-Request-ID', req.id);
+  
+  // Track response time
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    res.setHeader('X-Response-Time', `${duration}ms`);
+    
+    // Log slow requests
+    if (duration > 1000) {
+      console.warn(`🐌 Slow request: ${req.method} ${req.path} took ${duration}ms`);
+    }
+  });
+  
+  next();
+});
 
 // Input sanitization (AFTER body parsing)
 app.use(sanitizeInput);
@@ -161,25 +190,44 @@ backupService.scheduleBackups();
 
 // Error handler middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  // Skip if response already sent
+  if (res.headersSent) {
+    return next(err);
+  }
+
   // Log error details
-  console.error(`Error [${req.method} ${req.path}]:`, {
+  const errorLog = {
+    requestId: (req as any).id,
+    method: req.method,
+    path: req.path,
     message: err.message,
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-    timestamp: new Date().toISOString()
-  });
+    timestamp: new Date().toISOString(),
+    ip: req.ip,
+    userAgent: req.get('User-Agent')
+  };
+  
+  console.error('Error:', JSON.stringify(errorLog, null, 2));
 
   // Determine status code
   const statusCode = err.statusCode || err.status || 500;
   
-  // Don't leak error details in production
-  const message = statusCode === 500 && process.env.NODE_ENV === 'production'
+  // Don't leak error details in production for 5xx errors
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isInternalError = statusCode >= 500;
+  
+  const message = isProduction && isInternalError
     ? 'Internal Server Error'
     : err.message || 'An error occurred';
 
   res.status(statusCode).json({
     ok: false,
     error: message,
-    ...(process.env.NODE_ENV === 'development' && { details: err })
+    requestId: (req as any).id,
+    ...(process.env.NODE_ENV === 'development' && { 
+      details: err,
+      stack: err.stack 
+    })
   });
 });
 
