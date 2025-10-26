@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./components/ui/dialog";
 import { Input } from "./components/ui/input";
-import { Wallet, Plus, Search, Menu, X } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import "./globals.css";
 
 // Import existing components
@@ -14,7 +13,6 @@ import { logError } from "./utils/errorHandler";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'marketplace' | 'mint'>('marketplace');
-  const [isMintDialogOpen, setIsMintDialogOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
