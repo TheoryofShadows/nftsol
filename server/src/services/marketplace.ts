@@ -1,7 +1,7 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { db } from '../db';
 import { nfts, nftTransactions } from '../schema';
-import { eq, and, SQL } from 'drizzle-orm';
+import { eq, and, SQL, sql } from 'drizzle-orm';
 
 export class MarketplaceService {
   private connection: Connection;
@@ -128,6 +128,13 @@ export class MarketplaceService {
 
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
       
+      // Get total count for pagination
+      const [{ count }] = await db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(nfts)
+        .where(whereClause);
+      
+      // Get paginated results
       const results = await db
         .select()
         .from(nfts)
@@ -135,7 +142,15 @@ export class MarketplaceService {
         .limit(filters.limit || 50)
         .offset(filters.offset || 0);
 
-      return results;
+      return {
+        data: results,
+        pagination: {
+          total: count,
+          limit: filters.limit || 50,
+          offset: filters.offset || 0,
+          totalPages: Math.ceil(count / (filters.limit || 50))
+        }
+      };
 
     } catch (error) {
       console.error('Failed to get NFTs:', error);
