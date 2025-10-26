@@ -36,7 +36,7 @@
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "drizzle-kit": "^0.31.5",
+    "drizzle-kit": "^0.20.0",
     "drizzle-orm": "^0.44.6",
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
