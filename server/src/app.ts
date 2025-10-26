@@ -7,7 +7,7 @@ import compression from "compression";
 import crypto from "crypto";
 import { RedisStore } from "connect-redis";
 import { createClient } from "redis";
-import health from "./routes/health";
+import health from "./routes/simple-health";
 import nfts from "./routes/nfts";
 import market from "./routes/market";
 import clout from "./routes/clout";

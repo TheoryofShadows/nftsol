@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node dist/start-minimal.js",
     "build": "tsc -p tsconfig.json",
     "test": "jest",
     "test:watch": "jest --watch",
