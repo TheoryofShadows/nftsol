@@ -29,6 +29,15 @@ export const authLimiter = createRateLimiter(15 * 60 * 1000, 5); // 5 auth attem
 export const apiLimiter = createRateLimiter(60 * 1000, 30); // 30 API calls per minute
 export const uploadLimiter = createRateLimiter(60 * 1000, 10); // 10 uploads per minute
 
+// Helper to extract IP address for rate limiting
+const getIpAddress = (req: any) => {
+  return req.ip || 
+         req.connection?.remoteAddress || 
+         req.socket?.remoteAddress ||
+         (req.headers['x-forwarded-for'] as string)?.split(',')[0] ||
+         'unknown';
+};
+
 // Enhanced CORS configuration with proper environment separation
 export const corsConfig = cors({
   origin: (origin, callback) => {
@@ -272,7 +281,11 @@ export const requestSizeLimiter = (req: Request, res: Response, next: NextFuncti
   const maxSize = 50 * 1024 * 1024; // 50MB
 
   if (contentLength > maxSize) {
-    return res.status(413).json({ error: 'Request too large' });
+    return res.status(413).json({ 
+      ok: false,
+      error: 'Request too large',
+      maxSize: `${maxSize / 1024 / 1024}MB`
+    });
   }
 
   next();
