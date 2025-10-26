@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UniversalWalletProvider, WalletSelector } from "./wallet/UniversalWalletAdapter";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
@@ -9,31 +9,11 @@ import "./globals.css";
 // Import existing components
 import NFTMarketplace from "./components/NFTMarketplace";
 import MintForm from "./components/MintForm";
-import { logError } from "./utils/errorHandler";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'marketplace' | 'mint'>('marketplace');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Global error handling
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      logError(event.error, 'Global Error Handler');
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      logError(new Error(event.reason), 'Unhandled Promise Rejection');
-    };
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
-  }, []);
 
   return (
     <UniversalWalletProvider>

@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
 import NFTCard, { NFTData } from './NFTCard';
-import { Search, Filter, Grid, List, Loader2 } from 'lucide-react';
+import { Search, Grid, List, Loader2 } from 'lucide-react';
 
 interface NFTMarketplaceProps {
   searchQuery?: string;
@@ -14,7 +14,7 @@ const mockNFTs: NFTData[] = [
   {
     id: '1',
     name: 'Cosmic Solana #001',
-    description: 'A rare cosmic-themed NFT from the Solana universe. This piece represents the infinite possibilities of blockchain technology.',
+    description: 'A rare cosmic-themed NFT from the Solana universe.',
     image: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&h=400&fit=crop',
     price: 2.5,
     currency: 'SOL',
@@ -27,22 +27,13 @@ const mockNFTs: NFTData[] = [
       name: 'Cosmic Solana',
       verified: true
     },
-    owner: {
-      address: '7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU',
-      name: 'CosmicCollector'
-    },
     isListed: true,
-    isLiked: false,
-    attributes: [
-      { trait_type: 'Background', value: 'Cosmic', rarity_percentage: 5.2 },
-      { trait_type: 'Eyes', value: 'Galaxy', rarity_percentage: 12.8 },
-      { trait_type: 'Accessory', value: 'Solana Crown', rarity_percentage: 2.1 }
-    ]
+    isLiked: false
   },
   {
     id: '2',
     name: 'Digital Phoenix #042',
-    description: 'Rising from the digital ashes, this phoenix represents rebirth and innovation in the NFT space.',
+    description: 'Rising from the digital ashes, this phoenix represents rebirth.',
     image: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop',
     price: 1.8,
     currency: 'SOL',
@@ -55,17 +46,13 @@ const mockNFTs: NFTData[] = [
       name: 'Digital Creatures',
       verified: true
     },
-    owner: {
-      address: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM',
-      name: 'PhoenixRider'
-    },
     isListed: true,
     isLiked: true
   },
   {
     id: '3',
     name: 'Neon Dreams #156',
-    description: 'A vibrant piece that captures the essence of digital art and the future of creativity.',
+    description: 'A vibrant piece that captures the essence of digital art.',
     image: 'https://images.unsplash.com/photo-1642790104077-9d89d7b0e5f1?w=400&h=400&fit=crop',
     price: 0.9,
     currency: 'SOL',
@@ -78,17 +65,13 @@ const mockNFTs: NFTData[] = [
       name: 'Neon Collection',
       verified: false
     },
-    owner: {
-      address: '5Q544fKrFoe6tsEbD7S8EmxGTJYAKtTVhAW5Q5pge4j1',
-      name: 'NeonArtist'
-    },
     isListed: true,
     isLiked: false
   },
   {
     id: '4',
     name: 'Abstract Waves #789',
-    description: 'Fluid and dynamic, this abstract piece represents the constant flow of digital innovation.',
+    description: 'Fluid and dynamic, this abstract piece represents innovation.',
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop',
     price: 0.5,
     currency: 'SOL',
@@ -101,10 +84,6 @@ const mockNFTs: NFTData[] = [
       name: 'Abstract Art',
       verified: false
     },
-    owner: {
-      address: '3QJmV3qfvL9SuYo7YhLUTA5FLWJv7u4FBne6anKizrtr',
-      name: 'AbstractMind'
-    },
     isListed: false,
     isLiked: false
   }
@@ -116,8 +95,6 @@ const NFTMarketplace: React.FC<NFTMarketplaceProps> = ({ searchQuery = '' }) => 
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'price' | 'rarity' | 'newest'>('newest');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10]);
-  const [selectedRarity, setSelectedRarity] = useState<string>('all');
 
   // Load NFTs
   useEffect(() => {
@@ -145,16 +122,6 @@ const NFTMarketplace: React.FC<NFTMarketplaceProps> = ({ searchQuery = '' }) => 
       );
     }
 
-    // Price range filter
-    filtered = filtered.filter(nft => 
-      nft.price >= priceRange[0] && nft.price <= priceRange[1]
-    );
-
-    // Rarity filter
-    if (selectedRarity !== 'all') {
-      filtered = filtered.filter(nft => nft.rarity?.tier === selectedRarity);
-    }
-
     // Sort
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -169,7 +136,7 @@ const NFTMarketplace: React.FC<NFTMarketplaceProps> = ({ searchQuery = '' }) => 
     });
 
     setFilteredNFTs(filtered);
-  }, [nfts, searchQuery, priceRange, selectedRarity, sortBy]);
+  }, [nfts, searchQuery, sortBy]);
 
   const handleBuy = (nft: NFTData) => {
     console.log('Buying NFT:', nft);
@@ -228,19 +195,6 @@ const NFTMarketplace: React.FC<NFTMarketplaceProps> = ({ searchQuery = '' }) => 
                 <option value="newest">Newest</option>
                 <option value="price">Price: Low to High</option>
                 <option value="rarity">Rarity</option>
-              </select>
-
-              {/* Rarity Filter */}
-              <select
-                value={selectedRarity}
-                onChange={(e) => setSelectedRarity(e.target.value)}
-                className="bg-solana-gray/50 border border-solana-purple/20 rounded-md px-3 py-2 text-white text-sm"
-              >
-                <option value="all">All Rarities</option>
-                <option value="Legendary">Legendary</option>
-                <option value="Epic">Epic</option>
-                <option value="Rare">Rare</option>
-                <option value="Common">Common</option>
               </select>
 
               {/* View Mode */}
