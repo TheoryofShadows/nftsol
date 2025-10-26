@@ -21,6 +21,19 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics'>('home');
   const [user, setUser] = useState<any>(null);
 
+  // Listen for custom tab change events from buttons
+  useEffect(() => {
+    const handleTabChange = (event: CustomEvent) => {
+      const tab = event.detail as any;
+      setActiveTab(tab);
+    };
+
+    window.addEventListener('change-tab', handleTabChange as EventListener);
+    return () => {
+      window.removeEventListener('change-tab', handleTabChange as EventListener);
+    };
+  }, []);
+
   // Global error handling
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
