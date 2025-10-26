@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { NFTMintingService } from '../../src/services/nftMinting';
 
 describe('NFTMintingService', () => {
