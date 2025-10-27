@@ -4,38 +4,25 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { BubblegumService, CreateTreeOptions, MintCompressedNFTOptions, BulkMintOptions, CompressedNFTMetadata } from '../services/bubblegumService';
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
-import bs58 from 'bs58';
+import { CreateTreeOptions, MintCompressedNFTOptions, BulkMintOptions, CompressedNFTMetadata } from '../services/bubblegumService';
+import { PublicKey } from '@solana/web3.js';
 import expressRateLimit from 'express-rate-limit';
+import { solanaServiceManager } from '../services/solanaServiceManager';
 
 const router = Router();
-const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
 
-// Initialize Bubblegum service
-const bubblegumService = new BubblegumService(
-  connection,
-  connection.rpcEndpoint
-);
+// Initialize Solana services
+let bubblegumService: any = null;
 
-// Set up signer if wallet is configured
-console.log('🔍 Checking for BUBBLEGUM_PRIVATE_KEY...');
-console.log('BUBBLEGUM_PRIVATE_KEY exists:', !!process.env.BUBBLEGUM_PRIVATE_KEY);
-console.log('BUBBLEGUM_PRIVATE_KEY length:', process.env.BUBBLEGUM_PRIVATE_KEY?.length);
-
-if (process.env.BUBBLEGUM_PRIVATE_KEY) {
-  try {
-    const secretKey = bs58.decode(process.env.BUBBLEGUM_PRIVATE_KEY);
-    const walletKeypair = Keypair.fromSecretKey(secretKey);
-    bubblegumService.setSigner(walletKeypair);
-    console.log('✅ Bubblegum wallet signer configured');
-    console.log('Wallet public key:', walletKeypair.publicKey.toString());
-  } catch (error) {
-    console.error('❌ Failed to configure Bubblegum signer:', error);
-  }
-} else {
-  console.log('⚠️ BUBBLEGUM_PRIVATE_KEY not found in environment');
-}
+// Initialize services asynchronously
+solanaServiceManager.initialize()
+  .then(config => {
+    bubblegumService = config.bubblegumService;
+    console.log('✅ Bubblegum service initialized');
+  })
+  .catch(error => {
+    console.error('❌ Failed to initialize Bubblegum service:', error);
+  });
 
 // Rate limiting for bulk mint endpoint
 const bulkMintLimiter = expressRateLimit({
@@ -44,11 +31,23 @@ const bulkMintLimiter = expressRateLimit({
   message: 'Too many bulk mint requests, please try again later'
 });
 
+// Middleware to check if service is available
+const checkServiceAvailability = (req: Request, res: Response, next: any) => {
+  if (!bubblegumService) {
+    return res.status(503).json({
+      success: false,
+      error: 'Bubblegum service not available',
+      message: 'Service is still initializing. Please try again in a moment.'
+    });
+  }
+  next();
+};
+
 /**
  * GET /api/bubblegum/info
  * Get Bubblegum service information
  */
-router.get('/info', (req: Request, res: Response) => {
+router.get('/info', checkServiceAvailability, (req: Request, res: Response) => {
   try {
     const info = bubblegumService.getServiceInfo();
     res.json({
@@ -68,7 +67,7 @@ router.get('/info', (req: Request, res: Response) => {
  * POST /api/bubblegum/create-tree
  * Create a new Bubblegum tree for compressed NFTs
  */
-router.post('/create-tree', async (req: Request, res: Response) => {
+router.post('/create-tree', checkServiceAvailability, async (req: Request, res: Response) => {
   try {
     const { maxDepth = 14, maxBufferSize = 64, canopyDepth = 0 } = req.body;
     
@@ -114,7 +113,7 @@ router.post('/create-tree', async (req: Request, res: Response) => {
  * POST /api/bubblegum/mint
  * Create a single compressed NFT
  */
-router.post('/mint', async (req: Request, res: Response) => {
+router.post('/mint', checkServiceAvailability, async (req: Request, res: Response) => {
   try {
     const { treeAddress, metadata, owner, collectionMint } = req.body;
     

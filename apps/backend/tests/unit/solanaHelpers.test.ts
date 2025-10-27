@@ -87,7 +87,7 @@ describe('Solana Helpers', () => {
     it('should transform simulation failure error', () => {
       expect(() => {
         handleSolanaError({ message: 'Transaction simulation failed: test' }, 'test');
-      }).toThrow('Transaction would fail: test');
+      }).toThrow('Transaction would fail: Transaction simulation failed: test');
     });
 
     it('should transform blockheight error', () => {
@@ -130,10 +130,11 @@ describe('Solana Helpers', () => {
     it('should deduplicate concurrent requests', async () => {
       const mockFn = jest.fn().mockResolvedValue('result');
       const dedupKey = 'test-key';
+      const cache = new Map(); // Use shared cache
       
       const [result1, result2] = await Promise.all([
-        executeWithRetry(mockFn, dedupKey),
-        executeWithRetry(mockFn, dedupKey)
+        executeWithRetry(mockFn, dedupKey, cache),
+        executeWithRetry(mockFn, dedupKey, cache)
       ]);
       
       expect(result1).toBe('result');

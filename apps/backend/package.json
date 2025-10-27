@@ -85,31 +85,5 @@
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
-  "main": "dist/index.js",
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/tests"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.ts",
-      "**/tests/**/*.spec.ts"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.ts",
-      "!src/**/*.d.ts",
-      "!src/index.ts"
-    ],
-    "coverageDirectory": "coverage",
-    "coverageReporters": [
-      "text",
-      "lcov",
-      "html"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.ts"
-    ],
-    "testTimeout": 30000
-  }
+  "main": "dist/index.js"
 }

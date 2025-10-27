@@ -274,14 +274,12 @@ export async function executeParallel<T>(
       await Promise.race(executing);
       // Remove completed promises
       for (let j = executing.length - 1; j >= 0; j--) {
-        if (executing[j].then) {
-          try {
-            await executing[j];
-            executing.splice(j, 1);
-          } catch {
-            // Promise already resolved/rejected
-            executing.splice(j, 1);
-          }
+        try {
+          await executing[j];
+          executing.splice(j, 1);
+        } catch {
+          // Promise already resolved/rejected
+          executing.splice(j, 1);
         }
       }
     }

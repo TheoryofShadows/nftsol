@@ -65,14 +65,7 @@ describe('CloutTokenService', () => {
       const walletAddress = 'test-wallet';
       const mockBalance = 5000;
 
-      // Mock the getAccount call
-      const mockAccount = {
-        amount: BigInt(mockBalance),
-        mint: new PublicKey('4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf'),
-      };
-
-      jest.spyOn(cloutService as any, 'getAccount').mockResolvedValue(mockAccount);
-
+      // Mock the getAccount call - the mock is already set up in setup.ts
       const result = await cloutService.getCloutBalance(walletAddress);
 
       expect(result.balance).toBe(mockBalance);
@@ -82,7 +75,9 @@ describe('CloutTokenService', () => {
     it('should return zero balance for non-existent account', async () => {
       const walletAddress = 'non-existent-wallet';
 
-      jest.spyOn(cloutService as any, 'getAccount').mockRejectedValue(new Error('Account not found'));
+      // Mock the getAccount function from @solana/spl-token to throw an error
+      const splToken = require('@solana/spl-token');
+      jest.spyOn(splToken, 'getAccount').mockRejectedValue(new Error('Account not found'));
 
       const result = await cloutService.getCloutBalance(walletAddress);
 

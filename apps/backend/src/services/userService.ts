@@ -59,7 +59,14 @@ export class UserService {
   }> {
     try {
       // Validate wallet address
-      new PublicKey(walletAddress);
+      try {
+        new PublicKey(walletAddress);
+      } catch (error) {
+        return {
+          success: false,
+          error: 'Invalid wallet address format'
+        };
+      }
 
       const user: UserProfile = {
         walletAddress,

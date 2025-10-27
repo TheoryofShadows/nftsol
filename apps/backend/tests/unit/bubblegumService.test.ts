@@ -111,9 +111,10 @@ describe('BubblegumService', () => {
 
       // Mock the createTree function to return a successful result
       const mockCreateTree = require('@metaplex-foundation/mpl-bubblegum').createTree;
-      const mockSendAndConfirm = jest.fn().mockResolvedValue({
+      const mockSendAndConfirm = jest.fn() as jest.MockedFunction<any>;
+      mockSendAndConfirm.mockResolvedValue({
         signature: 'test-signature',
-      } as any);
+      });
       mockCreateTree.mockResolvedValue({
         sendAndConfirm: mockSendAndConfirm,
       });
@@ -158,9 +159,10 @@ describe('BubblegumService', () => {
     it('should accept valid metadata', () => {
       // Mock the mintV2 function
       const mockMintV2 = require('@metaplex-foundation/mpl-bubblegum').mintV2;
-      const mockSendAndConfirm = jest.fn().mockResolvedValue({
+      const mockSendAndConfirm = jest.fn() as jest.MockedFunction<any>;
+      mockSendAndConfirm.mockResolvedValue({
         signature: 'test-mint-signature',
-      } as any);
+      });
       mockMintV2.mockResolvedValue({
         sendAndConfirm: mockSendAndConfirm,
       });
@@ -322,9 +324,10 @@ describe('BubblegumService', () => {
 
       // Mock the mintV2 function
       const mockMintV2 = require('@metaplex-foundation/mpl-bubblegum').mintV2;
-      const mockSendAndConfirm = jest.fn().mockResolvedValue({
+      const mockSendAndConfirm = jest.fn() as jest.MockedFunction<any>;
+      mockSendAndConfirm.mockResolvedValue({
         signature: 'test-signature',
-      } as any);
+      });
       mockMintV2.mockResolvedValue({
         sendAndConfirm: mockSendAndConfirm,
       });

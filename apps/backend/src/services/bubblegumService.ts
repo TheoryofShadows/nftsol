@@ -74,6 +74,7 @@ export interface BulkMintOptions {
 export class BubblegumService {
   private umi: Umi;
   private connection: Connection;
+  private signerConfigured: boolean = false;
 
   constructor(connection: Connection, rpcEndpoint: string) {
     this.connection = connection;
@@ -91,11 +92,58 @@ export class BubblegumService {
    * Set up signer for the service
    */
   setSigner(keypair: Keypair) {
-    const umiKeypair = this.umi.eddsa.createKeypairFromSecretKey(
-      new Uint8Array(keypair.secretKey)
-    );
-    const signer = createSignerFromKeypair(this.umi, umiKeypair);
-    this.umi.use(signerIdentity(signer));
+    try {
+      const umiKeypair = this.umi.eddsa.createKeypairFromSecretKey(
+        new Uint8Array(keypair.secretKey)
+      );
+      const signer = createSignerFromKeypair(this.umi, umiKeypair);
+      this.umi.use(signerIdentity(signer));
+      this.signerConfigured = true;
+      console.log('✅ BubblegumService signer configured successfully');
+    } catch (error) {
+      console.error('❌ Failed to configure BubblegumService signer:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if signer is configured
+   */
+  private ensureSignerConfigured() {
+    if (!this.signerConfigured) {
+      throw new Error('BubblegumService signer not configured. Call setSigner() first.');
+    }
+  }
+
+  /**
+   * Get service information
+   */
+  getServiceInfo() {
+    return {
+      service: 'Bubblegum v2 Mass cNFT Drops',
+      version: '2.0.0',
+      description: 'Enables 99% cost reduction for NFT mints',
+      features: [
+        'Mass compressed NFT minting',
+        'Tree-based storage',
+        'Bulk operations',
+        'Cost optimization',
+        'Merkle proof verification'
+      ],
+      endpoints: {
+        'POST /tree': 'Create a new Bubblegum tree',
+        'POST /mint': 'Mint a single compressed NFT',
+        'POST /bulk-mint': 'Mint multiple compressed NFTs',
+        'GET /proof/:assetId': 'Get Merkle proof for an asset',
+        'POST /verify': 'Verify Merkle proof'
+      },
+      costSavings: {
+        traditional: '$200+ for 1000 NFTs',
+        bubblegum: '$2 for 1000 NFTs',
+        reduction: '99%'
+      },
+      status: this.signerConfigured ? 'ready' : 'read-only'
+    };
   }
 
   /**
@@ -109,6 +157,8 @@ export class BubblegumService {
     console.log('🌳 Creating Bubblegum tree for compressed NFTs...');
 
     try {
+      this.ensureSignerConfigured();
+      
       // Generate tree signer
       const merkleTree = generateSigner(this.umi);
 
@@ -151,6 +201,7 @@ export class BubblegumService {
     console.log(`🎨 Minting compressed NFT: ${options.metadata.name}`);
 
     try {
+      this.ensureSignerConfigured();
       const merkleTree = publicKey(options.treeAddress.toString());
 
       // Upload metadata to IPFS/Irys
@@ -326,26 +377,5 @@ export class BubblegumService {
       console.error('❌ Error uploading metadata:', error);
       throw new Error(`Failed to upload metadata: ${error.message}`);
     }
-  }
-
-  /**
-   * Get service information
-   */
-  getServiceInfo() {
-    return {
-      name: 'Bubblegum v2 Service',
-      version: '2.0.0',
-      description: 'Mass cNFT drops with 99% cost reduction',
-      features: [
-        'Tree Creation',
-        'Single Mint',
-        'Bulk Minting',
-        'Progress Tracking',
-        'Metadata Upload',
-      ],
-      costPerNFT: '$0.00001',
-      typicalBatchSize: '100-10000',
-      typicalCost: '$1-10 for 100K NFTs',
-    };
   }
 }
