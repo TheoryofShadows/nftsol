@@ -38,6 +38,29 @@ This guide provides step-by-step instructions for deploying NFTSol to staging an
 
 ## 🎯 **Deploy to Staging**
 
+### **🚀 Quick Start (Automated)**
+
+For automated deployment, use the provided scripts:
+
+**Windows (PowerShell):**
+```powershell
+.\scripts\deploy-staging.ps1
+```
+
+**Linux/Mac (Bash):**
+```bash
+bash scripts/deploy-staging.sh
+```
+
+These scripts will:
+- ✅ Run all tests
+- ✅ Build backend and frontend
+- ✅ Verify environment configuration
+- ✅ Check git status
+- ✅ Provide deployment summary
+
+### **📋 Manual Deployment**
+
 ### **1. Render.com Setup**
 
 1. **Create Service**
