@@ -1,4 +1,12 @@
 import "dotenv/config";
+import { config } from "dotenv";
+import path from "path";
+
+// Load development environment file if in development mode
+if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
+  const envPath = path.join(__dirname, '../../../config/development/backend.env');
+  config({ path: envPath });
+}
 import { z } from "zod";
 
 const EnvSchema = z.object({

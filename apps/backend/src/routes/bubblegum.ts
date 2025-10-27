@@ -19,15 +19,22 @@ const bubblegumService = new BubblegumService(
 );
 
 // Set up signer if wallet is configured
+console.log('🔍 Checking for BUBBLEGUM_PRIVATE_KEY...');
+console.log('BUBBLEGUM_PRIVATE_KEY exists:', !!process.env.BUBBLEGUM_PRIVATE_KEY);
+console.log('BUBBLEGUM_PRIVATE_KEY length:', process.env.BUBBLEGUM_PRIVATE_KEY?.length);
+
 if (process.env.BUBBLEGUM_PRIVATE_KEY) {
   try {
     const secretKey = bs58.decode(process.env.BUBBLEGUM_PRIVATE_KEY);
     const walletKeypair = Keypair.fromSecretKey(secretKey);
     bubblegumService.setSigner(walletKeypair);
     console.log('✅ Bubblegum wallet signer configured');
+    console.log('Wallet public key:', walletKeypair.publicKey.toString());
   } catch (error) {
     console.error('❌ Failed to configure Bubblegum signer:', error);
   }
+} else {
+  console.log('⚠️ BUBBLEGUM_PRIVATE_KEY not found in environment');
 }
 
 // Rate limiting for bulk mint endpoint

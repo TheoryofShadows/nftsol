@@ -13,6 +13,9 @@ const HomePage = lazy(() => import("./components/HomePage"));
 const NFTMarketplace = lazy(() => import("./components/NFTMarketplace"));
 const MintForm = lazy(() => import("./components/MintForm"));
 const BubblegumMinter = lazy(() => import("./components/BubblegumMinter"));
+const GenesisProtocol = lazy(() => import("./components/GenesisProtocol"));
+const MobileWallet = lazy(() => import("./components/MobileWallet"));
+const CollectionVerification = lazy(() => import("./components/CollectionVerification"));
 const CloutExplanation = lazy(() => import("./components/CloutExplanation"));
 const SmartContractPage = lazy(() => import("./components/SmartContractPage"));
 const TimeCapsuleSales = lazy(() => import("./components/TimeCapsuleSales"));
@@ -24,7 +27,7 @@ const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"))
 const TransparencyDashboard = lazy(() => import("./components/TransparencyDashboard"));
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'genesis' | 'mobile' | 'collection-verification' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -199,6 +202,27 @@ export default function App() {
                 🌳 Mass Mint
               </button>
               <button
+                onClick={() => setActiveTab('genesis')}
+                className={`nav-tab ${activeTab === 'genesis' ? 'active' : ''}`}
+                aria-label="Navigate to Genesis Protocol"
+              >
+                🌟 Genesis Protocol
+              </button>
+              <button
+                onClick={() => setActiveTab('mobile')}
+                className={`nav-tab ${activeTab === 'mobile' ? 'active' : ''}`}
+                aria-label="Navigate to Mobile Wallet"
+              >
+                📱 Mobile Wallet
+              </button>
+              <button
+                onClick={() => setActiveTab('collection-verification')}
+                className={`nav-tab ${activeTab === 'collection-verification' ? 'active' : ''}`}
+                aria-label="Navigate to Collection Verification"
+              >
+                🏗️ Collection Verification
+              </button>
+              <button
                 onClick={() => setActiveTab('clout')}
                 className={`nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
                 aria-label="Navigate to CLOUT Token"
@@ -297,13 +321,34 @@ export default function App() {
                 >
                   🌳 Mass Mint
                 </button>
-                <button
-                  onClick={() => { setActiveTab('clout'); setIsMobileMenuOpen(false); }}
-                  className={`mobile-nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
-                  aria-label="Navigate to CLOUT Token"
-                >
-                  ⚡ CLOUT Token
-                </button>
+              <button
+                onClick={() => { setActiveTab('genesis'); setIsMobileMenuOpen(false); }}
+                className={`mobile-nav-tab ${activeTab === 'genesis' ? 'active' : ''}`}
+                aria-label="Navigate to Genesis Protocol"
+              >
+                🌟 Genesis Protocol
+              </button>
+              <button
+                onClick={() => { setActiveTab('mobile'); setIsMobileMenuOpen(false); }}
+                className={`mobile-nav-tab ${activeTab === 'mobile' ? 'active' : ''}`}
+                aria-label="Navigate to Mobile Wallet"
+              >
+                📱 Mobile Wallet
+              </button>
+              <button
+                onClick={() => { setActiveTab('collection-verification'); setIsMobileMenuOpen(false); }}
+                className={`mobile-nav-tab ${activeTab === 'collection-verification' ? 'active' : ''}`}
+                aria-label="Navigate to Collection Verification"
+              >
+                🏗️ Collection Verification
+              </button>
+              <button
+                onClick={() => { setActiveTab('clout'); setIsMobileMenuOpen(false); }}
+                className={`mobile-nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
+                aria-label="Navigate to CLOUT Token"
+              >
+                ⚡ CLOUT Token
+              </button>
                 <button
                   onClick={() => { setActiveTab('smart-contract'); setIsMobileMenuOpen(false); }}
                   className={`mobile-nav-tab ${activeTab === 'smart-contract' ? 'active' : ''}`}
@@ -394,6 +439,24 @@ export default function App() {
             </div>
           )}
 
+          {activeTab === 'genesis' && (
+            <div className="section-card fade-in-up">
+              <GenesisProtocol />
+            </div>
+          )}
+
+          {activeTab === 'mobile' && (
+            <div className="section-card fade-in-up">
+              <MobileWallet />
+            </div>
+          )}
+
+          {activeTab === 'collection-verification' && (
+            <div className="section-card fade-in-up">
+              <CollectionVerification />
+            </div>
+          )}
+
           {activeTab === 'clout' && <CloutExplanation />}
 
           {activeTab === 'smart-contract' && <SmartContractPage />}
@@ -431,7 +494,7 @@ export default function App() {
           
           {activeTab === 'transparency' && <TransparencyDashboard />}
           
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && (
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'bubblegum' && activeTab !== 'genesis' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && (
             <UserAuth 
               onUserLogin={setUser}
               onUserLogout={() => setUser(null)}

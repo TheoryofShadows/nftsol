@@ -152,6 +152,22 @@ export const advancedSearchSchema = z.object({
   pagination: paginationSchema.optional()
 });
 
+// Validation middleware function
+export const validateRequest = (schema: z.ZodSchema) => {
+  return (req: any, res: any, next: any) => {
+    try {
+      schema.parse(req.body);
+      next();
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.errors
+      });
+    }
+  };
+};
+
 // Export all schemas for use in routes
 export const validationSchemas = {
   userRegistration: userRegistrationSchema,

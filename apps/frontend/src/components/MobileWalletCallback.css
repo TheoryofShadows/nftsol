@@ -1,0 +1,368 @@
+/**
+ * 📱 Mobile Wallet Callback Styles
+ * Styles for mobile wallet callback handling
+ */
+
+.mobile-wallet-callback {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.callback-container {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.callback-header {
+  margin-bottom: 30px;
+}
+
+.callback-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 10px 0;
+}
+
+.callback-header p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.callback-content {
+  margin-bottom: 30px;
+}
+
+/* Loading State */
+.callback-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.callback-loading p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Success State */
+.callback-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.success-icon {
+  font-size: 4rem;
+  animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.callback-success h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #059669;
+  margin: 0;
+}
+
+.callback-success p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Error State */
+.callback-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.error-icon {
+  font-size: 4rem;
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.callback-error h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin: 0;
+}
+
+.callback-error p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Idle State */
+.callback-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.idle-icon {
+  font-size: 4rem;
+  opacity: 0.7;
+}
+
+.callback-idle h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+}
+
+.callback-idle p {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Callback Data */
+.callback-data {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: left;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.callback-data h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 15px 0;
+}
+
+.callback-data ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #6b7280;
+}
+
+.callback-data li {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.callback-data li:last-child {
+  margin-bottom: 0;
+}
+
+/* Buttons */
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  background: #5a67d8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Footer */
+.callback-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+
+.callback-footer p {
+  color: #9ca3af;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mobile-wallet-callback {
+    padding: 15px;
+  }
+
+  .callback-container {
+    padding: 30px 20px;
+  }
+
+  .callback-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .callback-header p {
+    font-size: 1rem;
+  }
+
+  .success-icon,
+  .error-icon,
+  .idle-icon {
+    font-size: 3rem;
+  }
+
+  .callback-success h2,
+  .callback-error h2,
+  .callback-idle h2 {
+    font-size: 1.5rem;
+  }
+
+  .callback-data {
+    padding: 15px;
+  }
+
+  .btn-primary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .callback-container {
+    padding: 20px 15px;
+  }
+
+  .callback-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .success-icon,
+  .error-icon,
+  .idle-icon {
+    font-size: 2.5rem;
+  }
+
+  .callback-success h2,
+  .callback-error h2,
+  .callback-idle h2 {
+    font-size: 1.3rem;
+  }
+
+  .callback-data {
+    padding: 12px;
+  }
+
+  .callback-data h3 {
+    font-size: 1rem;
+  }
+
+  .callback-data li {
+    font-size: 0.8rem;
+  }
+}
+
+/* Animation for content transitions */
+.callback-content {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading animation enhancement */
+.loading-spinner {
+  position: relative;
+}
+
+.loading-spinner::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Success state enhancement */
+.callback-success .success-icon {
+  filter: drop-shadow(0 4px 8px rgba(5, 150, 105, 0.3));
+}
+
+/* Error state enhancement */
+.callback-error .error-icon {
+  filter: drop-shadow(0 4px 8px rgba(220, 38, 38, 0.3));
+}
+
+/* Idle state enhancement */
+.callback-idle .idle-icon {
+  filter: drop-shadow(0 4px 8px rgba(107, 114, 128, 0.3));
+}

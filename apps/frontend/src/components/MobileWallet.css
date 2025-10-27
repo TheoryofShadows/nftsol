@@ -1,0 +1,602 @@
+/**
+ * 📱 Mobile Wallet Component Styles
+ * Solana Mobile Stack (SMS) integration for mobile wallet support
+ */
+
+.mobile-wallet {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.mobile-wallet-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.mobile-wallet-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.mobile-wallet-header p {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0 0 15px 0;
+}
+
+.mobile-indicator {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.mobile-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-message button {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-wallet-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-wallet-tabs button {
+  background: none;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.mobile-wallet-tabs button:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.mobile-wallet-tabs button.active {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.mobile-wallet-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  min-height: 400px;
+}
+
+/* Wallets Tab */
+.wallets-tab h2 {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.wallets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.wallet-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.wallet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.wallet-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.wallet-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-info h3 {
+  margin: 0 0 5px 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.wallet-status {
+  font-size: 0.9rem;
+}
+
+.status-installed {
+  color: #059669;
+  font-weight: 500;
+}
+
+.status-not-installed {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.wallet-features {
+  margin-bottom: 15px;
+}
+
+.wallet-features h4 {
+  margin: 0 0 8px 0;
+  color: #374151;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.feature-tag {
+  background: #e0e7ff;
+  color: #3730a3;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-primary, .btn-secondary, .btn-warning {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #5a67d8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #4b5563;
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-warning:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Connect Tab */
+.connect-tab h2 {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.connection-status {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.connected-wallet {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: #f0f9ff;
+  border: 2px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.wallet-icon-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.wallet-details h3 {
+  margin: 0 0 8px 0;
+  color: #1f2937;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.wallet-address {
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  color: #374151;
+  margin: 0 0 4px 0;
+}
+
+.session-id {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.connection-actions {
+  margin-bottom: 20px;
+}
+
+.wallet-capabilities h4 {
+  margin: 0 0 10px 0;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.capabilities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.capability-tag {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.no-connection {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.no-connection-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.no-connection h3 {
+  margin: 0 0 10px 0;
+  color: #374151;
+  font-size: 1.5rem;
+}
+
+.no-connection p {
+  margin: 0 0 20px 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Transactions Tab */
+.transactions-tab h2 {
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.transaction-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.transaction-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.transaction-card h3 {
+  margin: 0 0 10px 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.transaction-card p {
+  margin: 0 0 15px 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Mobile Bottom Sheet */
+.mobile-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.mobile-bottom-sheet.show {
+  transform: translateY(0);
+}
+
+.bottom-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 12px auto;
+}
+
+.bottom-sheet-content {
+  padding: 20px;
+}
+
+.bottom-sheet-content h3 {
+  margin: 0 0 15px 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.bottom-sheet-content ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #6b7280;
+}
+
+.bottom-sheet-content li {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .mobile-wallet {
+    padding: 15px;
+  }
+
+  .mobile-wallet-header h1 {
+    font-size: 2rem;
+  }
+
+  .mobile-wallet-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-wallet-tabs button {
+    flex-shrink: 0;
+    min-width: 100px;
+  }
+
+  .mobile-wallet-content {
+    padding: 20px;
+  }
+
+  .wallets-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .transaction-options {
+    grid-template-columns: 1fr;
+  }
+
+  .connected-wallet {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .wallet-actions {
+    flex-direction: column;
+  }
+
+  .wallet-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .mobile-wallet {
+    padding: 10px;
+  }
+
+  .mobile-wallet-content {
+    padding: 15px;
+  }
+
+  .wallet-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .features-list {
+    justify-content: center;
+  }
+
+  .capabilities-list {
+    justify-content: center;
+  }
+}
+
+/* Animation for tab switching */
+.mobile-wallet-content {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading States */
+.mobile-wallet-tabs button:disabled,
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-warning:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Success/Error States */
+.success-message {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Custom Scrollbar for mobile */
+.mobile-wallet-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.mobile-wallet-tabs::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.mobile-wallet-tabs::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.mobile-wallet-tabs::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .wallet-card:hover,
+  .transaction-card:hover {
+    transform: none;
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-warning:hover {
+    transform: none;
+  }
+}

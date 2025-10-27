@@ -6,7 +6,7 @@
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import { getAccount, getAssociatedTokenAddress } from '@solana/spl-token';
 import { getHeliusConfig } from '../config/environment';
-import MetaplexService, { DASAsset } from './metaplexService';
+import { MetaplexService, NFT2026Metadata as DASAsset } from './metaplexService';
 
 export interface UniversalNFT {
   mint: string;
