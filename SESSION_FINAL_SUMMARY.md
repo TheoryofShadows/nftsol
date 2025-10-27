@@ -29,7 +29,7 @@
 - **Status**: Working (needs permanent fix)
 - **Command**: 
   ```powershell
-  $env:BUBBLEGUM_PRIVATE_KEY="612DvvoznGranf41yZ8s9qkvHFnAoZPMquoW2kkyHFkEgvjuPanx6YN2qPwRivYPBtuk8e9kpreEcmPJ6XmXqLFA"
+  $env:BUBBLEGUM_PRIVATE_KEY="YOUR_DEVNET_PRIVATE_KEY_HERE"
   $env:SOLANA_CLUSTER="devnet"
   ```
 
@@ -111,7 +111,7 @@
 ### **Priority 1: Permanent Environment Fix** (1 hour)
 Create `apps/backend/start-dev.ps1`:
 ```powershell
-$env:BUBBLEGUM_PRIVATE_KEY="612DvvoznGranf41yZ8s9qkvHFnAoZPMquoW2kkyHFkEgvjuPanx6YN2qPwRivYPBtuk8e9kpreEcmPJ6XmXqLFA"
+$env:BUBBLEGUM_PRIVATE_KEY="YOUR_DEVNET_PRIVATE_KEY_HERE"
 $env:SOLANA_CLUSTER="devnet"
 $env:NODE_ENV="development"
 cd apps\backend

@@ -32,7 +32,7 @@ We successfully created a **Bubblegum tree on Solana Devnet**! This is a major m
 - **Solution**: Used PowerShell to set variables directly
 - **Command**: 
   ```powershell
-  $env:BUBBLEGUM_PRIVATE_KEY="612DvvoznGranf41yZ8s9qkvHFnAoZPMquoW2kkyHFkEgvjuPanx6YN2qPwRivYPBtuk8e9kpreEcmPJ6XmXqLFA"
+  $env:BUBBLEGUM_PRIVATE_KEY="YOUR_DEVNET_PRIVATE_KEY_HERE"
   $env:SOLANA_CLUSTER="devnet"
   ```
 
@@ -101,7 +101,7 @@ Create a startup script that loads the environment file:
 
 **`apps/backend/start-dev.ps1`**:
 ```powershell
-$env:BUBBLEGUM_PRIVATE_KEY="612DvvoznGranf41yZ8s9qkvHFnAoZPMquoW2kkyHFkEgvjuPanx6YN2qPwRivYPBtuk8e9kpreEcmPJ6XmXqLFA"
+$env:BUBBLEGUM_PRIVATE_KEY="YOUR_DEVNET_PRIVATE_KEY_HERE"
 $env:SOLANA_CLUSTER="devnet"
 $env:NODE_ENV="development"
 cd apps\backend
