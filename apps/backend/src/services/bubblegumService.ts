@@ -207,7 +207,7 @@ export class BubblegumService {
       // Upload metadata to IPFS/Irys
       const metadataUri = await this.uploadMetadata(options.metadata);
 
-      // Mint using mintV2 (V2 API)
+      // Mint using mintV2 (V2 API) - Use DataV2 schema with proper structure
       const tx = await mintV2(this.umi, {
         merkleTree,
         leafOwner: options.owner 
@@ -215,16 +215,17 @@ export class BubblegumService {
           : this.umi.identity.publicKey,
         metadata: {
           name: options.metadata.name,
+          symbol: options.metadata.symbol || 'CNFT',
           uri: metadataUri,
-          sellerFeeBasisPoints: 500, // 5%
-          collection: options.collectionMint 
-            ? some(publicKey(options.collectionMint.toString()))
-            : none(),
+          sellerFeeBasisPoints: 500, // 5% (500 basis points)
           creators: [{
             address: this.umi.identity.publicKey,
             verified: false,
             share: 100,
           }],
+          collection: options.collectionMint 
+            ? some(publicKey(options.collectionMint.toString()))
+            : none(),
         },
       });
 

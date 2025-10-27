@@ -8,7 +8,12 @@ validateEnvironmentAndExit();
 const appConfig = getAppConfig();
 const heliusConfig = getHeliusConfig();
 
-console.log(`🚀 NFTSol Server Starting...`);
+// Debug logging for environment variables
+console.log(`\n🔍 Environment Debug:`);
+console.log(`   NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`   BUBBLEGUM_PRIVATE_KEY: ${process.env.BUBBLEGUM_PRIVATE_KEY ? `${process.env.BUBBLEGUM_PRIVATE_KEY.substring(0, 8)}...${process.env.BUBBLEGUM_PRIVATE_KEY.substring(process.env.BUBBLEGUM_PRIVATE_KEY.length - 8)}` : 'NOT SET'}`);
+console.log(`   SOLANA_CLUSTER: ${process.env.SOLANA_CLUSTER}`);
+console.log(`\n🚀 NFTSol Server Starting...`);
 console.log(`   Environment: ${appConfig.env}`);
 console.log(`   Port: ${appConfig.port}`);
 console.log(`   Helius RPC: ${heliusConfig.rpcUrl}`);

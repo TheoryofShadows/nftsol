@@ -62,17 +62,26 @@ export class SolanaServiceManager {
       // Configure signers if private keys are available
       let isConfigured = false;
 
+      // Debug: Check environment variable
+      console.log('🔍 DEBUG: BUBBLEGUM_PRIVATE_KEY check:');
+      console.log('  - process.env.BUBBLEGUM_PRIVATE_KEY exists:', !!process.env.BUBBLEGUM_PRIVATE_KEY);
+      console.log('  - Value length:', process.env.BUBBLEGUM_PRIVATE_KEY?.length || 0);
+      console.log('  - First 20 chars:', process.env.BUBBLEGUM_PRIVATE_KEY?.substring(0, 20));
+      
       if (process.env.BUBBLEGUM_PRIVATE_KEY && process.env.BUBBLEGUM_PRIVATE_KEY !== 'your-bubblegum-private-key-here') {
         try {
+          console.log('🔧 Attempting to configure BubblegumService signer...');
           const keypair = this.createKeypairFromPrivateKey(process.env.BUBBLEGUM_PRIVATE_KEY);
           bubblegumService.setSigner(keypair);
-          console.log('✅ BubblegumService signer configured');
+          console.log('✅ BubblegumService signer configured successfully');
+          console.log('   Public Key:', keypair.publicKey.toString());
           isConfigured = true;
         } catch (error) {
-          console.warn('⚠️ Failed to configure BubblegumService signer:', error);
+          console.error('❌ Failed to configure BubblegumService signer:', error);
         }
       } else {
         console.warn('⚠️ BUBBLEGUM_PRIVATE_KEY not configured - service will be in read-only mode');
+        console.warn('   Value:', process.env.BUBBLEGUM_PRIVATE_KEY);
       }
 
       if (process.env.GENESIS_PRIVATE_KEY && process.env.GENESIS_PRIVATE_KEY !== 'your-genesis-private-key-here') {

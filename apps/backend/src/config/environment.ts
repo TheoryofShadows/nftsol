@@ -1,11 +1,43 @@
-import "dotenv/config";
 import { config } from "dotenv";
 import path from "path";
+import fs from "fs";
 
-// Load development environment file if in development mode
+// Load development environment file FIRST if in development mode
 if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-  const envPath = path.join(__dirname, '../../../config/development/backend.env');
-  config({ path: envPath });
+  // Fix: Try multiple path resolutions (since we might be running from apps/backend or project root)
+  const paths = [
+    path.resolve(process.cwd(), 'config/development/backend.env'),  // From project root
+    path.resolve(process.cwd(), '../config/development/backend.env'),  // From apps/backend
+    path.resolve(__dirname, '../../../config/development/backend.env'),  // Relative to __dirname
+  ];
+  
+  let envPath: string | null = null;
+  for (const p of paths) {
+    if (fs.existsSync(p)) {
+      envPath = p;
+      break;
+    }
+  }
+  
+  if (!envPath) {
+    console.error('❌ Environment file not found in any of these paths:');
+    paths.forEach(p => console.error(`   - ${p}`));
+  } else {
+    console.log(`📁 Loading environment from: ${envPath}`);
+    console.log(`📁 process.cwd(): ${process.cwd()}`);
+    console.log(`📁 __dirname: ${__dirname}`);
+    
+    // Verify file exists and load
+    const result = config({ path: envPath });
+    if (result.error) {
+      console.error('❌ Error loading .env file:', result.error);
+    } else {
+      console.log('✅ Environment file loaded successfully');
+      // Debug: show loaded vars
+      console.log('🔍 BUBBLEGUM_PRIVATE_KEY:', process.env.BUBBLEGUM_PRIVATE_KEY ? `${process.env.BUBBLEGUM_PRIVATE_KEY.substring(0, 10)}...` : 'NOT SET');
+      console.log('🔍 SOLANA_CLUSTER:', process.env.SOLANA_CLUSTER);
+    }
+  }
 }
 import { z } from "zod";
 
