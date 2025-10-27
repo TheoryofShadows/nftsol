@@ -28,6 +28,8 @@ server/env.production
 !client/env.example
 !server/env.example
 !env.example
+config/development/
+config/production/
 
 # Batch files with hardcoded secrets (ignore the actual file but keep template)
 start-production.bat
