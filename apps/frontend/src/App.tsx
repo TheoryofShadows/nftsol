@@ -12,6 +12,7 @@ import "./App.css";
 const HomePage = lazy(() => import("./components/HomePage"));
 const NFTMarketplace = lazy(() => import("./components/NFTMarketplace"));
 const MintForm = lazy(() => import("./components/MintForm"));
+const BubblegumMinter = lazy(() => import("./components/BubblegumMinter"));
 const CloutExplanation = lazy(() => import("./components/CloutExplanation"));
 const SmartContractPage = lazy(() => import("./components/SmartContractPage"));
 const TimeCapsuleSales = lazy(() => import("./components/TimeCapsuleSales"));
@@ -23,7 +24,7 @@ const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"))
 const TransparencyDashboard = lazy(() => import("./components/TransparencyDashboard"));
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -146,7 +147,7 @@ export default function App() {
               className="mobile-menu-toggle"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
-              aria-expanded={isMobileMenuOpen}
+              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
             >
               <motion.span
                 className="hamburger-line"
@@ -189,6 +190,13 @@ export default function App() {
                 aria-label="Navigate to Create NFT"
               >
                 ✨ Create NFT
+              </button>
+              <button
+                onClick={() => setActiveTab('bubblegum')}
+                className={`nav-tab ${activeTab === 'bubblegum' ? 'active' : ''}`}
+                aria-label="Navigate to Bubblegum Mass Mint"
+              >
+                🌳 Mass Mint
               </button>
               <button
                 onClick={() => setActiveTab('clout')}
@@ -283,6 +291,13 @@ export default function App() {
                   ✨ Create NFT
                 </button>
                 <button
+                  onClick={() => { setActiveTab('bubblegum'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'bubblegum' ? 'active' : ''}`}
+                  aria-label="Navigate to Bubblegum Mass Mint"
+                >
+                  🌳 Mass Mint
+                </button>
+                <button
                   onClick={() => { setActiveTab('clout'); setIsMobileMenuOpen(false); }}
                   className={`mobile-nav-tab ${activeTab === 'clout' ? 'active' : ''}`}
                   aria-label="Navigate to CLOUT Token"
@@ -370,6 +385,12 @@ export default function App() {
                 ✨ Create Your Revolutionary NFT
               </h2>
               <MintForm />
+            </div>
+          )}
+
+          {activeTab === 'bubblegum' && (
+            <div className="section-card fade-in-up">
+              <BubblegumMinter />
             </div>
           )}
 
