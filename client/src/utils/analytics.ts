@@ -3,10 +3,11 @@
  * Custom event tracking for NFTSol platform
  */
 
-// Extend Window interface for gtag
+// Extend Window interface for gtag and dataLayer
 declare global {
   interface Window {
     gtag: (...args: any[]) => void;
+    dataLayer: any[];
   }
 }
 

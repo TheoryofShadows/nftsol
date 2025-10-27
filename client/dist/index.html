@@ -43,6 +43,23 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" /></noscript>
     
+    <!-- Google Analytics 4 -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'VITE_GA_MEASUREMENT_ID', {
+        page_title: 'NFTSol - Revolutionary NFT Platform',
+        page_location: window.location.href,
+        custom_map: {
+          'custom_parameter_1': 'platform',
+          'custom_parameter_2': 'nft_type',
+          'custom_parameter_3': 'wallet_type'
+        }
+      });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=VITE_GA_MEASUREMENT_ID"></script>
+    
     <!-- Critical CSS Inline -->
     <style>
       /* Critical above-the-fold styles */
