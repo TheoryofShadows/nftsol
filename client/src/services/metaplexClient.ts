@@ -10,7 +10,9 @@ import {
   mintTo,
   TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-// Temporarily commented out due to import issues with version 3.2.1
+// Temporarily commented out due to Umi version conflicts
+// TODO: Fix Umi framework integration
+// import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 // import { 
 //   createCreateMetadataAccountV3Instruction,
 //   createUpdateMetadataAccountV2Instruction,
@@ -19,6 +21,13 @@ import {
 //   DataV2,
 //   Creator
 // } from '@metaplex-foundation/mpl-token-metadata';
+// import { 
+//   createSignerFromKeypair,
+//   generateSigner,
+//   percentAmount,
+//   some,
+//   none
+// } from '@metaplex-foundation/umi';
 
 // Temporary constants to prevent build errors
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
@@ -130,9 +139,9 @@ export class MetaplexClient {
       TOKEN_METADATA_PROGRAM_ID
     );
 
-    // Temporarily commented out due to Metaplex import issues
-    // TODO: Fix Metaplex imports for version 3.2.1
-    console.log('⚠️ Metaplex functionality temporarily disabled due to import issues');
+    // Temporarily commented out due to Umi version conflicts
+    // TODO: Fix Umi framework integration
+    console.log('⚠️ Metaplex functionality temporarily disabled due to Umi version conflicts');
     
     // Create and send transaction (without metadata for now)
     const transaction = new Transaction();
@@ -157,8 +166,8 @@ export class MetaplexClient {
     nftMint: PublicKey,
     collectionMint: PublicKey
   ): Promise<string> {
-    console.log('⚠️ Collection verification temporarily disabled due to Metaplex import issues');
-    // TODO: Fix Metaplex imports for version 3.2.1
+    console.log('⚠️ Collection verification temporarily disabled due to Umi version conflicts');
+    // TODO: Fix Umi framework integration
     return 'disabled';
   }
 
