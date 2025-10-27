@@ -2,6 +2,7 @@
   "dependencies": {
     "@metaplex-foundation/mpl-candy-machine": "^6.1.0",
     "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/mpl-toolbox": "^0.10.0",
     "@metaplex-foundation/umi": "^1.4.1",
     "@metaplex-foundation/umi-bundle-defaults": "^1.4.1"
   }
