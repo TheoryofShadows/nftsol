@@ -1,1 +1,0 @@
-/mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/target/sbpf-solana-solana/release/market_escrow.so: /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/programs/loyalty_registry/src/lib.rs /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/programs/market_escrow/src/lib.rs /mnt/c/Users/KHK89/NFTSol/anchor/solana_rewards/programs/rewards_vault/src/lib.rs

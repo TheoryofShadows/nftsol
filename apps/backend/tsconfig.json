@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "types": ["node"],
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["src/**/*.ts", "**/*.d.ts"],
+  "exclude": [
+    "src/ipfs-img-proxy.ts",
+    "src/ipfsProxyStandalone.ts",
+    "src/ipfs*",
+    "src/**/ipfs*",
+    "src/**/*ipfs*",
+    "src/**/ipfsProxy*",
+    "src/**/ipfs-img-proxy*",
+    "src/**/ipfsProxyStandalone*"
+  ]
+}

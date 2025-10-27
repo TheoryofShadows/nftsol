@@ -27,25 +27,47 @@ Frontend (Netlify) → Backend (Render) → PostgreSQL (Render)
 
 ```
 NFTSol/
-├── client/                 # React frontend (Netlify)
-│   ├── src/
-│   │   ├── components/     # React components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── services/       # API and WebSocket services
-│   │   └── utils/          # Utility functions
-│   ├── cypress/            # E2E tests
-│   ├── dist/               # Production build
-│   └── env.*               # Environment configurations
-├── server/                 # Express.js backend (Render)
-│   ├── src/
-│   │   ├── routes/         # API routes
-│   │   ├── services/       # Business logic
-│   │   ├── utils/          # Utilities
-│   │   └── tests/          # Backend tests
-│   └── env.*               # Environment configurations
-├── anchor/                 # Solana smart contracts
-└── docs/                   # Documentation
+├── apps/                          # Main applications
+│   ├── frontend/                  # React frontend (Netlify)
+│   │   ├── src/                   # Source code
+│   │   │   ├── components/        # React components
+│   │   │   ├── hooks/            # Custom React hooks
+│   │   │   ├── services/         # API services
+│   │   │   └── utils/            # Utility functions
+│   │   ├── public/               # Static assets
+│   │   ├── tests/                # Test files
+│   │   └── package.json          # Frontend dependencies
+│   │
+│   ├── backend/                  # Express.js backend (Render)
+│   │   ├── src/                  # Source code
+│   │   │   ├── routes/           # API routes
+│   │   │   ├── services/         # Business logic
+│   │   │   └── utils/            # Utilities
+│   │   ├── tests/                # Test files
+│   │   └── package.json          # Backend dependencies
+│   │
+│   └── smart-contracts/          # Solana smart contracts
+│       ├── programs/             # Anchor programs
+│       └── scripts/              # Deployment scripts
+│
+├── config/                       # Environment configurations
+│   ├── development/              # Development environment
+│   ├── production/               # Production environment
+│   └── *.env.example            # Environment templates
+│
+├── docs/                         # Documentation
+│   ├── development/              # Development docs
+│   ├── production/               # Production docs
+│   └── deployment/               # Deployment guides
+│
+├── scripts/                      # Build and deployment scripts
+│   ├── development/              # Development scripts
+│   └── production/               # Production scripts
+│
+└── tests/                        # Global test utilities
 ```
+
+> **📋 See [REPOSITORY_STRUCTURE.md](REPOSITORY_STRUCTURE.md) for detailed structure documentation**
 
 ## 🚀 Quick Start
 
@@ -67,34 +89,34 @@ NFTSol/
    # Install root dependencies
    npm install
    
-   # Install client dependencies
-   cd client && npm install
+   # Install frontend dependencies
+   cd apps/frontend && npm install
    
-   # Install server dependencies
-   cd ../server && npm install
+   # Install backend dependencies
+   cd ../backend && npm install
    ```
 
 3. **Set up environment variables**
    ```bash
    # Copy environment files
-   cp client/env.development client/.env.local
-   cp server/env.development server/.env
+   cp config/frontend.env.example config/development/frontend.env
+   cp config/backend.env.example config/development/backend.env
    ```
 
 4. **Start development servers**
    ```bash
    # Start backend (Terminal 1)
-   cd server && npm run dev
+   cd apps/backend && npm run dev
    
    # Start frontend (Terminal 2)
-   cd client && npm run dev
+   cd apps/frontend && npm run dev
    ```
 
 ### Production Deployment
 
 #### Frontend (Netlify)
-1. Build the frontend: `cd client && npm run build`
-2. Deploy `client/dist` folder to Netlify
+1. Build the frontend: `cd apps/frontend && npm run build`
+2. Deploy `apps/frontend/dist` folder to Netlify
 3. Set environment variables in Netlify dashboard
 
 #### Backend (Render)
@@ -124,7 +146,7 @@ SOLANA_CLUSTER=mainnet-beta
 
 ### Frontend Tests
 ```bash
-cd client
+cd apps/frontend
 npm run test          # Unit tests
 npm run test:ui       # Test UI
 npm run cypress:open  # E2E tests
@@ -132,7 +154,7 @@ npm run cypress:open  # E2E tests
 
 ### Backend Tests
 ```bash
-cd server
+cd apps/backend
 npm run test          # Unit tests
 npm run test:e2e      # E2E tests
 ```
