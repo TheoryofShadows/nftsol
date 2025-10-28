@@ -50,6 +50,11 @@ export interface CollectionInfo {
     twitter?: string;
     discord?: string;
   };
+  // Additional properties that might be expected
+  address?: string;
+  creator?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export class UniversalNFTDetectionService {

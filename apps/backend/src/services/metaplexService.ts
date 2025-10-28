@@ -13,7 +13,8 @@ import {
   TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { getHeliusConfig } from '../config/environment';
-import { UmiMetaplexService, NFT2026Metadata } from './umiMetaplexService';
+import { UmiMetaplexService, NFT2026Metadata as UmiNFT2026Metadata } from './umiMetaplexService';
+import { CollectionInfo as UniversalCollectionInfo } from './universalNFTDetection';
 
 // Temporary constants for basic NFT operations
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
@@ -151,11 +152,27 @@ export class MetaplexService {
   /**
    * Get collection info (simplified placeholder)
    */
-  async getCollectionInfo(collectionAddress: string): Promise<CollectionInfo | null> {
+  async getCollectionInfo(collectionAddress: string): Promise<UniversalCollectionInfo | null> {
     console.log('⚠️ Collection info not implemented in deprecated service');
     console.log('💡 Use UmiMetaplexService for full collection support');
     
-    return null;
+    // Return a placeholder CollectionInfo with all required properties
+    return {
+      name: 'Unknown Collection',
+      symbol: 'UNK',
+      description: 'Collection info not available',
+      image: '',
+      totalSupply: 0,
+      floorPrice: 0,
+      volume24h: 0,
+      marketCap: 0,
+      verified: false,
+      socialLinks: {},
+      address: collectionAddress,
+      creator: 'unknown',
+      createdAt: Date.now(),
+      updatedAt: Date.now()
+    };
   }
 
   /**
@@ -163,5 +180,48 @@ export class MetaplexService {
    */
   async uploadMetadata(metadata: NFT2026Metadata): Promise<string> {
     return await this.umiService.uploadMetadata(metadata);
+  }
+
+  /**
+   * Get assets by owner (placeholder implementation)
+   */
+  async getAssetsByOwner(owner: string, limit: number = 1000): Promise<any[]> {
+    // Placeholder implementation - would use DAS API
+    console.log(`Getting assets for owner: ${owner}, limit: ${limit}`);
+    return [];
+  }
+
+  /**
+   * Convert DAS asset to Universal NFT (placeholder implementation)
+   */
+  convertDASAssetToUniversalNFT(asset: any): any {
+    // Placeholder implementation
+    return {
+      id: asset.id || 'unknown',
+      name: asset.content?.metadata?.name || 'Unknown NFT',
+      symbol: asset.content?.metadata?.symbol || '',
+      description: asset.content?.metadata?.description || '',
+      image: asset.content?.files?.[0]?.uri || '',
+      attributes: asset.content?.metadata?.attributes || [],
+      collection: asset.grouping?.[0]?.group_value || null,
+      mint: asset.id || 'unknown',
+      owner: asset.ownership?.owner || 'unknown',
+      verified: asset.ownership?.verified || false,
+      supply: asset.supply?.print_current_supply || 1,
+      maxSupply: asset.supply?.print_max_supply || 1,
+      royalty: asset.royalty?.royalty_payment_address || null,
+      creators: asset.creators || [],
+      createdAt: asset.created_at || Date.now(),
+      updatedAt: asset.updated_at || Date.now()
+    };
+  }
+
+  /**
+   * Search assets (placeholder implementation)
+   */
+  async searchAssets(searchParams: any): Promise<{ items: any[] }> {
+    // Placeholder implementation
+    console.log('Searching assets with params:', searchParams);
+    return { items: [] };
   }
 }

@@ -8,9 +8,38 @@ import rateLimit from 'express-rate-limit';
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
 import { CollectionVerificationService, CollectionMetadata, CollectionVerificationRequest } from '../services/collectionVerificationService';
 import { validateRequest } from '../middleware/validation';
+import { z } from 'zod';
 import { authenticateUser } from '../middleware/auth';
 
 const router = express.Router();
+
+// Zod schemas for validation
+const collectionMetadataSchema = z.object({
+  name: z.string().min(1).max(100),
+  symbol: z.string().min(1).max(10),
+  description: z.string().min(1).max(1000),
+  image: z.string().url(),
+  externalUrl: z.string().url().optional(),
+  attributes: z.array(z.object({
+    trait_type: z.string(),
+    value: z.string()
+  })).optional(),
+  properties: z.object({
+    files: z.array(z.object({
+      uri: z.string(),
+      type: z.string()
+    })),
+    category: z.string()
+  }).optional()
+});
+
+const collectionVerificationSchema = z.object({
+  collectionMint: z.string().min(32).max(44),
+  collectionAuthority: z.string().min(32).max(44),
+  treeAddress: z.string().min(32).max(44),
+  leafIndex: z.number().int().min(0),
+  assetId: z.string().min(1)
+});
 
 // Initialize Collection Verification Service
 const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
@@ -45,58 +74,7 @@ const updateCollectionLimiter = rateLimit({
   message: { success: false, error: 'Too many collection update attempts' }
 });
 
-// Validation schemas
-const collectionMetadataSchema = {
-  type: 'object',
-  required: ['name', 'symbol', 'description', 'image'],
-  properties: {
-    name: { type: 'string', minLength: 1, maxLength: 100 },
-    symbol: { type: 'string', minLength: 1, maxLength: 10 },
-    description: { type: 'string', minLength: 1, maxLength: 1000 },
-    image: { type: 'string', format: 'uri' },
-    externalUrl: { type: 'string', format: 'uri' },
-    attributes: {
-      type: 'array',
-      items: {
-        type: 'object',
-        required: ['trait_type', 'value'],
-        properties: {
-          trait_type: { type: 'string' },
-          value: { type: 'string' }
-        }
-      }
-    },
-    properties: {
-      type: 'object',
-      properties: {
-        files: {
-          type: 'array',
-          items: {
-            type: 'object',
-            required: ['uri', 'type'],
-            properties: {
-              uri: { type: 'string' },
-              type: { type: 'string' }
-            }
-          }
-        },
-        category: { type: 'string' }
-      }
-    }
-  }
-};
-
-const collectionVerificationSchema = {
-  type: 'object',
-  required: ['collectionMint', 'collectionAuthority', 'treeAddress', 'leafIndex', 'assetId'],
-  properties: {
-    collectionMint: { type: 'string', minLength: 32, maxLength: 44 },
-    collectionAuthority: { type: 'string', minLength: 32, maxLength: 44 },
-    treeAddress: { type: 'string', minLength: 32, maxLength: 44 },
-    leafIndex: { type: 'number', minimum: 0 },
-    assetId: { type: 'string', minLength: 1 }
-  }
-};
+// Validation schemas are defined above using Zod
 
 // Routes
 

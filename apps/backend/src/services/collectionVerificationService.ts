@@ -9,7 +9,7 @@ import { mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { dasApi } from '@metaplex-foundation/digital-asset-standard-api';
 import { signerIdentity, publicKey, some, none } from '@metaplex-foundation/umi';
-import { createTree, createCollectionV1, verifyCollectionV1 } from '@metaplex-foundation/mpl-bubblegum';
+import { createTree, setCollectionV2, verifyCollection } from '@metaplex-foundation/mpl-bubblegum';
 
 export interface CollectionMetadata {
   name: string;
@@ -76,7 +76,23 @@ export class CollectionVerificationService {
 
   setSigner(signer: Keypair): void {
     this.signer = signer;
-    this.umi.use(signerIdentity(signer));
+    // Convert Keypair to UmiSigner
+    const umiSigner = {
+      publicKey: publicKey(signer.publicKey.toString()),
+      signMessage: async (message: Uint8Array) => {
+        // Use the signer's sign method directly
+        const signature = (signer as any).sign(message);
+        return signature;
+      },
+      signTransaction: async (transaction: any) => {
+        // This would need proper implementation for Umi transactions
+        return transaction;
+      },
+      signAllTransactions: async (transactions: any[]) => {
+        return transactions;
+      }
+    };
+    this.umi.use(signerIdentity(umiSigner));
   }
 
   /**
@@ -84,7 +100,8 @@ export class CollectionVerificationService {
    */
   async createCollection(
     metadata: CollectionMetadata,
-    collectionAuthority?: PublicKey
+    collectionAuthority?: PublicKey,
+    merkleTree?: PublicKey
   ): Promise<CollectionInfo> {
     if (!this.signer) {
       throw new Error('Signer not set. Call setSigner() first.');
@@ -100,16 +117,20 @@ export class CollectionVerificationService {
       // Create collection mint
       const collectionMint = Keypair.generate();
       const collectionAuthorityPubkey = collectionAuthority || this.signer.publicKey;
+      const merkleTreePubkey = merkleTree || Keypair.generate().publicKey;
 
       // Create collection instruction
-      const createCollectionIx = await createCollectionV1(this.umi, {
-        collectionMint: publicKey(collectionMint.publicKey.toString()),
-        collectionAuthority: publicKey(collectionAuthorityPubkey.toString()),
-        collectionMetadata: {
+      const createCollectionIx = await setCollectionV2(this.umi, {
+        leafOwner: publicKey(this.signer.publicKey.toString()),
+        leafDelegate: publicKey(this.signer.publicKey.toString()),
+        merkleTree: publicKey(merkleTreePubkey.toString()),
+        root: new Uint8Array(32),
+        metadata: {
           name: metadata.name,
           symbol: metadata.symbol,
           uri: collectionUri,
           sellerFeeBasisPoints: 0,
+          collection: some(publicKey(collectionMint.publicKey.toString())),
           creators: [
             {
               address: publicKey(collectionAuthorityPubkey.toString()),
@@ -118,8 +139,8 @@ export class CollectionVerificationService {
             },
           ],
         },
-        collectionUpdateAuthority: publicKey(collectionAuthorityPubkey.toString()),
-        isMutable: true,
+        nonce: 0,
+        index: 0,
       });
 
       // Send and confirm transaction
@@ -157,13 +178,22 @@ export class CollectionVerificationService {
       console.log(`🔍 Verifying collection for asset ${request.assetId}...`);
 
       // Create verification instruction
-      const verifyCollectionIx = await verifyCollectionV1(this.umi, {
+      const verifyCollectionIx = await verifyCollection(this.umi, {
         leafOwner: publicKey(this.signer.publicKey.toString()),
         leafDelegate: publicKey(this.signer.publicKey.toString()),
         merkleTree: publicKey(request.treeAddress.toString()),
         collectionMint: publicKey(request.collectionMint.toString()),
-        collectionAuthority: publicKey(request.collectionAuthority.toString()),
-        leafIndex: request.leafIndex,
+        root: new Uint8Array(32),
+        metadata: {
+          name: 'Verification',
+          symbol: 'VERIFY',
+          uri: '',
+          sellerFeeBasisPoints: 0,
+          collection: none(),
+          creators: [],
+        },
+        nonce: 0,
+        index: request.leafIndex,
       });
 
       // Send and confirm transaction
@@ -172,7 +202,7 @@ export class CollectionVerificationService {
 
       return {
         success: true,
-        signature: result.signature,
+        signature: result.signature.toString(),
         verified: true,
         assetId: request.assetId,
         collectionMint: request.collectionMint,

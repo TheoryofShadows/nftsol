@@ -57,7 +57,7 @@ export class SolanaServiceManager {
 
       // Create services
       const bubblegumService = new BubblegumService(connection, heliusConfig.rpcUrl);
-      const genesisProtocolService = new GenesisProtocolService(connection, heliusConfig.rpcUrl);
+      const genesisProtocolService = new GenesisProtocolService(connection);
 
       // Configure signers if private keys are available
       let isConfigured = false;

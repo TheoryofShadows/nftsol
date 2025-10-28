@@ -12,7 +12,7 @@ const router = express.Router();
 
 // Initialize Genesis Protocol Service
 const connection = new Connection(process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
-const genesisService = new GenesisProtocolService(connection, process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
+const genesisService = new GenesisProtocolService(connection);
 
 // Set up signer if available
 if (process.env.BUBBLEGUM_PRIVATE_KEY) {
@@ -383,7 +383,7 @@ router.get('/launch/:id/whitelist', (req, res) => {
  * POST /api/genesis/launch/:id/mint
  * Mint NFT through Genesis Protocol
  */
-router.post('/launch/:id/mint', mintLimiter, (req, res) => {
+router.post('/launch/:id/mint', mintLimiter, async (req, res) => {
   try {
     const { id } = req.params;
     const { walletAddress, metadata, quantity } = req.body;
@@ -402,7 +402,7 @@ router.post('/launch/:id/mint', mintLimiter, (req, res) => {
       });
     }
 
-    const result = genesisService.mintThroughGenesis(id, walletAddress, metadata, quantity || 1);
+    const result = await genesisService.mintThroughGenesis(id, walletAddress, metadata, quantity || 1);
     
     if (result.success) {
       res.json({ success: true, data: result });

@@ -48,8 +48,10 @@ export class SolanaConnectionPool {
     }
   }
 
-  private createFetchWithTimeout(timeout: number) {
-    return async (url: string, options?: RequestInit) => {
+  private createFetchWithTimeout(timeout: number): typeof fetch {
+    return async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const options = init;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
       

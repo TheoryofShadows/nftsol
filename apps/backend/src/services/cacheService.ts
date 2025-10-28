@@ -297,7 +297,7 @@ export class CacheService {
   async getStats(): Promise<{ 
     connected: boolean; 
     memory?: any; 
-    performance: typeof this.stats;
+    performance: any;
     tagCount: number;
   }> {
     if (!this.client || !this.isConnected) {

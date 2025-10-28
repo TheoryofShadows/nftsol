@@ -1,8 +1,11 @@
 import { Connection, PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js';
-import { WalletAdapter } from '@solana/wallet-adapter-base';
 
 // Mobile wallet adapter interface
-export interface MobileWalletAdapter extends WalletAdapter {
+export interface MobileWalletAdapter {
+  // Basic wallet properties
+  publicKey: PublicKey | null;
+  connected: boolean;
+  
   // Mobile-specific methods
   connectMobile(): Promise<void>;
   disconnectMobile(): Promise<void>;

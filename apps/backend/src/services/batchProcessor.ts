@@ -180,7 +180,7 @@ export class BatchProcessor {
         op.reject({
           id: op.id,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           executionTime
         });
       }
@@ -210,7 +210,7 @@ export class BatchProcessor {
         op.reject({
           id: op.id,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           executionTime
         });
       }
@@ -263,7 +263,7 @@ export class BatchProcessor {
         op.reject({
           id: op.id,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : String(error),
           executionTime
         });
       }

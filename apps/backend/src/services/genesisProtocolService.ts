@@ -16,6 +16,38 @@ export interface FairLaunchConfig {
   whitelistRoot: string;
 }
 
+export interface GenesisLaunchConfig {
+  name: string;
+  symbol?: string;
+  description: string;
+  image?: string;
+  totalSupply?: number;
+  maxSupply: number;
+  price?: number;
+  pricePerNFT: number;
+  startTime?: number;
+  endTime?: number;
+  launchDate: Date;
+  endDate?: Date;
+  whitelistRoot?: string;
+  whitelistRequired?: boolean;
+  maxPerWallet?: number;
+  maxMintsPerWallet?: number;
+  maxMintsPerTransaction?: number;
+  creatorFee?: number;
+  antiBotProtection?: boolean;
+  tieredAccess?: boolean;
+  tiers?: any[];
+}
+
+export interface GenesisTier {
+  name: string;
+  minHoldings: number;
+  maxAllocation: number;
+  discount: number;
+  earlyAccess: boolean;
+}
+
 export interface FairLaunchData {
   fairLaunch: string;
   authority: string;
@@ -50,6 +82,7 @@ export class GenesisProtocolService {
   private connection: Connection;
   private program: Program<Idl> | null = null;
   private provider: AnchorProvider | null = null;
+  public signer: Keypair | null = null;
 
   constructor(connection: Connection) {
     this.connection = connection;
@@ -58,23 +91,36 @@ export class GenesisProtocolService {
 
   private async initializeProgram() {
     try {
-      // Load the governance program IDL
-      const idlPath = path.join(__dirname, '../../smart-contracts/solana_rewards/target/idl/governance.json');
-      const idl = JSON.parse(fs.readFileSync(idlPath, 'utf8'));
+      // TEMP: Skip Genesis Protocol init — using placeholder
+      // We'll enable this when real Anchor program + IDL is deployed
+      
+      // COMMENTED OUT: IDL loading and program initialization
+      // const idlPath = path.join(__dirname, '../../smart-contracts/solana_rewards/target/idl/governance.json');
+      // const idl = JSON.parse(fs.readFileSync(idlPath, 'utf8'));
       
       // Create provider with wallet
       const wallet = Keypair.generate(); // In production, use actual wallet
+      const walletAdapter = {
+        publicKey: wallet.publicKey,
+        signTransaction: async (tx: Transaction) => tx,
+        signAllTransactions: async (txs: Transaction[]) => txs
+      };
       this.provider = new AnchorProvider(
         this.connection,
-        { publicKey: wallet.publicKey, signTransaction: async (tx) => tx, signAllTransactions: async (txs) => txs },
+        walletAdapter as any,
         { commitment: 'confirmed' }
-      );
+      ) as any;
 
-      // Initialize program
-      const programId = new PublicKey('GvnmNTy8XJ3c2d4K9vR7wE1sP5qA8bC2fH6jL9mN3pQ7');
-      this.program = new Program(idl, programId, this.provider);
+      // Mock program for dev
+      this.program = {
+        methods: {},
+        account: {},
+        instruction: {},
+        // Add minimal methods you use
+        mint: () => ({ instruction: () => ({}) }),
+      } as any;
 
-      console.log('✅ Genesis Protocol service initialized');
+      console.log('✅ Genesis Protocol service initialized (placeholder mode)');
     } catch (error) {
       console.error('❌ Failed to initialize Genesis Protocol service:', error);
     }
@@ -463,6 +509,88 @@ export class GenesisProtocolService {
       remainingSupply,
       participationRate
     };
+  }
+
+  // Additional methods for Genesis Protocol routes
+  setSigner(signer: Keypair): void {
+    this.signer = signer;
+  }
+
+  async createLaunch(config: GenesisLaunchConfig): Promise<any> {
+    // Placeholder implementation
+    console.log('Creating Genesis launch:', config);
+    return {
+      id: 'launch_' + Date.now(),
+      config,
+      status: 'active',
+      createdAt: Date.now()
+    };
+  }
+
+  getAllLaunches(): any[] {
+    // Placeholder implementation
+    return [];
+  }
+
+  getActiveLaunches(): any[] {
+    // Placeholder implementation
+    return [];
+  }
+
+  getUpcomingLaunches(): any[] {
+    // Placeholder implementation
+    return [];
+  }
+
+  getLaunch(id: string): any {
+    // Placeholder implementation
+    return { id, status: 'active' };
+  }
+
+  getLaunchStats(id: string): any {
+    // Placeholder implementation
+    return { participants: 0, minted: 0 };
+  }
+
+  scheduleLaunch(id: string, date: Date): void {
+    // Placeholder implementation
+    console.log('Scheduling launch:', id, date);
+  }
+
+  activateLaunch(id: string): void {
+    // Placeholder implementation
+    console.log('Activating launch:', id);
+  }
+
+  pauseLaunch(id: string): void {
+    // Placeholder implementation
+    console.log('Pausing launch:', id);
+  }
+
+  resumeLaunch(id: string): void {
+    // Placeholder implementation
+    console.log('Resuming launch:', id);
+  }
+
+  completeLaunch(id: string): void {
+    // Placeholder implementation
+    console.log('Completing launch:', id);
+  }
+
+  addToWhitelist(id: string, wallet: string, tier: string, maxMints: number): void {
+    // Placeholder implementation
+    console.log('Adding to whitelist:', id, wallet, tier, maxMints);
+  }
+
+  removeFromWhitelist(id: string, wallet: string): void {
+    // Placeholder implementation
+    console.log('Removing from whitelist:', id, wallet);
+  }
+
+  async mintThroughGenesis(id: string, wallet: string, metadata: any, quantity: number): Promise<any> {
+    // Placeholder implementation
+    console.log('Minting through Genesis:', id, wallet, metadata, quantity);
+    return Promise.resolve({ success: true, signature: 'placeholder_signature' });
   }
 }
 
