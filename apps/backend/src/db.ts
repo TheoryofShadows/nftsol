@@ -57,7 +57,7 @@ export const initializeDatabase = async (): Promise<void> => {
     }
 
     // Create postgres client with pooling
-    postgresClient = postgres.default(connectionString, config);
+    postgresClient = (postgres as any).default(connectionString, config);
     
     // Test the connection with a simple query
     await postgresClient`SELECT 1`;

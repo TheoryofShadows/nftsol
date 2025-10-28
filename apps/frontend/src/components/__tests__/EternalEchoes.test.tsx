@@ -63,7 +63,6 @@ vi.mock('@solana/wallet-adapter-react', () => ({
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <WalletProvider
     wallets={[new PhantomWalletAdapter()]}
-    network={WalletAdapterNetwork.Devnet}
     autoConnect={false}
   >
     {children}
@@ -267,7 +266,7 @@ describe('Eternal Echoes Component', () => {
 
   describe('Error Handling', () => {
     test('handles network timeouts', async () => {
-      const timeoutError = new Error('timeout');
+      const timeoutError = new Error('timeout') as any;
       timeoutError.code = 'ECONNABORTED';
       mockedAxios.get.mockRejectedValueOnce(timeoutError);
       
