@@ -3,6 +3,7 @@ import { programConfig } from '../config';
 import logger from '../utils/logger';
 import { MintRequest, MintResponse, NFTMetadata } from '../types';
 import { ApiResponse } from '../types';
+import { mintNFT, accountExists } from '../lib/solana';
 
 class NFTService {
   // Generate unique NFT metadata
@@ -40,7 +41,7 @@ class NFTService {
     };
   }
   
-  // Create mock mint response (for now)
+  // Create mock mint response (for testing)
   async createMockMint(request: MintRequest): Promise<MintResponse> {
     try {
       const timestamp = Date.now();
@@ -72,6 +73,62 @@ class NFTService {
       return {
         success: false,
         error: 'Failed to create mock mint'
+      };
+    }
+  }
+
+  // Create real NFT mint using Solana blockchain
+  async createRealMint(request: MintRequest): Promise<MintResponse> {
+    try {
+      // Validate wallet address exists
+      const walletExists = await accountExists(request.creatorWallet);
+      if (!walletExists) {
+        return {
+          success: false,
+          error: 'Invalid wallet address or wallet does not exist'
+        };
+      }
+
+      // Generate metadata URI (for now using placeholder)
+      const metadataUri = request.imageUrl || `https://nftsol.app/metadata/${Date.now()}`;
+      
+      // Mint NFT on blockchain
+      const result = await mintNFT(
+        request.creatorWallet, 
+        metadataUri, 
+        request.name, 
+        request.description
+      );
+      
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'NFT minting failed'
+        };
+      }
+      
+      // Log the mint operation
+      logger.info('Real NFT minted', {
+        name: request.name,
+        creator: request.creatorWallet,
+        mintAddress: result.mintAddress,
+        signature: result.txSig,
+        timestamp: Date.now()
+      });
+      
+      return {
+        success: true,
+        mint: result.mintAddress,
+        uri: metadataUri,
+        mintAddress: result.mintAddress,
+        signature: result.txSig,
+        message: 'NFT minted successfully on Solana blockchain'
+      };
+    } catch (error) {
+      logger.error('Error creating real mint', { error, request });
+      return {
+        success: false,
+        error: 'Failed to create real mint: ' + (error as Error).message
       };
     }
   }

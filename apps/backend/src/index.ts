@@ -14,6 +14,7 @@ import { nftService } from './services/nft';
 import { ApiResponse, MintRequest } from './types';
 import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
+import nftRouter from './routes/nfts';
 
 const app = express();
 const server = createServer(app);
@@ -185,8 +186,8 @@ app.post('/api/simple-mint',
         return res.status(503).json(response);
       }
 
-      // Create the mint
-      const mintResult = await nftService.createMockMint(mintRequest);
+      // Create the mint using real blockchain
+      const mintResult = await nftService.createRealMint(mintRequest);
       
       if (mintResult.success) {
         const response: ApiResponse = {
@@ -291,6 +292,9 @@ const emergencyPauseMiddleware = (req: any, res: any, next: any) => {
 // Mount withdrawal routes with emergency controls
 app.use('/api/wallets/withdraw', emergencyPauseMiddleware, mockAuthMiddleware, withdrawLimiter, withdrawalRoutes);
 app.use('/api/admin/withdrawals', mockAdminMiddleware, adminWithdrawalRoutes);
+
+// Mount NFT routes
+app.use('/api/nfts', nftRouter);
 
 // Emergency controls endpoint
 app.get('/api/admin/emergency/status', mockAdminMiddleware, (req, res) => {

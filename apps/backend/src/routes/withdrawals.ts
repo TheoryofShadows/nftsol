@@ -1,6 +1,8 @@
 // src/routes/withdrawals.ts
 import express from 'express';
 import { withClient } from '../lib/db';
+import { getWalletBalance, accountExists } from '../lib/solana';
+import { ApiResponse } from '../types';
 
 const router = express.Router();
 const LAMPORTS_PER_SOL = 1_000_000_000;
@@ -9,17 +11,67 @@ function validateAddress(a?: string) {
   return typeof a === 'string' && /^[A-Za-z0-9]{32,44}$/.test(a);
 }
 
-// POST /api/wallets/withdraw
+// POST /api/wallets/withdraw - Create withdrawal request
 router.post('/', async (req, res) => {
   const userId = (req as any).user?.id;
-  if (!userId) return res.status(401).json({ error: 'not_authenticated' });
+  if (!userId) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'User not authenticated',
+      code: 'NOT_AUTHENTICATED'
+    };
+    return res.status(401).json(response);
+  }
 
   const { amount_sol, to_address, request_token } = req.body;
-  if (!amount_sol || !to_address) return res.status(400).json({ error: 'missing_params' });
-  if (!validateAddress(to_address)) return res.status(400).json({ error: 'invalid_address' });
+  if (!amount_sol || !to_address) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'Missing required parameters: amount_sol, to_address',
+      code: 'MISSING_PARAMETERS'
+    };
+    return res.status(400).json(response);
+  }
+
+  if (!validateAddress(to_address)) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'Invalid wallet address format',
+      code: 'INVALID_ADDRESS'
+    };
+    return res.status(400).json(response);
+  }
 
   const lamports = Math.floor(Number(amount_sol) * LAMPORTS_PER_SOL);
-  if (!Number.isFinite(lamports) || lamports <= 0) return res.status(400).json({ error: 'invalid_amount' });
+  if (!Number.isFinite(lamports) || lamports <= 0) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'Invalid withdrawal amount',
+      code: 'INVALID_AMOUNT'
+    };
+    return res.status(400).json(response);
+  }
+
+  // Check if destination wallet exists on Solana
+  try {
+    const walletExists = await accountExists(to_address);
+    if (!walletExists) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Destination wallet does not exist on Solana network',
+        code: 'WALLET_NOT_FOUND'
+      };
+      return res.status(400).json(response);
+    }
+  } catch (error) {
+    console.error('Wallet validation error:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to validate destination wallet',
+      code: 'WALLET_VALIDATION_FAILED'
+    };
+    return res.status(500).json(response);
+  }
 
   try {
     const result = await withClient(async (client) => {
@@ -50,26 +102,102 @@ router.post('/', async (req, res) => {
       return insert.rows[0];
     });
     
-    res.json({ status: 'pending', withdrawal: result });
+    const response: ApiResponse = {
+      success: true,
+      data: {
+        status: 'pending',
+        withdrawal: result,
+        amount_sol: amount_sol,
+        to_address: to_address
+      },
+      message: 'Withdrawal request created successfully'
+    };
+    return res.json(response);
   } catch (err: any) {
     console.error('create withdrawal error', err);
-    return res.status(500).json({ error: 'internal_error' });
+    const response: ApiResponse = {
+      success: false,
+      error: err.message === 'insufficient_balance' ? 'Insufficient balance' : 'Internal server error',
+      code: err.message === 'insufficient_balance' ? 'INSUFFICIENT_BALANCE' : 'INTERNAL_ERROR'
+    };
+    return res.status(500).json(response);
   }
-  return; // Explicit return for TypeScript
 });
 
-// GET /api/wallets/withdrawals
+// GET /api/wallets/withdraw - List user withdrawals
 router.get('/', async (req, res) => {
   const userId = (req as any).user?.id;
-  if (!userId) return res.status(401).json({ error: 'not_authenticated' });
+  if (!userId) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'User not authenticated',
+      code: 'NOT_AUTHENTICATED'
+    };
+    return res.status(401).json(response);
+  }
+
   try {
     const q = await (await import('../lib/db')).pool.query('SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100', [userId]);
-    return res.json(q.rows);
+    
+    const response: ApiResponse = {
+      success: true,
+      data: q.rows
+    };
+    return res.json(response);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'internal_error' });
+    console.error('Get withdrawals error:', err);
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to get withdrawals',
+      code: 'GET_WITHDRAWALS_FAILED'
+    };
+    return res.status(500).json(response);
   }
-  return; // Explicit return for TypeScript
+});
+
+// GET /api/wallets/withdraw/:id - Get specific withdrawal
+router.get('/:id', async (req, res) => {
+  const userId = (req as any).user?.id;
+  const { id } = req.params;
+  
+  if (!userId) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'User not authenticated',
+      code: 'NOT_AUTHENTICATED'
+    };
+    return res.status(401).json(response);
+  }
+
+  try {
+    const q = await (await import('../lib/db')).pool.query(
+      'SELECT * FROM withdrawals WHERE id=$1 AND user_id=$2', 
+      [id, userId]
+    );
+    
+    if (!q.rows.length) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Withdrawal not found',
+        code: 'WITHDRAWAL_NOT_FOUND'
+      };
+      return res.status(404).json(response);
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      data: q.rows[0]
+    };
+    return res.json(response);
+  } catch (err) {
+    console.error('Get withdrawal error:', err);
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to get withdrawal',
+      code: 'GET_WITHDRAWAL_FAILED'
+    };
+    return res.status(500).json(response);
+  }
 });
 
 export default router;
