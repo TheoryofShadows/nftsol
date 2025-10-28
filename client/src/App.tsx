@@ -4,7 +4,7 @@ import MintForm from "./components/MintForm";
 import NftGrid from "./components/NftGrid";
 import "./styles/solana.css";
 
-const API = import.meta.env.VITE_API_BASE || "https://nftsol-dev.onrender.com";
+const API = import.meta.env.VITE_API_BASE || "https://nftsol-server-prod.onrender.com";
 
 interface NFT {
   id: string;

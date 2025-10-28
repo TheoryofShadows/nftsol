@@ -13,7 +13,7 @@ export default function MintForm({ onMintSuccess }: MintFormProps) {
   const [status, setStatus] = useState("");
 
   const mint = async () => {
-    if (!file || !name || !connected) {
+    if (!name || !connected) {
       setStatus("❌ Please fill in all fields and connect wallet");
       return;
     }
@@ -22,28 +22,34 @@ export default function MintForm({ onMintSuccess }: MintFormProps) {
     setStatus("Minting...");
     
     try {
-      const form = new FormData();
-      form.append('file', file);
-      form.append('name', name);
-      form.append('owner', publicKey!.toBase58());
-
+      // For now, use JSON format that works with current backend
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE}/api/simple-mint`,
-        { method: 'POST', body: form }
+        { 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            creatorWallet: publicKey!.toBase58(),
+            name: name,
+            description: `NFT created by ${publicKey!.toBase58().slice(0, 8)}...`,
+            imageUrl: `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(name)}`
+          })
+        }
       );
       const data = await res.json();
       
-      if (data.mint) {
-        setStatus(`✅ Minted! ${data.mint}`);
+      if (data.success) {
+        setStatus(`✅ Minted! ${data.mintAddress}`);
         
         // Create NFT object for the parent component
         const newNFT = {
-          id: data.mint,
+          id: data.mintAddress,
           name: name,
-          imageUrl: data.uri,
+          description: `NFT created by ${publicKey!.toBase58().slice(0, 8)}...`,
+          imageUrl: `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(name)}`,
           creator: publicKey!.toBase58(),
-          mintAddress: data.mint,
-          uri: data.uri
+          mintAddress: data.mintAddress,
+          signature: data.signature
         };
         
         if (onMintSuccess) {
@@ -70,13 +76,6 @@ export default function MintForm({ onMintSuccess }: MintFormProps) {
       </h3>
       
       <div className="space-y-4">
-        <input
-          type="file"
-          onChange={e => setFile(e.target.files?.[0] ?? null)}
-          className="w-full p-2 mb-2 rounded border border-white/30 bg-white/10 text-white"
-          accept="image/*"
-        />
-        
         <input
           placeholder="NFT name"
           value={name}
