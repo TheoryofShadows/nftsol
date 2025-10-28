@@ -8,7 +8,7 @@
 import {
   createTree,
   mplBubblegum,
-  mintV2,
+  mintV1,
 } from '@metaplex-foundation/mpl-bubblegum';
 import {
   createSignerFromKeypair,
@@ -211,25 +211,23 @@ export class BubblegumService {
       const metadataUri = await this.uploadMetadata(options.metadata);
       console.log(`Metadata uploaded: ${metadataUri}`);
 
-      // Mint using mintV2 with proper V2 structure (fixes 0x1773)
-      const tx = await mintV2(this.umi, {
+      // Mint using mintV1 (no collection required)
+      const tx = await mintV1(this.umi, {
         merkleTree,
         leafOwner: options.owner 
           ? publicKey(options.owner.toString())
           : this.umi.identity.publicKey,
-        assetData: {
+        metadata: {
           name: options.metadata.name,
           symbol: options.metadata.symbol || 'CNFT',
           uri: metadataUri,
-          sellerFeeBasisPoints: percentAmount(5), // 5% (500 basis points)
+          sellerFeeBasisPoints: 500, // 5% (500 basis points)
           creators: [{
             address: this.umi.identity.publicKey,
             verified: false,
             share: 100,
           }],
-          collection: options.collectionMint 
-            ? some(publicKey(options.collectionMint.toString()))
-            : none(),
+          collection: none(),
         },
       });
 

@@ -1,453 +1,477 @@
-/**
- * 🌟 Genesis Protocol Service
- * Fair launch mechanisms for compressed NFT drops
- */
+import { Connection, PublicKey, Keypair, Transaction, SystemProgram } from '@solana/web3.js';
+import { AnchorProvider, Program, Idl, BN } from '@coral-xyz/anchor';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } from '@solana/spl-token';
+import { MerkleTree } from 'merkletreejs';
+import { keccak256 } from 'ethers';
+import fs from 'fs';
+import path from 'path';
 
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-import { mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
-import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
-import { dasApi } from '@metaplex-foundation/digital-asset-standard-api';
-import { signerIdentity, generateSigner, publicKey, some, none } from '@metaplex-foundation/umi';
-import { percentAmount } from '@metaplex-foundation/umi';
-
-export interface GenesisLaunchConfig {
-  name: string;
-  description: string;
-  maxSupply: number;
-  pricePerNFT: number; // in SOL
-  launchDate: Date;
-  endDate?: Date;
-  whitelistRequired: boolean;
-  maxMintsPerWallet: number;
-  maxMintsPerTransaction: number;
-  antiBotProtection: boolean;
-  tieredAccess: boolean;
-  tiers?: GenesisTier[];
+// Types for Genesis Protocol
+export interface FairLaunchConfig {
+  totalSupply: number;
+  minAllocation: number;
+  maxAllocation: number;
+  delaySeconds: number;
+  durationSeconds: number;
+  whitelistRoot: string;
 }
 
-export interface GenesisTier {
-  name: string;
-  maxMints: number;
-  priceMultiplier: number; // 1.0 = normal price, 0.5 = 50% discount
-  whitelistSlots: number;
-  earlyAccessMinutes: number; // Minutes before public launch
+export interface FairLaunchData {
+  fairLaunch: string;
+  authority: string;
+  tokenMint: string;
+  treasury: string;
+  config: FairLaunchConfig;
+  status: 'Active' | 'Finalized' | 'Cancelled';
+  totalParticipants: number;
+  totalAllocated: number;
+  createdAt: number;
+  startTime: number;
+  endTime: number;
+  finalizedAt?: number;
+}
+
+export interface ParticipantData {
+  participant: string;
+  fairLaunch: string;
+  wallet: string;
+  amountAllocated: number;
+  tokensClaimed: number;
+  participatedAt: number;
+  claimedAt?: number;
 }
 
 export interface WhitelistEntry {
-  walletAddress: string;
-  tier: string;
-  maxMints: number;
-  usedMints: number;
-  addedAt: Date;
-  verified: boolean;
-}
-
-export interface GenesisLaunch {
-  id: string;
-  config: GenesisLaunchConfig;
-  treeAddress?: PublicKey;
-  totalMinted: number;
-  totalRevenue: number;
-  whitelist: WhitelistEntry[];
-  status: 'draft' | 'scheduled' | 'active' | 'paused' | 'completed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface GenesisMintResult {
-  success: boolean;
-  assetId?: PublicKey;
-  signature?: string;
-  tier?: string;
-  pricePaid?: number;
-  error?: string;
+  wallet: string;
+  maxAllocation: number;
 }
 
 export class GenesisProtocolService {
   private connection: Connection;
-  private umi: any;
-  private launches: Map<string, GenesisLaunch> = new Map();
-  private whitelistCache: Map<string, WhitelistEntry[]> = new Map();
+  private program: Program<Idl> | null = null;
+  private provider: AnchorProvider | null = null;
 
-  constructor(connection: Connection, rpcEndpoint: string) {
+  constructor(connection: Connection) {
     this.connection = connection;
-    this.umi = createUmi(rpcEndpoint)
-      .use(mplBubblegum())
-      .use(irysUploader({
-        address: 'https://devnet.irys.xyz',
-        timeout: 60000,
-        providerUrl: rpcEndpoint,
-      }))
-      .use(dasApi());
+    this.initializeProgram();
   }
 
-  setSigner(keypair: Keypair): void {
-    const signer = signerIdentity(keypair);
-    this.umi.use(signer);
-  }
+  private async initializeProgram() {
+    try {
+      // Load the governance program IDL
+      const idlPath = path.join(__dirname, '../../smart-contracts/solana_rewards/target/idl/governance.json');
+      const idl = JSON.parse(fs.readFileSync(idlPath, 'utf8'));
+      
+      // Create provider with wallet
+      const wallet = Keypair.generate(); // In production, use actual wallet
+      this.provider = new AnchorProvider(
+        this.connection,
+        { publicKey: wallet.publicKey, signTransaction: async (tx) => tx, signAllTransactions: async (txs) => txs },
+        { commitment: 'confirmed' }
+      );
 
-  /**
-   * Create a new Genesis launch
-   */
-  async createLaunch(config: GenesisLaunchConfig): Promise<GenesisLaunch> {
-    console.log('🌟 Creating Genesis launch:', config.name);
-    
-    const launchId = this.generateLaunchId();
-    const launch: GenesisLaunch = {
-      id: launchId,
-      config,
-      totalMinted: 0,
-      totalRevenue: 0,
-      whitelist: [],
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+      // Initialize program
+      const programId = new PublicKey('GvnmNTy8XJ3c2d4K9vR7wE1sP5qA8bC2fH6jL9mN3pQ7');
+      this.program = new Program(idl, programId, this.provider);
 
-    this.launches.set(launchId, launch);
-    console.log(`✅ Genesis launch created: ${launchId}`);
-    
-    return launch;
+      console.log('✅ Genesis Protocol service initialized');
+    } catch (error) {
+      console.error('❌ Failed to initialize Genesis Protocol service:', error);
+    }
   }
 
   /**
-   * Schedule a launch for a specific date
+   * Create a fair launch campaign
    */
-  async scheduleLaunch(launchId: string, launchDate: Date): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (launch.status !== 'draft') {
-      throw new Error('Only draft launches can be scheduled');
-    }
-
-    launch.config.launchDate = launchDate;
-    launch.status = 'scheduled';
-    launch.updatedAt = new Date();
-
-    console.log(`📅 Launch scheduled: ${launchId} for ${launchDate.toISOString()}`);
-  }
-
-  /**
-   * Activate a scheduled launch
-   */
-  async activateLaunch(launchId: string): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (launch.status !== 'scheduled') {
-      throw new Error('Only scheduled launches can be activated');
-    }
-
-    const now = new Date();
-    if (now < launch.config.launchDate) {
-      throw new Error('Launch date has not been reached');
-    }
-
-    // Create tree for the launch
-    const treeResult = await this.createLaunchTree(launch);
-    launch.treeAddress = treeResult.treeAddress;
-    launch.status = 'active';
-    launch.updatedAt = new Date();
-
-    console.log(`🚀 Launch activated: ${launchId}`);
-  }
-
-  /**
-   * Add wallet to whitelist
-   */
-  async addToWhitelist(
-    launchId: string,
-    walletAddress: string,
-    tier: string = 'default',
-    maxMints: number = 1
-  ): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (!launch.config.whitelistRequired) {
-      throw new Error('This launch does not require whitelist');
-    }
-
-    const existingEntry = launch.whitelist.find(entry => entry.walletAddress === walletAddress);
-    if (existingEntry) {
-      existingEntry.maxMints = maxMints;
-      existingEntry.tier = tier;
-      existingEntry.updatedAt = new Date();
-    } else {
-      launch.whitelist.push({
-        walletAddress,
-        tier,
-        maxMints,
-        usedMints: 0,
-        addedAt: new Date(),
-        verified: true,
-      });
-    }
-
-    launch.updatedAt = new Date();
-    console.log(`✅ Added to whitelist: ${walletAddress} (${tier})`);
-  }
-
-  /**
-   * Remove wallet from whitelist
-   */
-  async removeFromWhitelist(launchId: string, walletAddress: string): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    launch.whitelist = launch.whitelist.filter(entry => entry.walletAddress !== walletAddress);
-    launch.updatedAt = new Date();
-    console.log(`❌ Removed from whitelist: ${walletAddress}`);
-  }
-
-  /**
-   * Mint NFT through Genesis Protocol
-   */
-  async mintThroughGenesis(
-    launchId: string,
-    walletAddress: string,
-    metadata: any,
-    quantity: number = 1
-  ): Promise<GenesisMintResult> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      return { success: false, error: 'Launch not found' };
-    }
-
-    if (launch.status !== 'active') {
-      return { success: false, error: 'Launch is not active' };
-    }
-
-    if (launch.totalMinted + quantity > launch.config.maxSupply) {
-      return { success: false, error: 'Exceeds maximum supply' };
-    }
-
-    // Check whitelist if required
-    if (launch.config.whitelistRequired) {
-      const whitelistEntry = launch.whitelist.find(entry => entry.walletAddress === walletAddress);
-      if (!whitelistEntry) {
-        return { success: false, error: 'Wallet not whitelisted' };
-      }
-
-      if (whitelistEntry.usedMints + quantity > whitelistEntry.maxMints) {
-        return { success: false, error: 'Exceeds whitelist allocation' };
-      }
-    }
-
-    // Check tier access
-    const tier = this.getWalletTier(launch, walletAddress);
-    const priceMultiplier = tier?.priceMultiplier || 1.0;
-    const finalPrice = launch.config.pricePerNFT * priceMultiplier;
-
-    // Check anti-bot protection
-    if (launch.config.antiBotProtection) {
-      const isBot = await this.detectBot(walletAddress);
-      if (isBot) {
-        return { success: false, error: 'Bot detected' };
-      }
+  async createFairLaunch(
+    authority: Keypair,
+    tokenMint: PublicKey,
+    treasury: PublicKey,
+    config: FairLaunchConfig
+  ): Promise<{ fairLaunch: PublicKey; signature: string }> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
     }
 
     try {
-      // Mint the NFT
-      const mintResult = await this.performMint(launch, metadata, quantity);
+      console.log('🎲 Creating fair launch campaign...');
+
+      // Generate fair launch PDA
+      const timestamp = Math.floor(Date.now() / 1000);
+      const [fairLaunchPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('fair_launch'),
+          tokenMint.toBuffer(),
+          Buffer.from(timestamp.toString().padStart(8, '0'))
+        ],
+        this.program.programId
+      );
+
+      // Create fair launch transaction
+      const tx = await this.program.methods
+        .createFairLaunch({
+          totalSupply: new BN(config.totalSupply),
+          minAllocation: new BN(config.minAllocation),
+          maxAllocation: new BN(config.maxAllocation),
+          delaySeconds: new BN(config.delaySeconds),
+          durationSeconds: new BN(config.durationSeconds),
+          whitelistRoot: Buffer.from(config.whitelistRoot, 'hex')
+        })
+        .accounts({
+          fairLaunch: fairLaunchPda,
+          authority: authority.publicKey,
+          tokenMint: tokenMint,
+          treasury: treasury,
+          systemProgram: SystemProgram.programId
+        })
+        .signers([authority])
+        .rpc();
+
+      console.log(`✅ Fair launch created: ${fairLaunchPda.toString()}`);
+      console.log(`📝 Transaction: ${tx}`);
+
+      return {
+        fairLaunch: fairLaunchPda,
+        signature: tx
+      };
+
+    } catch (error) {
+      console.error('❌ Failed to create fair launch:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate whitelist merkle tree
+   */
+  generateWhitelistTree(whitelist: WhitelistEntry[]): { root: string; tree: MerkleTree } {
+    try {
+      console.log(`🌳 Generating merkle tree for ${whitelist.length} participants...`);
+
+      // Create leaves for merkle tree
+      const leaves = whitelist.map(entry => {
+        const data = Buffer.concat([
+          Buffer.from(entry.wallet, 'hex'),
+          Buffer.from(entry.maxAllocation.toString().padStart(16, '0'))
+        ]);
+        return keccak256(data);
+      });
+
+      // Create merkle tree
+      const tree = new MerkleTree(leaves, keccak256, { sortPairs: true });
+      const root = tree.getHexRoot();
+
+      console.log(`✅ Merkle tree generated with root: ${root}`);
+
+      return { root, tree };
+    } catch (error) {
+      console.error('❌ Failed to generate whitelist tree:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get merkle proof for participant
+   */
+  getMerkleProof(tree: MerkleTree, wallet: string, maxAllocation: number): string[] {
+    try {
+      const data = Buffer.concat([
+        Buffer.from(wallet, 'hex'),
+        Buffer.from(maxAllocation.toString().padStart(16, '0'))
+      ]);
+      const leaf = keccak256(data);
       
-      // Update launch stats
-      launch.totalMinted += quantity;
-      launch.totalRevenue += finalPrice * quantity;
+      const proof = tree.getHexProof(leaf);
+      return proof;
+    } catch (error) {
+      console.error('❌ Failed to get merkle proof:', error);
+      throw error;
+    }
+  }
 
-      // Update whitelist usage
-      if (launch.config.whitelistRequired) {
-        const whitelistEntry = launch.whitelist.find(entry => entry.walletAddress === walletAddress);
-        if (whitelistEntry) {
-          whitelistEntry.usedMints += quantity;
-        }
-      }
+  /**
+   * Participate in fair launch
+   */
+  async participateInFairLaunch(
+    participant: Keypair,
+    fairLaunch: PublicKey,
+    amount: number,
+    merkleProof: string[]
+  ): Promise<{ signature: string }> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
+    }
 
-      launch.updatedAt = new Date();
+    try {
+      console.log(`🎯 Participating in fair launch with ${amount} tokens...`);
 
-      console.log(`✅ Genesis mint successful: ${quantity} NFTs for ${walletAddress}`);
+      // Generate participant PDA
+      const [participantPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('participant'),
+          fairLaunch.toBuffer(),
+          participant.publicKey.toBuffer()
+        ],
+        this.program.programId
+      );
+
+      // Convert merkle proof to bytes
+      const proofBytes = merkleProof.map(proof => Buffer.from(proof.slice(2), 'hex'));
+
+      // Create participation transaction
+      const tx = await this.program.methods
+        .participateFairLaunch(
+          new BN(amount),
+          proofBytes
+        )
+        .accounts({
+          fairLaunch: fairLaunch,
+          participant: participantPda,
+          participantWallet: participant.publicKey,
+          participantSigner: participant.publicKey,
+          systemProgram: SystemProgram.programId
+        })
+        .signers([participant])
+        .rpc();
+
+      console.log(`✅ Participation successful: ${tx}`);
+
+      return { signature: tx };
+
+    } catch (error) {
+      console.error('❌ Failed to participate in fair launch:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Finalize fair launch
+   */
+  async finalizeFairLaunch(
+    authority: Keypair,
+    fairLaunch: PublicKey
+  ): Promise<{ signature: string }> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
+    }
+
+    try {
+      console.log('🏁 Finalizing fair launch...');
+
+      const tx = await this.program.methods
+        .finalizeFairLaunch()
+        .accounts({
+          fairLaunch: fairLaunch,
+          authority: authority.publicKey
+        })
+        .signers([authority])
+        .rpc();
+
+      console.log(`✅ Fair launch finalized: ${tx}`);
+
+      return { signature: tx };
+
+    } catch (error) {
+      console.error('❌ Failed to finalize fair launch:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Claim tokens after fair launch
+   */
+  async claimTokens(
+    participant: Keypair,
+    fairLaunch: PublicKey,
+    tokenMint: PublicKey
+  ): Promise<{ signature: string }> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
+    }
+
+    try {
+      console.log('💰 Claiming tokens...');
+
+      // Generate PDAs
+      const [participantPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('participant'),
+          fairLaunch.toBuffer(),
+          participant.publicKey.toBuffer()
+        ],
+        this.program.programId
+      );
+
+      // Get fair launch data to find treasury
+      const fairLaunchAccount = await (this.program as any).account.fairLaunch.fetch(fairLaunch);
+      const treasury = fairLaunchAccount.treasury;
+
+      // Get token accounts
+      const participantTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        participant.publicKey
+      );
+
+      const treasuryTokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        treasury
+      );
+
+      // Create claim transaction
+      const tx = await this.program.methods
+        .claimTokens()
+        .accounts({
+          fairLaunch: fairLaunch,
+          participant: participantPda,
+          participantWallet: participant.publicKey,
+          participantSigner: participant.publicKey,
+          treasuryTokenAccount: treasuryTokenAccount,
+          participantTokenAccount: participantTokenAccount,
+          treasury: treasury,
+          tokenProgram: TOKEN_PROGRAM_ID
+        })
+        .signers([participant])
+        .rpc();
+
+      console.log(`✅ Tokens claimed: ${tx}`);
+
+      return { signature: tx };
+
+    } catch (error) {
+      console.error('❌ Failed to claim tokens:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get fair launch data
+   */
+  async getFairLaunchData(fairLaunch: PublicKey): Promise<FairLaunchData | null> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
+    }
+
+    try {
+      const account = await (this.program as any).account.fairLaunch.fetch(fairLaunch);
       
       return {
-        success: true,
-        assetId: mintResult.assetId,
-        signature: mintResult.signature,
-        tier: tier?.name,
-        pricePaid: finalPrice * quantity,
+        fairLaunch: fairLaunch.toString(),
+        authority: account.authority.toString(),
+        tokenMint: account.tokenMint.toString(),
+        treasury: account.treasury.toString(),
+        config: {
+          totalSupply: account.config.totalSupply.toNumber(),
+          minAllocation: account.config.minAllocation.toNumber(),
+          maxAllocation: account.config.maxAllocation.toNumber(),
+          delaySeconds: account.config.delaySeconds.toNumber(),
+          durationSeconds: account.config.durationSeconds.toNumber(),
+          whitelistRoot: Buffer.from(account.config.whitelistRoot).toString('hex')
+        },
+        status: this.mapStatus(account.status),
+        totalParticipants: account.totalParticipants.toNumber(),
+        totalAllocated: account.totalAllocated.toNumber(),
+        createdAt: account.createdAt.toNumber(),
+        startTime: account.startTime.toNumber(),
+        endTime: account.endTime.toNumber(),
+        finalizedAt: account.finalizedAt ? account.finalizedAt.toNumber() : undefined
       };
-    } catch (error: any) {
-      console.error('❌ Genesis mint failed:', error);
-      return { success: false, error: error.message };
+    } catch (error) {
+      console.error('❌ Failed to get fair launch data:', error);
+      return null;
     }
   }
 
   /**
-   * Get launch information
+   * Get participant data
    */
-  getLaunch(launchId: string): GenesisLaunch | undefined {
-    return this.launches.get(launchId);
+  async getParticipantData(
+    fairLaunch: PublicKey,
+    participantWallet: PublicKey
+  ): Promise<ParticipantData | null> {
+    if (!this.program) {
+      throw new Error('Genesis Protocol service not initialized');
+    }
+
+    try {
+      const [participantPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('participant'),
+          fairLaunch.toBuffer(),
+          participantWallet.toBuffer()
+        ],
+        this.program.programId
+      );
+
+      const account = await (this.program as any).account.participant.fetch(participantPda);
+      
+      return {
+        participant: participantPda.toString(),
+        fairLaunch: account.fairLaunch.toString(),
+        wallet: account.wallet.toString(),
+        amountAllocated: account.amountAllocated.toNumber(),
+        tokensClaimed: account.tokensClaimed.toNumber(),
+        participatedAt: account.participatedAt.toNumber(),
+        claimedAt: account.claimedAt ? account.claimedAt.toNumber() : undefined
+      };
+    } catch (error) {
+      console.error('❌ Failed to get participant data:', error);
+      return null;
+    }
   }
 
   /**
-   * Get all launches
+   * Map Anchor enum to string
    */
-  getAllLaunches(): GenesisLaunch[] {
-    return Array.from(this.launches.values());
+  private mapStatus(status: any): 'Active' | 'Finalized' | 'Cancelled' {
+    if (status.active) return 'Active';
+    if (status.finalized) return 'Finalized';
+    if (status.cancelled) return 'Cancelled';
+    return 'Active';
   }
 
   /**
-   * Get active launches
+   * Check if fair launch is active
    */
-  getActiveLaunches(): GenesisLaunch[] {
-    return this.getAllLaunches().filter(launch => launch.status === 'active');
+  async isFairLaunchActive(fairLaunch: PublicKey): Promise<boolean> {
+    const data = await this.getFairLaunchData(fairLaunch);
+    if (!data) return false;
+
+    const now = Math.floor(Date.now() / 1000);
+    return data.status === 'Active' && 
+           now >= data.startTime && 
+           now <= data.endTime;
   }
 
   /**
-   * Get upcoming launches
+   * Get fair launch statistics
    */
-  getUpcomingLaunches(): GenesisLaunch[] {
-    const now = new Date();
-    return this.getAllLaunches().filter(
-      launch => launch.status === 'scheduled' && launch.config.launchDate > now
-    );
-  }
+  async getFairLaunchStats(fairLaunch: PublicKey): Promise<{
+    totalParticipants: number;
+    totalAllocated: number;
+    remainingSupply: number;
+    participationRate: number;
+  } | null> {
+    const data = await this.getFairLaunchData(fairLaunch);
+    if (!data) return null;
 
-  /**
-   * Pause a launch
-   */
-  async pauseLaunch(launchId: string): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (launch.status !== 'active') {
-      throw new Error('Only active launches can be paused');
-    }
-
-    launch.status = 'paused';
-    launch.updatedAt = new Date();
-    console.log(`⏸️ Launch paused: ${launchId}`);
-  }
-
-  /**
-   * Resume a paused launch
-   */
-  async resumeLaunch(launchId: string): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (launch.status !== 'paused') {
-      throw new Error('Only paused launches can be resumed');
-    }
-
-    launch.status = 'active';
-    launch.updatedAt = new Date();
-    console.log(`▶️ Launch resumed: ${launchId}`);
-  }
-
-  /**
-   * Complete a launch
-   */
-  async completeLaunch(launchId: string): Promise<void> {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
-
-    if (launch.status !== 'active' && launch.status !== 'paused') {
-      throw new Error('Only active or paused launches can be completed');
-    }
-
-    launch.status = 'completed';
-    launch.updatedAt = new Date();
-    console.log(`✅ Launch completed: ${launchId}`);
-  }
-
-  /**
-   * Get launch statistics
-   */
-  getLaunchStats(launchId: string): any {
-    const launch = this.launches.get(launchId);
-    if (!launch) {
-      throw new Error('Launch not found');
-    }
+    const remainingSupply = data.config.totalSupply - data.totalAllocated;
+    const participationRate = data.totalAllocated / data.config.totalSupply;
 
     return {
-      id: launch.id,
-      name: launch.config.name,
-      status: launch.status,
-      totalMinted: launch.totalMinted,
-      maxSupply: launch.config.maxSupply,
-      totalRevenue: launch.totalRevenue,
-      whitelistSize: launch.whitelist.length,
-      averagePrice: launch.totalMinted > 0 ? launch.totalRevenue / launch.totalMinted : 0,
-      completionRate: (launch.totalMinted / launch.config.maxSupply) * 100,
+      totalParticipants: data.totalParticipants,
+      totalAllocated: data.totalAllocated,
+      remainingSupply,
+      participationRate
     };
   }
+}
 
-  // Private helper methods
+// Export singleton instance
+let genesisProtocolService: GenesisProtocolService | null = null;
 
-  private generateLaunchId(): string {
-    return `genesis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+export function getGenesisProtocolService(connection: Connection): GenesisProtocolService {
+  if (!genesisProtocolService) {
+    genesisProtocolService = new GenesisProtocolService(connection);
   }
-
-  private async createLaunchTree(launch: GenesisLaunch): Promise<any> {
-    console.log('🌳 Creating tree for Genesis launch...');
-    
-    // Calculate optimal tree depth based on max supply
-    const maxDepth = Math.ceil(Math.log2(launch.config.maxSupply));
-    
-    // This would integrate with the BubblegumService
-    // For now, return a mock result
-    return {
-      treeAddress: new PublicKey('11111111111111111111111111111112'),
-      signature: 'mock-tree-signature',
-    };
-  }
-
-  private getWalletTier(launch: GenesisLaunch, walletAddress: string): GenesisTier | undefined {
-    if (!launch.config.tieredAccess || !launch.config.tiers) {
-      return undefined;
-    }
-
-    const whitelistEntry = launch.whitelist.find(entry => entry.walletAddress === walletAddress);
-    if (!whitelistEntry) {
-      return undefined;
-    }
-
-    return launch.config.tiers.find(tier => tier.name === whitelistEntry.tier);
-  }
-
-  private async detectBot(walletAddress: string): Promise<boolean> {
-    // Implement bot detection logic
-    // This could include:
-    // - Transaction pattern analysis
-    // - Wallet age verification
-    // - CAPTCHA verification
-    // - Rate limiting checks
-    
-    // For now, return false (no bot detected)
-    return false;
-  }
-
-  private async performMint(launch: GenesisLaunch, metadata: any, quantity: number): Promise<any> {
-    // This would integrate with the BubblegumService
-    // For now, return a mock result
-    return {
-      assetId: new PublicKey('11111111111111111111111111111113'),
-      signature: 'mock-mint-signature',
-    };
-  }
+  return genesisProtocolService;
 }

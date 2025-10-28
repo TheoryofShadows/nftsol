@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",
+    "@coral-xyz/anchor": "^0.32.1",
     "@irys/sdk": "^0.2.0",
     "@irys/upload": "^0.0.15",
     "@irys/upload-solana": "^0.1.8",
@@ -53,6 +54,7 @@
     "drizzle-kit": "^0.20.0",
     "drizzle-orm": "^0.44.6",
     "drizzle-zod": "^0.8.3",
+    "ethers": "^6.15.0",
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1",
     "express-session": "^1.18.2",
@@ -60,6 +62,7 @@
     "helmet": "^8.0.0",
     "ipfs-http-client": "^60.0.1",
     "jsonwebtoken": "^9.0.2",
+    "merkletreejs": "^0.6.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nanoid": "^5.0.8",
