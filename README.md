@@ -100,9 +100,12 @@ NFTSol/
 
 3. **Set up environment variables**
    ```bash
-   # Copy environment files
+   # Frontend (root-level env)
    cp config/frontend.env.example config/development/frontend.env
-   cp config/backend.env.example config/development/backend.env
+
+   # Backend (per-app env under apps/backend)
+   cp apps/backend/config/development/backend.env.example apps/backend/config/development/backend.env
+   # Fill in local dev values (Devnet signer, optional Helius); PORT is 3001 in dev
    ```
 
 4. **Start development servers**
@@ -141,7 +144,7 @@ VITE_SOLANA_CLUSTER=mainnet-beta
 ALLOWED_ORIGINS=https://nftsol.app
 DATABASE_URL=postgresql://...
 SOLANA_CLUSTER=mainnet-beta
-# ... see server/env.production for complete list
+# See apps/backend/config/production/backend.env.example for full list
 ```
 
 ## 🧪 Testing
