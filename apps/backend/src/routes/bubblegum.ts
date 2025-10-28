@@ -149,6 +149,7 @@ router.post('/mint', checkServiceAvailability, async (req: Request, res: Respons
       data: {
         assetId: result.assetId.toString(),
         signature: result.signature,
+        uri: result.uri,
         metadata: metadata
       }
     });
@@ -205,7 +206,8 @@ router.post('/bulk-mint', bulkMintLimiter, async (req: Request, res: Response) =
         total: metadatas.length,
         signatures: result.signatures,
         totalCost: result.totalCost,
-        averageCostPerNFT: result.minted > 0 ? result.totalCost / result.minted : 0
+        averageCostPerNFT: result.minted > 0 ? result.totalCost / result.minted : 0,
+        assets: result.assets
       }
     });
   } catch (error: any) {
@@ -252,6 +254,44 @@ router.get('/merkle-proof', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get Merkle proof',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/bubblegum/quick-test
+ * Quick test mint with your existing tree (C4qvg46azH7ogDQGcsZMqpAJ5L5DSkPALkV45f82MZKx)
+ */
+router.post('/quick-test', checkServiceAvailability, async (req: Request, res: Response) => {
+  try {
+    const { name = 'Yooo cNFT', symbol = 'NSOL', description, image } = req.body;
+    
+    console.log(`🧪 Quick test mint: ${name}`);
+
+    const result = await bubblegumService.quickMintTest({
+      name,
+      symbol,
+      description,
+      image
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        message: 'Quick test mint successful!',
+        assetId: result.assetId,
+        signature: result.signature,
+        uri: result.uri,
+        treeAddress: 'C4qvg46azH7ogDQGcsZMqpAJ5L5DSkPALkV45f82MZKx',
+        explorerUrl: `https://explorer.solana.com/tx/${result.signature}?cluster=devnet`
+      }
+    });
+  } catch (error: any) {
+    console.error('❌ Error in quick test mint:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Quick test mint failed',
       details: error.message
     });
   }
