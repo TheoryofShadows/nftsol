@@ -1,25 +1,11 @@
 {
-  "name": "nftsol-server",
-  "version": "0.1.0",
-  "private": true,
+  "name": "nftsol-backend",
+  "version": "1.0.0",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p .",
     "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.json",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:unit": "jest tests/unit",
-    "test:integration": "jest tests/integration",
-    "test:e2e": "jest tests/e2e",
-    "test:compliance": "node scripts/run-comprehensive-tests.js",
-    "test:all": "npm run test:compliance && npm run test:coverage",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix",
-    "type-check": "tsc --noEmit",
-    "seed:devnet": "node scripts/seed-marketplace.mjs devnet",
-    "seed:mainnet": "node scripts/seed-marketplace.mjs mainnet-beta",
-    "seed:custom": "node scripts/seed-marketplace.mjs"
+    "dev": "ts-node-dev src/index.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",
