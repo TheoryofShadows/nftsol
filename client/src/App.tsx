@@ -146,7 +146,7 @@ export default function App() {
             <h2 style={{ color: 'white', marginBottom: '1.5rem' }}>
               ✨ Mint New NFT
             </h2>
-            <MintForm onMintSuccess={handleMintSuccess} />
+            <MintForm />
           </div>
         )}
 
