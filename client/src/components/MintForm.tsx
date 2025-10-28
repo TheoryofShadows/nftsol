@@ -11,18 +11,40 @@ export default function MintForm() {
     if (!file || !name || !connected) return;
     setLoading(true);
 
-    const form = new FormData();
-    form.append('file', file);
-    form.append('name', name);
-    form.append('owner', publicKey!.toBase58());
-
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/simple-mint`, {
+      // First, verify wallet exists
+      const verifyRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/verify/${publicKey!.toBase58()}`);
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyData.success || !verifyData.data.exists) {
+        alert('Wallet not found on Solana network. Please ensure your wallet is properly connected.');
+        return;
+      }
+
+      // Create image URL (in production, upload to IPFS first)
+      const imageUrl = URL.createObjectURL(file);
+      
+      // Mint NFT using real Solana blockchain
+      const mintRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/mint`, {
         method: 'POST',
-        body: form,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          toAddress: publicKey!.toBase58(),
+          name: name,
+          description: `Minted NFT: ${name}`,
+          imageUrl: imageUrl
+        }),
       });
-      const data = await res.json();
-      alert(`Minted! Mint: ${data.mint}\nExplorer: https://explorer.solana.com/address/${data.mint}?cluster=devnet`);
+      
+      const mintData = await mintRes.json();
+      
+      if (mintData.success) {
+        alert(`🎉 NFT Minted Successfully!\n\nMint Address: ${mintData.data.mintAddress}\nTransaction: ${mintData.data.transactionSignature}\n\nView on Explorer: https://explorer.solana.com/address/${mintData.data.mintAddress}?cluster=devnet`);
+      } else {
+        alert(`Mint failed: ${mintData.error}`);
+      }
     } catch (e: any) {
       alert('Mint failed: ' + e.message);
     } finally {

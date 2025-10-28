@@ -14,6 +14,7 @@ import './styles/solana.css';
 const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
 const MintForm = lazy(() => import('./components/MintForm'));
 const NftGrid = lazy(() => import('./components/NftGrid'));
+const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -117,6 +118,7 @@ function AppContent() {
           {[
             { id: "market", label: "🏪 Marketplace", icon: "🏪" },
             { id: "mint", label: "✨ Mint NFT", icon: "✨" },
+            { id: "withdraw", label: "💰 Withdraw SOL", icon: "💰" },
             { id: "my-nfts", label: "👤 My NFTs", icon: "👤" },
             { id: "collections", label: "📚 Collections", icon: "📚" },
           ].map((tab) => (
@@ -157,6 +159,17 @@ function AppContent() {
               </h2>
               <Suspense fallback={<LoadingSpinner />}>
                 <MintForm />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "withdraw" && (
+            <div>
+              <h2 className="text-white text-2xl font-bold mb-6">
+                💰 Withdraw SOL
+              </h2>
+              <Suspense fallback={<LoadingSpinner />}>
+                <WithdrawalForm />
               </Suspense>
             </div>
           )}
