@@ -1,7 +1,7 @@
 services:
   - type: web
     name: nftsol-server-staging
-    rootDir: server
+    rootDir: apps/backend
     env: node
     plan: starter
     branch: develop
@@ -39,10 +39,47 @@ services:
         value: 1000000
       - key: TIP_ACCOUNTS
         value: 4ACfpUFoaSD9bfPdeu6DBt89gB6ENTeHBXCAi87NhDEE,D2L6yPZ2FmmmTKPgzaMKdhu6EWZcTpLy1Vhx8uvZe7NZ,9bnz4RShgq1hAnLnZbP8kbgBg1kEmcJBYQq3gQbmnSta
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUT_MINT
+        value: 4aHwytKbZnTJY5uNDSX75g2zChfYnC53GdNJHEZtwDPf
+      - key: CLOUT_TREASURY
+        value: J9msWkhEUPMLBXzkycwZjuU6B5vjfvNguASHLxJKAAfh
+      - key: CLOUT_FEE_COLLECTOR
+        value: 5Gu3RnFApFEDmMJj5czHTFPRf6A5xNypSRPrqewmPLHW
+      - key: CLOUT_DEVELOPER
+        value: 7pRUDnHS1y3b7EycVm7xtV2MgBArKFcAnFpdZCMPvLio
+      # Additional required environment variables
+      - key: SESSION_SECRET
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: BCRYPT_ROUNDS
+        value: 10
+      - key: BUBBLEGUM_PRIVATE_KEY
+        sync: false
+      - key: IRYS_WALLET_PRIVATE_KEY
+        sync: false
+      - key: MAX_FILE_SIZE
+        value: 50MB
+      - key: UPLOAD_DIR
+        value: ./uploads
+      - key: ENABLE_MONITORING
+        value: true
+      - key: LOG_REQUESTS
+        value: true
+      - key: SECURE_COOKIES
+        value: false
+      - key: TRUST_PROXY
+        value: true
+      - key: RATE_LIMITING_ENABLED
+        value: true
+      - key: HELMET_ENABLED
+        value: true
 
   - type: web
     name: nftsol-server-prod
-    rootDir: server
+    rootDir: apps/backend
     env: node
     plan: starter
     branch: main
