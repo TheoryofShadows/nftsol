@@ -4,7 +4,8 @@ services:
     name: nftsol-backend
     env: node
     region: oregon
-    plan: free
+    plan: starter
+    branch: develop
     buildCommand: cd apps/backend && npm ci && npm run build
     startCommand: cd apps/backend && node dist/index.js
     autoDeploy: true
@@ -14,8 +15,10 @@ services:
         fromDatabase:
           name: nftsol-db
           property: connectionString
-      VITE_API_BASE: https://nftsol-server-prod.onrender.com
+      VITE_API_BASE: https://nftsol-dev.onrender.com
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com
-      NFT_STORAGE_KEY: <YOUR_REAL_KEY>
-      CLOUT_PROGRAM_ID: C1oUt9v7NxKp3fA1b2cD4eF5gH6iJ7kL8mN9oPqRsTu
-      MARKET_PROGRAM_ID: MktEsc123abc456def789ghi012jkl345mno678pqrs
+      NFT_STORAGE_KEY: <YOUR_REAL_NFT_STORAGE_KEY>
+      CLOUT_PROGRAM_ID: <REAL_ID_AFTER_DEPLOY>
+      MARKET_PROGRAM_ID: <REAL_ID_AFTER_DEPLOY>
+      LOYALTY_PROGRAM_ID: <REAL_ID_AFTER_DEPLOY>
+      REWARDS_VAULT: <REAL_ID_AFTER_DEPLOY>
