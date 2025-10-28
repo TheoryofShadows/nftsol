@@ -6,6 +6,7 @@ import compression from 'compression';
 import multer from 'multer';
 import { createServer } from 'http';
 import dotenv from 'dotenv';
+import { PROGRAM_IDS } from './config/programs';
 
 // Load environment variables
 dotenv.config();
@@ -38,6 +39,15 @@ app.get('/healthz', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.json({ ok: true });
+});
+
+// Program IDs endpoint
+app.get('/api/programs', (req, res) => {
+  res.json({
+    success: true,
+    programs: PROGRAM_IDS,
+    message: 'Real Solana program IDs'
+  });
 });
 
 // Simple working mint endpoint
