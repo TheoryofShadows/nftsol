@@ -3,6 +3,7 @@ import MintForm from "./components/MintForm";
 import SolanaSection from "./components/SolanaSection";
 import SolanaHeader from "./components/SolanaHeader";
 import PhantomConnect from "./components/PhantomConnect";
+import ProxyCheck from "./components/ProxyCheck";
 import React from "react";
 
 const API = import.meta.env.VITE_API_BASE || "http://localhost:3003";
