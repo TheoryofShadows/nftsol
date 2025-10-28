@@ -25,9 +25,10 @@ const UserAuth = lazy(() => import("./components/UserAuth"));
 const UserDashboard = lazy(() => import("./components/UserDashboard"));
 const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"));
 const TransparencyDashboard = lazy(() => import("./components/TransparencyDashboard"));
+const EternalEchoes = lazy(() => import("./components/EternalEchoes"));
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'genesis' | 'mobile' | 'collection-verification' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'genesis' | 'mobile' | 'collection-verification' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency' | 'eternal-echoes'>('home');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -280,6 +281,13 @@ export default function App() {
               >
                 🔍 Transparency
               </button>
+              <button
+                onClick={() => setActiveTab('eternal-echoes')}
+                className={`nav-tab ${activeTab === 'eternal-echoes' ? 'active' : ''}`}
+                aria-label="Navigate to Eternal Echoes"
+              >
+                🌊 Eternal Echoes
+              </button>
             </div>
           )}
 
@@ -400,6 +408,13 @@ export default function App() {
                 >
                   🔍 Transparency
                 </button>
+                <button
+                  onClick={() => { setActiveTab('eternal-echoes'); setIsMobileMenuOpen(false); }}
+                  className={`mobile-nav-tab ${activeTab === 'eternal-echoes' ? 'active' : ''}`}
+                  aria-label="Navigate to Eternal Echoes"
+                >
+                  🌊 Eternal Echoes
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -494,7 +509,9 @@ export default function App() {
           
           {activeTab === 'transparency' && <TransparencyDashboard />}
           
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'bubblegum' && activeTab !== 'genesis' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && (
+          {activeTab === 'eternal-echoes' && <EternalEchoes />}
+          
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'bubblegum' && activeTab !== 'genesis' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && activeTab !== 'eternal-echoes' && (
             <UserAuth 
               onUserLogin={setUser}
               onUserLogout={() => setUser(null)}

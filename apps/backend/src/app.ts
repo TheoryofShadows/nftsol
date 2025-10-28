@@ -26,6 +26,7 @@ import irys from "./routes/irys";
 import bubblegum from "./routes/bubblegum";
 import genesis from "./routes/genesis";
 import collectionVerification from "./routes/collectionVerification";
+import eternalEchoes from "./routes/eternalEchoes";
 import { getAppConfig } from "./config/environment";
 import { trackUsage, trackAPICalls, performanceMonitoring } from "./middleware/usageTracking";
 import { AutomatedMaintenanceService } from "./services/automatedMaintenance";
@@ -199,6 +200,7 @@ app.use("/api/irys", irys);
 app.use("/api/bubblegum", bubblegum);
 app.use("/api/genesis", genesis);
 app.use("/api/collection-verification", collectionVerification);
+app.use("/api/eternal-echoes", eternalEchoes);
 app.use("/healthz", health);
 app.use("/health", health);
 app.use("/nfts", nfts);
@@ -291,6 +293,21 @@ if (process.env.WS_ENABLED === 'true') {
   } catch (error) {
     console.error('❌ Failed to initialize WebSocket service:', error);
   }
+}
+
+// Initialize Eternal Echoes service
+import { initializeEternalEchoes } from "./routes/eternalEchoes";
+import { Connection, clusterApiUrl } from "@solana/web3.js";
+
+try {
+  const connection = new Connection(
+    process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'),
+    'confirmed'
+  );
+  initializeEternalEchoes(connection);
+  console.log('✅ Eternal Echoes service initialized');
+} catch (error) {
+  console.error('❌ Failed to initialize Eternal Echoes service:', error);
 }
 
 // Export both app and server for different use cases
