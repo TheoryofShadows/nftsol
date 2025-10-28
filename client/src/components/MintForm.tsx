@@ -1,54 +1,49 @@
 import React, { useState } from "react";
+import { useWallet } from '@solana/wallet-adapter-react';
 
 interface MintFormProps {
   onMintSuccess?: (nft: any) => void;
 }
 
 export default function MintForm({ onMintSuccess }: MintFormProps) {
-  const [form, setForm] = useState({ 
-    name: "", 
-    description: "", 
-    imageUrl: "",
-    creatorWallet: "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E" // Default test wallet
-  });
-  const [status, setStatus] = useState("");
+  const { publicKey, connected } = useWallet();
+  const [file, setFile] = useState<File | null>(null);
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("");
 
-  async function handleMint() {
-    if (!form.name || !form.description || !form.imageUrl) {
-      setStatus("❌ Please fill in all fields");
+  const mint = async () => {
+    if (!file || !name || !connected) {
+      setStatus("❌ Please fill in all fields and connect wallet");
       return;
     }
-
+    
     setLoading(true);
     setStatus("Minting...");
     
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/simple-mint`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          description: form.description,
-          imageUrl: form.imageUrl,
-          creatorWallet: form.creatorWallet
-        })
-      });
-      
+      const form = new FormData();
+      form.append('file', file);
+      form.append('name', name);
+      form.append('owner', publicKey!.toBase58());
+
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/simple-mint`,
+        { method: 'POST', body: form }
+      );
       const data = await res.json();
       
-      if (data.success) {
-        setStatus(`✅ Minted! Address: ${data.mintAddress}`);
+      if (data.mint) {
+        setStatus(`✅ Minted! ${data.mint}`);
         
         // Create NFT object for the parent component
         const newNFT = {
-          id: data.mintAddress,
-          name: form.name,
-          description: form.description,
-          imageUrl: form.imageUrl,
-          creator: form.creatorWallet,
-          mintAddress: data.mintAddress,
-          signature: data.signature
+          id: data.mint,
+          name: name,
+          imageUrl: data.uri,
+          creator: publicKey!.toBase58(),
+          mintAddress: data.mint,
+          uri: data.uri
         };
         
         if (onMintSuccess) {
@@ -56,12 +51,8 @@ export default function MintForm({ onMintSuccess }: MintFormProps) {
         }
         
         // Reset form
-        setForm({ 
-          name: "", 
-          description: "", 
-          imageUrl: "",
-          creatorWallet: "4mUWjVdfVWP9TT5wT9x2P2Uhd8NQgzWXXMGKM8xxmM9E"
-        });
+        setName('');
+        setFile(null);
       } else {
         setStatus(`❌ ${data.error || 'Minting failed'}`);
       }
@@ -70,95 +61,43 @@ export default function MintForm({ onMintSuccess }: MintFormProps) {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
-    <div style={{
-      background: 'rgba(255, 255, 255, 0.1)',
-      backdropFilter: 'blur(10px)',
-      borderRadius: '16px',
-      padding: '2rem',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      maxWidth: '500px',
-      margin: '0 auto'
-    }}>
-      <h3 style={{ color: 'white', marginBottom: '1.5rem', textAlign: 'center' }}>
+    <div className="p-4 bg-white/10 backdrop-blur rounded-xl max-w-md mx-auto">
+      <h3 className="text-white mb-4 text-center text-lg font-semibold">
         Create Your NFT
       </h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="space-y-4">
         <input
-          placeholder="NFT Name"
-          value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
-          style={{
-            padding: '0.75rem',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            background: 'rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            fontSize: '1rem'
-          }}
-        />
-        
-        <textarea
-          placeholder="Description"
-          value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          rows={3}
-          style={{
-            padding: '0.75rem',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            background: 'rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            fontSize: '1rem',
-            resize: 'vertical'
-          }}
+          type="file"
+          onChange={e => setFile(e.target.files?.[0] ?? null)}
+          className="w-full p-2 mb-2 rounded border border-white/30 bg-white/10 text-white"
+          accept="image/*"
         />
         
         <input
-          placeholder="Image URL"
-          value={form.imageUrl}
-          onChange={e => setForm({ ...form, imageUrl: e.target.value })}
-          style={{
-            padding: '0.75rem',
-            borderRadius: '8px',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            background: 'rgba(255, 255, 255, 0.1)',
-            color: 'white',
-            fontSize: '1rem'
-          }}
+          placeholder="NFT name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          className="w-full p-2 rounded border border-white/30 bg-white/10 text-white placeholder-white/70"
         />
         
         <button
-          onClick={handleMint}
-          disabled={loading}
-          style={{
-            padding: '0.75rem 1.5rem',
-            borderRadius: '8px',
-            border: 'none',
-            background: loading ? 'rgba(255, 255, 255, 0.3)' : 'linear-gradient(45deg, #667eea, #764ba2)',
-            color: 'white',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s'
-          }}
+          onClick={mint}
+          disabled={!connected || loading}
+          className="w-full bg-purple-600 enabled:hover:bg-purple-700 disabled:bg-gray-500 text-white py-2 rounded font-medium transition-colors"
         >
-          {loading ? 'Minting...' : '✨ Mint NFT'}
+          {loading ? 'Minting…' : 'Mint NFT'}
         </button>
         
         {status && (
-          <div style={{
-            padding: '0.75rem',
-            borderRadius: '8px',
-            background: status.includes('✅') ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
-            border: `1px solid ${status.includes('✅') ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)'}`,
-            color: 'white',
-            textAlign: 'center',
-            fontSize: '0.9rem'
-          }}>
+          <div className={`p-3 rounded text-center text-sm ${
+            status.includes('✅') 
+              ? 'bg-green-500/20 border border-green-500/50 text-green-300' 
+              : 'bg-red-500/20 border border-red-500/50 text-red-300'
+          }`}>
             {status}
           </div>
         )}
