@@ -1,25 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { clusterApiUrl } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import './styles/solana.css';
 
-const endpoint = import.meta.env.VITE_SOLANA_CLUSTER === 'devnet'
-  ? clusterApiUrl('devnet')
-  : clusterApiUrl('mainnet-beta');
+// Performance monitoring
+const startTime = performance.now();
 
-const wallets = [new PhantomWalletAdapter()];
+// Error handling for unhandled promises
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  event.preventDefault();
+});
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <ConnectionProvider endpoint={endpoint}>
-    <WalletProvider wallets={wallets} autoConnect>
-      <WalletModalProvider>
-        <App />
-      </WalletModalProvider>
-    </WalletProvider>
-  </ConnectionProvider>
+// Error handling for uncaught errors
+window.addEventListener('error', (event) => {
+  console.error('Uncaught error:', event.error);
+});
+
+// Create root and render
+const root = ReactDOM.createRoot(document.getElementById('root')!);
+
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );
+
+// Performance logging
+const endTime = performance.now();
+console.log(`App initialized in ${(endTime - startTime).toFixed(2)}ms`);

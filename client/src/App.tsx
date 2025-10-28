@@ -1,166 +1,215 @@
-import React, { useState, useEffect } from "react";
-import PhantomConnect from "./components/PhantomConnect";
-import MintForm from "./components/MintForm";
-import NftGrid from "./components/NftGrid";
-import "./styles/solana.css";
+import React, { useState, useEffect, Suspense, lazy } from "react";
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { clusterApiUrl } from '@solana/web3.js';
+import { AppProvider } from './context/AppContext';
+import { NotificationProvider } from './components/NotificationSystem';
+import { usePerformance } from './hooks/usePerformance';
+import { useApp } from './context/AppContext';
+import { useNotification } from './components/NotificationSystem';
+import './styles/solana.css';
 
-const API = import.meta.env.VITE_API_BASE || "https://nftsol-dev.onrender.com";
+// Lazy load components for better performance
+const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
+const MintForm = lazy(() => import('./components/MintForm'));
+const NftGrid = lazy(() => import('./components/NftGrid'));
 
-interface NFT {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  creator: string;
-  mintAddress?: string;
-  signature?: string;
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center py-8">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+    <span className="ml-2 text-white">Loading...</span>
+  </div>
+);
+
+// Error boundary component
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-red-900 via-purple-900 to-indigo-900 flex items-center justify-center">
+          <div className="text-center text-white">
+            <h1 className="text-4xl font-bold mb-4">Oops! Something went wrong</h1>
+            <p className="text-lg mb-4">We're sorry, but something unexpected happened.</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
-export default function App() {
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'marketplace' | 'mint' | 'my-nfts'>('marketplace');
+function AppContent() {
+  const [activeTab, setActiveTab] = useState("market");
+  const { nfts, loading, error, loadMarketplace, clearError } = useApp();
+  const { addNotification } = useNotification();
+  const { metrics, getPerformanceReport } = usePerformance();
 
-  // Load NFTs on component mount
+  // Load NFTs on mount
   useEffect(() => {
-    loadNFTs();
-  }, []);
+    loadMarketplace();
+  }, [loadMarketplace]);
 
-  const loadNFTs = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API}/nfts`);
-      const data = await response.json();
-      setNfts(data.items || []);
-    } catch (err) {
-      setError('Failed to load NFTs');
-      console.error('Error loading NFTs:', err);
-    } finally {
-      setLoading(false);
+  // Performance monitoring
+  useEffect(() => {
+    const report = getPerformanceReport();
+    console.log('Performance Report:', report);
+  }, [getPerformanceReport]);
+
+  // Error handling
+  useEffect(() => {
+    if (error) {
+      addNotification({
+        type: 'error',
+        title: 'Error',
+        message: error,
+      });
     }
-  };
+  }, [error, addNotification]);
 
-  const handleMintSuccess = (newNFT: NFT) => {
-    setNfts(prev => [newNFT, ...prev]);
-    setActiveTab('marketplace');
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    clearError();
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
-      {/* Header */}
-      <header style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(10px)',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
-          <h1 style={{ 
-            margin: 0, 
-            color: 'white', 
-            fontSize: '1.8rem',
-            fontWeight: 'bold'
-          }}>
-            🎨 NFTSol
-          </h1>
-          <PhantomConnect />
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <header className="p-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-3xl font-bold text-white">NFTSol</h1>
+            <div className="text-sm text-white/70">
+              Performance: {metrics.loadTime.toFixed(0)}ms
+            </div>
+          </div>
+          <Suspense fallback={<div className="text-white">Loading wallet...</div>}>
+            <PhantomConnect />
+          </Suspense>
         </div>
       </header>
 
-      {/* Navigation */}
-      <nav style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        padding: '1rem 2rem',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '2rem',
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}>
+      <main className="max-w-6xl mx-auto p-4">
+        <div className="flex space-x-4 mb-8">
           {[
-            { id: 'marketplace', label: '🏪 Marketplace' },
-            { id: 'mint', label: '✨ Mint NFT' },
-            { id: 'my-nfts', label: '👤 My NFTs' }
-          ].map(tab => (
+            { id: "market", label: "🏪 Marketplace", icon: "🏪" },
+            { id: "mint", label: "✨ Mint NFT", icon: "✨" },
+            { id: "my-nfts", label: "👤 My NFTs", icon: "👤" },
+            { id: "collections", label: "📚 Collections", icon: "📚" },
+          ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              style={{
-                background: activeTab === tab.id ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                color: 'white',
-                padding: '0.5rem 1rem',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                fontSize: '1rem'
-              }}
+              onClick={() => handleTabChange(tab.id)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                activeTab === tab.id
+                  ? "bg-purple-600 text-white shadow-lg"
+                  : "bg-white/10 text-white hover:bg-white/20 hover:shadow-md"
+              }`}
             >
               {tab.label}
             </button>
           ))}
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <main style={{
-        padding: '2rem',
-        maxWidth: '1200px',
-        margin: '0 auto'
-      }}>
-        {activeTab === 'marketplace' && (
-          <div>
-            <h2 style={{ color: 'white', marginBottom: '1.5rem' }}>
-              🏪 NFT Marketplace
-            </h2>
-            {loading ? (
-              <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>
-                Loading NFTs...
-              </div>
-            ) : error ? (
-              <div style={{ color: '#ff6b6b', textAlign: 'center', padding: '2rem' }}>
-                {error}
-              </div>
-            ) : (
-              <NftGrid nfts={nfts} />
-            )}
-          </div>
-        )}
-
-        {activeTab === 'mint' && (
-          <div>
-            <h2 style={{ color: 'white', marginBottom: '1.5rem' }}>
-              ✨ Mint New NFT
-            </h2>
-            <MintForm />
-          </div>
-        )}
-
-        {activeTab === 'my-nfts' && (
-          <div>
-            <h2 style={{ color: 'white', marginBottom: '1.5rem' }}>
-              👤 My NFTs
-            </h2>
-            <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>
-              Connect your wallet to view your NFTs
+        <div className="min-h-[400px]">
+          {activeTab === "market" && (
+            <div>
+              <h2 className="text-white text-2xl font-bold mb-6">
+                🏪 NFT Marketplace
+              </h2>
+              {loading ? (
+                <LoadingSpinner />
+              ) : (
+                <Suspense fallback={<LoadingSpinner />}>
+                  <NftGrid nfts={nfts} />
+                </Suspense>
+              )}
             </div>
-          </div>
-        )}
+          )}
+
+          {activeTab === "mint" && (
+            <div>
+              <h2 className="text-white text-2xl font-bold mb-6">
+                ✨ Mint New NFT
+              </h2>
+              <Suspense fallback={<LoadingSpinner />}>
+                <MintForm />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "my-nfts" && (
+            <div>
+              <h2 className="text-white text-2xl font-bold mb-6">
+                👤 My NFTs
+              </h2>
+              <Suspense fallback={<LoadingSpinner />}>
+                <NftGrid nfts={nfts} />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "collections" && (
+            <div>
+              <h2 className="text-white text-2xl font-bold mb-6">
+                📚 Collections
+              </h2>
+              <div className="text-white text-center py-8">
+                Collections coming soon...
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
 }
+
+function App() {
+  const endpoint = import.meta.env.VITE_SOLANA_CLUSTER === 'devnet'
+    ? clusterApiUrl('devnet')
+    : clusterApiUrl('mainnet-beta');
+
+  const wallets = [new PhantomWalletAdapter()];
+
+  return (
+    <ErrorBoundary>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <WalletModalProvider>
+            <AppProvider>
+              <NotificationProvider>
+                <AppContent />
+              </NotificationProvider>
+            </AppProvider>
+          </WalletModalProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </ErrorBoundary>
+  );
+}
+
+export default App;
