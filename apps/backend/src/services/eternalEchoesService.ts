@@ -5,11 +5,11 @@
  */
 
 import { Connection, PublicKey } from '@solana/web3.js';
-import { bubblegumService } from './bubblegumService';
-import { irysService } from './irysService';
-import { cloutTokenService } from './cloutToken';
-import { honorSystem } from './honorSystem';
-import crypto from 'crypto';
+import { BubblegumService } from './bubblegumService';
+import { IrysService } from './irysService';
+import { CloutTokenService } from './cloutToken';
+import { HonorSystem } from './honorSystem';
+import * as crypto from 'crypto';
 import axios from 'axios';
 
 export interface IAVideo {
@@ -57,9 +57,21 @@ export interface EchoLedger {
 export class EternalEchoesService {
   private connection: Connection;
   private grokCache: Map<string, GrokVerification> = new Map();
+  private bubblegumService: BubblegumService;
+  private irysService: IrysService;
+  private cloutTokenService: CloutTokenService;
+  private honorSystem: HonorSystem;
 
   constructor(connection: Connection) {
     this.connection = connection;
+    this.bubblegumService = new BubblegumService(connection, process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com');
+    this.irysService = new IrysService({ 
+      url: 'https://devnet.irys.xyz',
+      token: 'solana',
+      key: process.env.IRYS_PRIVATE_KEY || ''
+    });
+    this.cloutTokenService = new CloutTokenService();
+    this.honorSystem = new HonorSystem();
   }
 
   /**
@@ -181,7 +193,8 @@ export class EternalEchoesService {
       }
 
       // Upload video to Irys for decentralized storage
-      const videoUri = await irysService.uploadFile(iaVideo.videoUrl);
+      const uploadResult = await this.irysService.uploadFile(Buffer.from(iaVideo.videoUrl), 'video/mp4');
+      const videoUri = typeof uploadResult === 'string' ? uploadResult : uploadResult.id;
       
       // Create truth hash
       const truthHash = crypto.createHash('sha256')
@@ -189,7 +202,7 @@ export class EternalEchoesService {
         .digest();
 
       // Mint compressed NFT using existing Bubblegum service
-      const mintResult = await bubblegumService.mintCompressedNFT({
+      const mintResult = await this.bubblegumService.createCompressedNFT({
         treeAddress: new PublicKey(process.env.BUBBLEGUM_TREE_ADDRESS!),
         metadata: {
           name: `Eternal Echo: ${iaVideo.title}`,
@@ -203,9 +216,10 @@ export class EternalEchoesService {
             { trait_type: 'Creator', value: iaVideo.creator },
             { trait_type: 'Date', value: iaVideo.date },
             { trait_type: 'Echo Type', value: 'Base' },
-            { trait_type: 'Verified', value: verification.verified }
+            { trait_type: 'Verified', value: verification.verified ? 'true' : 'false' }
           ]
-        }
+        },
+        owner: new PublicKey(creatorWallet)
       });
 
       // Create echo ledger
@@ -225,7 +239,7 @@ export class EternalEchoesService {
 
       // Award CLOUT tokens for verified content
       if (verification.verified) {
-        await cloutTokenService.distributeCloutRewards(
+        await this.cloutTokenService.distributeCloutRewards(
           creatorWallet,
           100, // 2x bonus for verified echoes
           2.0
@@ -233,7 +247,7 @@ export class EternalEchoesService {
       }
 
       // Update honor score
-      await honorSystem.updateHonorScore(creatorWallet, 'echo_created', 1);
+      await this.honorSystem.updateHonorScore(creatorWallet, 'echo_created', 1);
 
       return {
         success: true,
@@ -280,7 +294,7 @@ export class EternalEchoesService {
 
       // Award CLOUT tokens for verified echoes
       if (verification.verified) {
-        await cloutTokenService.distributeCloutRewards(
+        await this.cloutTokenService.distributeCloutRewards(
           contributor,
           50, // Standard echo reward
           1.0
@@ -288,7 +302,7 @@ export class EternalEchoesService {
       }
 
       // Update honor score
-      await honorSystem.updateHonorScore(contributor, 'echo_added', 1);
+      await this.honorSystem.updateHonorScore(contributor, 'echo_added', 1);
 
       return {
         success: true,
