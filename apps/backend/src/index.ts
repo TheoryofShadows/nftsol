@@ -12,6 +12,8 @@ import { validateWallet, validateFileUpload, sanitizeInput } from './utils/valid
 import { solanaService } from './services/solana';
 import { nftService } from './services/nft';
 import { ApiResponse, MintRequest } from './types';
+import withdrawalRoutes from './routes/withdrawals';
+import adminWithdrawalRoutes from './routes/admin/withdrawals';
 
 const app = express();
 const server = createServer(app);
@@ -244,6 +246,84 @@ app.get('/api/nfts/:owner', async (req, res) => {
       error: 'Failed to get NFTs by owner'
     });
   }
+});
+
+// Withdrawal routes (with rate limiting)
+const withdrawLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Max 5 withdrawal requests per window
+  message: 'Too many withdrawal attempts, slow down',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Mock authentication middleware (replace with real auth)
+const mockAuthMiddleware = (req: any, res: any, next: any) => {
+  // For testing - replace with real authentication
+  req.user = { id: 'test-user-123', isAdmin: false };
+  next();
+};
+
+const mockAdminMiddleware = (req: any, res: any, next: any) => {
+  // For testing - replace with real admin authentication
+  req.user = { id: 'admin-123', isAdmin: true };
+  next();
+};
+
+// Emergency controls
+const WITHDRAWALS_PAUSED = process.env.WITHDRAWALS_PAUSED === 'true';
+const MAX_SINGLE_WITHDRAWAL = parseInt(process.env.MAX_SINGLE_WITHDRAWAL_LAMPORTS || '10000000000', 10);
+const MAX_DAILY_PER_USER = parseInt(process.env.MAX_DAILY_PER_USER_LAMPORTS || '50000000000', 10);
+
+// Emergency pause middleware
+const emergencyPauseMiddleware = (req: any, res: any, next: any) => {
+  if (WITHDRAWALS_PAUSED && req.path.includes('/withdraw')) {
+    const response: ApiResponse = {
+      success: false,
+      error: 'Withdrawals are temporarily paused for maintenance',
+      code: 'WITHDRAWALS_PAUSED'
+    };
+    return res.status(503).json(response);
+  }
+  next();
+};
+
+// Mount withdrawal routes with emergency controls
+app.use('/api/wallets/withdraw', emergencyPauseMiddleware, mockAuthMiddleware, withdrawLimiter, withdrawalRoutes);
+app.use('/api/admin/withdrawals', mockAdminMiddleware, adminWithdrawalRoutes);
+
+// Emergency controls endpoint
+app.get('/api/admin/emergency/status', mockAdminMiddleware, (req, res) => {
+  const response: ApiResponse = {
+    success: true,
+    data: {
+      withdrawalsPaused: WITHDRAWALS_PAUSED,
+      maxSingleWithdrawal: MAX_SINGLE_WITHDRAWAL,
+      maxDailyPerUser: MAX_DAILY_PER_USER,
+      timestamp: Date.now()
+    }
+  };
+  res.json(response);
+});
+
+// Toggle withdrawals pause (admin only)
+app.post('/api/admin/emergency/pause-withdrawals', mockAdminMiddleware, (req, res) => {
+  const { paused, reason } = req.body;
+  
+  // In production, this would update a database or config service
+  console.log(`🚨 EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
+  
+  const response: ApiResponse = {
+    success: true,
+    data: {
+      withdrawalsPaused: paused,
+      reason,
+      timestamp: Date.now(),
+      adminId: (req as any).user.id
+    },
+    message: `Withdrawals ${paused ? 'paused' : 'resumed'} successfully`
+  };
+  res.json(response);
 });
 
 // Marketplace endpoints

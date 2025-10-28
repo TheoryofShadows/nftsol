@@ -68,6 +68,17 @@ export const programConfig: ProgramConfig = {
   rewardsVault: process.env.REWARDS_VAULT || ''
 };
 
+// Withdrawal configuration
+export const withdrawalConfig = {
+  solanaRpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  platformSecretKeyBase58: process.env.PLATFORM_SECRET_KEY_BASE58 || '',
+  platformSecretKeyJson: process.env.PLATFORM_SECRET_KEY_JSON || '',
+  autoApproveLamports: parseInt(process.env.WITHDRAWAL_AUTO_APPROVE_LAMPORTS || '100000000', 10), // 0.1 SOL
+  dailyLimitLamports: parseInt(process.env.WITHDRAWAL_DAILY_LIMIT_LAMPORTS || '5000000000', 10), // 5 SOL
+  rateLimitWindowMs: parseInt(process.env.WITHDRAWAL_RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
+  rateLimitMax: parseInt(process.env.WITHDRAWAL_RATE_LIMIT_MAX || '5', 10), // 5 requests per window
+};
+
 // Validation helpers
 export const validateWalletAddress = (address: string): boolean => {
   return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
