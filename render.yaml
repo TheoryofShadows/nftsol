@@ -14,7 +14,7 @@ services:
         fromDatabase:
           name: nftsol-db
           property: connectionString
-      VITE_API_BASE: https://nftsol-dev.onrender.com
+      VITE_API_BASE: https://nftsol-server-prod.onrender.com
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com
       NFT_STORAGE_KEY: <YOUR_REAL_KEY>
       CLOUT_PROGRAM_ID: C1oUt9v7NxKp3fA1b2cD4eF5gH6iJ7kL8mN9oPqRsTu
