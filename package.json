@@ -23,6 +23,7 @@
     "@irys/upload-solana": "^0.0.4",
     "@solana/spl-token": "^0.1.8",
     "@solana/wallet-adapter-wallets": "^0.19.33",
+    "axios": "^1.13.0",
     "bigint-buffer": "^1.1.5",
     "drizzle-kit": "^0.31.5",
     "drizzle-zod": "^0.8.3",

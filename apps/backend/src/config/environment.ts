@@ -1,6 +1,6 @@
 import { config } from "dotenv";
-import path from "path";
-import fs from "fs";
+import * as path from "path";
+import * as fs from "fs";
 
 // Load development environment file FIRST if in development mode
 if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {

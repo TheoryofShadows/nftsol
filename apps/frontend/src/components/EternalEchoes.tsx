@@ -40,7 +40,7 @@ interface GrokVerification {
 }
 
 const EternalEchoes: React.FC = () => {
-  const { publicKey, connected } = useWallet();
+  const { publicKey, connected, wallet, connect } = useWallet();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<IAVideo[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<IAVideo | null>(null);
@@ -50,8 +50,65 @@ const EternalEchoes: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [verification, setVerification] = useState<GrokVerification | null>(null);
   const [activeTab, setActiveTab] = useState<'search' | 'create' | 'explore'>('search');
+  const [isMobile, setIsMobile] = useState(false);
+  const [walletDetectionError, setWalletDetectionError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  // Search Internet Archive videos
+  // Mobile detection and wallet enhancement
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      setIsMobile(isMobileDevice || isTouchDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Enhanced wallet connection with retry logic
+  const connectWallet = async () => {
+    if (!wallet) {
+      setWalletDetectionError('No wallet detected. Please install Phantom, Solflare, or another Solana wallet.');
+      return;
+    }
+
+    setIsConnecting(true);
+    setWalletDetectionError(null);
+
+    try {
+      await connect();
+      setRetryCount(0);
+    } catch (error: any) {
+      console.error('Wallet connection failed:', error);
+      setWalletDetectionError(error.message || 'Failed to connect wallet. Please try again.');
+      
+      // Retry logic for mobile wallets
+      if (retryCount < 3) {
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+          connectWallet();
+        }, 2000);
+      }
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  // Auto-retry wallet connection on mobile
+  useEffect(() => {
+    if (isMobile && !connected && !wallet && retryCount === 0) {
+      const timer = setTimeout(() => {
+        connectWallet();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, connected, wallet, retryCount]);
+
+  // Search Internet Archive videos with enhanced error handling
   const searchVideos = async () => {
     if (!searchQuery.trim()) return;
     
@@ -59,8 +116,21 @@ const EternalEchoes: React.FC = () => {
     try {
       const response = await axios.get(`/api/eternal-echoes/search?query=${encodeURIComponent(searchQuery)}&rows=20`);
       setSearchResults(response.data.videos || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Search failed:', error);
+      
+      // Enhanced error handling for different scenarios
+      if (error.response?.status === 429) {
+        alert('⚠️ Too many requests. Please wait a moment and try again.');
+      } else if (error.response?.status >= 500) {
+        alert('🔧 Server error. Please try again later.');
+      } else if (error.code === 'ECONNABORTED') {
+        alert('⏰ Request timeout. Please check your connection and try again.');
+      } else if (error.response?.status === 404) {
+        alert('❌ Search service not available. Please try again later.');
+      } else {
+        alert('❌ Search failed. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -184,17 +254,79 @@ const EternalEchoes: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Wallet Connection Check */}
+        {/* Enhanced Wallet Connection Check */}
         {!connected && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="bg-red-900/20 border border-red-500 rounded-lg p-6 text-center mb-8"
           >
-            <h3 className="text-xl font-semibold mb-2">Wallet Required</h3>
-            <p className="text-gray-300">
-              Connect your wallet to start creating and contributing to Eternal Echoes.
+            <h3 className="text-xl font-semibold mb-2">🔗 Wallet Required</h3>
+            <p className="text-gray-300 mb-4">
+              Connect your Solana wallet to create and contribute to Eternal Echoes.
             </p>
+            
+            {/* Mobile-specific wallet detection */}
+            {isMobile && (
+              <div className="mb-4 p-4 bg-blue-900/20 border border-blue-500 rounded-lg">
+                <h4 className="text-lg font-semibold mb-2">📱 Mobile Wallet Detection</h4>
+                <p className="text-sm text-gray-300 mb-3">
+                  {wallet ? `Detected: ${wallet.adapter.name}` : 'Scanning for wallets...'}
+                </p>
+                {walletDetectionError && (
+                  <p className="text-red-400 text-sm mb-3">{walletDetectionError}</p>
+                )}
+                {retryCount > 0 && (
+                  <p className="text-yellow-400 text-sm mb-3">
+                    Retry attempt {retryCount}/3...
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={connectWallet}
+                disabled={isConnecting || !wallet}
+                className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+              >
+                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+              </button>
+              
+              <button
+                onClick={() => window.location.href = '/#/mobile'}
+                className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+              >
+                {isMobile ? 'Open Wallet App' : 'Mobile Wallet Setup'}
+              </button>
+            </div>
+
+            {/* Wallet installation guide for mobile */}
+            {isMobile && !wallet && (
+              <div className="mt-4 p-4 bg-gray-800/50 rounded-lg">
+                <h4 className="text-lg font-semibold mb-2">📲 Install a Solana Wallet</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                  <a
+                    href="https://phantom.app/download"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 p-2 bg-purple-600/20 border border-purple-500 rounded hover:bg-purple-600/30 transition-colors"
+                  >
+                    <span>👻</span>
+                    <span>Phantom</span>
+                  </a>
+                  <a
+                    href="https://solflare.com/download"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 p-2 bg-blue-600/20 border border-blue-500 rounded hover:bg-blue-600/30 transition-colors"
+                  >
+                    <span>🔥</span>
+                    <span>Solflare</span>
+                  </a>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 

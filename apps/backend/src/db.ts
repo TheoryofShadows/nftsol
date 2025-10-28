@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres, { Sql } from 'postgres';
+import * as postgres from 'postgres';
+import { Sql } from 'postgres';
 import * as schema from './schema';
 
 // Connection state management
@@ -56,7 +57,7 @@ export const initializeDatabase = async (): Promise<void> => {
     }
 
     // Create postgres client with pooling
-    postgresClient = postgres(connectionString, config);
+    postgresClient = postgres.default(connectionString, config);
     
     // Test the connection with a simple query
     await postgresClient`SELECT 1`;

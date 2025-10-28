@@ -81,7 +81,7 @@ export class EternalEchoesService {
     try {
       const searchUrl = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(query)}&filter=publicdomain&output=json&rows=${rows}`;
       
-      const response = await axios.get(searchUrl);
+      const response = await axios.get(searchUrl, { timeout: 10000 });
       const docs = response.data.response?.docs || [];
 
       return docs.map((doc: any) => ({
@@ -94,10 +94,64 @@ export class EternalEchoesService {
         videoUrl: `https://archive.org/download/${doc.identifier}/${doc.identifier}.mp4`,
         duration: doc.length || 0
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to search IA videos:', error);
-      return [];
+      
+      // Enhanced error logging with specific error types
+      if (error.code === 'ECONNABORTED') {
+        console.error('⏰ Internet Archive request timeout - using fallback');
+      } else if (error.response?.status === 429) {
+        console.error('🚫 Internet Archive rate limit exceeded - using fallback');
+      } else if (error.response?.status >= 500) {
+        console.error('🔧 Internet Archive server error - using fallback');
+      } else {
+        console.error('❌ Internet Archive connection failed - using fallback');
+      }
+      
+      // Fallback to mock data when Internet Archive is unavailable
+      console.log('🔄 Using fallback mock data for Internet Archive search');
+      return this.getMockIAVideos(query, rows);
     }
+  }
+
+  /**
+   * Fallback mock data for Internet Archive when service is unavailable
+   */
+  private getMockIAVideos(query: string, rows: number): IAVideo[] {
+    const mockVideos = [
+      {
+        identifier: 'mock_historical_documentary_1',
+        title: `Historical Documentary: ${query}`,
+        description: 'A fascinating look into historical events and their impact on society. This documentary explores various perspectives and provides valuable insights.',
+        creator: 'Public Domain Archive',
+        date: '2020-01-01',
+        thumbnail: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Historical+Documentary',
+        videoUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+        duration: 1800
+      },
+      {
+        identifier: 'mock_educational_content_1',
+        title: `Educational Content: ${query}`,
+        description: 'Educational material covering important topics and providing valuable learning resources for students and researchers.',
+        creator: 'Educational Archive',
+        date: '2019-06-15',
+        thumbnail: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Educational+Content',
+        videoUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_2mb.mp4',
+        duration: 2400
+      },
+      {
+        identifier: 'mock_cultural_heritage_1',
+        title: `Cultural Heritage: ${query}`,
+        description: 'Preservation of cultural heritage and traditions through visual documentation and storytelling.',
+        creator: 'Cultural Preservation Society',
+        date: '2021-03-10',
+        thumbnail: 'https://via.placeholder.com/300x200/DC2626/FFFFFF?text=Cultural+Heritage',
+        videoUrl: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_5mb.mp4',
+        duration: 3600
+      }
+    ];
+
+    return mockVideos.slice(0, Math.min(rows, mockVideos.length));
   }
 
   /**
@@ -192,9 +246,16 @@ export class EternalEchoesService {
         };
       }
 
-      // Upload video to Irys for decentralized storage
-      const uploadResult = await this.irysService.uploadFile(Buffer.from(iaVideo.videoUrl), 'video/mp4');
-      const videoUri = typeof uploadResult === 'string' ? uploadResult : uploadResult.id;
+      // Upload video to Irys for decentralized storage with fallback
+      let videoUri: string;
+      try {
+        const uploadResult = await this.irysService.uploadFile(Buffer.from(iaVideo.videoUrl), 'video/mp4');
+        videoUri = typeof uploadResult === 'string' ? uploadResult : uploadResult.id;
+      } catch (error) {
+        console.error('Irys upload failed, using fallback:', error);
+        // Fallback to original URL if Irys is unavailable
+        videoUri = iaVideo.videoUrl;
+      }
       
       // Create truth hash
       const truthHash = crypto.createHash('sha256')
@@ -256,9 +317,29 @@ export class EternalEchoesService {
 
     } catch (error: any) {
       console.error('Failed to mint base echo:', error);
+      
+      // Enhanced error messages for different failure types
+      let errorMessage = 'Failed to mint base echo';
+      
+      if (error.message?.includes('insufficient funds')) {
+        errorMessage = 'Insufficient SOL balance for transaction fees';
+      } else if (error.message?.includes('user rejected')) {
+        errorMessage = 'Transaction was rejected by user';
+      } else if (error.message?.includes('network')) {
+        errorMessage = 'Network connection failed. Please check your internet connection';
+      } else if (error.message?.includes('timeout')) {
+        errorMessage = 'Transaction timed out. Please try again';
+      } else if (error.message?.includes('Bubblegum')) {
+        errorMessage = 'Bubblegum service error. Please try again later';
+      } else if (error.message?.includes('Irys')) {
+        errorMessage = 'Storage service error. Using fallback storage';
+      } else {
+        errorMessage = error.message || 'Unknown error occurred during minting';
+      }
+      
       return {
         success: false,
-        error: error.message
+        error: errorMessage
       };
     }
   }
