@@ -30,6 +30,9 @@ server/env.production
 !env.example
 config/development/
 config/production/
+apps/backend/backups/
+apps/backend/uploads/
+apps/backend/scripts/fixtures/*.generated.*
 
 # Batch files with hardcoded secrets (ignore the actual file but keep template)
 start-production.bat
