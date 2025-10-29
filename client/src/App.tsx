@@ -1,7 +1,13 @@
 import React, { useState, useEffect, Suspense, lazy } from "react";
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { 
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+  TorusWalletAdapter,
+  LedgerWalletAdapter,
+  CoinbaseWalletAdapter
+} from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
 import { NotificationProvider } from './components/NotificationSystem';
@@ -423,9 +429,17 @@ function AppContent() {
 }
 
 function App() {
-  const endpoint = clusterApiUrl('mainnet-beta');
+  // Use environment variable for RPC URL or fallback to mainnet
+  const endpoint = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
 
-  const wallets = [new PhantomWalletAdapter()];
+  // Initialize all wallet adapters
+  const wallets = [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+    new TorusWalletAdapter(),
+    new LedgerWalletAdapter(),
+    new CoinbaseWalletAdapter()
+  ];
 
   return (
     <ErrorBoundary>

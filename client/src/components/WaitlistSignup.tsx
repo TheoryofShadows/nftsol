@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 interface WaitlistData {
   email: string;
@@ -8,12 +9,20 @@ interface WaitlistData {
 }
 
 export default function WaitlistSignup() {
+  const { publicKey, connected } = useWallet();
   const [email, setEmail] = useState('');
   const [walletAddress, setWalletAddress] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  
+  // Auto-fill wallet address if connected
+  React.useEffect(() => {
+    if (connected && publicKey) {
+      setWalletAddress(publicKey.toBase58());
+    }
+  }, [connected, publicKey]);
 
   // Get referral code from URL
   React.useEffect(() => {
@@ -88,13 +97,13 @@ export default function WaitlistSignup() {
           
           <div className="flex space-x-3">
             <button
-              onClick={() => window.open('https://twitter.com/nftsol', '_blank')}
+              onClick={() => window.open('https://twitter.com', '_blank', 'noopener,noreferrer')}
               className="btn-primary flex-1"
             >
               🐦 Follow on Twitter
             </button>
             <button
-              onClick={() => window.open('https://discord.gg/nftsol', '_blank')}
+              onClick={() => window.open('https://discord.com', '_blank', 'noopener,noreferrer')}
               className="btn-secondary flex-1"
             >
               💬 Join Discord
@@ -134,17 +143,18 @@ export default function WaitlistSignup() {
         {/* Wallet Address (Optional) */}
         <div>
           <label className="block text-sm font-semibold text-white mb-3">
-            Solana Wallet Address (Optional)
+            Solana Wallet Address {connected ? '(Connected)' : '(Optional)'}
           </label>
           <input
             type="text"
             value={walletAddress}
             onChange={(e) => setWalletAddress(e.target.value)}
             placeholder="7boWRDfn3aPE88jt5qpiryPLw56EneXhEMUdfbd5TR9f"
-            className="input"
+            className={`input ${connected ? 'bg-green-500/20 border-green-400/50' : ''}`}
+            readOnly={connected}
           />
           <p className="text-xs text-gray-400 mt-1">
-            Get early access to exclusive airdrops
+            {connected ? '✓ Auto-filled from connected wallet' : 'Get early access to exclusive airdrops'}
           </p>
         </div>
 

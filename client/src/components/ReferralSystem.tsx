@@ -66,7 +66,7 @@ Join me: ${referralData.referralLink}
         <div className="text-4xl mb-4">🔗</div>
         <h3 className="text-xl font-bold text-white mb-2">Referral System</h3>
         <p className="text-gray-300 mb-4">Connect your wallet to start earning from referrals!</p>
-        <div className="btn-primary">Connect Wallet</div>
+        <p className="text-sm text-cyan-400 mb-4">Click the "Select Wallet" button in the header to connect</p>
       </div>
     );
   }
