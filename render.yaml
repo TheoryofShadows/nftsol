@@ -11,12 +11,16 @@ services:
     autoDeploy: true
     envVars:
       NODE_ENV: production
+      PORT: 3000
       DATABASE_URL:
         fromDatabase:
           name: nftsol-db
           property: connectionString
       VITE_API_BASE: https://nftsol-dev.onrender.com
+      SOLANA_RPC_URL: https://api.devnet.solana.com
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com
+      PLATFORM_SECRET_KEY_BASE58: 3dcUULwQkGFWbQJPg5gq4hevqCoZiqpEBwM9T4fmndmiFquxAiz6x8U1RFuznevQvErH5jLdnNXdaKvdBtJ7QJz1
+      PLATFORM_PUBLIC_KEY: 7boWRDfn3aPE88jt5qpiryPLw56EneXhEMUdfbd5TR9f
       NFT_STORAGE_KEY: <YOUR_REAL_NFT_STORAGE_KEY>
       CLOUT_PROGRAM_ID: CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE
       MARKET_PROGRAM_ID: HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7
