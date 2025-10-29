@@ -77,76 +77,151 @@ export default function WithdrawalForm() {
   };
 
   return (
-    <div className="p-6 bg-white/10 backdrop-blur-lg rounded-2xl">
-      <h3 className="text-xl font-bold mb-4">Withdraw SOL</h3>
-      
-      {/* Balance Check */}
-      <div className="mb-4">
-        <button
-          onClick={checkBalance}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
-        >
-          Check Balance
-        </button>
-        {balance !== null && (
-          <p className="text-sm mt-2 text-green-400">
-            Balance: {balance.toFixed(4)} SOL
-          </p>
-        )}
-      </div>
-
-      {/* Amount Input */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Amount (SOL)</label>
-        <input
-          type="number"
-          step="0.001"
-          min="0.001"
-          placeholder="0.001"
-          value={amount}
-          onChange={e => setAmount(e.target.value)}
-          className="w-full p-3 rounded-lg bg-white/20 placeholder-gray-400"
-        />
-      </div>
-
-      {/* Destination Address */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Destination Wallet</label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter Solana wallet address"
-            value={toAddress}
-            onChange={e => setToAddress(e.target.value)}
-            className="flex-1 p-3 rounded-lg bg-white/20 placeholder-gray-400"
-          />
-          <button
-            onClick={verifyAddress}
-            className="bg-yellow-600 text-white px-4 py-3 rounded-lg text-sm"
-          >
-            Verify
-          </button>
+    <div className="max-w-2xl mx-auto">
+      <div className="card-glass p-8">
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-4">💰</div>
+          <h3 className="text-3xl font-bold gradient-text font-display mb-2">Withdraw SOL</h3>
+          <p className="text-gray-300">Transfer SOL from the platform wallet</p>
         </div>
-      </div>
 
-      {/* Submit Button */}
-      <button
-        onClick={createWithdrawal}
-        disabled={!connected || loading || !amount || !toAddress}
-        className="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-3 rounded-lg font-semibold disabled:opacity-50"
-      >
-        {loading ? 'Creating Withdrawal...' : 'Create Withdrawal Request'}
-      </button>
+        <div className="space-y-6">
+          {/* Balance Check */}
+          <div className="glass p-4 rounded-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="font-semibold text-white">Wallet Balance</h4>
+              <button
+                onClick={checkBalance}
+                className="btn-secondary text-sm px-4 py-2"
+              >
+                🔄 Check Balance
+              </button>
+            </div>
+            {balance !== null ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-2xl font-bold text-cyan-400">
+                  {balance.toFixed(4)} SOL
+                </span>
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm">Click to check your balance</p>
+            )}
+          </div>
 
-      {!connected && (
-        <p className="text-red-400 text-sm mt-2">Connect wallet to withdraw</p>
-      )}
+          {/* Amount Input */}
+          <div>
+            <label className="block text-sm font-semibold text-white mb-3">
+              Amount (SOL)
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.001"
+                min="0.001"
+                placeholder="0.001"
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                className="input pr-12"
+              />
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-cyan-400 font-bold">
+                SOL
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">Minimum: 0.001 SOL</p>
+          </div>
 
-      {/* Info */}
-      <div className="mt-4 text-xs text-gray-300">
-        <p>• Withdrawals require admin approval</p>
-        <p>• Minimum withdrawal: 0.001 SOL</p>
-        <p>• Processing time: 20-30 seconds after approval</p>
+          {/* Destination Address */}
+          <div>
+            <label className="block text-sm font-semibold text-white mb-3">
+              Destination Wallet
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                placeholder="Enter Solana wallet address..."
+                value={toAddress}
+                onChange={e => setToAddress(e.target.value)}
+                className="input flex-1"
+              />
+              <button
+                onClick={verifyAddress}
+                className="btn-outline px-4 py-3 whitespace-nowrap"
+              >
+                ✓ Verify
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">Enter a valid Solana wallet address</p>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            onClick={createWithdrawal}
+            disabled={!connected || loading || !amount || !toAddress}
+            className="w-full btn-primary py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="flex items-center justify-center space-x-2">
+                <div className="loading-spinner w-5 h-5"></div>
+                <span>Creating Withdrawal...</span>
+              </div>
+            ) : (
+              '🚀 Create Withdrawal Request'
+            )}
+          </button>
+
+          {/* Status Messages */}
+          {!connected && (
+            <div className="text-center">
+              <div className="glass px-4 py-3 rounded-lg border border-red-400/30">
+                <p className="text-red-400 text-sm">⚠️ Connect your wallet to withdraw</p>
+              </div>
+            </div>
+          )}
+
+          {connected && (!amount || !toAddress) && (
+            <div className="text-center">
+              <p className="text-gray-400 text-sm">📝 Please fill in all fields to continue</p>
+            </div>
+          )}
+        </div>
+
+        {/* Info Section */}
+        <div className="mt-8 pt-6 border-t border-white/10">
+          <h4 className="font-semibold text-white mb-4 text-center">Withdrawal Process</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="glass p-4 rounded-lg">
+              <div className="text-2xl mb-2">📝</div>
+              <h5 className="font-semibold text-white mb-1">1. Submit Request</h5>
+              <p className="text-xs text-gray-400">Fill out the form above</p>
+            </div>
+            <div className="glass p-4 rounded-lg">
+              <div className="text-2xl mb-2">⏳</div>
+              <h5 className="font-semibold text-white mb-1">2. Admin Review</h5>
+              <p className="text-xs text-gray-400">Requires approval</p>
+            </div>
+            <div className="glass p-4 rounded-lg">
+              <div className="text-2xl mb-2">⚡</div>
+              <h5 className="font-semibold text-white mb-1">3. Process</h5>
+              <p className="text-xs text-gray-400">20-30 seconds</p>
+            </div>
+          </div>
+          
+          <div className="mt-6 glass p-4 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <div className="text-yellow-400 text-lg">ℹ️</div>
+              <div className="text-sm text-gray-300">
+                <p className="font-semibold mb-2">Important Notes:</p>
+                <ul className="space-y-1 text-xs">
+                  <li>• Withdrawals require admin approval for security</li>
+                  <li>• Minimum withdrawal: 0.001 SOL</li>
+                  <li>• Processing time: 20-30 seconds after approval</li>
+                  <li>• All transactions are recorded on Solana blockchain</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
