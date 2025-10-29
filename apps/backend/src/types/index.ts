@@ -79,6 +79,7 @@ export interface ErrorResponse {
   error: string;
   code?: string;
   details?: any;
+  requestId?: string;
 }
 
 export interface SuccessResponse<T = any> {

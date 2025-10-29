@@ -3,12 +3,14 @@ import express from 'express';
 import { withClient } from '../lib/db';
 import { getWalletBalance, accountExists } from '../lib/solana';
 import { ApiResponse } from '../types';
+import { isValidSolanaAddress } from '../utils/validation';
 
 const router = express.Router();
 const LAMPORTS_PER_SOL = 1_000_000_000;
 
+// Use centralized validation function
 function validateAddress(a?: string) {
-  return typeof a === 'string' && /^[A-Za-z0-9]{32,44}$/.test(a);
+  return isValidSolanaAddress(a || '');
 }
 
 // POST /api/wallets/withdraw - Create withdrawal request
@@ -23,7 +25,27 @@ router.post('/', async (req, res) => {
     return res.status(401).json(response);
   }
 
-  const { amount_sol, to_address, request_token } = req.body;
+  const { amount_sol, to_address, request_token, idempotency_key } = req.body;
+  
+  // Check for idempotency key to prevent duplicate requests
+  if (idempotency_key) {
+    try {
+      const existing = await (await import('../lib/db')).pool.query(
+        'SELECT id FROM withdrawals WHERE idempotency_key = $1 AND user_id = $2',
+        [idempotency_key, userId]
+      );
+      if (existing && existing.rowCount && existing.rowCount > 0) {
+        const response: ApiResponse = {
+          success: false,
+          error: 'Duplicate withdrawal request',
+          code: 'DUPLICATE_REQUEST'
+        };
+        return res.status(409).json(response);
+      }
+    } catch (err) {
+      console.error('Idempotency check error:', err);
+    }
+  }
   if (!amount_sol || !to_address) {
     const response: ApiResponse = {
       success: false,
@@ -88,9 +110,9 @@ router.post('/', async (req, res) => {
       }
 
       const insert = await client.query(
-        `INSERT INTO withdrawals (user_id, amount_lamports, to_address, request_ip, request_user_agent, request_token)
-         VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, created_at`,
-        [userId, lamports, to_address, req.ip, req.headers['user-agent'], request_token ?? null]
+        `INSERT INTO withdrawals (user_id, amount_lamports, to_address, request_ip, request_user_agent, request_token, idempotency_key)
+         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, created_at`,
+        [userId, lamports, to_address, req.ip, req.headers['user-agent'], request_token ?? null, idempotency_key ?? null]
       );
 
       await client.query(

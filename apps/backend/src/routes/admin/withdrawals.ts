@@ -3,6 +3,7 @@ import express from 'express';
 import { withClient } from '../../lib/db';
 import { sendSOL } from '../../lib/solana';
 import { ApiResponse } from '../../types';
+import { auditLogger, securityLogger } from '../../utils/logger';
 
 const router = express.Router();
 
@@ -23,9 +24,13 @@ router.use(adminOnly);
 // GET /api/admin/withdrawals - List withdrawals by status
 router.get('/', async (req, res) => {
   try {
-    const status = (req.query.status as string) ?? 'pending';
-    const limit = parseInt(req.query.limit as string) || 200;
-    const offset = parseInt(req.query.offset as string) || 0;
+    // Validate status parameter to prevent SQL injection
+    const allowedStatuses = ['pending', 'approved', 'processing', 'completed', 'failed', 'rejected'];
+    const status = allowedStatuses.includes(req.query.status as string) ? req.query.status as string : 'pending';
+    
+    // Validate and limit pagination parameters
+    const limit = Math.min(parseInt(req.query.limit as string) || 200, 1000); // Cap at 1000
+    const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
     
     const q = await (await import('../../lib/db')).pool.query(
       'SELECT * FROM withdrawals WHERE status=$1 ORDER BY created_at ASC LIMIT $2 OFFSET $3', 
@@ -92,6 +97,8 @@ router.post('/:id/process', async (req, res) => {
   const adminId = (req as any).user.id;
   const id = req.params.id;
   
+  auditLogger('WITHDRAWAL_PROCESS_START', { withdrawalId: id, adminId }, req);
+  
   try {
     let withdrawalRow: any = null;
 
@@ -102,6 +109,18 @@ router.post('/:id/process', async (req, res) => {
       if (!r.rowCount) throw new Error('not_found');
       const w = r.rows[0];
       if (!['approved','pending'].includes(w.status)) throw new Error('invalid_status');
+      
+      // Check for duplicate processing
+      if (w.processed_tx_sig) {
+        throw new Error('already_processed');
+      }
+      
+      // Validate withdrawal amount limits
+      const MAX_SINGLE_WITHDRAWAL = parseInt(process.env.MAX_SINGLE_WITHDRAWAL_LAMPORTS || '10000000000', 10);
+      if (Number(w.amount_lamports) > MAX_SINGLE_WITHDRAWAL) {
+        throw new Error('amount_exceeds_limit');
+      }
+      
       await client.query('UPDATE withdrawals SET status=$1, admin_id=$2, updated_at=now() WHERE id=$3', ['processing', adminId, id]);
       await client.query('COMMIT');
       withdrawalRow = w;
@@ -129,6 +148,13 @@ router.post('/:id/process', async (req, res) => {
       await client.query('COMMIT');
     });
 
+    auditLogger('WITHDRAWAL_PROCESS_SUCCESS', { 
+      withdrawalId: id, 
+      adminId, 
+      amountSol, 
+      txSig: result.txSig 
+    }, req);
+    
     const response: ApiResponse = {
       success: true,
       data: { 
@@ -142,6 +168,12 @@ router.post('/:id/process', async (req, res) => {
     return res.json(response);
   } catch (err: any) {
     console.error('Process error:', err);
+    
+    securityLogger('WITHDRAWAL_PROCESS_FAILED', { 
+      withdrawalId: id, 
+      adminId, 
+      error: err.message 
+    }, req);
     
     // Rollback: mark as failed and return funds
     try {
@@ -168,9 +200,13 @@ router.post('/:id/process', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: err.message === 'not_found' ? 'Withdrawal not found' : 
-             err.message === 'invalid_status' ? 'Invalid withdrawal status' : 'Processing failed',
+             err.message === 'invalid_status' ? 'Invalid withdrawal status' :
+             err.message === 'already_processed' ? 'Withdrawal already processed' :
+             err.message === 'amount_exceeds_limit' ? 'Withdrawal amount exceeds limit' : 'Processing failed',
       code: err.message === 'not_found' ? 'WITHDRAWAL_NOT_FOUND' :
-            err.message === 'invalid_status' ? 'INVALID_STATUS' : 'PROCESSING_FAILED'
+            err.message === 'invalid_status' ? 'INVALID_STATUS' :
+            err.message === 'already_processed' ? 'ALREADY_PROCESSED' :
+            err.message === 'amount_exceeds_limit' ? 'AMOUNT_EXCEEDS_LIMIT' : 'PROCESSING_FAILED'
     };
     return res.status(500).json(response);
   }

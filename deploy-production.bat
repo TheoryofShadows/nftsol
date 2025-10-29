@@ -11,7 +11,7 @@ echo 🔨 Building TypeScript...
 call npm run build
 
 echo 🔑 Setting environment variables...
-set PLATFORM_SECRET_KEY_BASE58=57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L
+set PLATFORM_SECRET_KEY_BASE58=YOUR_PLATFORM_SECRET_KEY_HERE
 set SOLANA_RPC_URL=https://api.devnet.solana.com
 set NODE_ENV=development
 set WITHDRAWALS_ENABLED=true

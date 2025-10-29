@@ -67,7 +67,7 @@ NFTSol/
 - [ ] Set environment variables:
   ```
   SOLANA_RPC_URL=https://api.devnet.solana.com
-  PLATFORM_SECRET_KEY_BASE58=57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L
+  PLATFORM_SECRET_KEY_BASE58=YOUR_PLATFORM_SECRET_KEY_HERE
   USE_MOCK=false
   WITHDRAWALS_ENABLED=true
   DAILY_WITHDRAWAL_LIMIT_SOL=10
@@ -110,7 +110,7 @@ NFTSol/
 cd apps/backend
 npm install
 npm run build
-$env:PLATFORM_SECRET_KEY_BASE58="57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L"
+$env:PLATFORM_SECRET_KEY_BASE58="YOUR_PLATFORM_SECRET_KEY_HERE"
 $env:SOLANA_RPC_URL="https://api.devnet.solana.com"
 node dist/index.js
 

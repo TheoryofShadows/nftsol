@@ -25,25 +25,46 @@ export function loadPlatformKeypair(): Keypair {
   throw new Error('Missing PLATFORM secret key env (PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON)');
 }
 
-export const platformKeypair = loadPlatformKeypair();
-export const metaplex = Metaplex.make(connection).use(keypairIdentity(platformKeypair));
+// Lazy load platform keypair to prevent startup failures
+let _platformKeypair: Keypair | null = null;
+let _metaplex: any = null;
+
+export function getPlatformKeypair(): Keypair {
+  if (!_platformKeypair) {
+    _platformKeypair = loadPlatformKeypair();
+  }
+  return _platformKeypair;
+}
+
+export function getMetaplex() {
+  if (!_metaplex) {
+    _metaplex = Metaplex.make(connection).use(keypairIdentity(getPlatformKeypair()));
+  }
+  return _metaplex;
+}
+
+// Legacy exports for backward compatibility
+export const platformKeypair = getPlatformKeypair();
+export const metaplex = getMetaplex();
 
 // Mint NFT and transfer to user
 export async function mintNFT(toAddress: string, metadataUri: string, name: string, description?: string) {
   try {
     const toPublicKey = new PublicKey(toAddress);
+    const metaplexInstance = getMetaplex();
+    const keypair = getPlatformKeypair();
 
-    const { nft } = await metaplex.nfts().create({
+    const { nft } = await metaplexInstance.nfts().create({
       uri: metadataUri,
       name,
       symbol: 'NFTSOL',
       sellerFeeBasisPoints: 250, // 2.5% royalties
-      updateAuthority: platformKeypair,
-      mintAuthority: platformKeypair
+      updateAuthority: keypair,
+      mintAuthority: keypair
     });
 
     // Transfer NFT to user
-    const transferResult = await metaplex.nfts().transfer({
+    const transferResult = await metaplexInstance.nfts().transfer({
       nftOrSft: nft,
       toOwner: toPublicKey
     });
@@ -55,9 +76,12 @@ export async function mintNFT(toAddress: string, metadataUri: string, name: stri
     };
   } catch (error) {
     console.error('NFT minting error:', error);
+    // Don't expose internal error details to client
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      error: (error as Error).message
+      error: 'NFT minting failed',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     };
   }
 }
@@ -66,21 +90,54 @@ export async function mintNFT(toAddress: string, metadataUri: string, name: stri
 export async function sendSOL(toAddress: string, amountSol: number) {
   try {
     const toPublicKey = new PublicKey(toAddress);
+    const keypair = getPlatformKeypair();
+    
+    // Validate amount
+    if (amountSol <= 0 || !Number.isFinite(amountSol)) {
+      return {
+        success: false,
+        error: 'Invalid amount'
+      };
+    }
+    
+    // Check platform wallet balance
+    const balance = await connection.getBalance(keypair.publicKey);
+    const requiredLamports = Math.floor(amountSol * 1e9);
+    
+    if (balance < requiredLamports) {
+      return {
+        success: false,
+        error: 'Insufficient platform balance'
+      };
+    }
+    
     const tx = new Transaction().add(
       SystemProgram.transfer({
-        fromPubkey: platformKeypair.publicKey,
+        fromPubkey: keypair.publicKey,
         toPubkey: toPublicKey,
-        lamports: amountSol * 1e9
+        lamports: requiredLamports
       })
     );
 
-    const txSig = await sendAndConfirmTransaction(connection, tx, [platformKeypair]);
+    // Get recent blockhash and set fee payer
+    const { blockhash } = await connection.getLatestBlockhash();
+    tx.recentBlockhash = blockhash;
+    tx.feePayer = keypair.publicKey;
+
+    const txSig = await sendAndConfirmTransaction(connection, tx, [keypair], {
+      commitment: 'confirmed',
+      maxRetries: 3
+    });
+    
     return { success: true, txSig };
   } catch (error) {
     console.error('SOL transfer error:', error);
+    // Don't expose internal error details to client
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      error: (error as Error).message
+      error: 'SOL transfer failed',
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
     };
   }
 }

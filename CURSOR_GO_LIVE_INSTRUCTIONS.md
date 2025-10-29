@@ -16,7 +16,7 @@
 cd C:\Users\KHK89\NFTSol\apps\backend
 
 # Set environment variables
-$env:PLATFORM_SECRET_KEY_BASE58="57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L"
+$env:PLATFORM_SECRET_KEY_BASE58="YOUR_PLATFORM_SECRET_KEY_HERE"
 $env:SOLANA_RPC_URL="https://api.devnet.solana.com"
 $env:NODE_ENV="development"
 $env:WITHDRAWALS_ENABLED="true"
@@ -153,7 +153,7 @@ npm install axios
 ### **Render Environment Variables:**
 ```
 SOLANA_RPC_URL=https://api.devnet.solana.com
-PLATFORM_SECRET_KEY_BASE58=57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L
+PLATFORM_SECRET_KEY_BASE58=YOUR_PLATFORM_SECRET_KEY_HERE
 USE_MOCK=false
 WITHDRAWALS_ENABLED=true
 DAILY_WITHDRAWAL_LIMIT_SOL=10

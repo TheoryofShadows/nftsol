@@ -4,6 +4,28 @@
   "version": "0.0.0",
   "scripts": {
     "build": "npm --prefix server install && npm --prefix server run build",
-    "start": "node server/dist/index.js"
+    "start": "node server/dist/index.js",
+    "lint": "eslint \"client/**/*.{ts,tsx,js}\" \"apps/backend/**/*.{ts,js}\"",
+    "format": "prettier -w .",
+    "format:check": "prettier -c .",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
+    "eslint": "^9.13.0",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3"
+  },
+  "lint-staged": {
+    "*/*.{js,ts,tsx,json,md,css,scss}": [
+      "prettier -w"
+    ],
+    "{client,apps/backend}/**/*.{ts,tsx,js}": [
+      "eslint --fix"
+    ]
   }
 }

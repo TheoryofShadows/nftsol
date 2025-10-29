@@ -77,4 +77,33 @@ export const performanceLogger = (operation: string, duration: number, metadata?
   });
 };
 
+// Audit logging for security events
+export const auditLogger = (event: string, details: any, req?: any) => {
+  const auditEntry = {
+    timestamp: new Date().toISOString(),
+    event,
+    level: 'audit',
+    service: 'nftsol-backend',
+    requestId: req?.id,
+    ip: req?.ip,
+    userAgent: req?.get?.('User-Agent'),
+    userId: req?.user?.id,
+    ...details
+  };
+  
+  if (appConfig.nodeEnv === 'production') {
+    console.log(JSON.stringify(auditEntry));
+  } else {
+    console.log(`[AUDIT] ${event}:`, auditEntry);
+  }
+};
+
+// Security event logging
+export const securityLogger = (event: string, details: any, req?: any) => {
+  auditLogger(`SECURITY_${event}`, {
+    ...details,
+    severity: 'high'
+  }, req);
+};
+
 export default logger;

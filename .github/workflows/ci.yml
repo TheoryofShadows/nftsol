@@ -1,30 +1,38 @@
 name: CI
+
 on:
   push:
-    branches: ["**"]
+    branches: [ develop, main ]
   pull_request:
+    branches: [ develop, main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
           cache: 'npm'
 
-      - name: Install & build server
-        working-directory: ./server
-        run: |
-          npm ci || npm install
-          npm run build || echo "no server build step"
+      - name: Install root tools
+        run: npm ci --ignore-scripts
 
-      - name: Install & build client
-        working-directory: ./client
+      - name: Client install and build
+        working-directory: client
         run: |
-          npm ci || npm install
+          npm ci
           npm run build
+
+      - name: Backend install and build
+        working-directory: apps/backend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Lint
+        run: npm run lint

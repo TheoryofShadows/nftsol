@@ -1,62 +1,88 @@
-# 🚀 NFTSol Deployment Instructions
+# NFTSol Platform Deployment Instructions
 
-## ✅ **PRODUCTION READY - DEPLOY NOW**
+## 🚀 Quick Start
 
-### **Backend Status**
-- ✅ **Deployed**: https://nftsol-dev.onrender.com
-- ✅ **Status**: All endpoints working
-- ✅ **Platform Wallet**: Funded with 1 SOL
-- ✅ **Database**: PostgreSQL connected
+### Local Development
+1. **Start Backend:**
+   ```bash
+   cd apps/backend
+   npm run dev
+   ```
 
-### **Frontend Status**
-- ✅ **Built**: Production build ready in `client/dist/`
-- ✅ **Tested**: Working perfectly
-- ✅ **Ready**: For Netlify deployment
+2. **Start Frontend:**
+   ```bash
+   cd client
+   npm run dev
+   ```
 
-## 🌐 **Deploy to Netlify (2 minutes)**
+3. **Or use the quick start scripts:**
+   - Linux/Mac: `./start-platform.sh`
+   - Windows: `start-platform.bat`
 
-### **Option 1: Drag & Drop (Easiest)**
-1. Go to: https://app.netlify.com
-2. Drag the `client/dist` folder to the deploy area
-3. Your site will be live instantly!
+### Production Deployment
 
-### **Option 2: Git Integration**
-1. Connect your GitHub repo to Netlify
-2. Set build command: `cd client && npm run build`
-3. Set publish directory: `client/dist`
-4. Deploy automatically
+#### 1. Environment Setup
+- Copy `.env.production` to your production environment
+- Update all placeholder values with real production values
+- Set secure JWT secret and platform keys
 
-### **Option 3: Netlify CLI**
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
+#### 2. Backend Deployment (Render/Heroku/etc.)
+- Deploy `apps/backend` directory
+- Set environment variables from `.env.production`
+- Ensure database is configured and accessible
 
-# Login to Netlify
-netlify login
+#### 3. Frontend Deployment (Netlify/Vercel/etc.)
+- Deploy `client` directory
+- Set build command: `npm run build`
+- Set output directory: `dist`
+- Configure redirects for SPA routing
 
-# Deploy
-cd client/dist
-netlify deploy --prod --dir .
-```
+#### 4. Platform Wallet Setup
+- Fund the platform wallet with SOL
+- Test withdrawals with small amounts first
+- Monitor wallet balance and transactions
 
-## 🔗 **Production URLs**
+## 🔒 Security Checklist
 
-- **Backend API**: https://nftsol-dev.onrender.com
-- **Frontend**: Will be available after Netlify deployment
-- **Platform Wallet**: 7boWRDfn3aPE88jt5qpiryPLw56EneXhEMUdfbd5TR9f
+- [ ] All environment variables set securely
+- [ ] Platform wallet funded and tested
+- [ ] Database connection secured
+- [ ] CORS origins configured for production domains
+- [ ] Rate limiting configured appropriately
+- [ ] Audit logging enabled and monitored
+- [ ] SSL/TLS certificates configured
+- [ ] Regular security monitoring in place
 
-## 🎯 **What's Ready**
+## 📊 Monitoring
 
-- ✅ Complete NFT marketplace
-- ✅ Wallet integration (Phantom/Solflare)
-- ✅ NFT minting functionality
-- ✅ SOL withdrawal system
-- ✅ Beautiful UI/UX
-- ✅ Production security
-- ✅ Database integration
+- Monitor `/healthz` endpoint for system health
+- Check audit logs for security events
+- Monitor platform wallet balance
+- Track withdrawal transactions
+- Monitor rate limiting and error rates
 
-## 🚀 **LAUNCH NOW!**
+## 🆘 Troubleshooting
 
-**Your NFTSol platform is 100% ready for production!**
+### Common Issues
+1. **Backend won't start:** Check environment variables and database connection
+2. **Frontend build fails:** Check Node.js version and dependencies
+3. **Authentication fails:** Verify JWT_SECRET is set
+4. **Withdrawals fail:** Check platform wallet balance and Solana RPC connection
 
-**Next step: Deploy to Netlify and go live!** 🎉
+### Support
+- Check logs in `apps/backend/logs`
+- Monitor `/api/v1/admin/emergency/status` for system status
+- Review security logs for any suspicious activity
+
+## 🔄 Maintenance
+
+- Regularly rotate platform keys
+- Update dependencies for security patches
+- Monitor and review audit logs
+- Backup platform keys securely
+- Test disaster recovery procedures
+
+---
+Generated: 2025-10-29T17:23:23.684Z
+Platform: NFTSol v1.0.0
+Security Level: Enterprise

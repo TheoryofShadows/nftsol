@@ -15,7 +15,7 @@ npm run build
 
 # Set environment variables
 Write-Host "🔑 Setting environment variables..." -ForegroundColor Yellow
-$env:PLATFORM_SECRET_KEY_BASE58 = "57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L"
+$env:PLATFORM_SECRET_KEY_BASE58 = "YOUR_PLATFORM_SECRET_KEY_HERE"
 $env:SOLANA_RPC_URL = "https://api.devnet.solana.com"
 $env:NODE_ENV = "development"
 $env:WITHDRAWALS_ENABLED = "true"

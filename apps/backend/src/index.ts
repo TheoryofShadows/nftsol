@@ -5,15 +5,18 @@ import morgan from 'morgan';
 import compression from 'compression';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
+import { nanoid } from 'nanoid';
 import { createServer } from 'http';
 import { appConfig, solanaConfig, programConfig } from './config';
-import { requestLogger, errorLogger } from './utils/logger';
-import { validateWallet, validateFileUpload, sanitizeInput } from './utils/validation';
+import { pool } from './lib/db';
+import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
+import { validateWallet, validateFileUpload, sanitizeInput, csrfProtection, generateCSRFToken } from './utils/validation';
 import { solanaService } from './services/solana';
 import { nftService } from './services/nft';
 import { ApiResponse, MintRequest } from './types';
 import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
+import jwt from 'jsonwebtoken';
 import nftRouter from './routes/nfts';
 
 const app = express();
@@ -31,21 +34,32 @@ app.use(helmet({
   },
 }));
 
+// Enforce ALLOWED_ORIGINS in production
+if (appConfig.nodeEnv === 'production' && (!process.env.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS.trim().length === 0)) {
+  throw new Error('ALLOWED_ORIGINS must be set in production');
+}
+
 // CORS configuration
 app.use(cors({
   origin: appConfig.cors.origin,
   credentials: appConfig.cors.credentials,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID']
 }));
 
 // Compression
 app.use(compression());
 
-// Request logging
+// Request ID and logging
+app.use((req: any, res: any, next: any) => {
+  const id = req.headers['x-request-id'] || nanoid();
+  req.id = id;
+  res.setHeader('X-Request-ID', id as string);
+  next();
+});
 app.use(requestLogger);
 
-// Rate limiting
+// Rate limiting (global with health exemptions)
 const limiter = rateLimit({
   windowMs: appConfig.rateLimit.windowMs,
   max: appConfig.rateLimit.max,
@@ -56,10 +70,11 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req: any) => req.path === '/healthz' || req.path === '/health'
 });
-app.use('/api/', limiter);
+app.use(limiter);
 
-// Body parsing
+// Body parsing with security limits
 app.use(express.json({ 
   limit: '10mb',
   verify: (req, res, buf) => {
@@ -68,6 +83,16 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Apply input sanitization globally
+app.use(sanitizeInput);
+
+// CSRF token endpoint
+app.get('/api/csrf-token', (req, res) => {
+  const token = generateCSRFToken();
+  // In a real app, store this in session
+  res.json({ csrfToken: token });
+});
 
 // Configure multer for file uploads
 const upload = multer({ 
@@ -85,21 +110,57 @@ const upload = multer({
   }
 });
 
+// Database health check function
+async function checkDatabase(): Promise<{ healthy: boolean; details: any }> {
+  try {
+    const start = Date.now();
+    const result = await pool.query('SELECT 1 as health_check');
+    const duration = Date.now() - start;
+    const hasRows = result && (result as any).rowCount && (result as any).rowCount > 0;
+    
+    return {
+      healthy: !!hasRows && duration < 5000,
+      details: {
+        connected: true,
+        responseTime: `${duration}ms`,
+        queryResult: result.rows[0]
+      }
+    };
+  } catch (error) {
+    return {
+      healthy: false,
+      details: {
+        connected: false,
+        error: error instanceof Error ? error.message : 'Unknown database error'
+      }
+    };
+  }
+}
+
 // Health check endpoints
 app.get('/healthz', async (req, res) => {
   try {
-    const solanaHealth = await solanaService.healthCheck();
+    const [solanaHealth, dbHealth] = await Promise.all([
+      solanaService.healthCheck(),
+      checkDatabase()
+    ]);
+    
+    const overallHealthy = solanaHealth.healthy && dbHealth.healthy;
+    const statusCode = overallHealthy ? 200 : 503;
+    
     const response: ApiResponse = {
       success: true,
       data: {
-        status: 'healthy',
+        status: overallHealthy ? 'healthy' : 'unhealthy',
         timestamp: Date.now(),
         uptime: process.uptime(),
         environment: appConfig.nodeEnv,
-        solana: solanaHealth
+        solana: solanaHealth,
+        database: dbHealth
       }
     };
-    res.json(response);
+    
+    res.status(statusCode).json(response);
   } catch (error) {
     errorLogger(error as Error, { endpoint: '/healthz' });
     res.status(500).json({
@@ -117,8 +178,12 @@ app.get('/health', (req, res) => {
   });
 });
 
+// API router (v1)
+import expressPkg from 'express';
+const apiV1 = expressPkg.Router();
+
 // Program configuration endpoint
-app.get('/api/programs', (req, res) => {
+apiV1.get('/programs', (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
@@ -132,7 +197,7 @@ app.get('/api/programs', (req, res) => {
 });
 
 // Solana status endpoint
-app.get('/api/solana/status', async (req, res) => {
+apiV1.get('/solana/status', async (req, res) => {
   try {
     const health = await solanaService.healthCheck();
     const response: ApiResponse = {
@@ -150,7 +215,8 @@ app.get('/api/solana/status', async (req, res) => {
 });
 
 // Enhanced mint endpoint with full validation
-app.post('/api/simple-mint', 
+apiV1.post('/simple-mint', 
+  csrfProtection,
   sanitizeInput,
   validateWallet,
   upload.single('file'),
@@ -220,7 +286,7 @@ app.post('/api/simple-mint',
 );
 
 // Get NFT metadata endpoint
-app.get('/api/nft/:mintAddress', async (req, res) => {
+apiV1.get('/nft/:mintAddress', async (req, res) => {
   try {
     const { mintAddress } = req.params;
     const result = await nftService.getNFTMetadata(mintAddress);
@@ -235,7 +301,7 @@ app.get('/api/nft/:mintAddress', async (req, res) => {
 });
 
 // Get NFTs by owner endpoint
-app.get('/api/nfts/:owner', async (req, res) => {
+apiV1.get('/nfts/:owner', async (req, res) => {
   try {
     const { owner } = req.params;
     const result = await nftService.getNFTsByOwner(owner);
@@ -258,16 +324,38 @@ const withdrawLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// Mock authentication middleware (replace with real auth)
-const mockAuthMiddleware = (req: any, res: any, next: any) => {
-  // For testing - replace with real authentication
-  req.user = { id: 'test-user-123', isAdmin: false };
-  next();
+// JWT Authentication middleware (replaces mock auth)
+const authenticate = (req: any, res: any, next: any) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) {
+      securityLogger('AUTH_FAILED', { reason: 'No token provided', ip: req.ip }, req);
+      const response: ApiResponse = { success: false, error: 'Access token required', code: 'NOT_AUTHENTICATED' };
+      return res.status(401).json(response);
+    }
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      securityLogger('AUTH_MISCONFIGURED', { reason: 'JWT_SECRET not set' }, req);
+      const response: ApiResponse = { success: false, error: 'Server auth not configured', code: 'AUTH_MISCONFIGURED' };
+      return res.status(500).json(response);
+    }
+    const decoded: any = jwt.verify(token, secret);
+    req.user = decoded;
+    auditLogger('AUTH_SUCCESS', { userId: decoded.id, ip: req.ip }, req);
+    next();
+  } catch (err) {
+    securityLogger('AUTH_FAILED', { reason: 'Invalid token', error: err instanceof Error ? err.message : 'Unknown', ip: req.ip }, req);
+    const response: ApiResponse = { success: false, error: 'Invalid or expired token', code: 'INVALID_TOKEN' };
+    return res.status(403).json(response);
+  }
 };
 
-const mockAdminMiddleware = (req: any, res: any, next: any) => {
-  // For testing - replace with real admin authentication
-  req.user = { id: 'admin-123', isAdmin: true };
+const requireAdmin = (req: any, res: any, next: any) => {
+  if (!req.user || !(req.user.isAdmin || req.user.role === 'admin')) {
+    const response: ApiResponse = { success: false, error: 'Admin access required', code: 'FORBIDDEN' };
+    return res.status(403).json(response);
+  }
   next();
 };
 
@@ -290,14 +378,14 @@ const emergencyPauseMiddleware = (req: any, res: any, next: any) => {
 };
 
 // Mount withdrawal routes with emergency controls
-app.use('/api/wallets/withdraw', emergencyPauseMiddleware, mockAuthMiddleware, withdrawLimiter, withdrawalRoutes);
-app.use('/api/admin/withdrawals', mockAdminMiddleware, adminWithdrawalRoutes);
+apiV1.use('/wallets/withdraw', emergencyPauseMiddleware, authenticate, withdrawLimiter, withdrawalRoutes);
+apiV1.use('/admin/withdrawals', authenticate, requireAdmin, adminWithdrawalRoutes);
 
 // Mount NFT routes
-app.use('/api/nfts', nftRouter);
+apiV1.use('/nfts', nftRouter);
 
 // Emergency controls endpoint
-app.get('/api/admin/emergency/status', mockAdminMiddleware, (req, res) => {
+apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
@@ -311,7 +399,7 @@ app.get('/api/admin/emergency/status', mockAdminMiddleware, (req, res) => {
 });
 
 // Toggle withdrawals pause (admin only)
-app.post('/api/admin/emergency/pause-withdrawals', mockAdminMiddleware, (req, res) => {
+apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (req, res) => {
   const { paused, reason } = req.body;
   
   // In production, this would update a database or config service
@@ -331,7 +419,7 @@ app.post('/api/admin/emergency/pause-withdrawals', mockAdminMiddleware, (req, re
 });
 
 // Marketplace endpoints
-app.get('/api/market', async (req, res) => {
+apiV1.get('/market', async (req, res) => {
   try {
     const response: ApiResponse = {
       success: true,
@@ -374,7 +462,7 @@ app.get('/api/market', async (req, res) => {
 });
 
 // Collections endpoint
-app.get('/api/collections', (req, res) => {
+apiV1.get('/collections', (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
@@ -394,7 +482,7 @@ app.get('/api/collections', (req, res) => {
 });
 
 // Wallet info endpoint
-app.get('/api/wallet/:address', async (req, res) => {
+apiV1.get('/wallet/:address', async (req, res) => {
   try {
     const { address } = req.params;
     const balance = await solanaService.getBalance(address);
@@ -420,7 +508,7 @@ app.get('/api/wallet/:address', async (req, res) => {
 });
 
 // Root endpoint
-app.get('/', (req, res) => {
+apiV1.get('/', (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
@@ -429,44 +517,97 @@ app.get('/', (req, res) => {
       status: 'operational',
       endpoints: {
         health: '/healthz',
-        programs: '/api/programs',
-        mint: '/api/simple-mint',
-        market: '/api/market',
-        collections: '/api/collections',
-        wallet: '/api/wallet/:address',
-        nft: '/api/nft/:mintAddress',
-        nfts: '/api/nfts/:owner'
+        programs: '/api/v1/programs',
+        mint: '/api/v1/simple-mint',
+        market: '/api/v1/market',
+        collections: '/api/v1/collections',
+        wallet: '/api/v1/wallet/:address',
+        nft: '/api/v1/nft/:mintAddress',
+        nfts: '/api/v1/nfts/:owner'
       }
     }
   };
   res.json(response);
 });
 
-// Global error handling middleware
+// Mount versioned API
+app.use('/api/v1', apiV1);
+
+// Enhanced error handling middleware
 app.use((err: any, req: any, res: any, next: any) => {
+  const requestId = req.id;
+  const userId = req.user?.id;
+  
+  // Log error with full context
   errorLogger(err, { 
+    requestId,
+    userId,
     url: req.url, 
     method: req.method,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
     body: req.body 
   });
+  
+  // Log security-relevant errors
+  if (err.status === 401 || err.status === 403 || err.status === 429) {
+    securityLogger('ERROR_RESPONSE', {
+      status: err.status,
+      message: err.message,
+      requestId,
+      userId,
+      ip: req.ip
+    }, req);
+  }
+  
+  // Determine error response based on type
+  let statusCode = err.status || 500;
+  let errorMessage = 'Internal server error';
+  let errorCode = 'INTERNAL_ERROR';
+  
+  if (err.name === 'ValidationError') {
+    statusCode = 400;
+    errorMessage = 'Validation failed';
+    errorCode = 'VALIDATION_ERROR';
+  } else if (err.name === 'UnauthorizedError') {
+    statusCode = 401;
+    errorMessage = 'Unauthorized';
+    errorCode = 'UNAUTHORIZED';
+  } else if (err.name === 'ForbiddenError') {
+    statusCode = 403;
+    errorMessage = 'Forbidden';
+    errorCode = 'FORBIDDEN';
+  } else if (err.name === 'RateLimitError') {
+    statusCode = 429;
+    errorMessage = 'Too many requests';
+    errorCode = 'RATE_LIMIT_EXCEEDED';
+  }
   
   const response: ApiResponse = {
     success: false,
     error: appConfig.nodeEnv === 'production' 
-      ? 'Internal server error' 
+      ? errorMessage
       : err.message,
-    code: 'INTERNAL_ERROR'
+    code: errorCode,
+    requestId
   };
   
-  res.status(500).json(response);
+  res.status(statusCode).json(response);
 });
 
 // 404 handler
 app.use((req, res) => {
+  securityLogger('ENDPOINT_NOT_FOUND', { 
+    path: req.path, 
+    method: req.method,
+    ip: req.ip 
+  }, req);
+  
   const response: ApiResponse = {
     success: false,
     error: 'Endpoint not found',
-    code: 'NOT_FOUND'
+    code: 'NOT_FOUND',
+    requestId: (req as any).id
   };
   res.status(404).json(response);
 });

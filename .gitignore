@@ -12,6 +12,8 @@ coverage/
 # Env & local config
 .env
 .env.local
+.env.production
+platform-keys-backup.json
 *.local.*
 
 # OS/editor
