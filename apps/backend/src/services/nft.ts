@@ -89,6 +89,20 @@ class NFTService {
         };
       }
 
+      // Calculate fees (2.5% of mint cost)
+      const MINT_COST_SOL = 0.01; // Base mint cost
+      const FEE_PERCENTAGE = 0.025; // 2.5%
+      const feeAmount = MINT_COST_SOL * FEE_PERCENTAGE;
+      const totalCost = MINT_COST_SOL + feeAmount;
+      
+      logger.info('Fee calculation', {
+        baseCost: MINT_COST_SOL,
+        feePercentage: FEE_PERCENTAGE,
+        feeAmount,
+        totalCost,
+        creator: request.creatorWallet
+      });
+
       // Generate metadata URI (for now using placeholder)
       const metadataUri = request.imageUrl || `https://nftsol.app/metadata/${Date.now()}`;
       

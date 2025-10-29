@@ -16,6 +16,8 @@ const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
 const MintForm = lazy(() => import('./components/MintForm'));
 const NftGrid = lazy(() => import('./components/NftGrid'));
 const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
+const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
+const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -158,6 +160,8 @@ function AppContent() {
           {[
             { id: "market", label: "Marketplace", icon: "🏪", desc: "Discover NFTs" },
             { id: "mint", label: "Mint NFT", icon: "✨", desc: "Create new" },
+            { id: "referrals", label: "Referrals", icon: "🎯", desc: "Earn rewards" },
+            { id: "waitlist", label: "Waitlist", icon: "🚀", desc: "Join early" },
             { id: "withdraw", label: "Withdraw SOL", icon: "💰", desc: "Manage funds" },
             { id: "my-nfts", label: "My NFTs", icon: "👤", desc: "Your collection" },
             { id: "collections", label: "Collections", icon: "📚", desc: "Browse by type" },
@@ -279,6 +283,48 @@ function AppContent() {
             </div>
           )}
 
+          {activeTab === "referrals" && (
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  🎯 Referral System
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Earn 5% from every NFT minted through your referral link. Build your empire!
+                </p>
+              </div>
+              <Suspense fallback={
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading referral system...</span>
+                </div>
+              }>
+                <ReferralSystem />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "waitlist" && (
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  🚀 Join the Waitlist
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Be the first to experience the future of NFT marketplaces. Early access, exclusive rewards, and more!
+                </p>
+              </div>
+              <Suspense fallback={
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading waitlist...</span>
+                </div>
+              }>
+                <WaitlistSignup />
+              </Suspense>
+            </div>
+          )}
+
           {activeTab === "collections" && (
             <div className="animate-fade-in">
               <div className="text-center mb-8">
@@ -377,9 +423,7 @@ function AppContent() {
 }
 
 function App() {
-  const endpoint = import.meta.env.VITE_SOLANA_CLUSTER === 'devnet'
-    ? clusterApiUrl('devnet')
-    : clusterApiUrl('mainnet-beta');
+  const endpoint = clusterApiUrl('mainnet-beta');
 
   const wallets = [new PhantomWalletAdapter()];
 
