@@ -9,6 +9,7 @@ import { usePerformance } from './hooks/usePerformance';
 import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
 import './styles/solana.css';
+import './styles/design-system.css';
 
 // Lazy load components for better performance
 const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
@@ -98,54 +99,117 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <header className="p-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold text-white">NFTSol</h1>
-            <div className="text-sm text-white/70">
-              Performance: {metrics.loadTime.toFixed(0)}ms
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-40 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+      </div>
+      
+      <header className="relative z-10 p-6 backdrop-blur-sm bg-black/20 border-b border-white/10">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-6">
+            {/* Solana-style logo */}
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-lg transform rotate-12 shadow-lg"></div>
+                <div className="absolute top-1 left-1 w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg transform rotate-12"></div>
+                <div className="absolute top-2 left-2 w-6 h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded-lg transform rotate-12"></div>
+              </div>
+              <h1 className="text-4xl font-bold gradient-text font-display tracking-tight">
+                NFTSol
+              </h1>
+            </div>
+            
+            {/* Performance indicator with Solana styling */}
+            <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-black/30 rounded-full border border-cyan-400/30">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-cyan-300 font-mono">
+                {metrics.loadTime.toFixed(0)}ms
+              </span>
             </div>
           </div>
-          <Suspense fallback={<div className="text-white">Loading wallet...</div>}>
+          
+          <Suspense fallback={
+            <div className="btn-glass animate-pulse">
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+              Loading...
+            </div>
+          }>
             <PhantomConnect />
           </Suspense>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto p-4">
-        <div className="flex space-x-4 mb-8">
+      <main className="relative z-10 max-w-7xl mx-auto p-6">
+        {/* Hero Section */}
+        <div className="text-center mb-12 animate-fade-in">
+          <h2 className="text-5xl md:text-6xl font-bold gradient-text mb-4 font-display">
+            Mint, Trade, Own the Future
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Lightning-fast NFT marketplace on Solana. Create, discover, and trade digital assets with unprecedented speed.
+          </p>
+        </div>
+
+        {/* Enhanced Navigation */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
           {[
-            { id: "market", label: "🏪 Marketplace", icon: "🏪" },
-            { id: "mint", label: "✨ Mint NFT", icon: "✨" },
-            { id: "withdraw", label: "💰 Withdraw SOL", icon: "💰" },
-            { id: "my-nfts", label: "👤 My NFTs", icon: "👤" },
-            { id: "collections", label: "📚 Collections", icon: "📚" },
+            { id: "market", label: "Marketplace", icon: "🏪", desc: "Discover NFTs" },
+            { id: "mint", label: "Mint NFT", icon: "✨", desc: "Create new" },
+            { id: "withdraw", label: "Withdraw SOL", icon: "💰", desc: "Manage funds" },
+            { id: "my-nfts", label: "My NFTs", icon: "👤", desc: "Your collection" },
+            { id: "collections", label: "Collections", icon: "📚", desc: "Browse by type" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
                 activeTab === tab.id
-                  ? "bg-purple-600 text-white shadow-lg"
-                  : "bg-white/10 text-white hover:bg-white/20 hover:shadow-md"
+                  ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25"
+                  : "glass text-white hover:bg-white/20 hover:shadow-lg"
               }`}
             >
-              {tab.label}
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">{tab.icon}</span>
+                <div className="text-left">
+                  <div className="font-bold">{tab.label}</div>
+                  <div className="text-xs opacity-75">{tab.desc}</div>
+                </div>
+              </div>
+              {activeTab === tab.id && (
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20 animate-pulse"></div>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="min-h-[400px]">
+        <div className="min-h-[600px]">
           {activeTab === "market" && (
-            <div>
-              <h2 className="text-white text-2xl font-bold mb-6">
-                🏪 NFT Marketplace
-              </h2>
+            <div className="animate-fade-in">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display">
+                  🏪 NFT Marketplace
+                </h2>
+                <div className="flex items-center space-x-4">
+                  <div className="glass px-4 py-2 rounded-lg">
+                    <span className="text-sm text-gray-300">Live on Solana Devnet</span>
+                  </div>
+                </div>
+              </div>
               {loading ? (
-                <LoadingSpinner />
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading marketplace...</span>
+                </div>
               ) : (
-                <Suspense fallback={<LoadingSpinner />}>
+                <Suspense fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading NFTs...</span>
+                  </div>
+                }>
                   <NftGrid nfts={nfts} />
                 </Suspense>
               )}
@@ -153,50 +217,161 @@ function AppContent() {
           )}
 
           {activeTab === "mint" && (
-            <div>
-              <h2 className="text-white text-2xl font-bold mb-6">
-                ✨ Mint New NFT
-              </h2>
-              <Suspense fallback={<LoadingSpinner />}>
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  ✨ Mint New NFT
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Create your unique digital asset on the Solana blockchain. Fast, secure, and cost-effective.
+                </p>
+              </div>
+              <Suspense fallback={
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading mint form...</span>
+                </div>
+              }>
                 <MintForm />
               </Suspense>
             </div>
           )}
 
           {activeTab === "withdraw" && (
-            <div>
-              <h2 className="text-white text-2xl font-bold mb-6">
-                💰 Withdraw SOL
-              </h2>
-              <Suspense fallback={<LoadingSpinner />}>
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  💰 Withdraw SOL
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Manage your SOL balance and withdraw funds from the platform wallet.
+                </p>
+              </div>
+              <Suspense fallback={
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading withdrawal form...</span>
+                </div>
+              }>
                 <WithdrawalForm />
               </Suspense>
             </div>
           )}
 
           {activeTab === "my-nfts" && (
-            <div>
-              <h2 className="text-white text-2xl font-bold mb-6">
-                👤 My NFTs
-              </h2>
-              <Suspense fallback={<LoadingSpinner />}>
+            <div className="animate-fade-in">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display">
+                  👤 My NFTs
+                </h2>
+                <div className="glass px-4 py-2 rounded-lg">
+                  <span className="text-sm text-gray-300">Your Collection</span>
+                </div>
+              </div>
+              <Suspense fallback={
+                <div className="flex justify-center items-center py-20">
+                  <div className="loading-spinner"></div>
+                  <span className="ml-4 text-gray-300">Loading your NFTs...</span>
+                </div>
+              }>
                 <NftGrid nfts={nfts} />
               </Suspense>
             </div>
           )}
 
           {activeTab === "collections" && (
-            <div>
-              <h2 className="text-white text-2xl font-bold mb-6">
-                📚 Collections
-              </h2>
-              <div className="text-white text-center py-8">
-                Collections coming soon...
+            <div className="animate-fade-in">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  📚 Collections
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Browse NFTs by collection and discover curated digital art.
+                </p>
+              </div>
+              <div className="text-center py-20">
+                <div className="glass p-12 rounded-2xl max-w-md mx-auto">
+                  <div className="text-6xl mb-4">🚀</div>
+                  <h3 className="text-2xl font-bold text-white mb-2">Coming Soon</h3>
+                  <p className="text-gray-300">Collections feature is in development</p>
+                </div>
               </div>
             </div>
           )}
         </div>
       </main>
+
+      {/* Enhanced Footer */}
+      <footer className="relative z-10 mt-20 border-t border-white/10 bg-black/20 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-lg transform rotate-12 shadow-lg"></div>
+                  <div className="absolute top-1 left-1 w-6 h-6 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg transform rotate-12"></div>
+                </div>
+                <span className="text-2xl font-bold gradient-text font-display">NFTSol</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Lightning-fast NFT marketplace on Solana. Create, discover, and trade digital assets with unprecedented speed.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Platform</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Marketplace</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Mint NFT</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Collections</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">My NFTs</a></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Documentation</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">API Reference</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Support</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Status</a></li>
+              </ul>
+            </div>
+
+            {/* Social & Status */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Connect</h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-400">Live on Solana Devnet</span>
+                </div>
+                <div className="flex space-x-3">
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Twitter</a>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Discord</a>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">GitHub</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © 2024 NFTSol. Built on Solana with ❤️
+            </p>
+            <div className="flex items-center space-x-4 mt-4 md:mt-0">
+              <span className="text-xs text-gray-500">Powered by</span>
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 bg-gradient-to-r from-purple-500 to-cyan-400 rounded"></div>
+                <span className="text-sm font-semibold gradient-text">Solana</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
