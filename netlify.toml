@@ -1,0 +1,45 @@
+[build]
+  # Frontend build settings
+  publish = "client/dist"
+  command = "cd client && npm install && npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--production=false"
+
+# Frontend redirects for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Backend API routes
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# CORS headers for API
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+
+# Frontend environment variables
+[context.production]
+  environment = { 
+    VITE_API_BASE = "https://nftsol.netlify.app/api",
+    NODE_ENV = "production"
+  }
+
+[context.deploy-preview]
+  environment = { 
+    VITE_API_BASE = "https://nftsol.netlify.app/api",
+    NODE_ENV = "development"
+  }
+
+# Functions configuration
+[functions]
+  directory = "netlify/functions"
