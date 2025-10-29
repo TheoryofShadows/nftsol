@@ -1,0 +1,17 @@
+[build]
+  publish = "client/dist"
+  command = "cd client && npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production]
+  environment = { VITE_API_BASE = "https://nftsol-dev.onrender.com" }
+
+[context.deploy-preview]
+  environment = { VITE_API_BASE = "https://nftsol-dev.onrender.com" }
