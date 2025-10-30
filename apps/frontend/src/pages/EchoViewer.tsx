@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { toast } from 'react-toastify';
+import EchoSocialShare from '../components/EchoSocialShare';
+import { io, Socket } from 'socket.io-client';
 import './EchoViewer.css';
 
 interface Echo {
@@ -39,6 +41,34 @@ export const EchoViewer: React.FC = () => {
   const [newEchoData, setNewEchoData] = useState('');
   const [echoType, setEchoType] = useState<'Text' | 'Audio' | 'Annotation'>('Text');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [socket, setSocket] = useState<Socket | null>(null);
+
+  // Setup Socket.io for real-time updates
+  useEffect(() => {
+    if (!ledgerId) return;
+
+    const socketInstance = io(API_BASE);
+    
+    socketInstance.on('connect', () => {
+      console.log('✅ Connected to Echo updates');
+      socketInstance.emit('joinEcho', ledgerId);
+    });
+
+    socketInstance.on('echoAdded', (data: any) => {
+      console.log('✨ New echo added:', data);
+      queryClient.invalidateQueries({ queryKey: ['echoes', ledgerId] });
+      
+      if (data.verified) {
+        toast.success(`✨ New verified echo added by ${data.contributor.slice(0, 6)}...!`);
+      }
+    });
+
+    setSocket(socketInstance);
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, [ledgerId, queryClient]);
 
   // Fetch echoes for this ledger
   const { data: echoesData, isLoading } = useQuery({
@@ -130,11 +160,22 @@ export const EchoViewer: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="header-content">
-          <h1 className="viewer-title">
-            🎬 Eternal Echo
-            <span className="viewer-subtitle">Ledger: {ledgerId?.slice(0, 8)}...</span>
-          </h1>
-          <WalletMultiButton className="wallet-button" />
+          <div>
+            <h1 className="viewer-title">
+              🎬 Eternal Echo
+              <span className="viewer-subtitle">Ledger: {ledgerId?.slice(0, 8)}...</span>
+            </h1>
+          </div>
+          <div className="header-actions">
+            {ledgerId && (
+              <EchoSocialShare
+                echoId={ledgerId}
+                title="My Eternal Echo"
+                truthScore={avgScore}
+              />
+            )}
+            <WalletMultiButton className="wallet-button" />
+          </div>
         </div>
 
         {/* Stats Bar */}

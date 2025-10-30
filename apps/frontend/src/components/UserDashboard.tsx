@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '../wallet/UniversalWalletAdapter';
+import EchoStatsWidget from './EchoStatsWidget';
 import './UserDashboard.css';
 
 interface UserProfile {
@@ -231,6 +232,9 @@ export default function UserDashboard({ user }: UserDashboardProps) {
               </div>
             </div>
           </div>
+
+          {/* Echo Stats Widget */}
+          <EchoStatsWidget />
         )}
 
         {activeTab === 'activity' && (

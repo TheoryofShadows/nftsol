@@ -27,9 +27,10 @@ const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard"))
 const TransparencyDashboard = lazy(() => import("./components/TransparencyDashboard"));
 const EchoMint = lazy(() => import("./pages/EchoMint"));
 const EchoViewer = lazy(() => import("./pages/EchoViewer"));
+const EchoMarketplace = lazy(() => import("./components/EchoMarketplace"));
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'genesis' | 'mobile' | 'collection-verification' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency' | 'echo-mint' | 'echo-viewer'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'marketplace' | 'mint' | 'bubblegum' | 'genesis' | 'mobile' | 'collection-verification' | 'clout' | 'smart-contract' | 'time-capsules' | 'collections' | 'proxy' | 'dashboard' | 'analytics' | 'transparency' | 'echo-mint' | 'echo-viewer' | 'echo-marketplace'>('home');
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -287,7 +288,14 @@ export default function App() {
                 className={`nav-tab ${activeTab === 'echo-mint' ? 'active' : ''}`}
                 aria-label="Navigate to Eternal Echoes"
               >
-                🎬 Eternal Echoes
+                🎬 Mint Echo
+              </button>
+              <button
+                onClick={() => setActiveTab('echo-marketplace')}
+                className={`nav-tab ${activeTab === 'echo-marketplace' ? 'active' : ''}`}
+                aria-label="Navigate to Echo Marketplace"
+              >
+                🎭 Echo Market
               </button>
             </div>
           )}
@@ -507,7 +515,9 @@ export default function App() {
           
           {activeTab === 'echo-viewer' && <EchoViewer />}
           
-          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'bubblegum' && activeTab !== 'genesis' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && activeTab !== 'echo-mint' && activeTab !== 'echo-viewer' && (
+          {activeTab === 'echo-marketplace' && <EchoMarketplace />}
+          
+          {!user && activeTab !== 'home' && activeTab !== 'marketplace' && activeTab !== 'mint' && activeTab !== 'bubblegum' && activeTab !== 'genesis' && activeTab !== 'clout' && activeTab !== 'smart-contract' && activeTab !== 'time-capsules' && activeTab !== 'collections' && activeTab !== 'proxy' && activeTab !== 'analytics' && activeTab !== 'transparency' && activeTab !== 'echo-mint' && activeTab !== 'echo-viewer' && activeTab !== 'echo-marketplace' && (
             <UserAuth 
               onUserLogin={setUser}
               onUserLogout={() => setUser(null)}

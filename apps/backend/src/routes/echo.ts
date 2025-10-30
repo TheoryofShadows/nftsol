@@ -10,10 +10,15 @@ import axios from 'axios';
 import { grokVerify, generateTruthHash, reverifyLedger, batchGrokVerify, getVerificationTeaser } from '../utils/grokpedia';
 import { db } from '../db';
 import { echoTable } from '../schema';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import expressRateLimit from 'express-rate-limit';
+import { EternalEchoesService } from '../services/eternalEchoesService';
+import { webSocketService } from '../app';
 
 const router = Router();
+
+// Initialize service (will be set when bubblegum service is ready)
+let echoService: EternalEchoesService | null = null;
 
 // ============================================================================
 // Rate Limiting
@@ -290,21 +295,24 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       })
       .returning();
 
-    // Emit Socket.io event (if WebSocket service is available)
-    // @ts-ignore - WebSocket service may not be typed
-    if (global.webSocketService) {
-      // @ts-ignore
-      global.webSocketService.emitToRoom(`echo-room:${ledgerId}`, 'echoAdded', {
+    // Emit Socket.io event for real-time updates
+    if (webSocketService) {
+      webSocketService.io?.to(`echo-room:${ledgerId}`).emit('echoAdded', {
         echoId: insertedEcho.id,
         verified,
         contributor: contributorWallet,
+        verificationScore: verification.score,
       });
     }
 
-    // TODO: Trigger CLOUT boost for verified echoes
-    // if (verified) {
-    //   await cloutService.boostUser(contributorWallet, 'echo_verified', 2);
-    // }
+    // Award CLOUT for verified echoes
+    if (echoService) {
+      await echoService.awardEchoClout(
+        contributorWallet,
+        verified,
+        verification.score
+      );
+    }
 
     res.json({
       success: true,
@@ -386,5 +394,82 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
     });
   }
 });
+
+/**
+ * GET /api/echo/trending
+ * Get trending Echo NFTs for marketplace
+ */
+router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+
+    if (!echoService) {
+      // Fallback if service not initialized
+      const echoes = await db
+        .select()
+        .from(echoTable)
+        .orderBy(desc(echoTable.timestamp))
+        .limit(limit);
+
+      return res.json({
+        success: true,
+        echoes,
+      });
+    }
+
+    const trending = await echoService.getTrendingEchoes(limit);
+
+    res.json({
+      success: true,
+      echoes: trending,
+    });
+
+  } catch (error: any) {
+    console.error('Get trending echoes error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch trending echoes',
+    });
+  }
+});
+
+/**
+ * GET /api/echo/stats/:wallet
+ * Get user's Echo NFT statistics
+ */
+router.get('/stats/:wallet', echoLimiter, async (req: Request, res: Response) => {
+  try {
+    const { wallet } = req.params;
+
+    if (!echoService) {
+      return res.json({
+        success: true,
+        totalEchosMinted: 0,
+        totalEchosContributed: 0,
+        avgTruthScore: 0,
+        totalCloutEarned: 0,
+      });
+    }
+
+    const stats = await echoService.getUserEchoStats(wallet);
+
+    res.json({
+      success: true,
+      ...stats,
+    });
+
+  } catch (error: any) {
+    console.error('Get echo stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch stats',
+    });
+  }
+});
+
+// Export service setter for initialization
+export function setEchoService(service: EternalEchoesService) {
+  echoService = service;
+}
 
 export default router;
