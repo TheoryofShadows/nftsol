@@ -1,0 +1,40 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "name": "eternal-echoes",
+  "builds": [
+    {
+      "src": "apps/frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
+    {
+      "src": "apps/backend/api/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/apps/backend/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/apps/frontend/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "apps/backend/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 10,
+      "runtime": "@vercel/node@2"
+    }
+  },
+  "regions": ["iad1"],
+  "framework": "vite"
+}
