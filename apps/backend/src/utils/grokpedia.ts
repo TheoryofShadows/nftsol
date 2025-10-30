@@ -1,11 +1,12 @@
 /**
  * Grokipedia Verification Service
- * Mock implementation for truth verification
+ * FREE Grok integration via OpenAI SDK + smart caching
  * 
- * In production, this would integrate with:
- * - Local Grokipedia clone (SQLite)
- * - xAI Grok API for real-time verification
- * - Historical fact databases
+ * Features:
+ * - Uses OpenAI SDK for xAI API calls
+ * - Redis caching (1 hour TTL)
+ * - Graceful fallback to heuristics
+ * - JSON mode for structured responses
  */
 
 import crypto from 'crypto';
