@@ -43,7 +43,6 @@ export const EchoMint: React.FC = () => {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIaId, setSelectedIaId] = useState<string | null>(null);
   const { publicKey, signTransaction } = useWallet();
-  const navigate = useNavigate();
 
   // Debounce search input
   useEffect(() => {
@@ -107,12 +106,16 @@ export const EchoMint: React.FC = () => {
       // TODO: Call Anchor program.methods.initEchoLedger()
       // This requires Anchor client setup - shown as placeholder
       
-      toast.success('🎬 Echo Minted! Redirecting...');
+      toast.success('🎬 Echo Minted! You can view it in the Echo Viewer tab.');
       
       return ledgerPda.toBase58();
     },
     onSuccess: (ledgerPda) => {
-      navigate(`/echo/${ledgerPda}`);
+      // Emit custom event to change tab
+      window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
+      
+      // Store ledger ID for viewer
+      localStorage.setItem('currentEchoLedger', ledgerPda);
     },
     onError: (error: any) => {
       toast.error(`Mint failed: ${error.message}`);

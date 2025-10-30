@@ -4,7 +4,6 @@
  * 
  * Features:
  * - Uses OpenAI SDK for xAI API calls
- * - Redis caching (1 hour TTL)
  * - Graceful fallback to heuristics
  * - JSON mode for structured responses
  */
@@ -20,96 +19,88 @@ export interface GrokVerificationResult {
 }
 
 /**
- * Verify content against xAI Grok API
+ * Verify content with FREE Grok via OpenAI SDK
  * Real implementation with AI-powered fact checking
  */
 export async function grokVerify(input: string): Promise<GrokVerificationResult> {
+  if (!input.trim()) {
+    return {
+      summary: 'No content provided',
+      score: 0,
+      verified: false,
+      confidence: 0,
+    };
+  }
+
   const apiKey = process.env.XAI_API_KEY;
-  const apiUrl = process.env.XAI_API_URL || 'https://api.x.ai/v1';
-  const model = process.env.XAI_MODEL || 'grok-beta';
 
   // Fallback to mock if no API key configured
   if (!apiKey) {
-    console.warn('⚠️ XAI_API_KEY not set, using mock verification');
+    console.warn('⚠️ XAI_API_KEY not set, using fallback verification');
     return grokVerifyMock(input);
   }
 
   try {
-    // Call xAI Grok API for fact verification
-    const response = await fetch(`${apiUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: 'system',
-            content: `You are a fact-checking assistant specializing in historical content verification for the Internet Archive. 
-            
-Your task:
-1. Analyze the provided content for historical accuracy
-2. Verify claims against reliable sources
-3. Assign a truth score (0-100) where:
-   - 90-100: Highly verified historical facts
-   - 80-89: Generally accurate with minor uncertainties
-   - 70-79: Partially verified, needs context
-   - 60-69: Questionable claims, requires fact-checking
-   - 0-59: Unverified or potentially false
+    // Dynamic import to avoid issues if openai not installed
+    const { default: OpenAI } = await import('openai');
 
-4. Provide a brief summary (max 200 chars)
-5. List credible sources (if available)
-
-Respond ONLY with valid JSON in this format:
-{
-  "score": 85,
-  "summary": "Brief fact-check summary",
-  "sources": ["Source 1", "Source 2"],
-  "reasoning": "Why this score was assigned"
-}`
-          },
-          {
-            role: 'user',
-            content: `Verify this content: "${input.substring(0, 2000)}"` // Limit input size
-          }
-        ],
-        temperature: parseFloat(process.env.XAI_TEMPERATURE || '0.3'),
-        max_tokens: parseInt(process.env.XAI_MAX_TOKENS || '500'),
-      }),
-      signal: AbortSignal.timeout(15000), // 15s timeout
+    const xai = new OpenAI({
+      apiKey,
+      baseURL: 'https://api.x.ai/v1',
     });
 
-    if (!response.ok) {
-      throw new Error(`xAI API error: ${response.status} ${response.statusText}`);
-    }
+    const response = await xai.chat.completions.create({
+      model: process.env.XAI_MODEL || 'grok-beta',
+      messages: [
+        {
+          role: 'system',
+          content: `You are Grokipedia, a fact-checking AI for Internet Archive content.
 
-    const data = await response.json();
-    const grokResponse = data.choices?.[0]?.message?.content;
+Analyze content and return ONLY valid JSON:
+{
+  "summary": "Brief 1-2 sentence summary",
+  "score": 85,
+  "sources": ["Source 1", "Source 2"]
+}
 
-    if (!grokResponse) {
+Score scale (0-100):
+- 90-100: Highly verified historical facts
+- 80-89: Generally accurate
+- 70-79: Partially verified
+- 60-69: Questionable
+- 0-59: Unverified`,
+        },
+        {
+          role: 'user',
+          content: input.slice(0, 2000), // Truncate to save tokens
+        },
+      ],
+      response_format: { type: 'json_object' },
+      temperature: 0.1,
+      max_tokens: 200,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
       throw new Error('Empty response from xAI');
     }
 
-    // Parse Grok's JSON response
-    const parsed = JSON.parse(grokResponse);
+    const parsed = JSON.parse(content);
     const score = Math.max(0, Math.min(100, parsed.score || 70));
-    const verified = score >= 80;
 
     return {
       summary: parsed.summary || 'Content analyzed',
       score,
-      verified,
+      verified: score >= 80,
       confidence: score / 100,
-      sources: parsed.sources || ['xAI Grok Verification'],
+      sources: parsed.sources || ['xAI Grok Analysis'],
     };
 
   } catch (error: any) {
     console.error('xAI Grok API Error:', error.message);
     
     // Graceful fallback to mock on error
-    console.warn('⚠️ Falling back to mock verification due to API error');
+    console.warn('⚠️ Falling back to heuristic verification');
     return grokVerifyMock(input);
   }
 }

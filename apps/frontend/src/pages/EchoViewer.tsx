@@ -3,8 +3,7 @@
  * View base NFT + collaborative echo layers
  */
 
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -25,9 +24,17 @@ interface Echo {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export const EchoViewer: React.FC = () => {
-  const { ledgerId } = useParams<{ ledgerId: string }>();
   const { publicKey } = useWallet();
   const queryClient = useQueryClient();
+  const [ledgerId, setLedgerId] = useState<string | null>(null);
+
+  // Get ledger ID from localStorage or URL hash
+  useEffect(() => {
+    const storedLedger = localStorage.getItem('currentEchoLedger');
+    if (storedLedger) {
+      setLedgerId(storedLedger);
+    }
+  }, []);
 
   const [newEchoData, setNewEchoData] = useState('');
   const [echoType, setEchoType] = useState<'Text' | 'Audio' | 'Annotation'>('Text');
