@@ -1,4 +1,4 @@
-import { pgTable, text, decimal, timestamp, uuid, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, decimal, timestamp, uuid, jsonb, index, integer, boolean } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const users = pgTable("users", {
@@ -74,5 +74,25 @@ export const userNftStats = pgTable("user_nft_stats", {
 }, (table) => {
   return {
     walletAddressIdx: index("wallet_address_idx").on(table.walletAddress),
+  };
+});
+
+// Eternal Echoes - Echo tracking table
+export const echoTable = pgTable("echoes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  ledgerId: text("ledger_id").notNull(), // On-chain PDA address
+  echoData: text("echo_data").notNull(), // Text/audio content
+  echoType: text("echo_type").notNull(), // Text, Audio, Annotation
+  dataHash: jsonb("data_hash").notNull(), // Hash array for verification
+  contributor: text("contributor").notNull(), // Wallet address
+  grokVerified: boolean("grok_verified").notNull().default(false),
+  verificationScore: integer("verification_score").default(0), // 0-100
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    ledgerIdIdx: index("echo_ledger_id_idx").on(table.ledgerId),
+    contributorIdx: index("echo_contributor_idx").on(table.contributor),
+    timestampIdx: index("echo_timestamp_idx").on(table.timestamp),
   };
 });
