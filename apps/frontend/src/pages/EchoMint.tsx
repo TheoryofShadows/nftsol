@@ -10,7 +10,6 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { PublicKey } from '@solana/web3.js';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
 import './EchoMint.css';
 
 interface IASearchResult {

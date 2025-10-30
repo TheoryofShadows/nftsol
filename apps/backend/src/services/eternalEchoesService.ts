@@ -44,10 +44,10 @@ export class EternalEchoesService {
       // Award CLOUT for minting verified content
       if (truthScore >= 80) {
         try {
-          await this.cloutService.awardCloutForAction(
+          await this.cloutService.distributeCloutRewards(
             ownerWallet,
-            'echo_verified_mint',
-            truthScore >= 90 ? 100 : 50 // Higher reward for gold truth
+            truthScore >= 90 ? 100 : 50, // Base amount
+            1.0 // Honor multiplier
           );
         } catch (cloutError) {
           console.warn('CLOUT award failed (non-critical):', cloutError);
@@ -106,10 +106,10 @@ export class EternalEchoesService {
       else if (verificationScore >= 90) cloutAmount = 40; // Gold
       else if (verificationScore >= 85) cloutAmount = 30; // Silver
 
-      await this.cloutService.awardCloutForAction(
+      await this.cloutService.distributeCloutRewards(
         contributorWallet,
-        'echo_verified_contribution',
-        cloutAmount
+        cloutAmount,
+        1.0 // Honor multiplier
       );
 
       console.log(`✨ Awarded ${cloutAmount} CLOUT to ${contributorWallet.slice(0, 8)}...`);
