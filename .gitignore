@@ -1,202 +1,111 @@
-# Dependencies
+# ============================================
+# Eternal Echoes - Secure Git Strategy
+# ============================================
+
+# === CRITICAL: Never commit these! ===
+.env
+.env.*
+*.env
+!.env.example
+*.key
+*.pem
+secrets/
+wallet.json
+**/wallet.json
+
+# API Keys & Credentials
+XAI_API_KEY*
+OPENAI_API_KEY*
+*apikey*
+*api-key*
+
+# === Node & Dependencies ===
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-client/.env.local
-server/.env
-
-# Add environment files with secrets (but keep examples)
-*.env
-*.env.*
-!*.env.example
-!.env.example
-env.development
-env.production
-client/env.development
-client/env.production
-server/env.development
-server/env.production
-!client/env.example
-!server/env.example
-!env.example
-config/development/
-config/production/
-apps/backend/backups/
-apps/backend/uploads/
-apps/backend/scripts/fixtures/*.generated.*
-
-# Batch files with hardcoded secrets (ignore the actual file but keep template)
-start-production.bat
-
-# Archive documentation with leaked keys
-docs/archive/
-
-# Build outputs
-client/dist/
-server/dist/
-client/build/
-server/build/
-
-# TypeScript
+.pnpm-debug.log*
+dist/
+build/
 *.tsbuildinfo
-tsconfig.tsbuildinfo
 
-# IDE
-.vscode/
+# === Environment & Config ===
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 *~
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Logs
+# === Logs ===
 logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+*.log.*
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
+# === Testing & Coverage ===
 coverage/
+.nyc_output/
 *.lcov
 
-# nyc test coverage
-.nyc_output
+# === Build Artifacts ===
+*.js.map
+*.d.ts.map
+dist/
+build/
+out/
 
-# Dependency directories
-jspm_packages/
+# === Database ===
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+backups/
 
-# Optional npm cache directory
-.npm
+# === Solana ===
+.anchor/
+target/
+test-ledger/
+.solana/
+*.so
 
-# Optional eslint cache
-.eslintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-public
-
-# Storybook build outputs
-.out
-.storybook-out
-
-# Temporary folders
+# === Temporary Files ===
 tmp/
 temp/
+*.tmp
+*.bak
+*.backup
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === IDE ===
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
 
-# Solana
-.anchor/
-target/
-**/*.rs.bk
+# === Package Managers ===
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Test files
-test-results/
-playwright-report/
-playwright/.cache/
+# === Eternal Echoes Specific (KEEP PRIVATE!) ===
+# Uncomment these if you want to keep the feature completely private:
+# apps/backend/src/utils/grokpedia*.ts
+# apps/backend/src/routes/echo*.ts
+# apps/frontend/src/pages/Echo*.tsx
+# apps/frontend/src/pages/Echo*.css
+# apps/smart-contracts/*/programs/eternal_echoes/
+# tests/eternal-echoes.test.ts
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Redis
-dump.rdb
-
-# Docker
-.dockerignore
-Dockerfile.dev
-
-# Deployment
-deploy.sh
-deploy-*.sh
-deploy-*.ps1
-
-# Backup files
-*.bak
-*.backup
-*.old
-
-# Archive files
-*.zip
-*.tar.gz
-*.rar
-
-# Local development
-.local/
-local/
-
-# Cypress
-cypress/videos/
-cypress/screenshots/
-
-# Jest
-jest-cache/
-
-# Webpack
-.webpack/
-
-# Vite
-.vite/
-
-# Turborepo
-.turbo/
+# === Documentation (Optional Privacy) ===
+# Uncomment to hide feature docs:
+# ETERNAL_ECHOES*.md
+# XAI_*.md
+# *ECHOES*.txt
+# setup-eternal-echoes*.sh
