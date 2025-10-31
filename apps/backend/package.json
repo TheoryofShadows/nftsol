@@ -70,7 +70,6 @@
   },
   "overrides": {
     "@metaplex-foundation/umi": "^1.4.1",
-    "axios": "^1.7.9",
     "semver": "^7.6.0",
     "minimist": "^1.2.8",
     "follow-redirects": "^1.15.6",
