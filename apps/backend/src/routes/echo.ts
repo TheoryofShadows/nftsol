@@ -160,7 +160,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid search parameters',
-        details: error.errors,
+        details: error.issues,
       });
     }
 
@@ -240,7 +240,7 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid mint parameters',
-        details: error.errors,
+        details: error.issues,
       });
     }
 
@@ -331,7 +331,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid echo parameters',
-        details: error.errors,
+        details: error.issues,
       });
     }
 
