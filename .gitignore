@@ -105,7 +105,8 @@ desktop.ini
 *.sln
 
 # === Package Managers ===
-package-lock.json
+# package-lock.json - Keep for deployment (npm ci requires it)
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
