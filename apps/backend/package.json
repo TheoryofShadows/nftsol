@@ -10,9 +10,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.917.0",
     "@coral-xyz/anchor": "^0.32.1",
-    "@irys/sdk": "^0.2.0",
-    "@irys/upload": "^0.0.15",
-    "@irys/upload-solana": "^0.1.8",
+    "@irys/sdk": "^0.2.11",
     "@metaplex-foundation/digital-asset-standard-api": "^2.0.0",
     "@metaplex-foundation/js": "^0.19.0",
     "@metaplex-foundation/mpl-bubblegum": "^5.0.2",
