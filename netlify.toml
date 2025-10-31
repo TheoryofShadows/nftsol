@@ -17,15 +17,11 @@
 ## API is hosted on Render; no Netlify Functions proxy needed
 
 # Frontend environment variables
-[context.production]
-  environment = { 
-    NODE_ENV = "production"
-  }
+[context.production.environment]
+  NODE_ENV = "production"
 
-[context.deploy-preview]
-  environment = { 
-    NODE_ENV = "development"
-  }
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
 
 # Functions configuration
 # No Netlify Functions used for this site

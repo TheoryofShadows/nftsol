@@ -4,6 +4,7 @@ import App from './App';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import './styles/solana.css';
 import { Buffer } from 'buffer';
+import { initAnalytics } from './utils/analytics';
 
 // Polyfill Buffer for browser
 interface WindowWithBuffer extends Window {
@@ -38,6 +39,11 @@ window.addEventListener('error', (event) => {
   }
   // In production, could send to error tracking service
 });
+
+// Initialize Google Analytics
+if (import.meta.env.VITE_GA_TRACKING_ID) {
+  initAnalytics(import.meta.env.VITE_GA_TRACKING_ID);
+}
 
 // Create root and render
 const root = ReactDOM.createRoot(document.getElementById('root')!);

@@ -59,8 +59,9 @@ export default function WaitlistSignup() {
         setSubmitted(true);
 
         // Track conversion
-        if (typeof window !== 'undefined' && (window as any).gtag) {
-          (window as any).gtag('event', 'waitlist_signup', {
+        if (typeof window !== 'undefined') {
+          const { trackEvent } = await import('../utils/analytics');
+          trackEvent('waitlist_signup', {
             event_category: 'engagement',
             event_label: referralCode ? 'referral' : 'organic',
           });

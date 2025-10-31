@@ -1,0 +1,18 @@
+# Netlify Environment Variables - Complete Setup
+# Copy and paste these into Netlify Dashboard → Site Settings → Environment Variables
+# Replace <placeholder> values with your actual keys
+
+# API Configuration
+VITE_API_BASE=https://nftsol.onrender.com
+
+# Solana Configuration
+VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+VITE_SOLANA_CLUSTER=mainnet-beta
+VITE_HELIUS_API_KEY=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+
+# Analytics
+VITE_GA_TRACKING_ID=G-680PM8QN21
+
+# Environment
+NODE_ENV=production
+

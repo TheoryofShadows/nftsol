@@ -14,6 +14,7 @@ import { NotificationProvider } from './components/NotificationSystem';
 import { usePerformance } from './hooks/usePerformance';
 import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
+import { trackPageView, trackWalletConnect, trackTabChange } from './utils/analytics';
 import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
@@ -94,6 +95,25 @@ function AppContent() {
   useEffect(() => {
     loadMarketplace();
   }, [loadMarketplace]);
+
+  // Track page views
+  useEffect(() => {
+    trackPageView(window.location.pathname);
+  }, []);
+
+  // Track wallet connections
+  useEffect(() => {
+    if (connected && publicKey) {
+      // Try to detect wallet type from available adapters
+      const walletType = 'Solana Wallet'; // Default, could be enhanced
+      trackWalletConnect(walletType);
+    }
+  }, [connected, publicKey]);
+
+  // Track tab changes
+  useEffect(() => {
+    trackTabChange(activeTab);
+  }, [activeTab]);
 
   // Performance monitoring
   useEffect(() => {
