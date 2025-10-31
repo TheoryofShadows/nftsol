@@ -14,7 +14,7 @@
     "@irys/upload": "^0.0.15",
     "@irys/upload-solana": "^0.1.8",
     "@metaplex-foundation/digital-asset-standard-api": "^2.0.0",
-    "@metaplex-foundation/js": "^0.19.0",
+    "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-bubblegum": "^5.0.2",
     "@metaplex-foundation/mpl-candy-guard": "^0.1.0",
     "@metaplex-foundation/mpl-candy-machine": "^4.0.1",
