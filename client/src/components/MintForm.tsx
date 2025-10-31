@@ -16,14 +16,17 @@ export default function MintForm() {
 
     try {
       // First, verify wallet exists
-      const verifyRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/verify/${publicKey!.toBase58()}`);
+      const verifyRes = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/nfts/verify/${publicKey!.toBase58()}`
+      );
       const verifyData = await verifyRes.json();
-      
+
       if (!verifyData.success || !verifyData.data.exists) {
         addNotification({
           type: 'error',
           title: 'Wallet Verification Failed',
-          message: 'Wallet not found on Solana network. Please ensure your wallet is properly connected.',
+          message:
+            'Wallet not found on Solana network. Please ensure your wallet is properly connected.',
           duration: 5000,
         });
         setLoading(false);
@@ -32,7 +35,7 @@ export default function MintForm() {
 
       // Create image URL (in production, upload to IPFS first)
       const imageUrl = URL.createObjectURL(file);
-      
+
       // Mint NFT using real Solana blockchain
       const mintRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/mint`, {
         method: 'POST',
@@ -43,21 +46,21 @@ export default function MintForm() {
           toAddress: publicKey!.toBase58(),
           name: name,
           description: `Minted NFT: ${name}`,
-          imageUrl: imageUrl
+          imageUrl: imageUrl,
         }),
       });
-      
+
       const mintData = await mintRes.json();
-      
+
       if (mintData.success) {
         // Trigger confetti celebration
         confetti({
           particleCount: 150,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D']
+          colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D'],
         });
-        
+
         // Show success notification
         addNotification({
           type: 'success',
@@ -65,12 +68,12 @@ export default function MintForm() {
           message: `Your NFT "${name}" has been minted on Solana. Mint Address: ${mintData.data.mintAddress.slice(0, 8)}...`,
           duration: 6000,
         });
-        
+
         // Auto-navigate to "My NFTs" tab after a short delay
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('change-tab', { detail: 'my-nfts' }));
         }, 1500);
-        
+
         // Reset form
         setFile(null);
         setName('');
@@ -106,19 +109,17 @@ export default function MintForm() {
         <div className="space-y-6">
           {/* File Upload */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">
-              Upload Image
-            </label>
+            <label className="block text-sm font-semibold text-white mb-3">Upload Image</label>
             <div className="relative">
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={e => setFile(e.target.files?.[0] ?? null)} 
-                className="hidden" 
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                className="hidden"
                 id="file-upload"
               />
-              <label 
-                htmlFor="file-upload" 
+              <label
+                htmlFor="file-upload"
                 className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-cyan-400/50 rounded-xl cursor-pointer hover:border-cyan-400 transition-colors"
               >
                 {file ? (
@@ -138,13 +139,11 @@ export default function MintForm() {
 
           {/* NFT Name */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">
-              NFT Name
-            </label>
+            <label className="block text-sm font-semibold text-white mb-3">NFT Name</label>
             <input
               placeholder="Enter your NFT name..."
               value={name}
-              onChange={e => setName(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               className="input"
             />
           </div>

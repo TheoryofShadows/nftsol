@@ -11,11 +11,13 @@ export default function WithdrawalForm() {
   // Check wallet balance
   const checkBalance = async () => {
     if (!publicKey) return;
-    
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/balance/${publicKey.toBase58()}`);
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE}/api/nfts/balance/${publicKey.toBase58()}`
+      );
       const data = await res.json();
-      
+
       if (data.success) {
         setBalance(data.data.balance);
       }
@@ -38,14 +40,16 @@ export default function WithdrawalForm() {
         body: JSON.stringify({
           amount_sol: parseFloat(amount),
           to_address: toAddress,
-          userId: publicKey!.toBase58() // Using wallet address as user ID for demo
+          userId: publicKey!.toBase58(), // Using wallet address as user ID for demo
         }),
       });
-      
+
       const data = await res.json();
-      
+
       if (data.success) {
-        alert(`✅ Withdrawal Request Created!\n\nAmount: ${amount} SOL\nTo: ${toAddress}\nStatus: ${data.data.status}\n\nYour withdrawal is pending admin approval.`);
+        alert(
+          `✅ Withdrawal Request Created!\n\nAmount: ${amount} SOL\nTo: ${toAddress}\nStatus: ${data.data.status}\n\nYour withdrawal is pending admin approval.`
+        );
         setAmount('');
         setToAddress('');
       } else {
@@ -61,11 +65,11 @@ export default function WithdrawalForm() {
   // Verify destination wallet
   const verifyAddress = async () => {
     if (!toAddress) return;
-    
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/verify/${toAddress}`);
       const data = await res.json();
-      
+
       if (data.success && data.data.exists) {
         alert('✅ Wallet address is valid and exists on Solana network');
       } else {
@@ -90,19 +94,14 @@ export default function WithdrawalForm() {
           <div className="glass p-4 rounded-lg">
             <div className="flex items-center justify-between mb-4">
               <h4 className="font-semibold text-white">Wallet Balance</h4>
-              <button
-                onClick={checkBalance}
-                className="btn-secondary text-sm px-4 py-2"
-              >
+              <button onClick={checkBalance} className="btn-secondary text-sm px-4 py-2">
                 🔄 Check Balance
               </button>
             </div>
             {balance !== null ? (
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-2xl font-bold text-cyan-400">
-                  {balance.toFixed(4)} SOL
-                </span>
+                <span className="text-2xl font-bold text-cyan-400">{balance.toFixed(4)} SOL</span>
               </div>
             ) : (
               <p className="text-gray-400 text-sm">Click to check your balance</p>
@@ -111,9 +110,7 @@ export default function WithdrawalForm() {
 
           {/* Amount Input */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">
-              Amount (SOL)
-            </label>
+            <label className="block text-sm font-semibold text-white mb-3">Amount (SOL)</label>
             <div className="relative">
               <input
                 type="number"
@@ -121,7 +118,7 @@ export default function WithdrawalForm() {
                 min="0.001"
                 placeholder="0.001"
                 value={amount}
-                onChange={e => setAmount(e.target.value)}
+                onChange={(e) => setAmount(e.target.value)}
                 className="input pr-12"
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-cyan-400 font-bold">
@@ -141,13 +138,10 @@ export default function WithdrawalForm() {
                 type="text"
                 placeholder="Enter Solana wallet address..."
                 value={toAddress}
-                onChange={e => setToAddress(e.target.value)}
+                onChange={(e) => setToAddress(e.target.value)}
                 className="input flex-1"
               />
-              <button
-                onClick={verifyAddress}
-                className="btn-outline px-4 py-3 whitespace-nowrap"
-              >
+              <button onClick={verifyAddress} className="btn-outline px-4 py-3 whitespace-nowrap">
                 ✓ Verify
               </button>
             </div>
@@ -206,7 +200,7 @@ export default function WithdrawalForm() {
               <p className="text-xs text-gray-400">20-30 seconds</p>
             </div>
           </div>
-          
+
           <div className="mt-6 glass p-4 rounded-lg">
             <div className="flex items-start space-x-3">
               <div className="text-yellow-400 text-lg">ℹ️</div>

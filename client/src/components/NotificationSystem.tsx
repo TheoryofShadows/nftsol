@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 import { NotificationConfig } from '../types';
 
 interface NotificationState {
@@ -14,7 +14,10 @@ const initialState: NotificationState = {
   notifications: [],
 };
 
-function notificationReducer(state: NotificationState, action: NotificationAction): NotificationState {
+function notificationReducer(
+  state: NotificationState,
+  action: NotificationAction
+): NotificationState {
   switch (action.type) {
     case 'ADD_NOTIFICATION':
       return {
@@ -24,7 +27,7 @@ function notificationReducer(state: NotificationState, action: NotificationActio
     case 'REMOVE_NOTIFICATION':
       return {
         ...state,
-        notifications: state.notifications.filter(n => n.id !== action.payload),
+        notifications: state.notifications.filter((n) => n.id !== action.payload),
       };
     case 'CLEAR_ALL':
       return {
@@ -114,8 +117,9 @@ function NotificationItem({
   onRemove: () => void;
 }) {
   const getNotificationStyles = () => {
-    const baseStyles = 'glass p-4 rounded-xl shadow-2xl max-w-sm border-l-4 flex items-start space-x-3 backdrop-blur-md transition-all duration-300 transform hover:scale-105';
-    
+    const baseStyles =
+      'glass p-4 rounded-xl shadow-2xl max-w-sm border-l-4 flex items-start space-x-3 backdrop-blur-md transition-all duration-300 transform hover:scale-105';
+
     switch (notification.type) {
       case 'success':
         return `${baseStyles} bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/60 text-green-100 border-green-400`;

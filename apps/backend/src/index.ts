@@ -192,7 +192,13 @@ apiV1.get('/programs', (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
-      programs: programConfig,
+      programs: {
+        CLOUT_PROGRAM_ID: programConfig.cloutProgramId,
+        CLOUT_MINT: programConfig.cloutProgramId, // Same as program ID for CLOUT
+        REWARDS_VAULT: programConfig.rewardsVault,
+        MARKET_PROGRAM_ID: programConfig.marketProgramId,
+        LOYALTY_PROGRAM_ID: programConfig.loyaltyProgramId
+      },
       cluster: solanaConfig.cluster,
       rpcUrl: solanaConfig.rpcUrl
     },

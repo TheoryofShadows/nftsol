@@ -1,11 +1,9 @@
 node_modules
 dist
 build
-coverage
-.next
 .vscode
 *.log
-*.lock
-.env
-.env.local
+package-lock.json
 tsconfig.tsbuildinfo
+*.tsbuildinfo
+

@@ -6,7 +6,7 @@ import { useCloutBalance } from '../hooks/useCloutBalance';
  * CloutBadge Component
  * Displays user's CLOUT token balance using custom hook
  * Positioned as a fixed badge in bottom-right corner
- * 
+ *
  * @component
  */
 export default function CloutBadge() {
@@ -18,7 +18,7 @@ export default function CloutBadge() {
   }
 
   return (
-    <div 
+    <div
       className="glass fixed right-4 bottom-4 px-4 py-3 rounded-xl border border-white/10 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25"
       style={{ minWidth: '200px' }}
       title={`CLOUT Token Balance${error ? ` - Error: ${error}` : ''}`}
@@ -38,12 +38,14 @@ export default function CloutBadge() {
                 <span className="text-white text-sm">Loading...</span>
               </div>
             ) : error ? (
-              <span className="text-red-400 text-xs" title={error}>⚠️ Error</span>
+              <span className="text-red-400 text-xs" title={error}>
+                ⚠️ Error
+              </span>
             ) : (
               <span className="text-white font-bold text-lg">
-                {balance.toLocaleString(undefined, { 
-                  minimumFractionDigits: 0, 
-                  maximumFractionDigits: 2 
+                {balance.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
                 })}
               </span>
             )}

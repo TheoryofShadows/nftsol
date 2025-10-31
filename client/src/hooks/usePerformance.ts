@@ -12,13 +12,13 @@ export function usePerformance() {
   useEffect(() => {
     // Measure page load time
     const loadTime = performance.now();
-    setMetrics(prev => ({ ...prev, loadTime }));
+    setMetrics((prev) => ({ ...prev, loadTime }));
 
     // Measure memory usage if available
     const updateMemoryUsage = () => {
       if ('memory' in performance) {
         const memory = (performance as any).memory;
-        setMetrics(prev => ({
+        setMetrics((prev) => ({
           ...prev,
           memoryUsage: memory.usedJSHeapSize / 1024 / 1024, // Convert to MB
         }));
@@ -32,7 +32,7 @@ export function usePerformance() {
     const renderStart = performance.now();
     requestAnimationFrame(() => {
       const renderTime = performance.now() - renderStart;
-      setMetrics(prev => ({ ...prev, renderTime }));
+      setMetrics((prev) => ({ ...prev, renderTime }));
     });
 
     return () => {
@@ -40,18 +40,16 @@ export function usePerformance() {
     };
   }, []);
 
-  const measureApiCall = async <T>(
-    apiCall: () => Promise<T>
-  ): Promise<T> => {
+  const measureApiCall = async <T>(apiCall: () => Promise<T>): Promise<T> => {
     const start = performance.now();
     try {
       const result = await apiCall();
       const responseTime = performance.now() - start;
-      setMetrics(prev => ({ ...prev, apiResponseTime: responseTime }));
+      setMetrics((prev) => ({ ...prev, apiResponseTime: responseTime }));
       return result;
     } catch (error) {
       const responseTime = performance.now() - start;
-      setMetrics(prev => ({ ...prev, apiResponseTime: responseTime }));
+      setMetrics((prev) => ({ ...prev, apiResponseTime: responseTime }));
       throw error;
     }
   };

@@ -8,16 +8,15 @@ interface TruthBadgeProps {
   showPulse?: boolean;
 }
 
-export default function TruthBadge({ 
-  score, 
-  verified, 
-  summary, 
+export default function TruthBadge({
+  score,
+  verified,
+  summary,
   size = 'md',
-  showPulse = false 
+  showPulse = false,
 }: TruthBadgeProps) {
   const isVerified = verified !== undefined ? verified : score > 70;
   const isModerate = !isVerified && score >= 50;
-  const isLowTrust = score < 50;
 
   const getColorClasses = () => {
     if (isVerified) {
@@ -52,7 +51,7 @@ export default function TruthBadge({
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-1.5 text-sm',
-    lg: 'px-4 py-2 text-base'
+    lg: 'px-4 py-2 text-base',
   };
 
   return (

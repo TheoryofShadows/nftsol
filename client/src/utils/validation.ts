@@ -31,15 +31,15 @@ export const validateNFTName = (name: string): { valid: boolean; error?: string 
   if (!name || name.trim().length === 0) {
     return { valid: false, error: 'NFT name is required' };
   }
-  
+
   if (name.length > 100) {
     return { valid: false, error: 'NFT name must be less than 100 characters' };
   }
-  
+
   if (name.length < 2) {
     return { valid: false, error: 'NFT name must be at least 2 characters' };
   }
-  
+
   return { valid: true };
 };
 
@@ -47,7 +47,7 @@ export const validateNFTDescription = (description: string): { valid: boolean; e
   if (description && description.length > 1000) {
     return { valid: false, error: 'Description must be less than 1000 characters' };
   }
-  
+
   return { valid: true };
 };
 
@@ -58,13 +58,13 @@ export const validateMintRequest = (request: {
   file?: File;
 }): { valid: boolean; errors: string[] } => {
   const errors: string[] = [];
-  
+
   // Validate name
   const nameValidation = validateNFTName(request.name);
   if (!nameValidation.valid) {
     errors.push(nameValidation.error!);
   }
-  
+
   // Validate description
   if (request.description) {
     const descValidation = validateNFTDescription(request.description);
@@ -72,24 +72,24 @@ export const validateMintRequest = (request: {
       errors.push(descValidation.error!);
     }
   }
-  
+
   // Validate wallet
   if (!validateWalletAddress(request.creatorWallet)) {
     errors.push('Invalid wallet address format');
   }
-  
+
   // Validate file if provided
   if (request.file) {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!validateFileType(request.file, allowedTypes)) {
       errors.push(`Invalid file type. Allowed: ${allowedTypes.join(', ')}`);
     }
-    
+
     if (!validateFileSize(request.file, 10)) {
       errors.push('File size must be less than 10MB');
     }
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,

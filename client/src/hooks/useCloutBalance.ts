@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || 
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string) ||
   (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
 interface CloutBalanceData {
@@ -19,7 +20,7 @@ interface CloutBalanceResponse {
 /**
  * Custom hook for fetching CLOUT balance
  * Uses the same pattern as other hooks in the codebase (useState + useEffect)
- * 
+ *
  * @returns { balance, isLoading, error, refetch }
  */
 export function useCloutBalance() {
@@ -42,7 +43,7 @@ export function useCloutBalance() {
     try {
       const address = publicKey.toBase58();
       const response = await fetch(`${API_BASE}/api/clout/balance/${address}`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -100,7 +101,7 @@ export function useCloutVaultBalance() {
 
     try {
       const response = await fetch(`${API_BASE}/api/clout/vault-balance`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -139,4 +140,3 @@ export function useCloutVaultBalance() {
     refetch: fetchVaultBalance,
   };
 }
-

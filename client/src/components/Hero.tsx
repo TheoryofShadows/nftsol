@@ -17,7 +17,9 @@ type EchoStats = {
   trendingCount?: number;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string) ||
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
 export default function Hero() {
   const { connected, publicKey } = useWallet();
@@ -73,9 +75,15 @@ export default function Hero() {
       {/* Animated gradient background */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }}></div>
-        
+        <div
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
+
         {/* Floating particles */}
         {[...Array(6)].map((_, i) => (
           <div
@@ -96,7 +104,7 @@ export default function Hero() {
         <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold gradient-text font-display mb-6 drop-shadow-2xl">
           NFTSol + Eternal Echoes
         </h1>
-        
+
         <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed">
           NFTSol: Mint NFTs, Capture Eternal Echoes, Verify History on Solana.
         </p>
@@ -111,8 +119,11 @@ export default function Hero() {
           ) : (
             <div className="glass px-6 py-4 rounded-xl backdrop-blur-md">
               <p className="text-white font-semibold">
-                Connected: <span className="text-cyan-300 font-mono">
-                  {publicKey ? `${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-6)}` : 'Unknown'}
+                Connected:{' '}
+                <span className="text-cyan-300 font-mono">
+                  {publicKey
+                    ? `${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-6)}`
+                    : 'Unknown'}
                 </span>
               </p>
             </div>
@@ -120,7 +131,10 @@ export default function Hero() {
         </div>
 
         {/* Live Counters */}
-        <div className="flex flex-wrap justify-center gap-8 md:gap-12 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+        <div
+          className="flex flex-wrap justify-center gap-8 md:gap-12 animate-slide-up"
+          style={{ animationDelay: '0.3s' }}
+        >
           <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
             <div className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up">
               {loading ? '...' : nftCount.toLocaleString()}
@@ -129,23 +143,36 @@ export default function Hero() {
           </div>
 
           <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-            <div className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up" style={{ animationDelay: '0.1s' }}>
+            <div
+              className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up"
+              style={{ animationDelay: '0.1s' }}
+            >
               {loading ? '...' : echoLayers.toLocaleString()}
             </div>
             <div className="text-sm md:text-base text-gray-300 font-semibold">🌌 Echo Layers</div>
           </div>
 
           <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-            <div className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up" style={{ animationDelay: '0.2s' }}>
+            <div
+              className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up"
+              style={{ animationDelay: '0.2s' }}
+            >
               {loading ? '...' : trendingToday.toLocaleString()}
             </div>
-            <div className="text-sm md:text-base text-gray-300 font-semibold">🔥 Trending Today</div>
+            <div className="text-sm md:text-base text-gray-300 font-semibold">
+              🔥 Trending Today
+            </div>
           </div>
 
           {connected && (
             <div className="glass px-6 py-4 rounded-xl backdrop-blur-md text-center transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-              <div className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2 animate-counter-up" style={{ animationDelay: '0.3s' }}>
-                {cloutBalance > 0 ? cloutBalance.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+              <div
+                className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2 animate-counter-up"
+                style={{ animationDelay: '0.3s' }}
+              >
+                {cloutBalance > 0
+                  ? cloutBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })
+                  : '—'}
               </div>
               <div className="text-sm md:text-base text-gray-300 font-semibold">⭐ CLOUT</div>
             </div>

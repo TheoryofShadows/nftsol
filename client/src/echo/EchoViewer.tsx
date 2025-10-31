@@ -15,7 +15,9 @@ type Echo = {
   timestamp: string;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string) ||
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
 export default function EchoViewer() {
   const { publicKey } = useWallet();
@@ -40,7 +42,9 @@ export default function EchoViewer() {
       const data = await res.json();
       const newEchoes = Array.isArray(data.echoes) ? data.echoes : [];
       // Calculate current avg score before updating
-      const currentAvg = echoes.length ? Math.round(echoes.reduce((s, e) => s + e.verificationScore, 0) / echoes.length) : 0;
+      const currentAvg = echoes.length
+        ? Math.round(echoes.reduce((s, e) => s + e.verificationScore, 0) / echoes.length)
+        : 0;
       setPreviousAvgScore(currentAvg);
       setEchoes(newEchoes);
     } catch (_e) {
@@ -58,8 +62,14 @@ export default function EchoViewer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ledgerId]);
 
-  const verifiedCount = useMemo(() => echoes.filter(e => e.grokVerified).length, [echoes]);
-  const avgScore = useMemo(() => echoes.length ? Math.round(echoes.reduce((s, e) => s + e.verificationScore, 0) / echoes.length) : 0, [echoes]);
+  const verifiedCount = useMemo(() => echoes.filter((e) => e.grokVerified).length, [echoes]);
+  const avgScore = useMemo(
+    () =>
+      echoes.length
+        ? Math.round(echoes.reduce((s, e) => s + e.verificationScore, 0) / echoes.length)
+        : 0,
+    [echoes]
+  );
 
   // Check for score improvement and trigger confetti
   useEffect(() => {
@@ -68,7 +78,7 @@ export default function EchoViewer() {
         particleCount: 50,
         spread: 60,
         origin: { y: 0.5 },
-        colors: ['#14F195', '#9945FF']
+        colors: ['#14F195', '#9945FF'],
       });
       addNotification({
         type: 'success',
@@ -81,25 +91,30 @@ export default function EchoViewer() {
 
   const addEcho = async () => {
     if (!ledgerId || !publicKey || !newEcho.trim()) return;
-    
+
     try {
       const res = await fetch(`${API_BASE}/api/echo/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ledgerId, echoData: newEcho, echoType, contributorWallet: publicKey.toBase58() })
+        body: JSON.stringify({
+          ledgerId,
+          echoData: newEcho,
+          echoType,
+          contributorWallet: publicKey.toBase58(),
+        }),
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setNewEcho('');
-        
+
         addNotification({
           type: data.verified ? 'success' : 'warning',
           title: data.verified ? '✅ Echo Added & Verified!' : '⚠️ Echo Added',
           message: data.message || 'Echo layer added successfully',
           duration: 4000,
         });
-        
+
         // Refresh echoes
         setTimeout(() => fetchEchoes(ledgerId), 500);
       } else {
@@ -127,7 +142,11 @@ export default function EchoViewer() {
   };
 
   if (!ledgerId) {
-    return <div className="p-4 text-gray-300">Select an Echo from the marketplace or mint one to view.</div>;
+    return (
+      <div className="p-4 text-gray-300">
+        Select an Echo from the marketplace or mint one to view.
+      </div>
+    );
   }
 
   return (
@@ -135,7 +154,7 @@ export default function EchoViewer() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="text-2xl font-bold text-white">🎬 Eternal Echo</div>
-          <div className="text-gray-400 text-sm">Ledger: {ledgerId.slice(0,8)}…</div>
+          <div className="text-gray-400 text-sm">Ledger: {ledgerId.slice(0, 8)}…</div>
         </div>
         <WalletMultiButton className="btn-glass" />
       </div>
@@ -172,7 +191,7 @@ export default function EchoViewer() {
             echoes.map((e, index) => {
               const isLeft = index % 2 === 0;
               const isLowTrust = e.verificationScore < 50;
-              
+
               return (
                 <div
                   key={e.id}
@@ -193,7 +212,7 @@ export default function EchoViewer() {
                     >
                       {getContributorInitial(e.contributor)}
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2 gap-3">
                         <div className="flex-1">
@@ -204,26 +223,24 @@ export default function EchoViewer() {
                             {e.contributor.slice(0, 8)}...{e.contributor.slice(-6)}
                           </div>
                         </div>
-                        
+
                         {/* Verification Badge */}
                         <div className="flex-shrink-0">
-                          <TruthBadge 
-                            score={e.verificationScore} 
+                          <TruthBadge
+                            score={e.verificationScore}
                             verified={e.grokVerified}
                             showPulse={e.grokVerified}
                             size="sm"
                           />
                         </div>
                       </div>
-                      
+
                       <div className={`text-white mb-2 ${isLowTrust ? 'text-red-200' : ''}`}>
                         {e.echoData}
                       </div>
-                      
+
                       <div className="flex items-center gap-2 text-sm">
-                        <span className="glass px-2 py-1 rounded text-gray-300">
-                          {e.echoType}
-                        </span>
+                        <span className="glass px-2 py-1 rounded text-gray-300">{e.echoType}</span>
                         {isLowTrust && (
                           <span className="text-red-300 text-xs font-semibold">
                             ⚠️ Low Trust Content
@@ -242,7 +259,11 @@ export default function EchoViewer() {
       <div className="glass p-3 rounded">
         <div className="mb-2 text-white font-semibold">Add Echo</div>
         <div className="flex gap-2 mb-2">
-          <select className="glass px-2 py-1 rounded" value={echoType} onChange={(e) => setEchoType(e.target.value as any)}>
+          <select
+            className="glass px-2 py-1 rounded"
+            value={echoType}
+            onChange={(e) => setEchoType(e.target.value as any)}
+          >
             <option value="Text">Text</option>
             <option value="Audio">Audio</option>
             <option value="Annotation">Annotation</option>
@@ -253,12 +274,12 @@ export default function EchoViewer() {
             value={newEcho}
             onChange={(e) => setNewEcho(e.target.value)}
           />
-          <button className="btn-glass" onClick={addEcho} disabled={!publicKey || !newEcho.trim()}>Add</button>
+          <button className="btn-glass" onClick={addEcho} disabled={!publicKey || !newEcho.trim()}>
+            Add
+          </button>
         </div>
         {!publicKey && <div className="text-gray-400 text-sm">Connect wallet to add echo.</div>}
       </div>
     </div>
   );
 }
-
-

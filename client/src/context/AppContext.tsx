@@ -61,7 +61,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(appReducer, initialState);
   const { publicKey, connected } = useWallet();
-  const [theme, setTheme] = useLocalStorage('theme', 'dark');
+  const [theme] = useLocalStorage('theme', 'dark');
 
   // Load marketplace data
   const loadMarketplace = async () => {
@@ -159,11 +159,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearError,
   };
 
-  return (
-    <AppContext.Provider value={value}>
-      {children}
-    </AppContext.Provider>
-  );
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
 export function useApp() {

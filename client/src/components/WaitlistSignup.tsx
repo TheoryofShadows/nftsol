@@ -16,7 +16,7 @@ export default function WaitlistSignup() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Auto-fill wallet address if connected
   React.useEffect(() => {
     if (connected && publicKey) {
@@ -43,7 +43,7 @@ export default function WaitlistSignup() {
         email,
         walletAddress: walletAddress || undefined,
         referralCode: referralCode || undefined,
-        source: referralCode ? 'referral' : 'landing'
+        source: referralCode ? 'referral' : 'landing',
       };
 
       // Submit to ConvertKit (or your preferred service)
@@ -57,12 +57,12 @@ export default function WaitlistSignup() {
 
       if (response.ok) {
         setSubmitted(true);
-        
+
         // Track conversion
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('event', 'waitlist_signup', {
             event_category: 'engagement',
-            event_label: referralCode ? 'referral' : 'organic'
+            event_label: referralCode ? 'referral' : 'organic',
           });
         }
       } else {
@@ -79,14 +79,14 @@ export default function WaitlistSignup() {
     return (
       <div className="card-glass p-8 text-center">
         <div className="text-6xl mb-4">🎉</div>
-        <h3 className="text-2xl font-bold gradient-text mb-4">You're In!</h3>
+        <h3 className="text-2xl font-bold gradient-text mb-4">You&apos;re In!</h3>
         <p className="text-gray-300 mb-6">
-          Welcome to the NFTSol community! You'll be the first to know when we launch.
+          Welcome to the NFTSol community! You&apos;ll be the first to know when we launch.
         </p>
-        
+
         <div className="space-y-4">
           <div className="glass p-4 rounded-lg">
-            <h4 className="font-semibold text-white mb-2">What's Next?</h4>
+            <h4 className="font-semibold text-white mb-2">What&apos;s Next?</h4>
             <ul className="text-sm text-gray-300 space-y-1">
               <li>• Early access to new features</li>
               <li>• Exclusive airdrops and rewards</li>
@@ -94,7 +94,7 @@ export default function WaitlistSignup() {
               <li>• Beta testing opportunities</li>
             </ul>
           </div>
-          
+
           <div className="flex space-x-3">
             <button
               onClick={() => window.open('https://twitter.com', '_blank', 'noopener,noreferrer')}
@@ -119,17 +119,13 @@ export default function WaitlistSignup() {
       <div className="text-center mb-8">
         <div className="text-6xl mb-4">🚀</div>
         <h3 className="text-3xl font-bold gradient-text mb-2">Join the Waitlist</h3>
-        <p className="text-gray-300">
-          Be the first to experience the future of NFT marketplaces
-        </p>
+        <p className="text-gray-300">Be the first to experience the future of NFT marketplaces</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Email Input */}
         <div>
-          <label className="block text-sm font-semibold text-white mb-3">
-            Email Address *
-          </label>
+          <label className="block text-sm font-semibold text-white mb-3">Email Address *</label>
           <input
             type="email"
             value={email}
@@ -154,16 +150,16 @@ export default function WaitlistSignup() {
             readOnly={connected}
           />
           <p className="text-xs text-gray-400 mt-1">
-            {connected ? '✓ Auto-filled from connected wallet' : 'Get early access to exclusive airdrops'}
+            {connected
+              ? '✓ Auto-filled from connected wallet'
+              : 'Get early access to exclusive airdrops'}
           </p>
         </div>
 
         {/* Referral Code (Auto-filled if from referral link) */}
         {referralCode && (
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">
-              Referral Code
-            </label>
+            <label className="block text-sm font-semibold text-white mb-3">Referral Code</label>
             <input
               type="text"
               value={referralCode}

@@ -14,7 +14,9 @@ type TrendingLedger = {
   };
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string) ||
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
 export default function EchoTrending() {
   const [trending, setTrending] = useState<TrendingLedger[]>([]);
@@ -28,18 +30,18 @@ export default function EchoTrending() {
         const res = await fetch(`${API_BASE}/api/echo/trending?limit=10`);
         if (!res.ok) throw new Error('Failed to fetch trending');
         const data = await res.json();
-        
+
         if (!cancelled) {
           // Transform echoes into ledger summaries
           const ledgerMap = new Map<string, TrendingLedger>();
-          
+
           if (Array.isArray(data.echoes)) {
             // Track unique contributors per ledger
             const contributorSets = new Map<string, Set<string>>();
-            
+
             data.echoes.forEach((echo: any) => {
               const ledgerId = echo.ledgerId || echo.id?.split(':')[0] || 'unknown';
-              
+
               if (!ledgerMap.has(ledgerId)) {
                 ledgerMap.set(ledgerId, {
                   ledgerId,
@@ -50,10 +52,10 @@ export default function EchoTrending() {
                 });
                 contributorSets.set(ledgerId, new Set());
               }
-              
+
               const ledger = ledgerMap.get(ledgerId)!;
               ledger.echoCount = (ledger.echoCount || 0) + 1;
-              
+
               // Track unique contributors
               if (echo.contributor) {
                 const contributors = contributorSets.get(ledgerId)!;
@@ -62,19 +64,22 @@ export default function EchoTrending() {
                   ledger.contributorCount = contributors.size;
                 }
               }
-              
+
               if (echo.verificationScore) {
                 const currentAvg = ledger.avgTruthScore || 0;
                 ledger.avgTruthScore = Math.round(
-                  ((currentAvg * (ledger.echoCount - 1)) + echo.verificationScore) / ledger.echoCount
+                  (currentAvg * (ledger.echoCount - 1) + echo.verificationScore) / ledger.echoCount
                 );
               }
-              
+
               if (echo.grokVerified) {
                 ledger.verified = true;
               }
-              
-              if (!ledger.lastEcho || (echo.timestamp && new Date(echo.timestamp) > new Date(ledger.lastEcho.timestamp))) {
+
+              if (
+                !ledger.lastEcho ||
+                (echo.timestamp && new Date(echo.timestamp) > new Date(ledger.lastEcho.timestamp))
+              ) {
                 ledger.lastEcho = {
                   timestamp: echo.timestamp || new Date().toISOString(),
                   contributor: echo.contributor || 'Unknown',
@@ -82,7 +87,7 @@ export default function EchoTrending() {
               }
             });
           }
-          
+
           // Sort by echo count and recency, then take top 10
           const sorted = Array.from(ledgerMap.values())
             .sort((a, b) => {
@@ -91,7 +96,7 @@ export default function EchoTrending() {
               return bScore - aScore;
             })
             .slice(0, 10);
-          
+
           setTrending(sorted);
         }
       } catch (_e) {
@@ -100,7 +105,7 @@ export default function EchoTrending() {
         if (!cancelled) setLoading(false);
       }
     };
-    
+
     fetchTrending();
     const interval = setInterval(fetchTrending, 30000); // Refresh every 30s
     return () => {
@@ -127,7 +132,9 @@ export default function EchoTrending() {
     return (
       <div className="glass p-6 rounded-xl">
         <h3 className="text-xl font-bold text-white mb-4">🔥 Trending Echoes</h3>
-        <div className="text-gray-300 text-center py-8">No trending echoes yet. Be the first to mint!</div>
+        <div className="text-gray-300 text-center py-8">
+          No trending echoes yet. Be the first to mint!
+        </div>
       </div>
     );
   }
@@ -160,11 +167,7 @@ export default function EchoTrending() {
               </div>
               {ledger.avgTruthScore !== undefined && (
                 <div className="flex-shrink-0 ml-3">
-                  <TruthBadge 
-                    score={ledger.avgTruthScore} 
-                    verified={ledger.verified}
-                    size="sm"
-                  />
+                  <TruthBadge score={ledger.avgTruthScore} verified={ledger.verified} size="sm" />
                 </div>
               )}
             </div>

@@ -10,7 +10,8 @@ export function usePhantom() {
   // Eager connect (won't prompt if previously trusted)
   useEffect(() => {
     if (!provider) return;
-    provider.connect({ onlyIfTrusted: true })
+    provider
+      .connect({ onlyIfTrusted: true })
       .then(({ publicKey }) => {
         setConnected(true);
         setPubkey(publicKey.toBase58?.() ?? String(publicKey));

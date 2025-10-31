@@ -1,12 +1,12 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import { 
+import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
   TorusWalletAdapter,
   LedgerWalletAdapter,
-  CoinbaseWalletAdapter
+  CoinbaseWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
@@ -15,6 +15,8 @@ import { usePerformance } from './hooks/usePerformance';
 import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
 import CloutBadge from './components/CloutBadge';
+import ContractInfo from './components/ContractInfo';
+import CloutInfo from './components/CloutInfo';
 import './styles/solana.css';
 import './styles/design-system.css';
 
@@ -79,7 +81,7 @@ class ErrorBoundary extends React.Component<
 }
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState("market");
+  const [activeTab, setActiveTab] = useState('market');
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
@@ -92,7 +94,8 @@ function AppContent() {
   // Performance monitoring
   useEffect(() => {
     const report = getPerformanceReport();
-    console.log('Performance Report:', report);
+    // eslint-disable-next-line no-console
+    if (import.meta.env.DEV) console.log('Performance Report:', report);
   }, [getPerformanceReport]);
 
   // Allow programmatic tab changes (used by Echo components)
@@ -129,7 +132,7 @@ function AppContent() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
         <div className="absolute top-40 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
       </div>
-      
+
       <header className="relative z-10 p-6 backdrop-blur-sm bg-black/20 border-b border-white/10">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
@@ -144,7 +147,7 @@ function AppContent() {
                 NFTSol
               </h1>
             </div>
-            
+
             {/* Performance indicator with Solana styling */}
             <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-black/30 rounded-full border border-cyan-400/30">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -153,13 +156,15 @@ function AppContent() {
               </span>
             </div>
           </div>
-          
-          <Suspense fallback={
-            <div className="btn-glass animate-pulse">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-              Loading...
-            </div>
-          }>
+
+          <Suspense
+            fallback={
+              <div className="btn-glass animate-pulse">
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                Loading...
+              </div>
+            }
+          >
             <PhantomConnect />
           </Suspense>
         </div>
@@ -167,31 +172,38 @@ function AppContent() {
 
       <main className="relative z-10 max-w-7xl mx-auto p-6">
         {/* Hero Section - Full Screen Animated Landing */}
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="loading-spinner"></div></div>}>
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <div className="loading-spinner"></div>
+            </div>
+          }
+        >
           <Hero />
         </Suspense>
 
         {/* Enhanced Navigation */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {[
-            { id: "market", label: "Marketplace", icon: "🏪", desc: "Discover NFTs" },
-            { id: "mint", label: "Mint NFT", icon: "✨", desc: "Create new" },
-            { id: "echo-marketplace", label: "Echo Market", icon: "🎭", desc: "Collaborative" },
-            { id: "echo-mint", label: "Mint Echo", icon: "🎬", desc: "Eternal Echoes" },
-            { id: "echo-viewer", label: "Echo Viewer", icon: "👁️", desc: "Layers" },
-            { id: "referrals", label: "Referrals", icon: "🎯", desc: "Earn rewards" },
-            { id: "waitlist", label: "Waitlist", icon: "🚀", desc: "Join early" },
-            { id: "withdraw", label: "Withdraw SOL", icon: "💰", desc: "Manage funds" },
-            { id: "my-nfts", label: "My NFTs", icon: "👤", desc: "Your collection" },
-            { id: "collections", label: "Collections", icon: "📚", desc: "Browse by type" },
+            { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
+            { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
+            { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
+            { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
+            { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
+            { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
+            { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
+            { id: 'waitlist', label: 'Waitlist', icon: '🚀', desc: 'Join early' },
+            { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
+            { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
+            { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
                 activeTab === tab.id
-                  ? "bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25"
-                  : "glass text-white hover:bg-white/20 hover:shadow-lg"
+                  ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25'
+                  : 'glass text-white hover:bg-white/20 hover:shadow-lg'
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -209,7 +221,7 @@ function AppContent() {
         </div>
 
         <div className="min-h-[600px]">
-          {activeTab === "market" && (
+          {activeTab === 'market' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display">
@@ -227,19 +239,21 @@ function AppContent() {
                   <span className="ml-4 text-gray-300">Loading marketplace...</span>
                 </div>
               ) : (
-                <Suspense fallback={
-                  <div className="flex justify-center items-center py-20">
-                    <div className="loading-spinner"></div>
-                    <span className="ml-4 text-gray-300">Loading NFTs...</span>
-                  </div>
-                }>
+                <Suspense
+                  fallback={
+                    <div className="flex justify-center items-center py-20">
+                      <div className="loading-spinner"></div>
+                      <span className="ml-4 text-gray-300">Loading NFTs...</span>
+                    </div>
+                  }
+                >
                   <NftGrid nfts={nfts} />
                 </Suspense>
               )}
             </div>
           )}
 
-          {activeTab === "echo-marketplace" && (
+          {activeTab === 'echo-marketplace' && (
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
                 <EchoMarketplace />
@@ -247,7 +261,7 @@ function AppContent() {
             </div>
           )}
 
-          {activeTab === "echo-mint" && (
+          {activeTab === 'echo-mint' && (
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
                 <EchoMint />
@@ -255,7 +269,7 @@ function AppContent() {
             </div>
           )}
 
-          {activeTab === "echo-viewer" && (
+          {activeTab === 'echo-viewer' && (
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
                 <EchoViewer />
@@ -263,28 +277,46 @@ function AppContent() {
             </div>
           )}
 
-          {activeTab === "mint" && (
+          {activeTab === 'clout' && (
+            <div className="animate-fade-in animate-slide-up">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  ⭐ CLOUT Token
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Learn about the CLOUT token, its utilities, and how to earn rewards on the NFTSol
+                  platform.
+                </p>
+              </div>
+              <CloutInfo />
+            </div>
+          )}
+
+          {activeTab === 'mint' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   ✨ Mint New NFT
                 </h2>
                 <p className="text-gray-300 max-w-2xl mx-auto">
-                  Create your unique digital asset on the Solana blockchain. Fast, secure, and cost-effective.
+                  Create your unique digital asset on the Solana blockchain. Fast, secure, and
+                  cost-effective.
                 </p>
               </div>
-              <Suspense fallback={
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading mint form...</span>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading mint form...</span>
+                  </div>
+                }
+              >
                 <MintForm />
               </Suspense>
             </div>
           )}
 
-          {activeTab === "withdraw" && (
+          {activeTab === 'withdraw' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
@@ -294,39 +326,41 @@ function AppContent() {
                   Manage your SOL balance and withdraw funds from the platform wallet.
                 </p>
               </div>
-              <Suspense fallback={
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading withdrawal form...</span>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading withdrawal form...</span>
+                  </div>
+                }
+              >
                 <WithdrawalForm />
               </Suspense>
             </div>
           )}
 
-          {activeTab === "my-nfts" && (
+          {activeTab === 'my-nfts' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-bold gradient-text font-display">
-                  👤 My NFTs
-                </h2>
+                <h2 className="text-4xl font-bold gradient-text font-display">👤 My NFTs</h2>
                 <div className="glass px-4 py-2 rounded-lg">
                   <span className="text-sm text-gray-300">Your Collection</span>
                 </div>
               </div>
-              <Suspense fallback={
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading your NFTs...</span>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading your NFTs...</span>
+                  </div>
+                }
+              >
                 <NftGrid nfts={nfts} />
               </Suspense>
             </div>
           )}
 
-          {activeTab === "referrals" && (
+          {activeTab === 'referrals' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
@@ -336,39 +370,44 @@ function AppContent() {
                   Earn 5% from every NFT minted through your referral link. Build your empire!
                 </p>
               </div>
-              <Suspense fallback={
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading referral system...</span>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading referral system...</span>
+                  </div>
+                }
+              >
                 <ReferralSystem />
               </Suspense>
             </div>
           )}
 
-          {activeTab === "waitlist" && (
+          {activeTab === 'waitlist' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   🚀 Join the Waitlist
                 </h2>
                 <p className="text-gray-300 max-w-2xl mx-auto">
-                  Be the first to experience the future of NFT marketplaces. Early access, exclusive rewards, and more!
+                  Be the first to experience the future of NFT marketplaces. Early access, exclusive
+                  rewards, and more!
                 </p>
               </div>
-              <Suspense fallback={
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading waitlist...</span>
-                </div>
-              }>
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading waitlist...</span>
+                  </div>
+                }
+              >
                 <WaitlistSignup />
               </Suspense>
             </div>
           )}
 
-          {activeTab === "collections" && (
+          {activeTab === 'collections' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
@@ -404,7 +443,8 @@ function AppContent() {
                 <span className="text-2xl font-bold gradient-text font-display">NFTSol</span>
               </div>
               <p className="text-gray-400 text-sm">
-                Lightning-fast NFT marketplace on Solana. Create, discover, and trade digital assets with unprecedented speed.
+                Lightning-fast NFT marketplace on Solana. Create, discover, and trade digital assets
+                with unprecedented speed.
               </p>
             </div>
 
@@ -412,10 +452,26 @@ function AppContent() {
             <div>
               <h3 className="text-white font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Marketplace</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Mint NFT</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Collections</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">My NFTs</a></li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Marketplace
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Mint NFT
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Collections
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    My NFTs
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -423,10 +479,26 @@ function AppContent() {
             <div>
               <h3 className="text-white font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Documentation</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">API Reference</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Support</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Status</a></li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    API Reference
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Support
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Status
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -439,18 +511,22 @@ function AppContent() {
                   <span className="text-sm text-gray-400">Live on Solana Devnet</span>
                 </div>
                 <div className="flex space-x-3">
-                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Twitter</a>
-                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">Discord</a>
-                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">GitHub</a>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Twitter
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    Discord
+                  </a>
+                  <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    GitHub
+                  </a>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
-              © 2024 NFTSol. Built on Solana with ❤️
-            </p>
+            <p className="text-gray-400 text-sm">© 2024 NFTSol. Built on Solana with ❤️</p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <span className="text-xs text-gray-500">Powered by</span>
               <div className="flex items-center space-x-2">
@@ -464,13 +540,19 @@ function AppContent() {
 
       {/* CloutBadge - Fixed position showing user's CLOUT balance */}
       <CloutBadge />
+
+      {/* ContractInfo - Shows CLOUT contract addresses */}
+      <div className="fixed left-4 bottom-4 z-40 max-w-xs">
+        <ContractInfo />
+      </div>
     </div>
   );
 }
 
 function App() {
   // Use environment variable for RPC URL or fallback to mainnet
-  const endpoint = process.env.VITE_SOLANA_RPC_URL || clusterApiUrl('mainnet-beta');
+  // Note: In Vite, use import.meta.env, not process.env
+  const endpoint = (import.meta.env.VITE_SOLANA_RPC_URL as string) || clusterApiUrl('mainnet-beta');
 
   // Initialize all wallet adapters
   const wallets = [
@@ -478,7 +560,7 @@ function App() {
     new SolflareWalletAdapter(),
     new TorusWalletAdapter(),
     new LedgerWalletAdapter(),
-    new CoinbaseWalletAdapter()
+    new CoinbaseWalletAdapter(),
   ];
 
   return (

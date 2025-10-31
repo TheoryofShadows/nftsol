@@ -21,37 +21,41 @@ export function useApi<T = any>(
     error: null,
   });
 
-  const execute = useCallback(async (...args: any[]): Promise<T | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    
-    try {
-      const response = await apiFunction(...args);
-      
-      if (response.success) {
-        setState({
-          data: response.data || null,
-          loading: false,
-          error: null,
-        });
-        return response.data || null;
-      } else {
+  const execute = useCallback(
+    async (...args: any[]): Promise<T | null> => {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
+      try {
+        const response = await apiFunction(...args);
+
+        if (response.success) {
+          setState({
+            data: response.data || null,
+            loading: false,
+            error: null,
+          });
+          return response.data || null;
+        } else {
+          setState({
+            data: null,
+            loading: false,
+            error: response.error || 'An error occurred',
+          });
+          return null;
+        }
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'An unexpected error occurred';
         setState({
           data: null,
           loading: false,
-          error: response.error || 'An error occurred',
+          error: errorMessage,
         });
         return null;
       }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setState({
-        data: null,
-        loading: false,
-        error: errorMessage,
-      });
-      return null;
-    }
-  }, [apiFunction]);
+    },
+    [apiFunction]
+  );
 
   const reset = useCallback(() => {
     setState({

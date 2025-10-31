@@ -3,6 +3,19 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import './styles/solana.css';
+import { Buffer } from 'buffer';
+
+// Polyfill Buffer for browser
+interface WindowWithBuffer extends Window {
+  Buffer: typeof Buffer;
+  global: typeof window;
+}
+
+if (typeof window !== 'undefined') {
+  const windowWithBuffer = window as unknown as WindowWithBuffer;
+  windowWithBuffer.Buffer = Buffer;
+  windowWithBuffer.global = window;
+}
 
 // Performance monitoring
 const startTime = performance.now();
@@ -28,5 +41,8 @@ root.render(
 );
 
 // Performance logging
-const endTime = performance.now();
-console.log(`App initialized in ${(endTime - startTime).toFixed(2)}ms`);
+if (import.meta.env.DEV) {
+  const endTime = performance.now();
+  // eslint-disable-next-line no-console
+  console.log(`App initialized in ${(endTime - startTime).toFixed(2)}ms`);
+}

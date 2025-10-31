@@ -1,14 +1,20 @@
-import { ApiResponse, NFT, Collection, WalletInfo, ProgramConfig, MintRequest, MintResponse, MarketData } from '../types';
+import {
+  ApiResponse,
+  NFT,
+  Collection,
+  WalletInfo,
+  ProgramConfig,
+  MintRequest,
+  MintResponse,
+  MarketData,
+} from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'https://nftsol-dev.onrender.com';
 
 class ApiService {
-  private async request<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<ApiResponse<T>> {
+  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     const url = `${API_BASE}${endpoint}`;
-    
+
     const defaultOptions: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -20,11 +26,11 @@ class ApiService {
     try {
       const response = await fetch(url, defaultOptions);
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || `HTTP ${response.status}`);
       }
-      
+
       return data;
     } catch (error) {
       console.error(`API Error (${endpoint}):`, error);
@@ -56,7 +62,7 @@ class ApiService {
     formData.append('name', request.name);
     formData.append('description', request.description);
     formData.append('creatorWallet', request.creatorWallet);
-    
+
     if (request.file) {
       formData.append('file', request.file);
     } else if (request.imageUrl) {
@@ -96,19 +102,16 @@ class ApiService {
   }
 
   // Batch API calls
-  async batchRequest<T>(
-    requests: Array<() => Promise<ApiResponse<T>>>
-  ): Promise<ApiResponse<T[]>> {
+  async batchRequest<T>(requests: Array<() => Promise<ApiResponse<T>>>): Promise<ApiResponse<T[]>> {
     try {
-      const results = await Promise.allSettled(
-        requests.map(request => request())
-      );
+      const results = await Promise.allSettled(requests.map((request) => request()));
 
       const successfulResults = results
-        .filter((result): result is PromiseFulfilledResult<ApiResponse<T>> => 
-          result.status === 'fulfilled' && result.value.success
+        .filter(
+          (result): result is PromiseFulfilledResult<ApiResponse<T>> =>
+            result.status === 'fulfilled' && result.value.success
         )
-        .map(result => result.value.data)
+        .map((result) => result.value.data)
         .filter((data): data is T => data !== undefined);
 
       return {

@@ -19,7 +19,9 @@ type EchoNFT = {
   verified?: boolean;
 };
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string) || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+const API_BASE =
+  (import.meta.env.VITE_API_BASE as string) ||
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
 
 export default function EchoMarketplace() {
   const [filter, setFilter] = useState<'all' | 'listed' | 'mine'>('all');
@@ -44,7 +46,9 @@ export default function EchoMarketplace() {
       }
     };
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [filter]);
 
   const visible = useMemo(() => items, [items]);
@@ -57,14 +61,14 @@ export default function EchoMarketplace() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold text-white">🎬 Echo NFT Marketplace</h2>
             <div className="flex gap-2">
-              <button 
-                className={`glass px-3 py-1 rounded transition-all duration-300 ${filter==='all'?'bg-white/20 shadow-lg':''}`} 
+              <button
+                className={`glass px-3 py-1 rounded transition-all duration-300 ${filter === 'all' ? 'bg-white/20 shadow-lg' : ''}`}
                 onClick={() => setFilter('all')}
               >
                 All
               </button>
-              <button 
-                className={`glass px-3 py-1 rounded transition-all duration-300 ${filter==='listed'?'bg-white/20 shadow-lg':''}`} 
+              <button
+                className={`glass px-3 py-1 rounded transition-all duration-300 ${filter === 'listed' ? 'bg-white/20 shadow-lg' : ''}`}
                 onClick={() => setFilter('listed')}
               >
                 For Sale
@@ -85,9 +89,9 @@ export default function EchoMarketplace() {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="relative">
-                    <img 
-                      src={e.image} 
-                      alt={e.name} 
+                    <img
+                      src={e.image}
+                      alt={e.name}
                       className="w-full h-48 object-cover rounded-lg mb-3"
                     />
                     {/* Clout Badge */}
@@ -99,11 +103,7 @@ export default function EchoMarketplace() {
                     {/* Truth Score Badge */}
                     {typeof e.avgTruthScore === 'number' && (
                       <div className="absolute top-3 left-3">
-                        <TruthBadge 
-                          score={e.avgTruthScore} 
-                          verified={e.verified}
-                          size="sm"
-                        />
+                        <TruthBadge score={e.avgTruthScore} verified={e.verified} size="sm" />
                       </div>
                     )}
                   </div>
@@ -115,16 +115,16 @@ export default function EchoMarketplace() {
                     ) : (
                       <span />
                     )}
-                    {e.price && (
-                      <span className="font-bold text-cyan-300">{e.price} SOL</span>
-                    )}
+                    {e.price && <span className="font-bold text-cyan-300">{e.price} SOL</span>}
                   </div>
                   <div className="mt-3 flex gap-2">
                     <button
                       className="btn-glass flex-1"
                       onClick={() => {
                         localStorage.setItem('currentEchoLedger', e.mintAddress);
-                        window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
+                        window.dispatchEvent(
+                          new CustomEvent('change-tab', { detail: 'echo-viewer' })
+                        );
                       }}
                     >
                       👁️ View
@@ -141,11 +141,13 @@ export default function EchoMarketplace() {
 
         {/* Trending Sidebar */}
         <div className="w-full md:w-80 flex-shrink-0">
-          <Suspense fallback={
-            <div className="glass p-6 rounded-xl">
-              <div className="text-gray-300">Loading trending...</div>
-            </div>
-          }>
+          <Suspense
+            fallback={
+              <div className="glass p-6 rounded-xl">
+                <div className="text-gray-300">Loading trending...</div>
+              </div>
+            }
+          >
             <EchoTrending />
           </Suspense>
         </div>
@@ -153,5 +155,3 @@ export default function EchoMarketplace() {
     </div>
   );
 }
-
-

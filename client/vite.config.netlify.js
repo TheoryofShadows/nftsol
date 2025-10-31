@@ -10,8 +10,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@reown/appkit-utils': '/home/khk89/NFTSol/node_modules/@reown/appkit-utils/dist/esm/exports/index.js',
-      'src': path.resolve(__dirname, './src'),
+      '@reown/appkit-utils':
+        '/home/khk89/NFTSol/node_modules/@reown/appkit-utils/dist/esm/exports/index.js',
+      src: path.resolve(__dirname, './src'),
     },
   },
 });

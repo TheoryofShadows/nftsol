@@ -18,17 +18,17 @@ export default function PhantomConnect() {
           jsonrpc: '2.0',
           id: 1,
           method: 'getBalance',
-          params: [publicKey.toBase58()]
+          params: [publicKey.toBase58()],
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.result?.value) {
+            setBalance(data.result.value / 1e9); // Convert lamports to SOL
+          }
         })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.result?.value) {
-          setBalance(data.result.value / 1e9); // Convert lamports to SOL
-        }
-      })
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
+        .catch(console.error)
+        .finally(() => setIsLoading(false));
     }
   }, [connected, publicKey]);
 
@@ -42,7 +42,7 @@ export default function PhantomConnect() {
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">👛</span>
             </div>
-            
+
             {/* Wallet Details */}
             <div className="text-left">
               <div className="text-sm font-mono text-cyan-300">
@@ -65,10 +65,7 @@ export default function PhantomConnect() {
         </div>
 
         {/* Disconnect Button */}
-        <button
-          onClick={disconnect}
-          className="btn-outline text-xs px-3 py-2"
-        >
+        <button onClick={disconnect} className="btn-outline text-xs px-3 py-2">
           Disconnect
         </button>
       </div>
