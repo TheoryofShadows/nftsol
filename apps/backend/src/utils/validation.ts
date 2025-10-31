@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { validateWalletAddress, validateFileType, validateFileSize } from '../config';
+import { validateFileType, validateFileSize } from '../config';
 import { ApiResponse } from '../types';
 import { PublicKey } from '@solana/web3.js';
 import crypto from 'crypto';
@@ -128,6 +128,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
       // Remove dangerous characters
       .replace(/[<>"'&]/g, '')
       // Remove control characters
+      // eslint-disable-next-line no-control-regex
       .replace(/[\x00-\x1F\x7F]/g, '')
       // Limit length
       .substring(0, 1000);

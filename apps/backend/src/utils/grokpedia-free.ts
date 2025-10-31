@@ -27,8 +27,8 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
     };
   }
 
-  // Generate cache key
-  const inputHash = crypto
+  // Generate cache key (reserved for future caching implementation)
+  const _inputHash = crypto
     .createHash('sha256')
     .update(input)
     .digest('hex')
