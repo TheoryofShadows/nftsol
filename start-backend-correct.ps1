@@ -20,7 +20,18 @@ $env:PORT = "3001"
 $env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
 $env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
 $env:NODE_ENV = "development"
-$env:PLATFORM_SECRET_KEY_BASE58 = "3B495YFvfjWzoKwmJDpwycFzksJZPAJcGozq45ycRMiHDnpgdXNEnyNdTG5dd8kpgdHUQdCeCZAWUFvtQk6BwThX"
+# ⚠️  SECURITY: Set this from environment or secure storage
+# $env:PLATFORM_SECRET_KEY_BASE58 = "<your_secret_key_from_secure_storage>"
+# Or read from .env file (which should be in .gitignore)
+if (Test-Path "apps\backend\.env") {
+    Get-Content "apps\backend\.env" | ForEach-Object {
+        if ($_ -match "^PLATFORM_SECRET_KEY_BASE58=(.+)") {
+            $env:PLATFORM_SECRET_KEY_BASE58 = $matches[1]
+        }
+    }
+} else {
+    Write-Host "⚠️  WARNING: .env file not found. Set PLATFORM_SECRET_KEY_BASE58 manually." -ForegroundColor Yellow
+}
 
 Write-Host "   ✅ PORT: $env:PORT" -ForegroundColor Green
 Write-Host "   ✅ CLOUT_PROGRAM_ID: $env:CLOUT_PROGRAM_ID" -ForegroundColor Green

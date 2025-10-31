@@ -2,15 +2,26 @@
 [![CI](https://github.com/TheoryofShadows/nftsol/actions/workflows/ci.yml/badge.svg)](https://github.com/TheoryofShadows/nftsol/actions/workflows/ci.yml) [![Pages](https://github.com/TheoryofShadows/nftsol/actions/workflows/pages.yml/badge.svg)](https://github.com/TheoryofShadows/nftsol/actions/workflows/pages.yml)
 <!-- BADGES:END -->
 
-# NFTSol Step 0 — Client + IPFS Proxy
+# NFTSol - Decentralized NFT Marketplace on Solana
 
 [![CI](https://img.shields.io/github/actions/workflow/status/TheoryofShadows/nftsol/ci.yml?branch=main&label=CI)](https://github.com/TheoryofShadows/nftsol/actions)
 ![License](https://img.shields.io/badge/license-MIT-informational)
 ![Stars](https://img.shields.io/github/stars/TheoryofShadows/nftsol?style=social)
 
-A tiny, production-minded setup for:
-- **IPFS image proxy** (Node/Express, pm2) with gateway rotation + browser-like headers
-- **Vite/React client** that loads images via the local proxy (`/ipfs-img?u=...`)
+**NFTSol** is a comprehensive, production-ready NFT marketplace built on the Solana blockchain, featuring:
+
+- 🎨 **Full NFT Marketplace**: Create, buy, and sell NFTs
+- ⭐ **CLOUT Token System**: Native reward token for platform engagement  
+- 🚀 **Solana Integration**: Real blockchain transactions with low fees
+- 🔒 **Enterprise Security**: Bank-grade security with comprehensive audit trails
+- 📱 **Modern UI**: Beautiful, responsive interface with wallet integration
+
+## 📚 Documentation
+
+- **[WHITEPAPER.md](WHITEPAPER.md)** - Complete project overview, tokenomics, and roadmap
+- **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)** - Technical documentation, API reference, and architecture
+- **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment guide for Render and Netlify
+- **[SECURITY.md](SECURITY.md)** - Security best practices and guidelines
 
 ## Quick Start
 

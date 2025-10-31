@@ -1,5 +1,8 @@
+# ⚠️  SECURITY WARNING: Replace placeholder values with your actual keys!
+# This file is a template - do not commit actual API keys to Git
+
 VITE_API_BASE=https://nftsol.onrender.com
-VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=<your_helius_api_key_here>
 VITE_SOLANA_CLUSTER=mainnet-beta
 VITE_IMG_PROXY_BASE=https://nftsol.onrender.com
 NODE_ENV=production
