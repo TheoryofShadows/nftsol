@@ -106,6 +106,13 @@ export async function sendSOL(toAddress: string, amountSol: number) {
     const toPublicKey = new PublicKey(toAddress);
     const keypair = getPlatformKeypair();
     
+    if (!keypair) {
+      return {
+        success: false,
+        error: 'Platform keypair not available'
+      };
+    }
+    
     // Validate amount
     if (amountSol <= 0 || !Number.isFinite(amountSol)) {
       return {
