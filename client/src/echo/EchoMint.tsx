@@ -1,0 +1,297 @@
+import React, { useEffect, useState } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { PublicKey } from '@solana/web3.js';
+import confetti from 'canvas-confetti';
+import { useNotification } from '../components/NotificationSystem';
+import TruthBadge from '../components/TruthBadge';
+
+type IASearchResult = {
+  identifier: string;
+  title: string;
+  description?: string;
+  year?: string;
+  creator?: string;
+  thumbnail?: string;
+  verificationTeaser?: string;
+  truthScore?: number;
+};
+
+type MintData = {
+  iaId: string;
+  title: string;
+  description?: string;
+  videoUri: string;
+  thumbnailUri?: string;
+  grokTruthHash: number[];
+  truthScore: number;
+  teaser: string;
+  verified: boolean;
+};
+
+const API_BASE = (import.meta.env.VITE_API_BASE as string) || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
+
+export default function EchoMint() {
+  const [query, setQuery] = useState('');
+  const [debounced, setDebounced] = useState('');
+  const [results, setResults] = useState<IASearchResult[] | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [mintData, setMintData] = useState<MintData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [minting, setMinting] = useState(false);
+  const [prefetchedThumbnails, setPrefetchedThumbnails] = useState<Map<string, string>>(new Map());
+  const { publicKey } = useWallet();
+  const { addNotification } = useNotification();
+
+  // Prefetch thumbnails for search results
+  useEffect(() => {
+    if (!results || results.length === 0) return;
+
+    const prefetch = async () => {
+      const thumbnailMap = new Map<string, string>();
+      
+      for (const result of results) {
+        if (result.thumbnail) {
+          try {
+            const img = new Image();
+            await new Promise((resolve, reject) => {
+              img.onload = resolve;
+              img.onerror = reject;
+              img.src = result.thumbnail!;
+            });
+            thumbnailMap.set(result.identifier, result.thumbnail);
+          } catch (_e) {
+            // Thumbnail failed to load, skip
+          }
+        }
+      }
+      
+      setPrefetchedThumbnails(thumbnailMap);
+    };
+
+    prefetch();
+  }, [results]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebounced(query), 400);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  useEffect(() => {
+    if (debounced.length < 3) { setResults(null); return; }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${API_BASE}/api/echo/search?q=${encodeURIComponent(debounced)}&rows=20`);
+        const data = await res.json();
+        if (!cancelled) setResults(data.results || []);
+      } catch (_e) {
+        if (!cancelled) setResults([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [debounced]);
+
+  useEffect(() => {
+    if (!selected || !publicKey) { setMintData(null); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/echo/mint`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ iaId: selected, walletAddress: publicKey.toBase58() })
+        });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        if (!cancelled) setMintData(data as MintData);
+      } catch (_e) {
+        if (!cancelled) setMintData(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [selected, publicKey]);
+
+  const handleMint = async () => {
+    if (!mintData || !publicKey) return;
+    setMinting(true);
+    
+    try {
+      // Simulate mint transaction (replace with actual Solana transaction)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate ledger ID from IA ID
+      const ledgerId = `${mintData.iaId}-${Date.now()}`;
+      localStorage.setItem('currentEchoLedger', ledgerId);
+      
+      // Trigger confetti celebration
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D']
+      });
+      
+      // Show success notification
+      addNotification({
+        type: 'success',
+        title: '🎉 Echo Minted Successfully!',
+        message: `Your Eternal Echo "${mintData.title}" has been minted. CLOUT x2 bonus applied!`,
+        duration: 5000,
+      });
+      
+      // Auto-navigate to Echo Viewer after a short delay
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
+      }, 1000);
+      
+    } catch (error: any) {
+      addNotification({
+        type: 'error',
+        title: 'Mint Failed',
+        message: error.message || 'Failed to mint Echo. Please try again.',
+        duration: 5000,
+      });
+    } finally {
+      setMinting(false);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-white">🎬 Eternal Echoes</h2>
+        <WalletMultiButton className="btn-glass" />
+      </div>
+
+      <div className="glass p-3 rounded mb-4">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search Internet Archive…"
+          className="w-full bg-transparent outline-none text-white placeholder-gray-400"
+        />
+      </div>
+
+      {loading && <div className="text-gray-300 mb-2">Searching…</div>}
+
+      {results && (
+        <div className="space-y-2 mb-4">
+          {results.map((r, index) => {
+            const thumbnail = prefetchedThumbnails.get(r.identifier);
+            return (
+              <button
+                key={r.identifier}
+                className={`w-full text-left glass p-3 rounded transform transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                  selected===r.identifier ? 'bg-white/10 border-2 border-purple-400/50' : 'border border-white/10'
+                }`}
+                onClick={() => setSelected(r.identifier)}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex items-start gap-3">
+                  {thumbnail ? (
+                    <img 
+                      src={thumbnail} 
+                      alt={r.title}
+                      className="w-20 h-20 object-cover rounded flex-shrink-0"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded flex-shrink-0 flex items-center justify-center">
+                      <span className="text-2xl">🎬</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white font-semibold mb-1 truncate">{r.title}</div>
+                    <div className="text-gray-300 text-sm mb-2">
+                      {r.year ? `📅 ${r.year} ` : ''}{r.creator ? `👤 ${r.creator}` : ''}
+                    </div>
+                    {r.truthScore !== undefined && (
+                      <TruthBadge score={r.truthScore} size="sm" />
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {mintData && (
+        <div className="glass p-4 rounded-xl animate-slide-up">
+          <div className="text-white font-bold text-lg mb-4 flex items-center gap-2">
+            <span>✨</span>
+            <span>Preview Your Echo</span>
+          </div>
+          
+          {/* Video Preview with Loading */}
+          <div className="relative mb-4 rounded-lg overflow-hidden">
+            {minting && (
+              <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10">
+                <div className="text-center">
+                  <div className="loading-spinner mx-auto mb-2"></div>
+                  <div className="text-white font-semibold">Minting on Solana...</div>
+                </div>
+              </div>
+            )}
+            <video 
+              src={mintData.videoUri} 
+              controls 
+              className="w-full rounded-lg mb-3" 
+              poster={mintData.thumbnailUri}
+              preload="metadata"
+            />
+          </div>
+          
+          <div className="text-white font-semibold text-xl mb-2">{mintData.title}</div>
+          {mintData.description && (
+            <div className="text-gray-300 text-sm mb-4 line-clamp-3">{mintData.description}</div>
+          )}
+          
+          {/* Truth Score Badge */}
+          <div className="mb-4 flex items-center gap-3">
+            <TruthBadge 
+              score={mintData.truthScore} 
+              verified={mintData.verified}
+              showPulse={mintData.verified}
+            />
+            <span className="text-gray-400 text-sm">
+              {mintData.verified ? '✓ Verified Content' : '⚠ Requires Review'}
+            </span>
+          </div>
+          
+          {/* Mint Button with Progress */}
+          <button 
+            className="w-full btn-primary py-4 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden" 
+            disabled={!publicKey || minting} 
+            onClick={handleMint}
+          >
+            {minting ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="loading-spinner w-5 h-5"></div>
+                <span>Minting...</span>
+              </span>
+            ) : publicKey ? (
+              '🚀 Mint Echo – CLOUT x2!'
+            ) : (
+              'Connect Wallet to Mint'
+            )}
+          </button>
+          
+          {mintData.teaser && (
+            <div className="mt-4 glass p-3 rounded-lg text-sm text-gray-300">
+              <strong>Verification Summary:</strong> {mintData.teaser}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+

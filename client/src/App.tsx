@@ -14,16 +14,21 @@ import { NotificationProvider } from './components/NotificationSystem';
 import { usePerformance } from './hooks/usePerformance';
 import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
+import CloutBadge from './components/CloutBadge';
 import './styles/solana.css';
 import './styles/design-system.css';
 
 // Lazy load components for better performance
+const Hero = lazy(() => import('./components/Hero'));
 const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
 const MintForm = lazy(() => import('./components/MintForm'));
 const NftGrid = lazy(() => import('./components/NftGrid'));
 const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
 const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
 const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
+const EchoMint = lazy(() => import('./echo/EchoMint'));
+const EchoViewer = lazy(() => import('./echo/EchoViewer'));
+const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -57,7 +62,7 @@ class ErrorBoundary extends React.Component<
         <div className="min-h-screen bg-gradient-to-br from-red-900 via-purple-900 to-indigo-900 flex items-center justify-center">
           <div className="text-center text-white">
             <h1 className="text-4xl font-bold mb-4">Oops! Something went wrong</h1>
-            <p className="text-lg mb-4">We're sorry, but something unexpected happened.</p>
+            <p className="text-lg mb-4">We&apos;re sorry, but something unexpected happened.</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
@@ -89,6 +94,16 @@ function AppContent() {
     const report = getPerformanceReport();
     console.log('Performance Report:', report);
   }, [getPerformanceReport]);
+
+  // Allow programmatic tab changes (used by Echo components)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as string;
+      if (typeof detail === 'string') setActiveTab(detail);
+    };
+    window.addEventListener('change-tab', handler as EventListener);
+    return () => window.removeEventListener('change-tab', handler as EventListener);
+  }, []);
 
   // Error handling
   useEffect(() => {
@@ -151,21 +166,19 @@ function AppContent() {
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto p-6">
-        {/* Hero Section */}
-        <div className="text-center mb-12 animate-fade-in">
-          <h2 className="text-5xl md:text-6xl font-bold gradient-text mb-4 font-display">
-            Mint, Trade, Own the Future
-          </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Lightning-fast NFT marketplace on Solana. Create, discover, and trade digital assets with unprecedented speed.
-          </p>
-        </div>
+        {/* Hero Section - Full Screen Animated Landing */}
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="loading-spinner"></div></div>}>
+          <Hero />
+        </Suspense>
 
         {/* Enhanced Navigation */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {[
             { id: "market", label: "Marketplace", icon: "🏪", desc: "Discover NFTs" },
             { id: "mint", label: "Mint NFT", icon: "✨", desc: "Create new" },
+            { id: "echo-marketplace", label: "Echo Market", icon: "🎭", desc: "Collaborative" },
+            { id: "echo-mint", label: "Mint Echo", icon: "🎬", desc: "Eternal Echoes" },
+            { id: "echo-viewer", label: "Echo Viewer", icon: "👁️", desc: "Layers" },
             { id: "referrals", label: "Referrals", icon: "🎯", desc: "Earn rewards" },
             { id: "waitlist", label: "Waitlist", icon: "🚀", desc: "Join early" },
             { id: "withdraw", label: "Withdraw SOL", icon: "💰", desc: "Manage funds" },
@@ -197,7 +210,7 @@ function AppContent() {
 
         <div className="min-h-[600px]">
           {activeTab === "market" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display">
                   🏪 NFT Marketplace
@@ -226,8 +239,32 @@ function AppContent() {
             </div>
           )}
 
+          {activeTab === "echo-marketplace" && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <EchoMarketplace />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "echo-mint" && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <EchoMint />
+              </Suspense>
+            </div>
+          )}
+
+          {activeTab === "echo-viewer" && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <EchoViewer />
+              </Suspense>
+            </div>
+          )}
+
           {activeTab === "mint" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   ✨ Mint New NFT
@@ -248,7 +285,7 @@ function AppContent() {
           )}
 
           {activeTab === "withdraw" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   💰 Withdraw SOL
@@ -269,7 +306,7 @@ function AppContent() {
           )}
 
           {activeTab === "my-nfts" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display">
                   👤 My NFTs
@@ -290,7 +327,7 @@ function AppContent() {
           )}
 
           {activeTab === "referrals" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   🎯 Referral System
@@ -311,7 +348,7 @@ function AppContent() {
           )}
 
           {activeTab === "waitlist" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   🚀 Join the Waitlist
@@ -332,7 +369,7 @@ function AppContent() {
           )}
 
           {activeTab === "collections" && (
-            <div className="animate-fade-in">
+            <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold gradient-text font-display mb-4">
                   📚 Collections
@@ -424,6 +461,9 @@ function AppContent() {
           </div>
         </div>
       </footer>
+
+      {/* CloutBadge - Fixed position showing user's CLOUT balance */}
+      <CloutBadge />
     </div>
   );
 }

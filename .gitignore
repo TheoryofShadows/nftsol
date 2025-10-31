@@ -1,3 +1,4 @@
+<<<<<<< Current (Your changes)
 # Node
 node_modules/
 npm-debug.log*
@@ -30,3 +31,116 @@ server/.env*
 logs/
 *.log
 uploads/
+=======
+# ============================================
+# Eternal Echoes - Secure Git Strategy
+# ============================================
+
+# === CRITICAL: Never commit these! ===
+.env
+.env.*
+*.env
+!.env.example
+*.key
+*.pem
+secrets/
+wallet.json
+**/wallet.json
+
+# API Keys & Credentials
+XAI_API_KEY*
+OPENAI_API_KEY*
+*apikey*
+*api-key*
+
+# === Node & Dependencies ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+build/
+*.tsbuildinfo
+
+# === Environment & Config ===
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# === Logs ===
+logs/
+*.log
+*.log.*
+
+# === Testing & Coverage ===
+coverage/
+.nyc_output/
+*.lcov
+
+# === Build Artifacts ===
+*.js.map
+*.d.ts.map
+dist/
+build/
+out/
+
+# === Database ===
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+backups/
+
+# === Solana ===
+.anchor/
+target/
+test-ledger/
+.solana/
+*.so
+
+# === Temporary Files ===
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === IDE ===
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# === Package Managers ===
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# === Eternal Echoes Specific (KEEP PRIVATE!) ===
+# Uncomment these if you want to keep the feature completely private:
+# apps/backend/src/utils/grokpedia*.ts
+# apps/backend/src/routes/echo*.ts
+# apps/frontend/src/pages/Echo*.tsx
+# apps/frontend/src/pages/Echo*.css
+# apps/smart-contracts/*/programs/eternal_echoes/
+# tests/eternal-echoes.test.ts
+
+# === Documentation (Optional Privacy) ===
+# Uncomment to hide feature docs:
+# ETERNAL_ECHOES*.md
+# XAI_*.md
+# *ECHOES*.txt
+# setup-eternal-echoes*.sh
+>>>>>>> Incoming (Background Agent changes)

@@ -29,23 +29,37 @@ export function loadPlatformKeypair(): Keypair {
 let _platformKeypair: Keypair | null = null;
 let _metaplex: any = null;
 
-export function getPlatformKeypair(): Keypair {
+export function getPlatformKeypair(): Keypair | null {
+  // Only load if env vars are set (development mode may not need it)
+  if (!process.env.PLATFORM_SECRET_KEY_BASE58 && !process.env.PLATFORM_SECRET_KEY_JSON) {
+    return null;
+  }
+  
   if (!_platformKeypair) {
-    _platformKeypair = loadPlatformKeypair();
+    try {
+      _platformKeypair = loadPlatformKeypair();
+    } catch (error) {
+      console.warn('[Solana] Platform keypair not available:', error instanceof Error ? error.message : error);
+      return null;
+    }
   }
   return _platformKeypair;
 }
 
 export function getMetaplex() {
+  const keypair = getPlatformKeypair();
+  if (!keypair) {
+    throw new Error('Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON');
+  }
+  
   if (!_metaplex) {
-    _metaplex = Metaplex.make(connection).use(keypairIdentity(getPlatformKeypair()));
+    _metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
   }
   return _metaplex;
 }
 
-// Legacy exports for backward compatibility
-export const platformKeypair = getPlatformKeypair();
-export const metaplex = getMetaplex();
+// Legacy exports removed - use getPlatformKeypair() and getMetaplex() directly
+// This prevents startup failures when platform keypair is not configured
 
 // Mint NFT and transfer to user
 export async function mintNFT(toAddress: string, metadataUri: string, name: string, description?: string) {

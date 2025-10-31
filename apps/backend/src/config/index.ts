@@ -17,15 +17,19 @@ const requiredEnvVars = [
 // Set defaults for development
 if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_RPC_DEVNET = process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com';
-  process.env.CLOUT_PROGRAM_ID = process.env.CLOUT_PROGRAM_ID || 'CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE';
+  // Mainnet CLOUT mint: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+  // Devnet default: CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE
+  process.env.CLOUT_PROGRAM_ID = process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
   process.env.MARKET_PROGRAM_ID = process.env.MARKET_PROGRAM_ID || 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
   process.env.LOYALTY_PROGRAM_ID = process.env.LOYALTY_PROGRAM_ID || '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
-  process.env.REWARDS_VAULT = process.env.REWARDS_VAULT || 'EkwwFmeS32L7Lei1vMwF66LCN2RuM7kfNZZ6HCmyvwuN';
+  process.env.REWARDS_VAULT = process.env.REWARDS_VAULT || '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
 }
 
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
+if (process.env.NODE_ENV === 'production') {
+  for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+      throw new Error(`Missing required environment variable: ${envVar}`);
+    }
   }
 }
 
@@ -33,7 +37,7 @@ export const appConfig: AppConfig = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'https://nftsol.app'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173', 'http://localhost:3000', 'https://nftsol.app'],
     credentials: true
   },
   rateLimit: {

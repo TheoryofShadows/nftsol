@@ -1,0 +1,5 @@
+VITE_API_BASE=https://nftsol.onrender.com
+VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+VITE_SOLANA_CLUSTER=mainnet-beta
+VITE_IMG_PROXY_BASE=https://nftsol.onrender.com
+NODE_ENV=production

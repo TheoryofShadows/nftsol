@@ -7,7 +7,9 @@ import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { nanoid } from 'nanoid';
 import { createServer } from 'http';
-import { appConfig, solanaConfig, programConfig } from './config';
+import { Connection } from '@solana/web3.js';
+import { appConfig, solanaConfig, programConfig } from './config/index';
+import { verifyCloutVault } from './utils/clout-vault';
 import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import { validateWallet, validateFileUpload, sanitizeInput, csrfProtection, generateCSRFToken } from './utils/validation';
@@ -18,6 +20,9 @@ import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
 import jwt from 'jsonwebtoken';
 import nftRouter from './routes/nfts';
+import orbRouter from './routes/orb';
+import echoRouter from './routes/echo';
+import cloutRouter from './routes/clout';
 
 const app = express();
 const server = createServer(app);
@@ -384,6 +389,13 @@ apiV1.use('/admin/withdrawals', authenticate, requireAdmin, adminWithdrawalRoute
 // Mount NFT routes
 apiV1.use('/nfts', nftRouter);
 
+// Echo routes
+app.use('/api/echo', echoRouter);
+app.use('/api/orb', orbRouter);
+
+// CLOUT routes
+app.use('/api/clout', cloutRouter);
+
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
   const response: ApiResponse = {
@@ -629,6 +641,17 @@ process.on('SIGINT', () => {
   });
 });
 
+// Initialize CLOUT vault check (non-blocking)
+(async () => {
+  try {
+    const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
+    await verifyCloutVault(connection);
+  } catch (error) {
+    console.warn('[CLOUT] Could not verify vault on startup:', error instanceof Error ? error.message : error);
+    console.warn('[CLOUT] Will create automatically when first reward is sent');
+  }
+})();
+
 // Start server
 server.listen(appConfig.port, '0.0.0.0', () => {
   console.log(`🚀 NFTSol Backend Server`);
@@ -639,6 +662,11 @@ server.listen(appConfig.port, '0.0.0.0', () => {
   console.log(`📁 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
   console.log(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
   console.log(`🎯 Cluster: ${solanaConfig.cluster}`);
+  
+  if (programConfig.cloutProgramId) {
+    console.log(`💰 CLOUT Token: ${programConfig.cloutProgramId}`);
+    console.log(`💼 Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`);
+  }
 });
 
 export { app, server };

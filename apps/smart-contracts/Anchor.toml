@@ -1,0 +1,22 @@
+[workspace]
+members = ["programs/*"]
+
+[provider]
+cluster = "mainnet"
+wallet = "~/.config/solana/id.json"
+
+[programs.mainnet]
+eternal_echoes = "EtEcho1111111111111111111111111111111111111"
+
+[programs.devnet]
+eternal_echoes = "EtEcho1111111111111111111111111111111111111"
+
+[scripts]
+test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+[test]
+startup_wait = 10000
+
+[[test.validator.account]]
+address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+filename = "mpl_token_metadata.so"

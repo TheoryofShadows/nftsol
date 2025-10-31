@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import confetti from 'canvas-confetti';
+import { useNotification } from './NotificationSystem';
 
 export default function MintForm() {
   const { publicKey, connected } = useWallet();
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const { addNotification } = useNotification();
 
   const mint = async () => {
     if (!file || !name || !connected) return;
@@ -17,7 +20,13 @@ export default function MintForm() {
       const verifyData = await verifyRes.json();
       
       if (!verifyData.success || !verifyData.data.exists) {
-        alert('Wallet not found on Solana network. Please ensure your wallet is properly connected.');
+        addNotification({
+          type: 'error',
+          title: 'Wallet Verification Failed',
+          message: 'Wallet not found on Solana network. Please ensure your wallet is properly connected.',
+          duration: 5000,
+        });
+        setLoading(false);
         return;
       }
 
@@ -41,12 +50,45 @@ export default function MintForm() {
       const mintData = await mintRes.json();
       
       if (mintData.success) {
-        alert(`🎉 NFT Minted Successfully!\n\nMint Address: ${mintData.data.mintAddress}\nTransaction: ${mintData.data.transactionSignature}\n\nView on Explorer: https://explorer.solana.com/address/${mintData.data.mintAddress}?cluster=devnet`);
+        // Trigger confetti celebration
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D']
+        });
+        
+        // Show success notification
+        addNotification({
+          type: 'success',
+          title: '🎉 NFT Minted Successfully!',
+          message: `Your NFT "${name}" has been minted on Solana. Mint Address: ${mintData.data.mintAddress.slice(0, 8)}...`,
+          duration: 6000,
+        });
+        
+        // Auto-navigate to "My NFTs" tab after a short delay
+        setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('change-tab', { detail: 'my-nfts' }));
+        }, 1500);
+        
+        // Reset form
+        setFile(null);
+        setName('');
       } else {
-        alert(`Mint failed: ${mintData.error}`);
+        addNotification({
+          type: 'error',
+          title: 'Mint Failed',
+          message: mintData.error || 'Failed to mint NFT. Please try again.',
+          duration: 5000,
+        });
       }
     } catch (e: any) {
-      alert('Mint failed: ' + e.message);
+      addNotification({
+        type: 'error',
+        title: 'Mint Failed',
+        message: e.message || 'An unexpected error occurred. Please try again.',
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
