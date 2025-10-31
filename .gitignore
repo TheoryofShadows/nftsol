@@ -16,6 +16,12 @@ platform-keys-backup.json
 *.secret
 *secret*
 
+# Keypair files (Solana wallets)
+*keypair.json
+temp-keypair.json
+**/treasury-keypair.json
+**/temp-keypair.json
+
 # API Keys & Credentials
 *API_KEY*
 *api-key*

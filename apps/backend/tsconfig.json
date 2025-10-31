@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "CommonJS",
-    "moduleResolution": "Node",
-    "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "moduleResolution": "Node"
   },
   "include": ["src/**/*.ts"],
   "exclude": [
