@@ -59,13 +59,17 @@ class ReconciliationWorker {
   }
 
   private async checkNegativeBalances(): Promise<ReconciliationIssue[]> {
-    const result = await pool.query(`
+    const result = await pool.query<{
+      user_id: string;
+      available_lamports: number;
+      pending_withdrawal_lamports: number;
+    }>(`
       SELECT user_id, available_lamports, pending_withdrawal_lamports
       FROM wallets
       WHERE available_lamports < 0 OR pending_withdrawal_lamports < 0
     `);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       type: 'NEGATIVE_BALANCE',
       severity: 'HIGH' as const,
       description: `User ${row.user_id} has negative balance`,
@@ -74,7 +78,11 @@ class ReconciliationWorker {
   }
 
   private async checkPendingMismatches(): Promise<ReconciliationIssue[]> {
-    const result = await pool.query(`
+    const result = await pool.query<{
+      user_id: string;
+      sum_withdrawals_pending: number;
+      wallet_pending: number;
+    }>(`
       SELECT 
         w.user_id,
         COALESCE(SUM(amount_lamports) FILTER (WHERE status IN ('pending','approved','processing')),0) AS sum_withdrawals_pending,
@@ -87,7 +95,7 @@ class ReconciliationWorker {
              <> COALESCE(wt.pending_withdrawal_lamports,0)
     `);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       type: 'PENDING_MISMATCH',
       severity: 'HIGH' as const,
       description: `User ${row.user_id} has pending withdrawal mismatch`,
@@ -96,14 +104,20 @@ class ReconciliationWorker {
   }
 
   private async checkMissingTxSigs(): Promise<ReconciliationIssue[]> {
-    const result = await pool.query(`
+    const result = await pool.query<{
+      id: string;
+      user_id: string;
+      amount_lamports: number;
+      processed_tx_sig: string | null;
+      created_at: Date;
+    }>(`
       SELECT id, user_id, amount_lamports, processed_tx_sig, created_at
       FROM withdrawals
       WHERE status = 'completed' 
         AND (processed_tx_sig IS NULL OR processed_tx_sig = '')
     `);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       type: 'MISSING_TX_SIG',
       severity: 'HIGH' as const,
       description: `Completed withdrawal ${row.id} missing transaction signature`,
@@ -112,14 +126,20 @@ class ReconciliationWorker {
   }
 
   private async checkStuckWithdrawals(): Promise<ReconciliationIssue[]> {
-    const result = await pool.query(`
+    const result = await pool.query<{
+      id: string;
+      user_id: string;
+      amount_lamports: number;
+      status: string;
+      created_at: Date;
+    }>(`
       SELECT id, user_id, amount_lamports, status, created_at
       FROM withdrawals
       WHERE status IN ('pending','processing','approved')
         AND created_at < now() - INTERVAL '6 hours'
     `);
 
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       type: 'STUCK_WITHDRAWAL',
       severity: 'MEDIUM' as const,
       description: `Withdrawal ${row.id} stuck in ${row.status} for >6 hours`,
