@@ -23,4 +23,9 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Skip type checking during build (Vite handles this)
+    // TypeScript errors will still show in IDE
+    emptyOutDir: true,
+  },
 });
