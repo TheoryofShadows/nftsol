@@ -63,12 +63,12 @@ class ApiService {
 
   // Get program configuration
   async getPrograms(): Promise<ApiResponse<ProgramConfig>> {
-    return this.request('/api/programs');
+    return this.request('/api/v1/programs');
   }
 
   // Get Solana status
   async getSolanaStatus(): Promise<ApiResponse<any>> {
-    return this.request('/api/solana/status');
+    return this.request('/api/v1/solana/status');
   }
 
   // Mint NFT
@@ -84,7 +84,7 @@ class ApiService {
       formData.append('imageUrl', request.imageUrl);
     }
 
-    return this.request('/api/simple-mint', {
+    return this.request('/api/v1/simple-mint', {
       method: 'POST',
       headers: {}, // Let browser set Content-Type for FormData
       body: formData,
@@ -93,27 +93,27 @@ class ApiService {
 
   // Get NFT metadata
   async getNFTMetadata(mintAddress: string): Promise<ApiResponse<NFT>> {
-    return this.request(`/api/nft/${mintAddress}`);
+    return this.request(`/api/v1/nft/${mintAddress}`);
   }
 
   // Get NFTs by owner
   async getNFTsByOwner(owner: string): Promise<ApiResponse<NFT[]>> {
-    return this.request(`/api/nfts/${owner}`);
+    return this.request(`/api/v1/nfts/${owner}`);
   }
 
   // Get marketplace data
   async getMarketplace(): Promise<ApiResponse<MarketData>> {
-    return this.request('/api/market');
+    return this.request('/api/v1/market');
   }
 
   // Get collections
   async getCollections(): Promise<ApiResponse<Collection[]>> {
-    return this.request('/api/collections');
+    return this.request('/api/v1/collections');
   }
 
   // Get wallet info
   async getWalletInfo(address: string): Promise<ApiResponse<WalletInfo>> {
-    return this.request(`/api/wallet/${address}`);
+    return this.request(`/api/v1/wallet/${address}`);
   }
 
   // Batch API calls
