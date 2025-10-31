@@ -8,7 +8,12 @@ import { z } from 'zod';
 import { PublicKey } from '@solana/web3.js';
 import axios from 'axios';
 import crypto from 'crypto';
-import { grokVerify, generateTruthHash, getVerificationTeaser, batchGrokVerify } from '../utils/grokpedia-free';
+import {
+  grokVerify,
+  generateTruthHash,
+  getVerificationTeaser,
+  batchGrokVerify,
+} from '../utils/grokpedia-free';
 import expressRateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -20,13 +25,13 @@ const router = Router();
 const searchLimiter = expressRateLimit({
   windowMs: 60 * 1000,
   max: 20,
-  message: 'Too many search requests'
+  message: 'Too many search requests',
 });
 
 const mintLimiter = expressRateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  message: 'Too many mint requests'
+  message: 'Too many mint requests',
 });
 
 // ============================================================================
@@ -49,7 +54,7 @@ const mintSchema = z.object({
 function buildIaSearchUrl(userQuery: string, rows: number): string {
   // Base query for public domain movies only
   const baseQuery = 'mediatype:movies AND licenseurl:*publicdomain*';
-  
+
   // Add user query if provided
   const fullQuery = userQuery
     ? `${baseQuery} AND (title:(${userQuery}) OR description:(${userQuery}))`
@@ -60,10 +65,18 @@ function buildIaSearchUrl(userQuery: string, rows: number): string {
   url.searchParams.append('rows', rows.toString());
   url.searchParams.append('output', 'json');
   url.searchParams.append('sort[]', 'downloads desc');
-  
+
   // Fields to retrieve
-  const fields = ['identifier', 'title', 'creator', 'description', 'date', 'licenseurl', 'mediatype'];
-  fields.forEach(f => url.searchParams.append('fl[]', f));
+  const fields = [
+    'identifier',
+    'title',
+    'creator',
+    'description',
+    'date',
+    'licenseurl',
+    'mediatype',
+  ];
+  fields.forEach((f) => url.searchParams.append('fl[]', f));
 
   return url.toString();
 }
@@ -83,14 +96,14 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
     // Build and execute search
     const searchUrl = buildIaSearchUrl(q, rows);
     const { data } = await axios.get(searchUrl, { timeout: 8000 });
-    
+
     const docs = data.response?.docs || [];
 
     // Enrich with Grok verification teasers (in parallel)
     const enriched = await Promise.all(
       docs.map(async (doc: any) => {
         const input = `${doc.title || ''} ${doc.description || ''}`.trim();
-        
+
         if (!input) {
           return {
             ...doc,
@@ -102,7 +115,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
 
         // Get verification teaser
         const verification = await grokVerify(input);
-        
+
         return {
           ...doc,
           thumbnail: `https://archive.org/services/img/${doc.identifier}`,
@@ -117,10 +130,9 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       numFound: data.response?.numFound || 0,
       docs: enriched,
     });
-
   } catch (error: any) {
     console.error('Search error:', error.message);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -170,8 +182,8 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
 
     // Find MP4 video file
     const files: any[] = Object.values(meta.files || {});
-    const mp4File = files.find((f: any) => 
-      f.format === 'MPEG4' && f.name?.endsWith('.mp4') && !f.name.includes('_thumbs')
+    const mp4File = files.find(
+      (f: any) => f.format === 'MPEG4' && f.name?.endsWith('.mp4') && !f.name.includes('_thumbs')
     );
 
     if (!mp4File) {
@@ -225,10 +237,9 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
       metadata: nftMetadata,
       // irysUri, // Uncomment when Irys integration added
     });
-
   } catch (error: any) {
     console.error('Mint preparation error:', error.message);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -251,9 +262,9 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
 router.post('/verify', async (req: Request, res: Response) => {
   try {
     const { content } = z.object({ content: z.string() }).parse(req.body);
-    
+
     const verification = await grokVerify(content);
-    
+
     res.json({
       success: true,
       ...verification,

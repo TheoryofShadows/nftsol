@@ -9,7 +9,7 @@ class Logger {
       level,
       message,
       service: 'nftsol-backend',
-      ...meta
+      ...meta,
     };
 
     if (appConfig.nodeEnv === 'production') {
@@ -43,7 +43,7 @@ const logger = new Logger();
 // Request logging middleware
 export const requestLogger = (req: any, res: any, next: any) => {
   const start = Date.now();
-  
+
   res.on('finish', () => {
     const duration = Date.now() - start;
     logger.info('HTTP Request', {
@@ -52,10 +52,10 @@ export const requestLogger = (req: any, res: any, next: any) => {
       status: res.statusCode,
       duration: `${duration}ms`,
       ip: req.ip,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
     });
   });
-  
+
   next();
 };
 
@@ -64,7 +64,7 @@ export const errorLogger = (error: Error, context?: any) => {
   logger.error('Application Error', {
     message: error.message,
     stack: error.stack,
-    context
+    context,
   });
 };
 
@@ -73,7 +73,7 @@ export const performanceLogger = (operation: string, duration: number, metadata?
   logger.info('Performance Metric', {
     operation,
     duration: `${duration}ms`,
-    ...metadata
+    ...metadata,
   });
 };
 
@@ -88,9 +88,9 @@ export const auditLogger = (event: string, details: any, req?: any) => {
     ip: req?.ip,
     userAgent: req?.get?.('User-Agent'),
     userId: req?.user?.id,
-    ...details
+    ...details,
   };
-  
+
   if (appConfig.nodeEnv === 'production') {
     console.log(JSON.stringify(auditEntry));
   } else {
@@ -100,10 +100,14 @@ export const auditLogger = (event: string, details: any, req?: any) => {
 
 // Security event logging
 export const securityLogger = (event: string, details: any, req?: any) => {
-  auditLogger(`SECURITY_${event}`, {
-    ...details,
-    severity: 'high'
-  }, req);
+  auditLogger(
+    `SECURITY_${event}`,
+    {
+      ...details,
+      severity: 'high',
+    },
+    req
+  );
 };
 
 export default logger;

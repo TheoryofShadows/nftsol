@@ -20,25 +20,27 @@ router.post('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'User not authenticated',
-      code: 'NOT_AUTHENTICATED'
+      code: 'NOT_AUTHENTICATED',
     };
     return res.status(401).json(response);
   }
 
   const { amount_sol, to_address, request_token, idempotency_key } = req.body;
-  
+
   // Check for idempotency key to prevent duplicate requests
   if (idempotency_key) {
     try {
-      const existing = await (await import('../lib/db')).pool.query(
-        'SELECT id FROM withdrawals WHERE idempotency_key = $1 AND user_id = $2',
-        [idempotency_key, userId]
-      );
+      const existing = await (
+        await import('../lib/db')
+      ).pool.query('SELECT id FROM withdrawals WHERE idempotency_key = $1 AND user_id = $2', [
+        idempotency_key,
+        userId,
+      ]);
       if (existing && existing.rowCount && existing.rowCount > 0) {
         const response: ApiResponse = {
           success: false,
           error: 'Duplicate withdrawal request',
-          code: 'DUPLICATE_REQUEST'
+          code: 'DUPLICATE_REQUEST',
         };
         return res.status(409).json(response);
       }
@@ -50,7 +52,7 @@ router.post('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Missing required parameters: amount_sol, to_address',
-      code: 'MISSING_PARAMETERS'
+      code: 'MISSING_PARAMETERS',
     };
     return res.status(400).json(response);
   }
@@ -59,7 +61,7 @@ router.post('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Invalid wallet address format',
-      code: 'INVALID_ADDRESS'
+      code: 'INVALID_ADDRESS',
     };
     return res.status(400).json(response);
   }
@@ -69,7 +71,7 @@ router.post('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Invalid withdrawal amount',
-      code: 'INVALID_AMOUNT'
+      code: 'INVALID_AMOUNT',
     };
     return res.status(400).json(response);
   }
@@ -81,7 +83,7 @@ router.post('/', async (req, res) => {
       const response: ApiResponse = {
         success: false,
         error: 'Destination wallet does not exist on Solana network',
-        code: 'WALLET_NOT_FOUND'
+        code: 'WALLET_NOT_FOUND',
       };
       return res.status(400).json(response);
     }
@@ -90,7 +92,7 @@ router.post('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Failed to validate destination wallet',
-      code: 'WALLET_VALIDATION_FAILED'
+      code: 'WALLET_VALIDATION_FAILED',
     };
     return res.status(500).json(response);
   }
@@ -98,7 +100,10 @@ router.post('/', async (req, res) => {
   try {
     const result = await withClient(async (client) => {
       await client.query('BEGIN');
-      const wRes = await client.query('SELECT available_lamports, pending_withdrawal_lamports FROM wallets WHERE user_id = $1 FOR UPDATE', [userId]);
+      const wRes = await client.query(
+        'SELECT available_lamports, pending_withdrawal_lamports FROM wallets WHERE user_id = $1 FOR UPDATE',
+        [userId]
+      );
       if (!wRes.rowCount) {
         await client.query('ROLLBACK');
         throw new Error('wallet_not_found');
@@ -112,7 +117,15 @@ router.post('/', async (req, res) => {
       const insert = await client.query(
         `INSERT INTO withdrawals (user_id, amount_lamports, to_address, request_ip, request_user_agent, request_token, idempotency_key)
          VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, created_at`,
-        [userId, lamports, to_address, req.ip, req.headers['user-agent'], request_token ?? null, idempotency_key ?? null]
+        [
+          userId,
+          lamports,
+          to_address,
+          req.ip,
+          req.headers['user-agent'],
+          request_token ?? null,
+          idempotency_key ?? null,
+        ]
       );
 
       await client.query(
@@ -123,24 +136,25 @@ router.post('/', async (req, res) => {
       await client.query('COMMIT');
       return insert.rows[0];
     });
-    
+
     const response: ApiResponse = {
       success: true,
       data: {
         status: 'pending',
         withdrawal: result,
         amount_sol: amount_sol,
-        to_address: to_address
+        to_address: to_address,
       },
-      message: 'Withdrawal request created successfully'
+      message: 'Withdrawal request created successfully',
     };
     return res.json(response);
   } catch (err: any) {
     console.error('create withdrawal error', err);
     const response: ApiResponse = {
       success: false,
-      error: err.message === 'insufficient_balance' ? 'Insufficient balance' : 'Internal server error',
-      code: err.message === 'insufficient_balance' ? 'INSUFFICIENT_BALANCE' : 'INTERNAL_ERROR'
+      error:
+        err.message === 'insufficient_balance' ? 'Insufficient balance' : 'Internal server error',
+      code: err.message === 'insufficient_balance' ? 'INSUFFICIENT_BALANCE' : 'INTERNAL_ERROR',
     };
     return res.status(500).json(response);
   }
@@ -153,17 +167,21 @@ router.get('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'User not authenticated',
-      code: 'NOT_AUTHENTICATED'
+      code: 'NOT_AUTHENTICATED',
     };
     return res.status(401).json(response);
   }
 
   try {
-    const q = await (await import('../lib/db')).pool.query('SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100', [userId]);
-    
+    const q = await (
+      await import('../lib/db')
+    ).pool.query('SELECT * FROM withdrawals WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100', [
+      userId,
+    ]);
+
     const response: ApiResponse = {
       success: true,
-      data: q.rows
+      data: q.rows,
     };
     return res.json(response);
   } catch (err) {
@@ -171,7 +189,7 @@ router.get('/', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get withdrawals',
-      code: 'GET_WITHDRAWALS_FAILED'
+      code: 'GET_WITHDRAWALS_FAILED',
     };
     return res.status(500).json(response);
   }
@@ -181,34 +199,33 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const userId = (req as any).user?.id;
   const { id } = req.params;
-  
+
   if (!userId) {
     const response: ApiResponse = {
       success: false,
       error: 'User not authenticated',
-      code: 'NOT_AUTHENTICATED'
+      code: 'NOT_AUTHENTICATED',
     };
     return res.status(401).json(response);
   }
 
   try {
-    const q = await (await import('../lib/db')).pool.query(
-      'SELECT * FROM withdrawals WHERE id=$1 AND user_id=$2', 
-      [id, userId]
-    );
-    
+    const q = await (
+      await import('../lib/db')
+    ).pool.query('SELECT * FROM withdrawals WHERE id=$1 AND user_id=$2', [id, userId]);
+
     if (!q.rows.length) {
       const response: ApiResponse = {
         success: false,
         error: 'Withdrawal not found',
-        code: 'WITHDRAWAL_NOT_FOUND'
+        code: 'WITHDRAWAL_NOT_FOUND',
       };
       return res.status(404).json(response);
     }
 
     const response: ApiResponse = {
       success: true,
-      data: q.rows[0]
+      data: q.rows[0],
     };
     return res.json(response);
   } catch (err) {
@@ -216,7 +233,7 @@ router.get('/:id', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get withdrawal',
-      code: 'GET_WITHDRAWAL_FAILED'
+      code: 'GET_WITHDRAWAL_FAILED',
     };
     return res.status(500).json(response);
   }

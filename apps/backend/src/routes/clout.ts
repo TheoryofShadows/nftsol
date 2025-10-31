@@ -1,7 +1,7 @@
 /**
  * CLOUT Token Routes
  * API endpoints for CLOUT token operations
- * 
+ *
  * @module routes/clout
  */
 
@@ -17,7 +17,7 @@ const cloutService = new CloutTokenService();
 /**
  * POST /api/clout/reward
  * Send CLOUT tokens to a user
- * 
+ *
  * Body: {
  *   recipientAddress: string (required),
  *   amount: number (required),
@@ -32,7 +32,7 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
       const response: ApiResponse = {
         success: false,
         error: 'recipientAddress is required',
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       };
       return res.status(400).json(response);
     }
@@ -41,7 +41,7 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
       const response: ApiResponse = {
         success: false,
         error: 'amount must be a positive number',
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       };
       return res.status(400).json(response);
     }
@@ -50,16 +50,12 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
       const response: ApiResponse = {
         success: false,
         error: 'multiplier must be a positive number',
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       };
       return res.status(400).json(response);
     }
 
-    const result = await cloutService.distributeCloutRewards(
-      recipientAddress,
-      amount,
-      multiplier
-    );
+    const result = await cloutService.distributeCloutRewards(recipientAddress, amount, multiplier);
 
     if (result.success && result.txSignature) {
       const totalAmount = Math.floor(amount * multiplier);
@@ -71,16 +67,16 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
           amount,
           multiplier,
           totalAmount,
-          token: 'CLOUT'
+          token: 'CLOUT',
         },
-        message: `Successfully sent ${totalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`
+        message: `Successfully sent ${totalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`,
       };
       res.json(response);
     } else {
       const response: ApiResponse = {
         success: false,
         error: result.error || 'Failed to send CLOUT reward',
-        code: 'REWARD_FAILED'
+        code: 'REWARD_FAILED',
       };
       res.status(500).json(response);
     }
@@ -90,13 +86,14 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
       // eslint-disable-next-line no-console
       console.error('CLOUT reward endpoint error:', err);
     }
-    
+
     const response: ApiResponse = {
       success: false,
-      error: process.env.NODE_ENV === 'production'
-        ? 'Failed to process request. Please try again later.'
-        : err.message || 'Internal server error',
-      code: 'INTERNAL_ERROR'
+      error:
+        process.env.NODE_ENV === 'production'
+          ? 'Failed to process request. Please try again later.'
+          : err.message || 'Internal server error',
+      code: 'INTERNAL_ERROR',
     };
     res.status(500).json(response);
   }
@@ -114,7 +111,7 @@ router.get('/balance/:address', sanitizeInput, async (req, res) => {
       const response: ApiResponse = {
         success: false,
         error: 'Invalid address parameter',
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       };
       return res.status(400).json(response);
     }
@@ -126,8 +123,8 @@ router.get('/balance/:address', sanitizeInput, async (req, res) => {
       data: {
         address,
         balance,
-        token: 'CLOUT'
-      }
+        token: 'CLOUT',
+      },
     };
     res.json(response);
   } catch (error) {
@@ -135,7 +132,7 @@ router.get('/balance/:address', sanitizeInput, async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get CLOUT balance',
-      code: 'INTERNAL_ERROR'
+      code: 'INTERNAL_ERROR',
     };
     res.status(500).json(response);
   }
@@ -154,8 +151,8 @@ router.get('/vault-balance', async (req, res) => {
       data: {
         balance,
         token: 'CLOUT',
-        vaultAddress: process.env.REWARDS_VAULT || 'Not configured'
-      }
+        vaultAddress: process.env.REWARDS_VAULT || 'Not configured',
+      },
     };
     res.json(response);
   } catch (error) {
@@ -163,11 +160,10 @@ router.get('/vault-balance', async (req, res) => {
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get vault balance',
-      code: 'INTERNAL_ERROR'
+      code: 'INTERNAL_ERROR',
     };
     res.status(500).json(response);
   }
 });
 
 export default router;
-

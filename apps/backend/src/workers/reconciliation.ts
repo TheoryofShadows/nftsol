@@ -49,7 +49,6 @@ class ReconciliationWorker {
 
       console.log(`✅ Reconciliation complete. Found ${issues.length} issues.`);
       return issues;
-
     } catch (error) {
       console.error('❌ Reconciliation failed:', error);
       throw error;
@@ -73,7 +72,7 @@ class ReconciliationWorker {
       type: 'NEGATIVE_BALANCE',
       severity: 'HIGH' as const,
       description: `User ${row.user_id} has negative balance`,
-      data: row
+      data: row,
     }));
   }
 
@@ -99,7 +98,7 @@ class ReconciliationWorker {
       type: 'PENDING_MISMATCH',
       severity: 'HIGH' as const,
       description: `User ${row.user_id} has pending withdrawal mismatch`,
-      data: row
+      data: row,
     }));
   }
 
@@ -121,7 +120,7 @@ class ReconciliationWorker {
       type: 'MISSING_TX_SIG',
       severity: 'HIGH' as const,
       description: `Completed withdrawal ${row.id} missing transaction signature`,
-      data: row
+      data: row,
     }));
   }
 
@@ -143,7 +142,7 @@ class ReconciliationWorker {
       type: 'STUCK_WITHDRAWAL',
       severity: 'MEDIUM' as const,
       description: `Withdrawal ${row.id} stuck in ${row.status} for >6 hours`,
-      data: row
+      data: row,
     }));
   }
 
@@ -152,25 +151,29 @@ class ReconciliationWorker {
       const { loadPlatformKeypair } = await import('../lib/solana');
       const keypair = loadPlatformKeypair();
       const balance = await connection.getBalance(keypair.publicKey);
-      
+
       // Alert if balance is too low (less than 10 SOL)
       const minBalance = 10 * 1_000_000_000; // 10 SOL in lamports
-      
+
       if (balance < minBalance) {
-        return [{
-          type: 'LOW_PLATFORM_BALANCE',
-          severity: 'HIGH' as const,
-          description: `Platform balance is low: ${balance / 1_000_000_000} SOL`,
-          data: { balance, minBalance }
-        }];
+        return [
+          {
+            type: 'LOW_PLATFORM_BALANCE',
+            severity: 'HIGH' as const,
+            description: `Platform balance is low: ${balance / 1_000_000_000} SOL`,
+            data: { balance, minBalance },
+          },
+        ];
       }
     } catch (error) {
-      return [{
-        type: 'PLATFORM_BALANCE_CHECK_FAILED',
-        severity: 'MEDIUM' as const,
-        description: `Failed to check platform balance: ${error}`,
-        data: { error: (error as Error).message }
-      }];
+      return [
+        {
+          type: 'PLATFORM_BALANCE_CHECK_FAILED',
+          severity: 'MEDIUM' as const,
+          description: `Failed to check platform balance: ${error}`,
+          data: { error: (error as Error).message },
+        },
+      ];
     }
 
     return [];
@@ -179,10 +182,10 @@ class ReconciliationWorker {
   private async processIssues(issues: ReconciliationIssue[]): Promise<void> {
     for (const issue of issues) {
       console.log(`🚨 ${issue.severity}: ${issue.description}`);
-      
+
       // Log to monitoring system
       await this.logIssue(issue);
-      
+
       // Send alerts for high severity issues
       if (issue.severity === 'HIGH') {
         await this.sendAlert(issue);
@@ -192,16 +195,19 @@ class ReconciliationWorker {
 
   private async logIssue(issue: ReconciliationIssue): Promise<void> {
     // Log to database for audit trail
-    await pool.query(`
+    await pool.query(
+      `
       INSERT INTO reconciliation_logs (issue_type, severity, description, data, created_at)
       VALUES ($1, $2, $3, $4, now())
-    `, [issue.type, issue.severity, issue.description, JSON.stringify(issue.data)]);
+    `,
+      [issue.type, issue.severity, issue.description, JSON.stringify(issue.data)]
+    );
   }
 
   private async sendAlert(issue: ReconciliationIssue): Promise<void> {
     // Send to monitoring system (PagerDuty, Slack, etc.)
     console.log(`🚨 ALERT: ${issue.type} - ${issue.description}`);
-    
+
     // TODO: Integrate with your alerting system
     // Example: await sendSlackAlert(issue);
     // Example: await sendPagerDutyAlert(issue);
@@ -212,7 +218,10 @@ export const reconciliationWorker = new ReconciliationWorker();
 
 // Run reconciliation every 15 minutes
 if (process.env.NODE_ENV === 'production') {
-  setInterval(() => {
-    reconciliationWorker.runReconciliation().catch(console.error);
-  }, 15 * 60 * 1000); // 15 minutes
+  setInterval(
+    () => {
+      reconciliationWorker.runReconciliation().catch(console.error);
+    },
+    15 * 60 * 1000
+  ); // 15 minutes
 }

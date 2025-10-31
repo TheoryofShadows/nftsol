@@ -1,7 +1,7 @@
 /**
  * Grokipedia Verification Service
  * FREE Grok integration via OpenAI SDK + smart caching
- * 
+ *
  * Features:
  * - Uses OpenAI SDK for xAI API calls
  * - Graceful fallback to heuristics
@@ -95,10 +95,9 @@ Score scale (0-100):
       confidence: score / 100,
       sources: parsed.sources || ['xAI Grok Analysis'],
     };
-
   } catch (error: any) {
     console.error('xAI Grok API Error:', error.message);
-    
+
     // Graceful fallback to mock on error
     console.warn('⚠️ Falling back to heuristic verification');
     return grokVerifyMock(input);
@@ -139,7 +138,7 @@ function grokVerifyMock(input: string): GrokVerificationResult {
   // Generate summary
   const truncated = input.substring(0, 200);
   let summary: string;
-  
+
   if (score >= 90) {
     summary = `VERIFIED: ${truncated}... [High confidence public domain content from Internet Archive]`;
   } else if (score >= 80) {
@@ -151,7 +150,7 @@ function grokVerifyMock(input: string): GrokVerificationResult {
   }
 
   // Mock sources
-  const sources = verified 
+  const sources = verified
     ? ['Internet Archive', 'Grokipedia Historical Database', 'Public Domain Registry']
     : ['Content flagged for review'];
 
@@ -174,23 +173,23 @@ export async function reverifyLedger(
 ): Promise<GrokVerificationResult> {
   // Combine all verified echo content
   const verifiedContent = echoes
-    .filter(e => e.verified)
-    .map(e => e.content)
+    .filter((e) => e.verified)
+    .map((e) => e.content)
     .join(' ');
 
   const combinedContent = `${originalContent} ${verifiedContent}`;
-  
+
   // Re-verify with combined content
   const result = await grokVerify(combinedContent);
-  
+
   // Boost score for collaborative verified echoes
-  const verifiedCount = echoes.filter(e => e.verified).length;
+  const verifiedCount = echoes.filter((e) => e.verified).length;
   const boost = Math.min(10, verifiedCount * 2);
-  
+
   result.score = Math.min(100, result.score + boost);
   result.verified = result.score >= 80;
   result.confidence = result.score / 100;
-  
+
   return result;
 }
 
@@ -204,7 +203,7 @@ export async function batchGrokVerify(
 
   // Process in parallel with Promise.all
   const verifications = await Promise.all(
-    items.map(async item => ({
+    items.map(async (item) => ({
       id: item.id,
       result: await grokVerify(item.content),
     }))

@@ -1,9 +1,9 @@
 /**
  * Helius Orb Service - AI-Powered Transaction Explorer
- * 
+ *
  * Status: Mock implementation (ready for real API)
  * Activation: Replace with @helius-labs/orb-sdk when available
- * 
+ *
  * Purpose:
  * - AI-explained transaction history
  * - Token flow heatmaps
@@ -61,7 +61,7 @@ export class OrbService {
 
   constructor(apiKey: string = process.env.HELIUS_API_KEY || '') {
     this.heliusApiKey = apiKey;
-    
+
     // Check if Orb SDK is available
     try {
       // When @helius-labs/orb-sdk is available:
@@ -94,7 +94,7 @@ export class OrbService {
     // const explained = await orb.explainTransactions(txs);
     // const heatmap = await orb.generateHeatmap(txs);
     // const timeline = await orb.timeMachine(ledgerPda, { from: '2025-10-01' });
-    
+
     return this.getMockTxHistory(ledgerPda);
   }
 
@@ -104,7 +104,7 @@ export class OrbService {
   getOrbEmbed(ledgerPda: string): string {
     // Real URL when Orb is live:
     // return `https://orb.helius.dev/explore/${ledgerPda}?ai=true&heatmap=true`;
-    
+
     // Mock: Use Solscan for now
     return `https://solscan.io/account/${ledgerPda}`;
   }
@@ -121,7 +121,7 @@ export class OrbService {
     // const orb = new HeliusOrb(this.heliusApiKey);
     // const explanation = await orb.explainTransaction(signature);
     // return explanation.summary;
-    
+
     return 'Transaction explanation pending Orb API.';
   }
 
@@ -136,7 +136,7 @@ export class OrbService {
     // Real implementation:
     // const orb = new HeliusOrb(this.heliusApiKey);
     // return await orb.generateHeatmap(ledgerPda);
-    
+
     return this.getMockHeatmap();
   }
 
@@ -154,7 +154,7 @@ export class OrbService {
     // Real implementation:
     // const orb = new HeliusOrb(this.heliusApiKey);
     // return await orb.timeMachine(ledgerPda, options);
-    
+
     return this.getMockTimeline();
   }
 
@@ -164,7 +164,7 @@ export class OrbService {
 
   private getMockTxHistory(ledgerPda: string) {
     const now = Date.now();
-    
+
     const txs: Transaction[] = [
       {
         signature: '5j7k8l9...',
@@ -192,7 +192,7 @@ export class OrbService {
       },
     ];
 
-    const explained: AIExplanation[] = txs.map(tx => ({
+    const explained: AIExplanation[] = txs.map((tx) => ({
       signature: tx.signature,
       summary: `${tx.participants[0]} performed ${tx.type}`,
       confidence: 95,
@@ -232,7 +232,7 @@ export class OrbService {
 
   private getMockTimeline(): TimelineEvent[] {
     const now = Date.now();
-    
+
     return [
       {
         timestamp: now - 86400000,
@@ -250,7 +250,7 @@ export class OrbService {
       {
         timestamp: now - 43200000,
         type: 'verified',
-        description: 'Grok verified Mike\'s echo (92%)',
+        description: "Grok verified Mike's echo (92%)",
         actor: 'Grok AI',
       },
       {
@@ -269,7 +269,7 @@ export class OrbService {
       {
         timestamp: now - 21600000,
         type: 'verified',
-        description: 'Grok verified Alice\'s echo (88%)',
+        description: "Grok verified Alice's echo (88%)",
         actor: 'Grok AI',
       },
       {
@@ -285,10 +285,10 @@ export class OrbService {
 
 /**
  * Usage Example:
- * 
+ *
  * const orbService = new OrbService(process.env.HELIUS_API_KEY);
  * const history = await orbService.getEchoTxHistory('EchoLedger_apollo11...');
- * 
+ *
  * // Display in frontend:
  * <Heatmap data={history.heatmap} />
  * <Timeline events={history.timeline} />

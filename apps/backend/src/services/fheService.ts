@@ -1,12 +1,12 @@
 /**
  * FHE Service - Fully Homomorphic Encryption for Private Echoes
- * 
+ *
  * Status: v3.0 Feature (Architecture Ready)
  * Dependencies: @zama.ai/fhevm (when available)
- * 
+ *
  * IMPORTANT: This is production-ready architecture.
  * Real Zama SDK integration pending (expected 2026).
- * 
+ *
  * Current mode: Mock implementation for development/testing
  * Production mode: Activate when Zama Solana support launches
  */
@@ -68,7 +68,7 @@ export class FHEService {
       //   network: this.config.network,
       //   publicKey: this.config.publicKey,
       // });
-      
+
       this.fhevmInitialized = true;
       console.log('✅ FHE initialized:', this.config.keyType, this.config.network);
     } catch (error) {
@@ -79,7 +79,7 @@ export class FHEService {
 
   /**
    * Encrypt echo data with FHE
-   * 
+   *
    * @param echoData - Plain text echo content
    * @returns Encrypted data structure
    */
@@ -109,7 +109,6 @@ export class FHEService {
       // };
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
-
     } catch (error) {
       console.error('FHE encryption error:', error);
       throw new Error(`Failed to encrypt echo: ${(error as Error).message}`);
@@ -145,7 +144,7 @@ export class FHEService {
 
   /**
    * Perform homomorphic computation on encrypted data
-   * 
+   *
    * @param encryptedData - Encrypted echo
    * @param operation - Operation to perform (e.g., 'fact_check', 'sentiment')
    * @param params - Additional parameters
@@ -180,7 +179,6 @@ export class FHEService {
       // };
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
-
     } catch (error) {
       console.error('FHE computation error:', error);
       throw new Error(`Failed to compute on encrypted data: ${(error as Error).message}`);
@@ -225,15 +223,12 @@ export class FHEService {
   /**
    * Decrypt FHE-encrypted data
    * IMPORTANT: Only for authorized users or server operations
-   * 
+   *
    * @param encryptedData - Encrypted echo
    * @param requesterId - Who is requesting decryption (for audit)
    * @returns Decrypted plain text
    */
-  async decryptEcho(
-    encryptedData: EncryptedData,
-    requesterId?: string
-  ): Promise<string> {
+  async decryptEcho(encryptedData: EncryptedData, requesterId?: string): Promise<string> {
     if (!FHE_ENABLED) {
       throw new Error('FHE is not enabled');
     }
@@ -261,7 +256,6 @@ export class FHEService {
       // return plaintext;
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
-
     } catch (error) {
       console.error('FHE decryption error:', error);
       throw new Error(`Failed to decrypt echo: ${(error as Error).message}`);
@@ -275,7 +269,7 @@ export class FHEService {
     try {
       const decoded = Buffer.from(encryptedData.ciphertext, 'base64').toString();
       const parsed = JSON.parse(decoded);
-      
+
       if (!parsed.mock) {
         throw new Error('Not a mock encrypted format');
       }
@@ -298,10 +292,7 @@ export class FHEService {
    * Verify encrypted data matches a public hash
    * Uses homomorphic hash comparison (no decryption)
    */
-  async verifyHashMatch(
-    encryptedData: EncryptedData,
-    publicHash: string
-  ): Promise<boolean> {
+  async verifyHashMatch(encryptedData: EncryptedData, publicHash: string): Promise<boolean> {
     try {
       if (FHE_MOCK_MODE) {
         // Mock: decrypt to verify (real FHE wouldn't need this)
@@ -316,7 +307,6 @@ export class FHEService {
       // return computedHash === publicHash;
 
       throw new Error('Real FHE not available yet');
-
     } catch {
       return false;
     }
@@ -341,9 +331,7 @@ export class FHEService {
       mockMode: FHE_MOCK_MODE,
       network: this.config.network,
       scheme: this.config.keyType,
-      publicKey: this.config.publicKey
-        ? this.config.publicKey.substring(0, 20) + '...'
-        : null,
+      publicKey: this.config.publicKey ? this.config.publicKey.substring(0, 20) + '...' : null,
       features: {
         encryption: true,
         homomorphicCompute: true,

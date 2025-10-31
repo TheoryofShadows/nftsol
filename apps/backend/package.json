@@ -72,7 +72,29 @@
     "minimist": "^1.2.8",
     "follow-redirects": "^1.15.6",
     "ws": "^8.18.0",
-    "bigint-buffer": "^1.1.5"
+    "bigint-buffer": "^1.1.5",
+    "axios": "^1.7.9",
+    "crypto-js": "^4.2.0",
+    "parse-duration": "^2.1.3",
+    "esbuild": "^0.24.2",
+    "@bundlr-network/client": {
+      "axios": "^1.7.9"
+    },
+    "arbundles": {
+      "axios": "^1.7.9"
+    },
+    "merkletreejs": {
+      "crypto-js": "^4.2.0"
+    },
+    "ipfs-core-utils": {
+      "parse-duration": "^2.1.3"
+    },
+    "ipfs-http-client": {
+      "parse-duration": "^2.1.3"
+    },
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.24.2"
+    }
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",

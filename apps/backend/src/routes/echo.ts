@@ -7,7 +7,13 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { PublicKey } from '@solana/web3.js';
 import axios from 'axios';
-import { grokVerify, generateTruthHash, reverifyLedger, batchGrokVerify, getVerificationTeaser } from '../utils/grokpedia';
+import {
+  grokVerify,
+  generateTruthHash,
+  reverifyLedger,
+  batchGrokVerify,
+  getVerificationTeaser,
+} from '../utils/grokpedia';
 import expressRateLimit from 'express-rate-limit';
 // Optional service (not required for dev/in-memory mode). Avoid importing to reduce build surface.
 
@@ -38,19 +44,19 @@ let echoService: any = null;
 const searchLimiter = expressRateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 20,
-  message: 'Too many search requests, please try again later'
+  message: 'Too many search requests, please try again later',
 });
 
 const mintLimiter = expressRateLimit({
   windowMs: 60 * 1000,
   max: 10,
-  message: 'Too many mint requests, please try again later'
+  message: 'Too many mint requests, please try again later',
 });
 
 const echoLimiter = expressRateLimit({
   windowMs: 60 * 1000,
   max: 30,
-  message: 'Too many echo requests, please try again later'
+  message: 'Too many echo requests, please try again later',
 });
 
 // ============================================================================
@@ -64,7 +70,7 @@ const searchSchema = z.object({
 
 const mintSchema = z.object({
   iaId: z.string().min(1).max(64),
-  walletAddress: z.string().refine(val => {
+  walletAddress: z.string().refine((val) => {
     try {
       new PublicKey(val);
       return true;
@@ -78,7 +84,7 @@ const addEchoSchema = z.object({
   ledgerId: z.string().min(1),
   echoData: z.string().min(1).max(5000),
   echoType: z.enum(['Text', 'Audio', 'Annotation']),
-  contributorWallet: z.string().refine(val => {
+  contributorWallet: z.string().refine((val) => {
     try {
       new PublicKey(val);
       return true;
@@ -108,7 +114,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
         sort: 'downloads desc',
         rows,
         output: 'json',
-        'filter': 'publicdomain', // Only public domain content
+        filter: 'publicdomain', // Only public domain content
       },
       timeout: 10000,
     });
@@ -128,7 +134,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
     // Format results with thumbnails and verification teasers
     const results = docs.map((doc: any) => {
       const verification = verifications.get(doc.identifier);
-      
+
       return {
         identifier: doc.identifier,
         title: doc.title || 'Untitled',
@@ -147,10 +153,9 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       results,
       total: iaResponse.data.response?.numFound || 0,
     });
-
   } catch (error: any) {
     console.error('IA Search Error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -189,8 +194,8 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
     }
 
     // Find MP4 video file
-    const mp4File = metadata.files.find((f: any) => 
-      f.name.endsWith('.mp4') && !f.name.includes('thumbs')
+    const mp4File = metadata.files.find(
+      (f: any) => f.name.endsWith('.mp4') && !f.name.includes('thumbs')
     );
 
     if (!mp4File) {
@@ -228,10 +233,9 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
     };
 
     res.json(response);
-
   } catch (error: any) {
     console.error('Mint Preparation Error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -256,7 +260,9 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
   try {
     const { ledgerId } = req.params;
 
-    const echoes = (echoStore.get(ledgerId) || []).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const echoes = (echoStore.get(ledgerId) || []).sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+    );
 
     res.json({
       success: true,
@@ -264,7 +270,6 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
       echoes,
       count: echoes.length,
     });
-
   } catch (error: any) {
     console.error('Fetch Echoes Error:', error);
     res.status(500).json({
@@ -307,11 +312,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
 
     // Award CLOUT for verified echoes
     if (echoService) {
-      await echoService.awardEchoClout(
-        contributorWallet,
-        verified,
-        verification.score
-      );
+      await echoService.awardEchoClout(contributorWallet, verified, verification.score);
     }
 
     res.json({
@@ -319,14 +320,13 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       echoId: insertedEcho.id,
       verified,
       verificationScore: verification.score,
-      message: verified 
+      message: verified
         ? '✨ Echo added and verified! CLOUT boost applied.'
         : '⚠️ Echo added but not verified.',
     });
-
   } catch (error: any) {
     console.error('Add Echo Error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return res.status(400).json({
         success: false,
@@ -352,7 +352,9 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
     const { ledgerId } = z.object({ ledgerId: z.string() }).parse(req.body);
 
     // Fetch all echoes for this ledger
-    const echoes = (echoStore.get(ledgerId) || []).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    const echoes = (echoStore.get(ledgerId) || []).sort(
+      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+    );
 
     if (echoes.length === 0) {
       return res.status(404).json({
@@ -380,7 +382,6 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
       summary: verification.summary,
       echoCount: echoes.length,
     });
-
   } catch (error: any) {
     console.error('Reverify Error:', error);
     res.status(500).json({
@@ -401,7 +402,7 @@ router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
     const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
     const totalLayers = allEchoes.length;
     const totalLedgers = echoStore.size;
-    
+
     // Calculate average truth score
     let avgTruthScore = 0;
     if (totalLayers > 0) {
@@ -423,7 +424,6 @@ router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
       avgTruthScore,
       trendingCount,
     });
-
   } catch (error: any) {
     console.error('Get Echo stats error:', error);
     res.status(500).json({
@@ -445,7 +445,9 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
     if (!echoService) {
       // Fallback if service not initialized: compute trending from in-memory store
       const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
-      const sorted = allEchoes.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, limit);
+      const sorted = allEchoes
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, limit);
       return res.json({ success: true, echoes: sorted });
     }
 
@@ -455,7 +457,6 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
       success: true,
       echoes: trending,
     });
-
   } catch (error: any) {
     console.error('Get trending echoes error:', error);
     res.status(500).json({
@@ -489,7 +490,6 @@ router.get('/stats/:wallet', echoLimiter, async (req: Request, res: Response) =>
       success: true,
       ...stats,
     });
-
   } catch (error: any) {
     console.error('Get echo stats error:', error);
     res.status(500).json({

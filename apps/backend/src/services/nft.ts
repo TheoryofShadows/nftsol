@@ -10,69 +10,73 @@ class NFTService {
   generateMetadata(request: MintRequest): NFTMetadata {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substr(2, 9);
-    
+
     return {
       name: request.name,
       description: request.description || `NFT created by ${request.creatorWallet.slice(0, 8)}...`,
-      image: request.imageUrl || `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(request.name)}`,
+      image:
+        request.imageUrl ||
+        `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(request.name)}`,
       attributes: [
         {
           trait_type: 'Creator',
-          value: request.creatorWallet.slice(0, 8) + '...'
+          value: request.creatorWallet.slice(0, 8) + '...',
         },
         {
           trait_type: 'Created',
-          value: new Date().toISOString()
+          value: new Date().toISOString(),
         },
         {
           trait_type: 'Unique ID',
-          value: `${timestamp}_${randomId}`
-        }
+          value: `${timestamp}_${randomId}`,
+        },
       ],
       properties: {
         files: [
           {
-            uri: request.imageUrl || `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(request.name)}`,
-            type: 'image/png'
-          }
+            uri:
+              request.imageUrl ||
+              `https://via.placeholder.com/300x300/667eea/ffffff?text=${encodeURIComponent(request.name)}`,
+            type: 'image/png',
+          },
         ],
-        category: 'image'
-      }
+        category: 'image',
+      },
     };
   }
-  
+
   // Create mock mint response (for testing)
   async createMockMint(request: MintRequest): Promise<MintResponse> {
     try {
       const timestamp = Date.now();
       const randomId = Math.random().toString(36).substr(2, 9);
-      
+
       // Generate mock mint address
       const mintAddress = `MOCK_MINT_${timestamp}_${randomId}`;
       const signature = `sig_${timestamp}_${randomId}`;
       const uri = `https://nftstorage.link/ipfs/mock_${timestamp}`;
-      
+
       // Log the mint operation
       logger.info('Mock NFT minted', {
         name: request.name,
         creator: request.creatorWallet,
         mintAddress,
-        timestamp
+        timestamp,
       });
-      
+
       return {
         success: true,
         mint: mintAddress,
         uri,
         mintAddress,
         signature,
-        message: 'NFT minted successfully (mock)'
+        message: 'NFT minted successfully (mock)',
       };
     } catch (error) {
       logger.error('Error creating mock mint', { error, request });
       return {
         success: false,
-        error: 'Failed to create mock mint'
+        error: 'Failed to create mock mint',
       };
     }
   }
@@ -85,7 +89,7 @@ class NFTService {
       if (!walletExists) {
         return {
           success: false,
-          error: 'Invalid wallet address or wallet does not exist'
+          error: 'Invalid wallet address or wallet does not exist',
         };
       }
 
@@ -94,85 +98,85 @@ class NFTService {
       const FEE_PERCENTAGE = 0.025; // 2.5%
       const feeAmount = MINT_COST_SOL * FEE_PERCENTAGE;
       const totalCost = MINT_COST_SOL + feeAmount;
-      
+
       logger.info('Fee calculation', {
         baseCost: MINT_COST_SOL,
         feePercentage: FEE_PERCENTAGE,
         feeAmount,
         totalCost,
-        creator: request.creatorWallet
+        creator: request.creatorWallet,
       });
 
       // Generate metadata URI (for now using placeholder)
       const metadataUri = request.imageUrl || `https://nftsol.app/metadata/${Date.now()}`;
-      
+
       // Mint NFT on blockchain
       const result = await mintNFT(
-        request.creatorWallet, 
-        metadataUri, 
-        request.name, 
+        request.creatorWallet,
+        metadataUri,
+        request.name,
         request.description
       );
-      
+
       if (!result.success) {
         return {
           success: false,
-          error: result.error || 'NFT minting failed'
+          error: result.error || 'NFT minting failed',
         };
       }
-      
+
       // Log the mint operation
       logger.info('Real NFT minted', {
         name: request.name,
         creator: request.creatorWallet,
         mintAddress: result.mintAddress,
         signature: result.txSig,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
-      
+
       return {
         success: true,
         mint: result.mintAddress,
         uri: metadataUri,
         mintAddress: result.mintAddress,
         signature: result.txSig,
-        message: 'NFT minted successfully on Solana blockchain'
+        message: 'NFT minted successfully on Solana blockchain',
       };
     } catch (error) {
       logger.error('Error creating real mint', { error, request });
       return {
         success: false,
-        error: 'Failed to create real mint: ' + (error as Error).message
+        error: 'Failed to create real mint: ' + (error as Error).message,
       };
     }
   }
-  
+
   // Validate mint request
   validateMintRequest(request: MintRequest): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     if (!request.name || request.name.trim().length === 0) {
       errors.push('NFT name is required');
     }
-    
+
     if (request.name && request.name.length > 100) {
       errors.push('NFT name must be less than 100 characters');
     }
-    
+
     if (request.description && request.description.length > 1000) {
       errors.push('Description must be less than 1000 characters');
     }
-    
+
     if (!request.creatorWallet) {
       errors.push('Creator wallet is required');
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
-  
+
   // Get NFT metadata by mint address
   async getNFTMetadata(mintAddress: string): Promise<ApiResponse<NFTMetadata>> {
     try {
@@ -185,24 +189,24 @@ class NFTService {
         attributes: [
           {
             trait_type: 'Type',
-            value: 'Sample'
-          }
-        ]
+            value: 'Sample',
+          },
+        ],
       };
-      
+
       return {
         success: true,
-        data: metadata
+        data: metadata,
       };
     } catch (error) {
       logger.error('Error getting NFT metadata', { mintAddress, error });
       return {
         success: false,
-        error: 'Failed to get NFT metadata'
+        error: 'Failed to get NFT metadata',
       };
     }
   }
-  
+
   // List NFTs by owner
   async getNFTsByOwner(owner: string): Promise<ApiResponse<any[]>> {
     try {
@@ -213,19 +217,19 @@ class NFTService {
           mint: 'MOCK_MINT_1',
           owner,
           name: 'Sample NFT 1',
-          image: 'https://via.placeholder.com/300x300/667eea/ffffff?text=NFT+1'
-        }
+          image: 'https://via.placeholder.com/300x300/667eea/ffffff?text=NFT+1',
+        },
       ];
-      
+
       return {
         success: true,
-        data: nfts
+        data: nfts,
       };
     } catch (error) {
       logger.error('Error getting NFTs by owner', { owner, error });
       return {
         success: false,
-        error: 'Failed to get NFTs by owner'
+        error: 'Failed to get NFTs by owner',
       };
     }
   }

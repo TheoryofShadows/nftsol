@@ -1,12 +1,12 @@
 /**
  * Cloudflare AI Workers - FREE Real AI Verification!
- * 
+ *
  * Benefits:
  * - ✅ FREE: 10,000 requests/day (vs $12/month for Grok)
  * - ✅ REAL AI: Llama 3 or Mistral (vs 90% heuristics)
  * - ✅ FAST: 50ms response (vs 500ms Grok)
  * - ✅ ACCURATE: 93% accuracy (vs 90% heuristics, 95% Grok)
- * 
+ *
  * Setup:
  * 1. Sign up for Cloudflare (free)
  * 2. Enable AI Workers in dashboard
@@ -23,9 +23,9 @@ const CLOUDFLARE_AI_TOKEN = process.env.CLOUDFLARE_AI_TOKEN;
 
 // Available free models
 const MODELS = {
-  llama3: '@cf/meta/llama-3-8b-instruct',    // Recommended: 93% accuracy
+  llama3: '@cf/meta/llama-3-8b-instruct', // Recommended: 93% accuracy
   mistral: '@cf/mistral/mistral-7b-instruct', // Alternative: 91% accuracy
-  qwen: '@cf/qwen/qwen1.5-14b-chat',         // Backup: 89% accuracy
+  qwen: '@cf/qwen/qwen1.5-14b-chat', // Backup: 89% accuracy
 };
 
 interface CloudflareAIResult {
@@ -52,29 +52,30 @@ export async function verifyWithCloudflareAI(
 
   try {
     const prompt = buildVerificationPrompt(content);
-    
+
     const response = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${MODELS[model]}`,
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${CLOUDFLARE_AI_TOKEN}`,
+          Authorization: `Bearer ${CLOUDFLARE_AI_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           messages: [
             {
               role: 'system',
-              content: 'You are an expert historical fact checker. Analyze content and return ONLY a JSON object with: score (0-100), summary (1 sentence), reasoning (array of brief points), flags (array of concerns).'
+              content:
+                'You are an expert historical fact checker. Analyze content and return ONLY a JSON object with: score (0-100), summary (1 sentence), reasoning (array of brief points), flags (array of concerns).',
             },
             {
               role: 'user',
-              content: prompt
-            }
+              content: prompt,
+            },
           ],
           max_tokens: 500,
           temperature: 0.3, // Lower = more consistent
-        })
+        }),
       }
     );
 
@@ -84,7 +85,7 @@ export async function verifyWithCloudflareAI(
     }
 
     const data = await response.json();
-    
+
     // Parse AI response
     const aiResponse = data.result?.response || data.result;
     const parsed = parseAIResponse(aiResponse);
@@ -98,7 +99,6 @@ export async function verifyWithCloudflareAI(
       flags: parsed.flags,
       model: MODELS[model],
     };
-
   } catch (error) {
     console.error('Cloudflare AI verification error:', error);
     return fallbackVerification(content);
@@ -168,7 +168,6 @@ function parseAIResponse(aiResponse: string): {
       reasoning: ['Automated analysis'],
       flags: [],
     };
-
   } catch (error) {
     console.error('Failed to parse AI response:', error);
     return {
@@ -217,9 +216,10 @@ function fallbackVerification(content: string): CloudflareAIResult {
     score,
     verified: score >= 80,
     confidence: 75, // Lower confidence for fallback
-    summary: score >= 80 
-      ? 'Content appears credible (heuristic analysis)'
-      : 'Content requires manual verification (heuristic analysis)',
+    summary:
+      score >= 80
+        ? 'Content appears credible (heuristic analysis)'
+        : 'Content requires manual verification (heuristic analysis)',
     reasoning,
     flags,
     model: 'fallback-heuristic',
@@ -229,9 +229,7 @@ function fallbackVerification(content: string): CloudflareAIResult {
 /**
  * Batch verify multiple contents (parallel)
  */
-export async function batchVerifyCloudflareAI(
-  contents: string[]
-): Promise<CloudflareAIResult[]> {
+export async function batchVerifyCloudflareAI(contents: string[]): Promise<CloudflareAIResult[]> {
   // Process in parallel (Cloudflare AI is fast!)
   // Limit concurrency to avoid rate limits
   const BATCH_SIZE = 10;
@@ -239,9 +237,7 @@ export async function batchVerifyCloudflareAI(
 
   for (let i = 0; i < contents.length; i += BATCH_SIZE) {
     const batch = contents.slice(i, i + BATCH_SIZE);
-    const batchResults = await Promise.all(
-      batch.map(content => verifyWithCloudflareAI(content))
-    );
+    const batchResults = await Promise.all(batch.map((content) => verifyWithCloudflareAI(content)));
     results.push(...batchResults);
   }
 
@@ -253,7 +249,7 @@ export async function batchVerifyCloudflareAI(
  */
 export async function grokVerify(content: string) {
   const result = await verifyWithCloudflareAI(content);
-  
+
   return {
     summary: result.summary,
     score: result.score,
@@ -276,9 +272,13 @@ export function generateTruthHash(content: string): Uint8Array {
  */
 export function getVerificationTeaser(result: CloudflareAIResult): string {
   const emoji = result.verified ? '✅' : result.score >= 60 ? '⚠️' : '❌';
-  const modelName = result.model.includes('llama') ? 'Llama AI' : 
-                   result.model.includes('mistral') ? 'Mistral AI' : 
-                   result.model.includes('fallback') ? 'Heuristic' : 'AI';
+  const modelName = result.model.includes('llama')
+    ? 'Llama AI'
+    : result.model.includes('mistral')
+      ? 'Mistral AI'
+      : result.model.includes('fallback')
+        ? 'Heuristic'
+        : 'AI';
   return `${emoji} ${result.score}% confidence (${modelName})`;
 }
 

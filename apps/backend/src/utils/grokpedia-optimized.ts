@@ -1,7 +1,7 @@
 /**
  * Grokipedia Integration - Optimized by Grok AI
  * Truth verification using xAI Grok API with intelligent caching
- * 
+ *
  * Key Optimizations:
  * - 24-hour NodeCache for duplicate content (80% hit rate expected)
  * - SHA-256 hash-based deduplication
@@ -28,9 +28,7 @@ export interface GrokVerificationResult {
  * @param content - Content to verify (max 2000 chars for efficiency)
  * @returns Verification result with truth score
  */
-export async function grokVerify(
-  content: string
-): Promise<GrokVerificationResult> {
+export async function grokVerify(content: string): Promise<GrokVerificationResult> {
   // 1. Generate content hash for cache lookup
   const hash = createHash('sha256').update(content).digest('hex');
   const cacheKey = `grok:${hash.slice(0, 16)}`;
@@ -65,19 +63,17 @@ export async function grokVerify(
   "score": <0-100>,
   "verified": <true/false>,
   "confidence": <0-100>
-}`
+}`,
         },
         {
           role: 'user',
-          content: content.slice(0, 2000) // Truncate for efficiency
-        }
+          content: content.slice(0, 2000), // Truncate for efficiency
+        },
       ],
     });
 
     // 4. Parse and validate response
-    const parsed = JSON.parse(
-      response.choices[0].message.content || '{}'
-    );
+    const parsed = JSON.parse(response.choices[0].message.content || '{}');
 
     const result: GrokVerificationResult = {
       summary: parsed.summary || 'Content analyzed',
@@ -91,7 +87,6 @@ export async function grokVerify(
     console.log('💾 Cached result:', cacheKey);
 
     return result;
-
   } catch (error) {
     console.warn('⚠️ Grok API failed, using fallback:', error);
     return grokVerifyFallback(content);
@@ -105,25 +100,25 @@ export async function grokVerify(
  */
 function grokVerifyFallback(content: string): GrokVerificationResult {
   const lower = content.toLowerCase();
-  
+
   // Simple heuristic scoring
   let score = 50; // Base score
-  
+
   // Boost for known reliable sources
   if (lower.includes('nasa') || lower.includes('archive.org')) score += 20;
   if (lower.includes('1969') || lower.includes('moon')) score += 10;
   if (lower.includes('verified') || lower.includes('official')) score += 10;
-  
+
   // Penalty for suspicious patterns
   if (lower.includes('conspiracy') || lower.includes('fake')) score -= 20;
-  
+
   score = Math.max(0, Math.min(100, score));
 
   return {
     summary: 'Heuristic fallback scoring applied (API unavailable).',
     score,
     verified: score >= 80,
-    confidence: 50
+    confidence: 50,
   };
 }
 
@@ -145,8 +140,8 @@ export async function batchGrokVerify(
     content: item,
     summary: baseResult.summary,
     score: Math.max(0, baseResult.score - i * 2),
-    verified: (baseResult.score - i * 2) >= 80,
-    confidence: Math.max(10, baseResult.confidence - i * 5)
+    verified: baseResult.score - i * 2 >= 80,
+    confidence: Math.max(10, baseResult.confidence - i * 5),
   }));
 }
 
@@ -164,9 +159,7 @@ export function generateTruthHash(content: string): Uint8Array {
  * @param result - Verification result
  * @returns Short summary text
  */
-export function getVerificationTeaser(
-  result: GrokVerificationResult
-): string {
+export function getVerificationTeaser(result: GrokVerificationResult): string {
   if (result.score >= 90) {
     return `✅ Highly accurate (${result.score}%)`;
   } else if (result.score >= 80) {
@@ -202,11 +195,11 @@ export async function warmCache() {
     'Apollo 11 moon landing',
     'NASA space program',
     'Historical documentary footage',
-    'Public domain video archive'
+    'Public domain video archive',
   ];
 
   console.log('🔥 Warming cache with common queries...');
-  
+
   for (const query of commonQueries) {
     try {
       await grokVerify(query);

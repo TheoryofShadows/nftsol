@@ -10,12 +10,12 @@ const allowedOrigins = (process.env.CORS_ORIGINS || '')
   .filter(Boolean);
 
 export const corsConfig = cors({
-    origin: (origin, cb) => {
+  origin: (origin, cb) => {
     if (!origin) return cb(null, true);
     if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return cb(null, true);
     return cb(new Error('CORS blocked'));
-    },
-    credentials: true,
+  },
+  credentials: true,
 });
 
 export const helmetConfig = helmet({ contentSecurityPolicy: false });

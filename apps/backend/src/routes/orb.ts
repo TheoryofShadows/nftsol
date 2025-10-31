@@ -38,7 +38,6 @@ router.get('/history/:ledgerId', orbLimiter, async (req: Request, res: Response)
       success: true,
       ...history,
     });
-
   } catch (error: any) {
     console.error('Orb history error:', error);
     res.status(500).json({
@@ -63,7 +62,6 @@ router.get('/embed/:ledgerId', orbLimiter, async (req: Request, res: Response) =
       success: true,
       embedUrl,
     });
-
   } catch (error: any) {
     console.error('Orb embed error:', error);
     res.status(500).json({
@@ -87,7 +85,6 @@ router.get('/explain/:signature', orbLimiter, async (req: Request, res: Response
       success: true,
       explanation,
     });
-
   } catch (error: any) {
     console.error('Orb explain error:', error);
     res.status(500).json({
@@ -111,7 +108,6 @@ router.get('/heatmap/:ledgerId', orbLimiter, async (req: Request, res: Response)
       success: true,
       heatmap,
     });
-
   } catch (error: any) {
     console.error('Orb heatmap error:', error);
     res.status(500).json({
@@ -139,7 +135,6 @@ router.get('/timeline/:ledgerId', orbLimiter, async (req: Request, res: Response
       success: true,
       timeline,
     });
-
   } catch (error: any) {
     console.error('Orb timeline error:', error);
     res.status(500).json({

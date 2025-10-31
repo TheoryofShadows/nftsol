@@ -20,9 +20,7 @@ app.get('/health', (_, res) => res.json({ ok: true, ts: Date.now() }));
 // ───── Socket.io ─────
 const server = http.createServer(app);
 
-const allowedOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map((s) => s.trim());
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map((s) => s.trim());
 
 const io = new SocketIOServer(server, {
   cors: { origin: allowedOrigins, credentials: true },

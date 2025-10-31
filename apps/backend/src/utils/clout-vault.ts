@@ -4,10 +4,10 @@
  */
 
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
-import { 
-  getAssociatedTokenAddress, 
+import {
+  getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
-  getAccount
+  getAccount,
 } from '@solana/spl-token';
 import { programConfig, solanaConfig } from '../config/index';
 
@@ -40,7 +40,7 @@ export async function getOrCreateCloutVault(
 
   // Check if ATA already exists
   const accountInfo = await connection.getAccountInfo(ata);
-  
+
   if (accountInfo) {
     console.log(`[CLOUT] Rewards vault ATA already exists: ${ata.toBase58()}`);
     return ata;
@@ -48,7 +48,7 @@ export async function getOrCreateCloutVault(
 
   // ATA doesn't exist - create it
   console.log(`[CLOUT] Creating rewards vault ATA: ${ata.toBase58()}`);
-  
+
   const createInstruction = createAssociatedTokenAccountInstruction(
     payer.publicKey, // payer
     ata, // ata
@@ -70,7 +70,7 @@ export async function getOrCreateCloutVault(
 export async function verifyCloutVault(connection: Connection): Promise<boolean> {
   const rewardsVault = programConfig.rewardsVault;
   const mintAddress = programConfig.cloutProgramId;
-  
+
   if (!rewardsVault) {
     console.warn('[CLOUT] REWARDS_VAULT not set in config');
     return false;
@@ -84,7 +84,7 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
   try {
     const vaultPubkey = new PublicKey(rewardsVault);
     const mint = new PublicKey(mintAddress);
-    
+
     // Try to get the token account (better check than getAccountInfo)
     try {
       const tokenAccount = await getAccount(connection, vaultPubkey);
@@ -97,17 +97,21 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
       // Token account doesn't exist
       if (err.name === 'TokenAccountNotFoundError' || err.message?.includes('not found')) {
         console.warn(`[CLOUT] ⚠ Rewards vault does not exist yet: ${rewardsVault}`);
-        console.warn(`[CLOUT]   This is OK - it will be created automatically when first CLOUT reward is sent`);
+        console.warn(
+          `[CLOUT]   This is OK - it will be created automatically when first CLOUT reward is sent`
+        );
         return false;
       }
       throw err;
     }
-    
+
     return false;
   } catch (error) {
-    console.warn('[CLOUT] Could not verify rewards vault:', error instanceof Error ? error.message : error);
+    console.warn(
+      '[CLOUT] Could not verify rewards vault:',
+      error instanceof Error ? error.message : error
+    );
     console.warn('[CLOUT] Will attempt to create when first reward is sent');
     return false;
   }
 }
-

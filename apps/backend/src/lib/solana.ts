@@ -1,5 +1,13 @@
 // src/lib/solana.ts
-import { Connection, Keypair, PublicKey, Transaction, SystemProgram, sendAndConfirmTransaction, Commitment } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  sendAndConfirmTransaction,
+  Commitment,
+} from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import bs58 from 'bs58';
 
@@ -22,7 +30,9 @@ export function loadPlatformKeypair(): Keypair {
     const arr = JSON.parse(json);
     return Keypair.fromSecretKey(Uint8Array.from(arr));
   }
-  throw new Error('Missing PLATFORM secret key env (PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON)');
+  throw new Error(
+    'Missing PLATFORM secret key env (PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON)'
+  );
 }
 
 // Lazy load platform keypair to prevent startup failures
@@ -34,12 +44,15 @@ export function getPlatformKeypair(): Keypair | null {
   if (!process.env.PLATFORM_SECRET_KEY_BASE58 && !process.env.PLATFORM_SECRET_KEY_JSON) {
     return null;
   }
-  
+
   if (!_platformKeypair) {
     try {
       _platformKeypair = loadPlatformKeypair();
     } catch (error) {
-      console.warn('[Solana] Platform keypair not available:', error instanceof Error ? error.message : error);
+      console.warn(
+        '[Solana] Platform keypair not available:',
+        error instanceof Error ? error.message : error
+      );
       return null;
     }
   }
@@ -49,9 +62,11 @@ export function getPlatformKeypair(): Keypair | null {
 export function getMetaplex() {
   const keypair = getPlatformKeypair();
   if (!keypair) {
-    throw new Error('Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON');
+    throw new Error(
+      'Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON'
+    );
   }
-  
+
   if (!_metaplex) {
     _metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
   }
@@ -62,7 +77,12 @@ export function getMetaplex() {
 // This prevents startup failures when platform keypair is not configured
 
 // Mint NFT and transfer to user
-export async function mintNFT(toAddress: string, metadataUri: string, name: string, description?: string) {
+export async function mintNFT(
+  toAddress: string,
+  metadataUri: string,
+  name: string,
+  description?: string
+) {
   try {
     const toPublicKey = new PublicKey(toAddress);
     const metaplexInstance = getMetaplex();
@@ -74,19 +94,19 @@ export async function mintNFT(toAddress: string, metadataUri: string, name: stri
       symbol: 'NFTSOL',
       sellerFeeBasisPoints: 250, // 2.5% royalties
       updateAuthority: keypair,
-      mintAuthority: keypair
+      mintAuthority: keypair,
     });
 
     // Transfer NFT to user
     const transferResult = await metaplexInstance.nfts().transfer({
       nftOrSft: nft,
-      toOwner: toPublicKey
+      toOwner: toPublicKey,
     });
 
-    return { 
-      mintAddress: nft.address.toString(), 
+    return {
+      mintAddress: nft.address.toString(),
       txSig: transferResult.response.signature,
-      success: true
+      success: true,
     };
   } catch (error) {
     console.error('NFT minting error:', error);
@@ -95,7 +115,7 @@ export async function mintNFT(toAddress: string, metadataUri: string, name: stri
     return {
       success: false,
       error: 'NFT minting failed',
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
     };
   }
 }
@@ -105,38 +125,38 @@ export async function sendSOL(toAddress: string, amountSol: number) {
   try {
     const toPublicKey = new PublicKey(toAddress);
     const keypair = getPlatformKeypair();
-    
+
     if (!keypair) {
       return {
         success: false,
-        error: 'Platform keypair not available'
+        error: 'Platform keypair not available',
       };
     }
-    
+
     // Validate amount
     if (amountSol <= 0 || !Number.isFinite(amountSol)) {
       return {
         success: false,
-        error: 'Invalid amount'
+        error: 'Invalid amount',
       };
     }
-    
+
     // Check platform wallet balance
     const balance = await connection.getBalance(keypair.publicKey);
     const requiredLamports = Math.floor(amountSol * 1e9);
-    
+
     if (balance < requiredLamports) {
       return {
         success: false,
-        error: 'Insufficient platform balance'
+        error: 'Insufficient platform balance',
       };
     }
-    
+
     const tx = new Transaction().add(
       SystemProgram.transfer({
         fromPubkey: keypair.publicKey,
         toPubkey: toPublicKey,
-        lamports: requiredLamports
+        lamports: requiredLamports,
       })
     );
 
@@ -147,9 +167,9 @@ export async function sendSOL(toAddress: string, amountSol: number) {
 
     const txSig = await sendAndConfirmTransaction(connection, tx, [keypair], {
       commitment: 'confirmed',
-      maxRetries: 3
+      maxRetries: 3,
     });
-    
+
     return { success: true, txSig };
   } catch (error) {
     console.error('SOL transfer error:', error);
@@ -158,7 +178,7 @@ export async function sendSOL(toAddress: string, amountSol: number) {
     return {
       success: false,
       error: 'SOL transfer failed',
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
     };
   }
 }

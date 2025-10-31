@@ -77,7 +77,6 @@ export class EternalEchoesService {
         assetId: result.assetId,
         signature: result.signature,
       };
-
     } catch (error: any) {
       console.error('Mint Echo cNFT error:', error);
       return {
@@ -102,8 +101,10 @@ export class EternalEchoesService {
       let cloutAmount = 20;
 
       // Bonus for high scores
-      if (verificationScore >= 95) cloutAmount = 50; // Platinum
-      else if (verificationScore >= 90) cloutAmount = 40; // Gold
+      if (verificationScore >= 95)
+        cloutAmount = 50; // Platinum
+      else if (verificationScore >= 90)
+        cloutAmount = 40; // Gold
       else if (verificationScore >= 85) cloutAmount = 30; // Silver
 
       await this.cloutService.distributeCloutRewards(
@@ -143,11 +144,13 @@ export class EternalEchoesService {
         .where(eq(echoTable.contributor, walletAddress));
 
       // Calculate stats
-      const avgScore = contributedEchoes.length > 0
-        ? contributedEchoes.reduce((sum, e) => sum + (e.verificationScore || 0), 0) / contributedEchoes.length
-        : 0;
+      const avgScore =
+        contributedEchoes.length > 0
+          ? contributedEchoes.reduce((sum, e) => sum + (e.verificationScore || 0), 0) /
+            contributedEchoes.length
+          : 0;
 
-      const cloutEarned = contributedEchoes.filter(e => e.grokVerified).length * 30;
+      const cloutEarned = contributedEchoes.filter((e) => e.grokVerified).length * 30;
 
       return {
         totalEchosMinted: mintedEchoes.length,

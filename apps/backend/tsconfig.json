@@ -8,9 +8,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": [
     "src/app-production.ts",
     "src/server-production.ts",

@@ -11,12 +11,12 @@ export function isValidSolanaAddress(address: string): boolean {
   if (!address || typeof address !== 'string') {
     return false;
   }
-  
+
   // First check regex pattern
   if (!SOLANA_ADDRESS_REGEX.test(address)) {
     return false;
   }
-  
+
   // Then validate with PublicKey constructor
   try {
     new PublicKey(address);
@@ -34,7 +34,7 @@ export const validateRequest = (schema: any) => {
       const response: ApiResponse = {
         success: false,
         error: error.details[0].message,
-        code: 'VALIDATION_ERROR'
+        code: 'VALIDATION_ERROR',
       };
       res.status(400).json(response);
       return;
@@ -47,64 +47,64 @@ export const validateRequest = (schema: any) => {
 export const validateWallet = (req: Request, res: Response, next: NextFunction) => {
   const { creatorWallet, owner } = req.body;
   const wallet = creatorWallet || owner;
-  
+
   if (!wallet) {
     const response: ApiResponse = {
       success: false,
       error: 'Wallet address is required',
-      code: 'MISSING_WALLET'
+      code: 'MISSING_WALLET',
     };
     res.status(400).json(response);
     return;
   }
-  
+
   if (!isValidSolanaAddress(wallet)) {
     const response: ApiResponse = {
       success: false,
       error: 'Invalid Solana wallet address format',
-      code: 'INVALID_WALLET'
+      code: 'INVALID_WALLET',
     };
     res.status(400).json(response);
     return;
   }
-  
+
   next();
 };
 
 // File upload validation
 export const validateFileUpload = (req: Request, res: Response, next: NextFunction) => {
   const file = req.file;
-  
+
   if (!file) {
     const response: ApiResponse = {
       success: false,
       error: 'No file uploaded',
-      code: 'NO_FILE'
+      code: 'NO_FILE',
     };
     res.status(400).json(response);
     return;
   }
-  
+
   if (!validateFileType(file.mimetype)) {
     const response: ApiResponse = {
       success: false,
       error: `Invalid file type. Allowed types: ${process.env.ALLOWED_FILE_TYPES || 'image/jpeg, image/png, image/gif, image/webp'}`,
-      code: 'INVALID_FILE_TYPE'
+      code: 'INVALID_FILE_TYPE',
     };
     res.status(400).json(response);
     return;
   }
-  
+
   if (!validateFileSize(file.size)) {
     const response: ApiResponse = {
       success: false,
       error: `File too large. Maximum size: ${process.env.MAX_FILE_SIZE || '10MB'}`,
-      code: 'FILE_TOO_LARGE'
+      code: 'FILE_TOO_LARGE',
     };
     res.status(400).json(response);
     return;
   }
-  
+
   next();
 };
 
@@ -119,21 +119,23 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
   // Comprehensive string sanitization
   const sanitizeString = (str: string): string => {
     if (typeof str !== 'string') return str;
-    
-    return str
-      .trim()
-      // Remove HTML tags and script content
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<[^>]*>/g, '')
-      // Remove dangerous characters
-      .replace(/[<>"'&]/g, '')
-      // Remove control characters
-      // eslint-disable-next-line no-control-regex
-      .replace(/[\x00-\x1F\x7F]/g, '')
-      // Limit length
-      .substring(0, 1000);
+
+    return (
+      str
+        .trim()
+        // Remove HTML tags and script content
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        // Remove dangerous characters
+        .replace(/[<>"'&]/g, '')
+        // Remove control characters
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\x00-\x1F\x7F]/g, '')
+        // Limit length
+        .substring(0, 1000)
+    );
   };
-  
+
   // Sanitize all string fields in body
   if (req.body && typeof req.body === 'object') {
     for (const key in req.body) {
@@ -142,7 +144,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
       }
     }
   }
-  
+
   // Sanitize query parameters
   if (req.query && typeof req.query === 'object') {
     for (const key in req.query) {
@@ -151,7 +153,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
       }
     }
   }
-  
+
   next();
 };
 
@@ -161,24 +163,24 @@ export const csrfProtection = (req: Request, res: Response, next: NextFunction) 
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
     return next();
   }
-  
+
   // Skip CSRF for health checks
   if (req.path === '/healthz' || req.path === '/health') {
     return next();
   }
-  
+
   const csrfToken = req.headers['x-csrf-token'] as string;
   const sessionToken = (req as any).session?.csrfToken;
-  
+
   if (!csrfToken || !sessionToken || csrfToken !== sessionToken) {
     const response: ApiResponse = {
       success: false,
       error: 'Invalid CSRF token',
-      code: 'CSRF_TOKEN_INVALID'
+      code: 'CSRF_TOKEN_INVALID',
     };
     return res.status(403).json(response);
   }
-  
+
   next();
 };
 

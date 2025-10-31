@@ -1,18 +1,24 @@
 /**
  * 💰 CLOUT Token Service
  * Handles sending CLOUT token rewards to users on Solana
- * 
+ *
  * @module services/cloutToken
  */
 
-import { Connection, Keypair, PublicKey, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+} from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
   getOrCreateAssociatedTokenAccount,
   transfer,
   getMint,
   getAccount,
-  createAssociatedTokenAccountInstruction
+  createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
 import { getPlatformKeypair } from '../lib/solana';
 import { programConfig, solanaConfig } from '../config/index';
@@ -46,10 +52,10 @@ export class CloutTokenService {
     if (!mintAddress) {
       throw new Error('[CLOUT] CLOUT_PROGRAM_ID not configured in environment');
     }
-    
+
     this.mint = new PublicKey(mintAddress);
     this.connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
-    
+
     console.log(`[CLOUT] Service initialized with mint: ${this.mint.toBase58()}`);
   }
 
@@ -58,8 +64,11 @@ export class CloutTokenService {
    */
   private async getMintInfo() {
     const now = Date.now();
-    if (this.mintInfoCache.decimals && this.mintInfoCache.cachedAt && 
-        (now - this.mintInfoCache.cachedAt) < this.MINT_INFO_CACHE_TTL) {
+    if (
+      this.mintInfoCache.decimals &&
+      this.mintInfoCache.cachedAt &&
+      now - this.mintInfoCache.cachedAt < this.MINT_INFO_CACHE_TTL
+    ) {
       return { decimals: this.mintInfoCache.decimals };
     }
 
@@ -67,11 +76,13 @@ export class CloutTokenService {
       const mintInfo = await getMint(this.connection, this.mint);
       this.mintInfoCache = {
         decimals: mintInfo.decimals,
-        cachedAt: now
+        cachedAt: now,
       };
       return mintInfo;
     } catch (error) {
-      throw new Error(`Failed to fetch CLOUT mint info: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to fetch CLOUT mint info: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -82,7 +93,7 @@ export class CloutTokenService {
     try {
       // Get or create vault address
       const rewardsVault = await getOrCreateCloutVault(this.connection, platformKeypair);
-      
+
       // Check if vault exists
       try {
         await getAccount(this.connection, rewardsVault);
@@ -91,11 +102,8 @@ export class CloutTokenService {
         // Vault doesn't exist - create it
         if (error.name === 'TokenAccountNotFoundError' || error.message?.includes('not found')) {
           console.log('[CLOUT] Creating rewards vault ATA...');
-          
-          const vaultATA = await getAssociatedTokenAddress(
-            this.mint,
-            platformKeypair.publicKey
-          );
+
+          const vaultATA = await getAssociatedTokenAddress(this.mint, platformKeypair.publicKey);
 
           const createInstruction = createAssociatedTokenAccountInstruction(
             platformKeypair.publicKey, // payer
@@ -116,25 +124,27 @@ export class CloutTokenService {
             [platformKeypair],
             {
               commitment: 'confirmed',
-              maxRetries: 3
+              maxRetries: 3,
             }
           );
 
           console.log(`[CLOUT] ✓ Rewards vault created: ${vaultATA.toBase58()}`);
           console.log(`[CLOUT] Transaction: https://solscan.io/tx/${signature}`);
-          
+
           return vaultATA;
         }
         throw error;
       }
     } catch (error) {
-      throw new Error(`Failed to ensure rewards vault: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to ensure rewards vault: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Distribute CLOUT rewards to a user
-   * 
+   *
    * @param recipientAddress - Wallet address to receive CLOUT (base58 string)
    * @param baseAmount - Base amount of CLOUT tokens (will be multiplied)
    * @param multiplier - Multiplier for the reward (default: 1.0)
@@ -162,9 +172,10 @@ export class CloutTokenService {
       // Get platform keypair
       const platformKeypair = getPlatformKeypair();
       if (!platformKeypair) {
-        return { 
-          success: false, 
-          error: 'Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON' 
+        return {
+          success: false,
+          error:
+            'Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON',
         };
       }
 
@@ -191,9 +202,9 @@ export class CloutTokenService {
       try {
         rewardsVault = await this.ensureRewardsVault(platformKeypair);
       } catch (error) {
-        return { 
-          success: false, 
-          error: `Rewards vault error: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        return {
+          success: false,
+          error: `Rewards vault error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
 
@@ -201,16 +212,17 @@ export class CloutTokenService {
       try {
         const vaultAccount = await getAccount(this.connection, rewardsVault);
         if (vaultAccount.amount < amountLamports) {
-          const currentBalance = Number(vaultAccount.amount) / Number(BigInt(10 ** mintInfo.decimals));
+          const currentBalance =
+            Number(vaultAccount.amount) / Number(BigInt(10 ** mintInfo.decimals));
           return {
             success: false,
-            error: `Insufficient CLOUT in rewards vault. Need ${finalAmount}, have ${currentBalance.toFixed(4)}`
+            error: `Insufficient CLOUT in rewards vault. Need ${finalAmount}, have ${currentBalance.toFixed(4)}`,
           };
         }
       } catch (error: any) {
-        return { 
-          success: false, 
-          error: `Failed to check vault balance: ${error.message || 'Unknown error'}` 
+        return {
+          success: false,
+          error: `Failed to check vault balance: ${error.message || 'Unknown error'}`,
         };
       }
 
@@ -224,15 +236,17 @@ export class CloutTokenService {
           recipient
         );
       } catch (error) {
-        return { 
-          success: false, 
-          error: `Failed to create recipient token account: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        return {
+          success: false,
+          error: `Failed to create recipient token account: ${error instanceof Error ? error.message : 'Unknown error'}`,
         };
       }
 
       // Transfer CLOUT
-      console.log(`[CLOUT] Transferring ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`);
-      
+      console.log(
+        `[CLOUT] Transferring ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`
+      );
+
       const txSignature = await transfer(
         this.connection,
         platformKeypair, // payer
@@ -242,13 +256,15 @@ export class CloutTokenService {
         amountLamports // amount
       );
 
-      console.log(`[CLOUT] ✓ Successfully sent ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`);
+      console.log(
+        `[CLOUT] ✓ Successfully sent ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`
+      );
       console.log(`[CLOUT] Transaction: https://solscan.io/tx/${txSignature}`);
 
-      return { 
-        success: true, 
+      return {
+        success: true,
         txSignature,
-        amount: finalAmount
+        amount: finalAmount,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -259,7 +275,7 @@ export class CloutTokenService {
 
   /**
    * Get CLOUT balance for a wallet
-   * 
+   *
    * @param walletAddress - Solana wallet address
    * @returns Balance in CLOUT tokens (0 if no ATA exists)
    */
@@ -267,7 +283,7 @@ export class CloutTokenService {
     try {
       const wallet = new PublicKey(walletAddress);
       const ata = await getAssociatedTokenAddress(this.mint, wallet);
-      
+
       try {
         const account = await getAccount(this.connection, ata);
         const mintInfo = await this.getMintInfo();
@@ -282,7 +298,7 @@ export class CloutTokenService {
 
   /**
    * Get rewards vault balance
-   * 
+   *
    * @returns Balance in CLOUT tokens
    */
   async getVaultBalance(): Promise<number> {
@@ -293,7 +309,7 @@ export class CloutTokenService {
       }
 
       const rewardsVault = await getOrCreateCloutVault(this.connection, platformKeypair);
-      
+
       try {
         const account = await getAccount(this.connection, rewardsVault);
         const mintInfo = await this.getMintInfo();
@@ -306,4 +322,3 @@ export class CloutTokenService {
     }
   }
 }
-

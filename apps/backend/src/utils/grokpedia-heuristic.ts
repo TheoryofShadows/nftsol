@@ -1,11 +1,11 @@
 /**
  * Free Heuristic Truth Verification
  * Replaces xAI Grok API ($0 cost vs $12/month)
- * 
+ *
  * Accuracy: ~90% (vs 95% with Grok AI)
  * Speed: <10ms (vs 500ms with Grok)
  * Cost: $0 forever
- * 
+ *
  * Usage: Set GROK_MODE=heuristic in .env
  */
 
@@ -24,9 +24,7 @@ export interface HeuristicResult {
  * Heuristic truth verification (no AI required)
  * Analyzes content patterns to estimate truth score
  */
-export async function grokVerifyHeuristic(
-  content: string
-): Promise<HeuristicResult> {
+export async function grokVerifyHeuristic(content: string): Promise<HeuristicResult> {
   const reasoning: string[] = [];
   const flags: string[] = [];
   let score = 50; // Start neutral
@@ -54,25 +52,34 @@ export async function grokVerifyHeuristic(
 
   // 3. Source credibility keywords
   const trustedSources = [
-    'archive', 'library', 'collection', 'museum',
-    'prelinger', 'public domain', 'historical society'
+    'archive',
+    'library',
+    'collection',
+    'museum',
+    'prelinger',
+    'public domain',
+    'historical society',
   ];
-  const sourceMatches = trustedSources.filter(kw =>
-    content.toLowerCase().includes(kw)
-  );
+  const sourceMatches = trustedSources.filter((kw) => content.toLowerCase().includes(kw));
   if (sourceMatches.length > 0) {
     score += 10 * sourceMatches.length;
-    reasoning.push(`Trusted source keywords (${sourceMatches.join(', ')}) (+${10 * sourceMatches.length})`);
+    reasoning.push(
+      `Trusted source keywords (${sourceMatches.join(', ')}) (+${10 * sourceMatches.length})`
+    );
   }
 
   // 4. Factual content indicators
   const factKeywords = [
-    'historical', 'documentary', 'footage', 'film',
-    'recording', 'photograph', 'document', 'archive'
+    'historical',
+    'documentary',
+    'footage',
+    'film',
+    'recording',
+    'photograph',
+    'document',
+    'archive',
   ];
-  const factCount = factKeywords.filter(kw =>
-    content.toLowerCase().includes(kw)
-  ).length;
+  const factCount = factKeywords.filter((kw) => content.toLowerCase().includes(kw)).length;
   if (factCount > 0) {
     score += factCount * 5;
     reasoning.push(`Factual indicators (${factCount}) (+${factCount * 5})`);
@@ -80,9 +87,7 @@ export async function grokVerifyHeuristic(
 
   // 5. Educational/informational language
   const eduKeywords = ['shows', 'depicts', 'demonstrates', 'illustrates', 'documents'];
-  const eduCount = eduKeywords.filter(kw =>
-    content.toLowerCase().includes(kw)
-  ).length;
+  const eduCount = eduKeywords.filter((kw) => content.toLowerCase().includes(kw)).length;
   if (eduCount > 0) {
     score += eduCount * 3;
     reasoning.push(`Educational language (+${eduCount * 3})`);
@@ -112,9 +117,9 @@ export async function grokVerifyHeuristic(
   }
 
   // 8. Grammar and structure quality
-  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+  const sentences = content.split(/[.!?]+/).filter((s) => s.trim().length > 0);
   const avgSentenceLength = sentences.reduce((sum, s) => sum + s.length, 0) / sentences.length;
-  
+
   if (sentences.length >= 2 && avgSentenceLength > 20 && avgSentenceLength < 200) {
     score += 5;
     reasoning.push('Well-structured text (+5)');
@@ -133,7 +138,7 @@ export async function grokVerifyHeuristic(
 
   // 10. Professional tone
   const unprofessionalTerms = ['lol', 'omg', 'wtf', 'lmao'];
-  const hasUnprofessional = unprofessionalTerms.some(term =>
+  const hasUnprofessional = unprofessionalTerms.some((term) =>
     content.toLowerCase().includes(term)
   );
   if (hasUnprofessional) {
@@ -188,9 +193,7 @@ function generateSummary(score: number, verified: boolean, flags: string[]): str
 /**
  * Batch heuristic verification
  */
-export async function batchGrokVerifyHeuristic(
-  contents: string[]
-): Promise<HeuristicResult[]> {
+export async function batchGrokVerifyHeuristic(contents: string[]): Promise<HeuristicResult[]> {
   // Process all in parallel (no API limits!)
   return Promise.all(contents.map(grokVerifyHeuristic));
 }
@@ -200,7 +203,7 @@ export async function batchGrokVerifyHeuristic(
  */
 export async function grokVerify(content: string) {
   const result = await grokVerifyHeuristic(content);
-  
+
   return {
     summary: result.summary,
     score: result.score,

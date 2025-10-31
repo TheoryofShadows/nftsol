@@ -25,11 +25,10 @@ export interface IrysUploadResult {
  */
 export async function createIrysNode(options: IrysUploadOptions): Promise<Irys> {
   const network = options.network || 'mainnet-beta';
-  
+
   // Irys gateway URLs
-  const gatewayUrl = network === 'mainnet-beta' 
-    ? 'https://node1.irys.xyz'
-    : 'https://devnet.irys.xyz';
+  const gatewayUrl =
+    network === 'mainnet-beta' ? 'https://node1.irys.xyz' : 'https://devnet.irys.xyz';
 
   // Initialize Irys with Solana wallet
   // Irys SDK v0.2.11 API: key should be Uint8Array, and we set RPC via config
@@ -90,7 +89,9 @@ export async function uploadToIrys(
     };
   } catch (error) {
     console.error('Irys upload failed:', error);
-    throw new Error(`Failed to upload to Irys: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to upload to Irys: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
 
@@ -111,10 +112,7 @@ export async function uploadMetadata(
  * @param requiredBytes - Required bytes for upload (optional)
  * @returns true if funded, false otherwise
  */
-export async function checkIrysBalance(
-  irys: Irys,
-  requiredBytes?: number
-): Promise<boolean> {
+export async function checkIrysBalance(irys: Irys, requiredBytes?: number): Promise<boolean> {
   try {
     const balance = await irys.getLoadedBalance();
     const balanceNumber = Number(balance);
@@ -134,17 +132,15 @@ export async function checkIrysBalance(
  * @param irys - Irys instance
  * @param amount - Amount in SOL (default: 0.1 SOL for small uploads)
  */
-export async function fundIrys(
-  irys: Irys,
-  amount: number = 0.1
-): Promise<void> {
+export async function fundIrys(irys: Irys, amount: number = 0.1): Promise<void> {
   try {
     const amountInAtomic = amount * 1_000_000_000; // Convert SOL to lamports
     await irys.fund(amountInAtomic);
     console.log(`Funded Irys with ${amount} SOL`);
   } catch (error) {
     console.error('Failed to fund Irys:', error);
-    throw new Error(`Failed to fund Irys: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to fund Irys: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 }
-

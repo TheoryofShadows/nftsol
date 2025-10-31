@@ -1,10 +1,6 @@
 import { Connection, PublicKey, Keypair } from '@solana/web3.js';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
-import { 
-  createTree,
-  mintV1,
-  mplBubblegum 
-} from '@metaplex-foundation/mpl-bubblegum';
+import { createTree, mintV1, mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
 import {
   createSignerFromKeypair,
   signerIdentity,
@@ -28,29 +24,30 @@ export class BubblegumService {
     // This avoids the vulnerable @bundlr-network/client dependency
     this.umi = createUmi(this.connection.rpcEndpoint)
       .use(mplBubblegum())
-      .use(irysUploader({
-        address: process.env.SOLANA_CLUSTER === 'mainnet-beta' 
-          ? 'https://node1.irys.xyz' 
-          : 'https://devnet.irys.xyz',
-        providerUrl: this.connection.rpcEndpoint,
-        timeout: 60000,
-      }));
+      .use(
+        irysUploader({
+          address:
+            process.env.SOLANA_CLUSTER === 'mainnet-beta'
+              ? 'https://node1.irys.xyz'
+              : 'https://devnet.irys.xyz',
+          providerUrl: this.connection.rpcEndpoint,
+          timeout: 60000,
+        })
+      );
   }
 
   setSigner(keypair: Keypair) {
     this.currentKeypair = keypair;
-    const umiKeypair = this.umi.eddsa.createKeypairFromSecretKey(
-      new Uint8Array(keypair.secretKey)
-    );
+    const umiKeypair = this.umi.eddsa.createKeypairFromSecretKey(new Uint8Array(keypair.secretKey));
     const signer = createSignerFromKeypair(this.umi, umiKeypair);
     this.umi.use(signerIdentity(signer));
   }
 
   async createTree(payer: Keypair) {
     this.setSigner(payer);
-    
+
     const merkleTree = generateSigner(this.umi);
-    
+
     const builder = await createTree(this.umi, {
       merkleTree,
       maxDepth: 14,
@@ -93,10 +90,14 @@ export class BubblegumService {
           },
           {
             connection: this.connection,
-            keypair: this.currentKeypair || (() => {
-              throw new Error('Keypair not set. Call setSigner() first.');
-            })(),
-            network: (process.env.SOLANA_CLUSTER === 'mainnet-beta' ? 'mainnet-beta' : 'devnet') as 'mainnet-beta' | 'devnet',
+            keypair:
+              this.currentKeypair ||
+              (() => {
+                throw new Error('Keypair not set. Call setSigner() first.');
+              })(),
+            network: (process.env.SOLANA_CLUSTER === 'mainnet-beta' ? 'mainnet-beta' : 'devnet') as
+              | 'mainnet-beta'
+              | 'devnet',
           }
         );
         metadataUri = uploadResult.uri;

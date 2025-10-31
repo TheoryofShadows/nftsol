@@ -28,11 +28,7 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
   }
 
   // Generate cache key (reserved for future caching implementation)
-  const _inputHash = crypto
-    .createHash('sha256')
-    .update(input)
-    .digest('hex')
-    .slice(0, 16);
+  const _inputHash = crypto.createHash('sha256').update(input).digest('hex').slice(0, 16);
 
   // Try to use xAI if available
   if (process.env.XAI_API_KEY) {
@@ -125,13 +121,13 @@ function grokVerifyFallback(input: string): GrokVerificationResult {
   ];
 
   const lower = input.toLowerCase();
-  const matches = keywords.filter(k => lower.includes(k)).length;
+  const matches = keywords.filter((k) => lower.includes(k)).length;
   const keywordScore = (matches / keywords.length) * 40;
   const lengthScore = Math.min(input.length / 500, 1) * 20;
-  
+
   // Check for suspicious words
   const suspicious = ['fake', 'hoax', 'conspiracy', 'clickbait'];
-  const hasSuspicious = suspicious.some(s => lower.includes(s));
+  const hasSuspicious = suspicious.some((s) => lower.includes(s));
   const suspiciousScore = hasSuspicious ? -20 : 0;
 
   const score = Math.max(0, Math.min(100, 40 + keywordScore + lengthScore + suspiciousScore));
@@ -173,7 +169,7 @@ export async function batchGrokVerify(
 
   // Process in parallel
   await Promise.all(
-    items.map(async item => {
+    items.map(async (item) => {
       const result = await grokVerify(item.content);
       results.set(item.id, result);
     })
@@ -191,15 +187,15 @@ export async function reverifyLedger(
 ): Promise<GrokVerificationResult> {
   // Combine verified echoes
   const verifiedContent = echoes
-    .filter(e => e.verified)
-    .map(e => e.content)
+    .filter((e) => e.verified)
+    .map((e) => e.content)
     .join(' ');
 
   const combinedContent = `${originalContent} ${verifiedContent}`;
   const result = await grokVerify(combinedContent);
 
   // Boost score for collaborative verified echoes
-  const verifiedCount = echoes.filter(e => e.verified).length;
+  const verifiedCount = echoes.filter((e) => e.verified).length;
   const boost = Math.min(10, verifiedCount * 2);
   result.score = Math.min(100, result.score + boost);
   result.verified = result.score >= 80;

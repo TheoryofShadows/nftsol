@@ -16,13 +16,13 @@ function testEndpoint(path, method = 'GET', data = null) {
       path: path,
       method: method,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     };
 
     const req = http.request(options, (res) => {
       let body = '';
-      res.on('data', chunk => body += chunk);
+      res.on('data', (chunk) => (body += chunk));
       res.on('end', () => {
         try {
           const json = JSON.parse(body);
@@ -34,11 +34,11 @@ function testEndpoint(path, method = 'GET', data = null) {
     });
 
     req.on('error', reject);
-    
+
     if (data) {
       req.write(JSON.stringify(data));
     }
-    
+
     req.end();
   });
 }
@@ -68,7 +68,9 @@ async function runTests() {
 
     // Test 4: Platform Wallet Balance
     console.log('4️⃣ Testing Platform Wallet Balance...');
-    const balance = await testEndpoint('/api/nfts/balance/3EgKZgBNotS5tnYTaWuhEuzS9NLyMQww3C4Vaz5RDhM4');
+    const balance = await testEndpoint(
+      '/api/nfts/balance/3EgKZgBNotS5tnYTaWuhEuzS9NLyMQww3C4Vaz5RDhM4'
+    );
     console.log(`   Status: ${balance.status}`);
     console.log(`   Response: ${JSON.stringify(balance.data, null, 2)}\n`);
 
@@ -78,7 +80,7 @@ async function runTests() {
       toAddress: '11111111111111111111111111111112',
       name: 'Test NFT',
       description: 'Test NFT for verification',
-      imageUrl: 'https://example.com/test.jpg'
+      imageUrl: 'https://example.com/test.jpg',
     });
     console.log(`   Status: ${mint.status}`);
     console.log(`   Response: ${JSON.stringify(mint.data, null, 2)}\n`);
@@ -88,13 +90,12 @@ async function runTests() {
     const withdraw = await testEndpoint('/api/wallets/withdraw', 'POST', {
       userId: 'test-user-123',
       toAddress: '11111111111111111111111111111112',
-      amountSol: 0.001
+      amountSol: 0.001,
     });
     console.log(`   Status: ${withdraw.status}`);
     console.log(`   Response: ${JSON.stringify(withdraw.data, null, 2)}\n`);
 
     console.log('✅ All tests completed!');
-
   } catch (error) {
     console.error('❌ Test failed:', error.message);
   }

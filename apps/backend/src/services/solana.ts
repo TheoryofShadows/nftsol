@@ -1,22 +1,28 @@
-import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import {
+  Connection,
+  PublicKey,
+  Transaction,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+} from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
 import logger from '../utils/logger';
 import { ApiResponse, MintResponse } from '../types';
 
 class SolanaService {
   private connection: Connection;
-  
+
   constructor() {
     this.connection = new Connection(solanaConfig.rpcUrl, {
-      commitment: solanaConfig.commitment
+      commitment: solanaConfig.commitment,
     });
   }
-  
+
   // Get connection instance
   getConnection(): Connection {
     return this.connection;
   }
-  
+
   // Get account balance
   async getBalance(publicKey: string): Promise<number> {
     try {
@@ -28,7 +34,7 @@ class SolanaService {
       throw new Error('Failed to get account balance');
     }
   }
-  
+
   // Check if account exists
   async accountExists(publicKey: string): Promise<boolean> {
     try {
@@ -40,7 +46,7 @@ class SolanaService {
       return false;
     }
   }
-  
+
   // Get program account info
   async getProgramAccount(programId: string): Promise<any> {
     try {
@@ -52,49 +58,49 @@ class SolanaService {
       throw new Error('Failed to get program account info');
     }
   }
-  
+
   // Validate program IDs
   async validatePrograms(): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
-    
+
     try {
       // Check Clout Program
       const cloutAccount = await this.getProgramAccount(programConfig.cloutProgramId);
       if (!cloutAccount) {
         errors.push('Clout program not found on chain');
       }
-      
+
       // Check Market Program
       const marketAccount = await this.getProgramAccount(programConfig.marketProgramId);
       if (!marketAccount) {
         errors.push('Market program not found on chain');
       }
-      
+
       // Check Loyalty Program
       const loyaltyAccount = await this.getProgramAccount(programConfig.loyaltyProgramId);
       if (!loyaltyAccount) {
         errors.push('Loyalty program not found on chain');
       }
-      
+
       // Check Rewards Vault
       const vaultAccount = await this.getProgramAccount(programConfig.rewardsVault);
       if (!vaultAccount) {
         errors.push('Rewards vault not found on chain');
       }
-      
+
       return {
         valid: errors.length === 0,
-        errors
+        errors,
       };
     } catch (error) {
       logger.error('Error validating programs', { error });
       return {
         valid: false,
-        errors: ['Failed to validate programs']
+        errors: ['Failed to validate programs'],
       };
     }
   }
-  
+
   // Get recent blockhash
   async getRecentBlockhash(): Promise<string> {
     try {
@@ -105,7 +111,7 @@ class SolanaService {
       throw new Error('Failed to get recent blockhash');
     }
   }
-  
+
   // Estimate transaction fees
   async estimateTransactionFee(transaction: Transaction): Promise<number> {
     try {
@@ -116,16 +122,16 @@ class SolanaService {
       return 5000; // Default fee
     }
   }
-  
+
   // Health check
   async healthCheck(): Promise<{ healthy: boolean; details: any }> {
     try {
       const start = Date.now();
       const version = await this.connection.getVersion();
       const duration = Date.now() - start;
-      
+
       const programs = await this.validatePrograms();
-      
+
       return {
         healthy: programs.valid && duration < 5000,
         details: {
@@ -133,8 +139,8 @@ class SolanaService {
           cluster: solanaConfig.cluster,
           version,
           responseTime: `${duration}ms`,
-          programs: programs.valid ? 'All programs valid' : programs.errors
-        }
+          programs: programs.valid ? 'All programs valid' : programs.errors,
+        },
       };
     } catch (error) {
       logger.error('Solana health check failed', { error });
@@ -142,8 +148,8 @@ class SolanaService {
         healthy: false,
         details: {
           error: 'Connection failed',
-          rpcUrl: solanaConfig.rpcUrl
-        }
+          rpcUrl: solanaConfig.rpcUrl,
+        },
       };
     }
   }

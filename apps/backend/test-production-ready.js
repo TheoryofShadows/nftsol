@@ -21,7 +21,7 @@ class WithdrawalTestSuite {
       await this.testAdminApproval();
       await this.testAdminProcessing();
       await this.testReconciliationQueries();
-      
+
       this.printResults();
     } catch (error) {
       console.error('❌ Test suite failed:', error);
@@ -34,7 +34,7 @@ class WithdrawalTestSuite {
     try {
       const response = await fetch(`${BASE_URL}/healthz`);
       const data = await response.json();
-      
+
       if (data.success && data.data.status === 'healthy') {
         this.addResult('Health Check', 'PASS', 'Server is healthy');
       } else {
@@ -50,7 +50,7 @@ class WithdrawalTestSuite {
     try {
       const response = await fetch(`${BASE_URL}/api/programs`);
       const data = await response.json();
-      
+
       if (data.success && data.data.programs.cloutProgramId) {
         this.addResult('Programs Endpoint', 'PASS', 'Program IDs configured');
       } else {
@@ -66,7 +66,7 @@ class WithdrawalTestSuite {
     try {
       const response = await fetch(`${BASE_URL}/api/admin/emergency/status`);
       const data = await response.json();
-      
+
       if (data.success && typeof data.data.withdrawalsPaused === 'boolean') {
         this.addResult('Emergency Controls', 'PASS', 'Emergency controls accessible');
       } else {
@@ -83,22 +83,26 @@ class WithdrawalTestSuite {
       const withdrawalData = {
         amount_sol: 0.01,
         to_address: '11111111111111111111111111111112',
-        request_token: 'test-token-' + Date.now()
+        request_token: 'test-token-' + Date.now(),
       };
 
       const response = await fetch(`${BASE_URL}/api/wallets/withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(withdrawalData)
+        body: JSON.stringify(withdrawalData),
       });
 
       const data = await response.json();
-      
+
       if (data.status === 'pending' && data.withdrawal && data.withdrawal.id) {
         this.withdrawalId = data.withdrawal.id;
         this.addResult('Withdrawal Creation', 'PASS', `Created withdrawal: ${this.withdrawalId}`);
       } else {
-        this.addResult('Withdrawal Creation', 'FAIL', `Unexpected response: ${JSON.stringify(data)}`);
+        this.addResult(
+          'Withdrawal Creation',
+          'FAIL',
+          `Unexpected response: ${JSON.stringify(data)}`
+        );
       }
     } catch (error) {
       this.addResult('Withdrawal Creation', 'FAIL', error.message);
@@ -113,12 +117,15 @@ class WithdrawalTestSuite {
 
     console.log('📊 Testing admin approval...');
     try {
-      const response = await fetch(`${BASE_URL}/api/admin/withdrawals/${this.withdrawalId}/approve`, {
-        method: 'POST'
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/admin/withdrawals/${this.withdrawalId}/approve`,
+        {
+          method: 'POST',
+        }
+      );
 
       const data = await response.json();
-      
+
       if (data.status === 'approved') {
         this.addResult('Admin Approval', 'PASS', 'Withdrawal approved successfully');
       } else {
@@ -137,12 +144,15 @@ class WithdrawalTestSuite {
 
     console.log('📊 Testing admin processing...');
     try {
-      const response = await fetch(`${BASE_URL}/api/admin/withdrawals/${this.withdrawalId}/process`, {
-        method: 'POST'
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/admin/withdrawals/${this.withdrawalId}/process`,
+        {
+          method: 'POST',
+        }
+      );
 
       const data = await response.json();
-      
+
       if (data.status === 'completed' || data.txSig) {
         this.addResult('Admin Processing', 'PASS', `Withdrawal processed: ${data.txSig || 'mock'}`);
       } else {
@@ -159,7 +169,7 @@ class WithdrawalTestSuite {
       // Test that we can query pending withdrawals
       const response = await fetch(`${BASE_URL}/api/admin/withdrawals?status=pending`);
       const data = await response.json();
-      
+
       if (Array.isArray(data)) {
         this.addResult('Reconciliation Queries', 'PASS', 'Admin queries working');
       } else {
@@ -177,15 +187,15 @@ class WithdrawalTestSuite {
   printResults() {
     console.log('\n📋 TEST RESULTS');
     console.log('================');
-    
+
     let passed = 0;
     let failed = 0;
     let skipped = 0;
 
-    this.testResults.forEach(result => {
+    this.testResults.forEach((result) => {
       const icon = result.status === 'PASS' ? '✅' : result.status === 'FAIL' ? '❌' : '⏭️';
       console.log(`${icon} ${result.test}: ${result.status} - ${result.message}`);
-      
+
       if (result.status === 'PASS') passed++;
       else if (result.status === 'FAIL') failed++;
       else skipped++;

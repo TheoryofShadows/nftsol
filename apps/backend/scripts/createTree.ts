@@ -8,27 +8,25 @@ import 'dotenv/config';
   console.log('🌳 Creating Merkle Tree for Eternal Echoes...\n');
 
   // Load payer keypair
-  const keypairPath = process.env.SOLANA_KEYPAIR_PATH || 
-                      path.join(process.env.HOME || '', '.config/solana/id.json');
-  
+  const keypairPath =
+    process.env.SOLANA_KEYPAIR_PATH || path.join(process.env.HOME || '', '.config/solana/id.json');
+
   if (!fs.existsSync(keypairPath)) {
     console.error(`❌ Keypair not found at: ${keypairPath}`);
     console.log('💡 Set SOLANA_KEYPAIR_PATH or create keypair with: solana-keygen new');
     process.exit(1);
   }
 
-  const secretKey = Uint8Array.from(
-    JSON.parse(fs.readFileSync(keypairPath, 'utf-8'))
-  );
+  const secretKey = Uint8Array.from(JSON.parse(fs.readFileSync(keypairPath, 'utf-8')));
   const payer = Keypair.fromSecretKey(secretKey);
 
   console.log(`👛 Payer: ${payer.publicKey.toBase58()}`);
   console.log(`🌐 RPC: ${process.env.SOLANA_RPC_URL}\n`);
 
   const svc = new BubblegumService();
-  
+
   console.log('⏳ Creating tree (this takes ~30 seconds)...\n');
-  
+
   const { success, treeAddress, signature, error } = await svc.createTree(payer);
 
   if (!success) {
@@ -44,10 +42,7 @@ import 'dotenv/config';
   const envPath = path.join(__dirname, '../.env');
   if (fs.existsSync(envPath)) {
     let env = fs.readFileSync(envPath, 'utf-8');
-    env = env.replace(
-      /MERKLE_TREE_ADDRESS=.*/,
-      `MERKLE_TREE_ADDRESS=${treeAddress}`
-    );
+    env = env.replace(/MERKLE_TREE_ADDRESS=.*/, `MERKLE_TREE_ADDRESS=${treeAddress}`);
     fs.writeFileSync(envPath, env);
     console.log('✅ Updated .env with MERKLE_TREE_ADDRESS\n');
   }

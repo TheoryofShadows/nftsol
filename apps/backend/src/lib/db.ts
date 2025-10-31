@@ -11,47 +11,51 @@ if (isTestMode) {
   pool = {
     query: async (text: string, params?: any[]) => {
       console.log('Mock DB Query:', text, params);
-      
+
       // Mock responses for withdrawal testing
       if (text.includes('SELECT available_lamports')) {
         return {
           rowCount: 1,
-          rows: [{
-            available_lamports: 1000000000, // 1 SOL in lamports
-            pending_withdrawal_lamports: 0
-          }]
+          rows: [
+            {
+              available_lamports: 1000000000, // 1 SOL in lamports
+              pending_withdrawal_lamports: 0,
+            },
+          ],
         };
       }
-      
+
       if (text.includes('INSERT INTO withdrawals')) {
         return {
           rowCount: 1,
-          rows: [{
-            id: 'mock-withdrawal-id-123',
-            created_at: new Date().toISOString()
-          }]
+          rows: [
+            {
+              id: 'mock-withdrawal-id-123',
+              created_at: new Date().toISOString(),
+            },
+          ],
         };
       }
-      
+
       if (text.includes('UPDATE wallets SET available_lamports')) {
         return { rowCount: 1, rows: [] };
       }
-      
+
       return { rowCount: 0, rows: [] };
     },
     connect: async () => ({
       query: pool.query,
-      release: () => {}
-    })
+      release: () => {},
+    }),
   } as any;
 } else {
   if (!process.env.DATABASE_URL) {
     throw new Error(
       'DATABASE_URL environment variable is required. ' +
-      'Please set it in your .env file or environment variables.'
+        'Please set it in your .env file or environment variables.'
     );
   }
-  
+
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     // Connection pool configuration
@@ -67,7 +71,8 @@ if (isTestMode) {
   });
 
   // Test connection on startup
-  pool.query('SELECT NOW()')
+  pool
+    .query('SELECT NOW()')
     .then(() => {
       console.log('✅ Database connection established');
     })
