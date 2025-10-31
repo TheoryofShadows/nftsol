@@ -68,6 +68,9 @@ app.use(
 // Compression
 app.use(compression());
 
+// Trust proxy for proper IP detection (needed for Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 // Request ID and logging
 app.use((req: any, res: any, next: any) => {
   const id = req.headers['x-request-id'] || nanoid();
@@ -88,7 +91,30 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req: any) => req.path === '/healthz' || req.path === '/health',
+  skip: (req: any) => {
+    // Skip rate limiting for health check endpoints
+    const path = req.path || req.url?.split('?')[0];
+    if (path === '/healthz' || path === '/health' || path?.endsWith('/healthz') || path?.endsWith('/health')) {
+      return true;
+    }
+    
+    // Skip rate limiting for Render's health check system
+    const userAgent = req.get('User-Agent') || req.headers['user-agent'] || '';
+    if (userAgent.includes('Render') || userAgent.includes('render.com')) {
+      return true;
+    }
+    
+    // Skip rate limiting for internal IPs (Render's internal network)
+    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || '';
+    if (ip.startsWith('10.') || ip.startsWith('172.16.') || ip.startsWith('192.168.') || ip === '::1' || ip === '127.0.0.1') {
+      // But only if it's a health check or Render user agent
+      if (userAgent.includes('Render') || path === '/healthz' || path === '/health') {
+        return true;
+      }
+    }
+    
+    return false;
+  },
 });
 app.use(limiter);
 
@@ -616,8 +642,11 @@ app.use((err: any, req: any, res: any, next: any) => {
     body: req.body,
   });
 
-  // Log security-relevant errors
-  if (err.status === 401 || err.status === 403 || err.status === 429) {
+  // Log security-relevant errors (skip 429s for health checks)
+  const isHealthCheck = req.path === '/healthz' || req.path === '/health' || req.url?.includes('/healthz') || req.url?.includes('/health');
+  const isRenderHealthCheck = (req.get('User-Agent') || '').includes('Render');
+  
+  if ((err.status === 401 || err.status === 403 || (err.status === 429 && !isHealthCheck && !isRenderHealthCheck))) {
     securityLogger(
       'ERROR_RESPONSE',
       {

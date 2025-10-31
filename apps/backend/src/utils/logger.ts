@@ -79,6 +79,14 @@ export const performanceLogger = (operation: string, duration: number, metadata?
 
 // Audit logging for security events
 export const auditLogger = (event: string, details: any, req?: any) => {
+  // Skip logging health check rate limits
+  const isHealthCheck = req?.path === '/healthz' || req?.path === '/health' || 
+                        req?.url?.includes('/healthz') || req?.url?.includes('/health');
+  const isRenderHealthCheck = (req?.get?.('User-Agent') || '').includes('Render');
+  if (event.includes('ERROR_RESPONSE') && details?.status === 429 && (isHealthCheck || isRenderHealthCheck)) {
+    return; // Don't log health check rate limits
+  }
+
   const auditEntry = {
     timestamp: new Date().toISOString(),
     event,
