@@ -4,7 +4,9 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "CommonJS",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
   },
   "include": [
     "src/**/*.ts"
