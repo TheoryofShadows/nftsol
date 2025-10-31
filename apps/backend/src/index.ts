@@ -514,34 +514,20 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
 // Marketplace endpoints
 apiV1.get('/market', async (req, res) => {
   try {
+    // For now, return empty marketplace with helpful message
+    // In production, this would query:
+    // 1. Database for minted NFTs
+    // 2. Solana blockchain for on-chain NFTs
+    // 3. Marketplace listings
+    
     const response: ApiResponse = {
       success: true,
       data: {
-        nfts: [
-          {
-            id: '1',
-            name: 'Sample NFT 1',
-            description: 'This is a sample NFT',
-            imageUrl: 'https://via.placeholder.com/300x300/667eea/ffffff?text=NFT+1',
-            price: '0.1',
-            owner: 'ZKa2AZpPmkXVGR7dwe43VNswxNQbiA2JKzRidPejFQK',
-            mintAddress: 'MOCK_MINT_1',
-            createdAt: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            name: 'Sample NFT 2',
-            description: 'Another sample NFT',
-            imageUrl: 'https://via.placeholder.com/300x300/667eea/ffffff?text=NFT+2',
-            price: '0.2',
-            owner: 'ZKa2AZpPmkXVGR7dwe43VNswxNQbiA2JKzRidPejFQK',
-            mintAddress: 'MOCK_MINT_2',
-            createdAt: new Date().toISOString(),
-          },
-        ],
-        total: 2,
-        page: 1,
-        limit: 20,
+        nfts: [], // Start with empty - NFTs will appear as they're minted
+        total: 0,
+        page: parseInt(req.query.page as string) || 1,
+        limit: parseInt(req.query.limit as string) || 20,
+        message: 'No NFTs available yet. Be the first to mint one!',
       },
     };
     res.json(response);
@@ -559,16 +545,8 @@ apiV1.get('/collections', (req, res) => {
   const response: ApiResponse = {
     success: true,
     data: {
-      collections: [
-        {
-          id: '1',
-          name: 'NFTSol Collection',
-          description: 'Official NFTSol collection',
-          imageUrl: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Collection',
-          itemCount: 2,
-          createdAt: new Date().toISOString(),
-        },
-      ],
+      collections: [], // Start with empty - collections will appear as NFTs are minted
+      message: 'No collections available yet. Create an NFT to start a collection!',
     },
   };
   res.json(response);
