@@ -117,3 +117,5 @@ nftsol-frontend-deploy.zip
 # === Old/Redundant Documentation ===
 # Keep only: README.md, WHITEPAPER.md, TECHNICAL-DOCS.md, DEPLOYMENT.md
 # All other .md files can be removed or archived
+# Archived/unused directories
+.archive/

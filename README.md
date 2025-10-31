@@ -66,7 +66,7 @@
 ```bash
 git clone https://github.com/TheoryofShadows/nftsol.git
 cd nftsol
-git checkout develop  # or main for stable version
+git checkout main  # or develop for latest development
 ```
 
 ### 2. Backend Setup

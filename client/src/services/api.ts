@@ -9,7 +9,7 @@ import {
   MarketData,
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'https://nftsol-dev.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {

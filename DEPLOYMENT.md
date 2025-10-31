@@ -46,7 +46,7 @@ NFTSol is deployed as a two-tier application:
 
 **Name**: `nftsol-backend`  
 **Region**: Choose closest to your users  
-**Branch**: `develop` (or `main` for production)  
+**Branch**: `main` (or `develop` for latest development)  
 **Root Directory**: `apps/backend`
 
 **Build Command**:
