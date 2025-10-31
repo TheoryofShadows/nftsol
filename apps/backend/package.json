@@ -40,7 +40,7 @@
     "connect-redis": "^9.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
-    "drizzle-kit": "^0.20.0",
+    "drizzle-kit": "^0.31.6",
     "drizzle-orm": "^0.44.6",
     "drizzle-zod": "^0.8.3",
     "ethers": "^6.15.0",
@@ -69,7 +69,13 @@
     "zod": "^3.25.76"
   },
   "overrides": {
-    "@metaplex-foundation/umi": "^1.4.1"
+    "@metaplex-foundation/umi": "^1.4.1",
+    "axios": "^1.7.9",
+    "semver": "^7.6.0",
+    "minimist": "^1.2.8",
+    "follow-redirects": "^1.15.6",
+    "ws": "^8.18.0",
+    "bigint-buffer": "^1.1.5"
   },
   "devDependencies": {
     "@jest/globals": "^29.7.0",
