@@ -60,8 +60,8 @@ export default function CloutInfo() {
       <div className="glass rounded-xl p-6 border border-white/10 backdrop-blur-md">
         <h2 className="text-3xl font-bold text-cyan-400 mb-4">What is CLOUT?</h2>
         <p className="text-white text-lg leading-relaxed">
-          CLOUT is the native utility token of the NFTSol platform. It&apos;s designed to reward active
-          users and provide real utility within our ecosystem. Unlike other tokens, CLOUT has
+          CLOUT is the native utility token of the NFTSol platform. It&apos;s designed to reward
+          active users and provide real utility within our ecosystem. Unlike other tokens, CLOUT has
           immediate, tangible benefits.
         </p>
       </div>

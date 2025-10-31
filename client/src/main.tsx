@@ -22,13 +22,21 @@ const startTime = performance.now();
 
 // Error handling for unhandled promises
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.error('Unhandled promise rejection:', event.reason);
+  }
+  // In production, could send to error tracking service
   event.preventDefault();
 });
 
 // Error handling for uncaught errors
 window.addEventListener('error', (event) => {
-  console.error('Uncaught error:', event.error);
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.error('Uncaught error:', event.error);
+  }
+  // In production, could send to error tracking service
 });
 
 // Create root and render

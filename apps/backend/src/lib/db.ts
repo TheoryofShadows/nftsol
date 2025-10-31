@@ -45,9 +45,36 @@ if (isTestMode) {
     })
   } as any;
 } else {
+  if (!process.env.DATABASE_URL) {
+    throw new Error(
+      'DATABASE_URL environment variable is required. ' +
+      'Please set it in your .env file or environment variables.'
+    );
+  }
+  
   pool = new Pool({
-    connectionString: process.env.DATABASE_URL
+    connectionString: process.env.DATABASE_URL,
+    // Connection pool configuration
+    max: 20, // Maximum number of clients in the pool
+    idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
+    connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection cannot be established
   });
+
+  // Handle connection errors
+  pool.on('error', (err) => {
+    console.error('Unexpected database pool error:', err);
+    // Don't exit process - let the app continue and retry
+  });
+
+  // Test connection on startup
+  pool.query('SELECT NOW()')
+    .then(() => {
+      console.log('✅ Database connection established');
+    })
+    .catch((err) => {
+      console.error('❌ Database connection failed:', err.message);
+      console.error('Please check your DATABASE_URL environment variable');
+    });
 }
 
 export { pool };

@@ -101,7 +101,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_WALLET_INFO', payload: response.data });
       }
     } catch (error) {
-      console.error('Failed to load wallet info:', error);
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load wallet info:', error);
+      }
     }
   };
 
@@ -113,7 +116,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_PROGRAMS', payload: response.data });
       }
     } catch (error) {
-      console.error('Failed to load programs:', error);
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load programs:', error);
+      }
     }
   };
 

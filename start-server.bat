@@ -9,10 +9,24 @@ call npm install
 echo 🔨 Building TypeScript...
 call npm run build
 
-echo 🔑 Setting environment variables...
-set PLATFORM_SECRET_KEY_BASE58=57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L
-set SOLANA_RPC_URL=https://api.devnet.solana.com
-set NODE_ENV=development
+echo 🔑 Loading environment variables...
+if exist .env (
+    echo    ✅ Loading from .env file...
+    for /f "tokens=1,2 delims==" %%a in (.env) do (
+        if not "%%a"=="" (
+            if not "%%a:~0,1%"=="#" (
+                set "%%a=%%b"
+            )
+        )
+    )
+) else (
+    echo    ⚠️  .env file not found. Using system environment variables.
+    echo    Please ensure PLATFORM_SECRET_KEY_BASE58 is set in your environment.
+)
+
+REM Set defaults only if not already set
+if not defined SOLANA_RPC_URL set SOLANA_RPC_URL=https://api.devnet.solana.com
+if not defined NODE_ENV set NODE_ENV=development
 
 echo 🚀 Starting server...
 node dist/index.js

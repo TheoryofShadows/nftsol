@@ -15,8 +15,18 @@ NC='\033[0m' # No Color
 
 # Configuration
 PLATFORM_WALLET="3EgKZgBNotS5tnYTaWuhEuzS9NLyMQww3C4Vaz5RDhM4"
-SECRET_KEY="57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L"
-RENDER_URL="https://nftsol-dev.onrender.com"
+# SECRET_KEY must be set in .env file or environment - never hardcode!
+if [ -z "$PLATFORM_SECRET_KEY_BASE58" ]; then
+    if [ -f ".env" ]; then
+        export $(grep -v '^#' .env | xargs)
+    else
+        echo -e "${RED}❌ ERROR: PLATFORM_SECRET_KEY_BASE58 must be set in .env or environment${NC}"
+        echo "   Create a .env file with: PLATFORM_SECRET_KEY_BASE58=your_key_here"
+        exit 1
+    fi
+fi
+SECRET_KEY="${PLATFORM_SECRET_KEY_BASE58}"
+RENDER_URL="https://nftsol.onrender.com"
 
 echo -e "${BLUE}📋 Step 1: Building Backend${NC}"
 cd apps/backend
@@ -87,7 +97,7 @@ echo -e "${YELLOW}2. Update your backend service${NC}"
 echo -e "${YELLOW}3. Set these environment variables:${NC}"
 echo ""
 echo "SOLANA_RPC_URL=https://api.devnet.solana.com"
-echo "PLATFORM_SECRET_KEY_BASE58=$SECRET_KEY"
+echo "PLATFORM_SECRET_KEY_BASE58=<YOUR_SECRET_KEY_HERE>"
 echo "USE_MOCK=false"
 echo "WITHDRAWALS_ENABLED=true"
 echo "DAILY_WITHDRAWAL_LIMIT_SOL=5"

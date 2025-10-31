@@ -62,10 +62,17 @@ router.post('/mint',
         return res.status(500).json(response);
       }
     } catch (err) {
-      console.error('NFT minting error:', err);
+      const error = err as Error;
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error('NFT minting error:', error);
+      }
+      
       const response: ApiResponse = {
         success: false,
-        error: 'Internal server error',
+        error: process.env.NODE_ENV === 'production'
+          ? 'Failed to mint NFT. Please try again later.'
+          : error.message || 'Internal server error',
         code: 'INTERNAL_ERROR'
       };
       return res.status(500).json(response);
@@ -101,10 +108,17 @@ router.get('/balance/:address', async (req, res) => {
     };
     return res.json(response);
   } catch (err) {
-    console.error('Balance check error:', err);
+    const error = err as Error;
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Balance check error:', error);
+    }
+    
     const response: ApiResponse = {
       success: false,
-      error: 'Failed to get wallet balance',
+      error: process.env.NODE_ENV === 'production'
+        ? 'Unable to check wallet balance. Please try again.'
+        : error.message || 'Failed to get wallet balance',
       code: 'BALANCE_CHECK_FAILED'
     };
     return res.status(500).json(response);
@@ -137,10 +151,17 @@ router.get('/verify/:address', async (req, res) => {
     };
     return res.json(response);
   } catch (err) {
-    console.error('Wallet verification error:', err);
+    const error = err as Error;
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('Wallet verification error:', error);
+    }
+    
     const response: ApiResponse = {
       success: false,
-      error: 'Failed to verify wallet address',
+      error: process.env.NODE_ENV === 'production'
+        ? 'Unable to verify wallet. Please check your wallet address and try again.'
+        : error.message || 'Failed to verify wallet address',
       code: 'VERIFICATION_FAILED'
     };
     return res.status(500).json(response);

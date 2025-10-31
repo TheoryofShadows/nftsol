@@ -3,13 +3,41 @@ Write-Host "Stopping any existing Node processes..." -ForegroundColor Yellow
 Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
 
-Write-Host "Setting CLOUT environment variables..." -ForegroundColor Cyan
-$env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-$env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
-$env:REWARDS_OWNER = "3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-$env:PORT = "3002"
-$env:SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
-$env:PLATFORM_SECRET_KEY_BASE58 = "3B495YFvfjWzoKwmJDpwycFzksJZPAJcGozq45ycRMiHDnpgdXNEnyNdTG5dd8kpgdHUQdCeCZAWUFvtQk6BwThX"
+Write-Host "Loading environment variables from .env..." -ForegroundColor Cyan
+if (Test-Path ".env") {
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^([^#][^=]+)=(.*)$") {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            if ($key -and $value) {
+                [Environment]::SetEnvironmentVariable($key, $value, "Process")
+            }
+        }
+    }
+    Write-Host "   ✅ Environment variables loaded from .env" -ForegroundColor Green
+} else {
+    Write-Host "   ⚠️  .env file not found. Using system environment variables." -ForegroundColor Yellow
+}
+
+# Set CLOUT defaults only if not already set
+if (!$env:CLOUT_PROGRAM_ID) {
+    $env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+}
+if (!$env:REWARDS_VAULT) {
+    $env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+}
+if (!$env:PORT) {
+    $env:PORT = "3002"
+}
+if (!$env:SOLANA_RPC_URL) {
+    $env:SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
+}
+
+if (!$env:PLATFORM_SECRET_KEY_BASE58) {
+    Write-Host "   ❌ ERROR: PLATFORM_SECRET_KEY_BASE58 not set!" -ForegroundColor Red
+    Write-Host "   Please set it in .env file or environment variables." -ForegroundColor Yellow
+    exit 1
+}
 
 Write-Host "CLOUT_PROGRAM_ID: $env:CLOUT_PROGRAM_ID" -ForegroundColor Green
 Write-Host "REWARDS_VAULT: $env:REWARDS_VAULT" -ForegroundColor Green

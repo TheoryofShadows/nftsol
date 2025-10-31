@@ -27,7 +27,12 @@ export default function PhantomConnect() {
             setBalance(data.result.value / 1e9); // Convert lamports to SOL
           }
         })
-        .catch(console.error)
+        .catch((error) => {
+          if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
+            console.error('Failed to fetch wallet balance:', error);
+          }
+        })
         .finally(() => setIsLoading(false));
     }
   }, [connected, publicKey]);

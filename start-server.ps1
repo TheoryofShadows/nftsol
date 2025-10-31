@@ -12,11 +12,31 @@ npm install
 Write-Host "🔨 Building TypeScript..." -ForegroundColor Yellow
 npm run build
 
-# Set environment variables
-Write-Host "🔑 Setting environment variables..." -ForegroundColor Yellow
-$env:PLATFORM_SECRET_KEY_BASE58 = "57gPGZp3tgwnNAPK2GJxYE4kJpeHh75Vg95M4xRDaNswNe37Gv8PwPBX666sfcDgc4sijPRqw4jTyobuNa2ch15L"
-$env:SOLANA_RPC_URL = "https://api.devnet.solana.com"
-$env:NODE_ENV = "development"
+# Load environment variables from .env file
+Write-Host "🔑 Loading environment variables..." -ForegroundColor Yellow
+if (Test-Path ".env") {
+    Get-Content ".env" | ForEach-Object {
+        if ($_ -match "^([^#][^=]+)=(.*)$") {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            if ($key -and $value) {
+                [Environment]::SetEnvironmentVariable($key, $value, "Process")
+            }
+        }
+    }
+    Write-Host "   ✅ Environment variables loaded from .env" -ForegroundColor Green
+} else {
+    Write-Host "   ⚠️  .env file not found. Using system environment variables." -ForegroundColor Yellow
+    Write-Host "   Please ensure PLATFORM_SECRET_KEY_BASE58 is set in your environment." -ForegroundColor Yellow
+}
+
+# Set defaults only if not already set
+if (!$env:SOLANA_RPC_URL) {
+    $env:SOLANA_RPC_URL = "https://api.devnet.solana.com"
+}
+if (!$env:NODE_ENV) {
+    $env:NODE_ENV = "development"
+}
 
 # Start server
 Write-Host "🚀 Starting server..." -ForegroundColor Green

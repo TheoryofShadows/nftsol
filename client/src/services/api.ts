@@ -33,10 +33,25 @@ class ApiService {
 
       return data;
     } catch (error) {
-      console.error(`API Error (${endpoint}):`, error);
+      // Log error in development only
+      if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
+        console.error(`API Error (${endpoint}):`, error);
+      }
+      
+      // Return user-friendly error message
+      let errorMessage = 'Network error. Please check your connection and try again.';
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          errorMessage = 'Unable to reach server. Please check your internet connection.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Network error',
+        error: errorMessage,
       };
     }
   }

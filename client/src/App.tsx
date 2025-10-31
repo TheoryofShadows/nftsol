@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
   PhantomWalletAdapter,
@@ -55,7 +55,10 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.error('Error caught by boundary:', error, errorInfo);
+    }
   }
 
   render() {
@@ -85,6 +88,7 @@ function AppContent() {
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
+  const { connected, publicKey, disconnect, connecting } = useWallet();
 
   // Load NFTs on mount
   useEffect(() => {
@@ -118,6 +122,26 @@ function AppContent() {
       });
     }
   }, [error, addNotification]);
+
+  // Handle wallet disconnection
+  useEffect(() => {
+    if (!connected && publicKey === null) {
+      // Wallet was disconnected - notify user if they were previously connected
+      const wasConnected = sessionStorage.getItem('wallet_was_connected') === 'true';
+      if (wasConnected) {
+        addNotification({
+          type: 'warning',
+          title: 'Wallet Disconnected',
+          message: 'Your wallet has been disconnected. Please reconnect to continue.',
+          duration: 5000,
+        });
+        sessionStorage.removeItem('wallet_was_connected');
+      }
+    } else if (connected && publicKey) {
+      // Wallet is connected - mark it
+      sessionStorage.setItem('wallet_was_connected', 'true');
+    }
+  }, [connected, publicKey, addNotification]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);

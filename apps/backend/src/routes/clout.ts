@@ -85,10 +85,17 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
       res.status(500).json(response);
     }
   } catch (error) {
-    console.error('CLOUT reward endpoint error:', error);
+    const err = error as Error;
+    if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
+      console.error('CLOUT reward endpoint error:', err);
+    }
+    
     const response: ApiResponse = {
       success: false,
-      error: 'Internal server error',
+      error: process.env.NODE_ENV === 'production'
+        ? 'Failed to process request. Please try again later.'
+        : err.message || 'Internal server error',
       code: 'INTERNAL_ERROR'
     };
     res.status(500).json(response);
