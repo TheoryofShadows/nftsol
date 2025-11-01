@@ -1,0 +1,9 @@
+# Netlify Frontend Environment Variables
+# Copy and paste these EXACTLY into Netlify Dashboard ΓåÆ Site Settings ΓåÆ Environment Variables
+# ΓÜá∩╕Å  Replace <your_helius_api_key_here> with your actual Helius API key
+
+VITE_API_BASE=https://nftsol.onrender.com
+VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=<your_helius_api_key_here>
+VITE_SOLANA_CLUSTER=mainnet-beta
+VITE_IMG_PROXY_BASE=https://nftsol.onrender.com
+NODE_ENV=production
