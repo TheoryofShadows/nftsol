@@ -19,8 +19,10 @@
 - 🌳 **Compressed NFTs (cNFTs)**: Low-cost NFT minting using Metaplex Bubblegum
 - 📦 **Storage Integration**: Irys SDK for decentralized Arweave storage
 - 🔒 **Enterprise Security**: Bank-grade security with comprehensive audit trails
-- 📱 **Modern UI**: Beautiful, responsive interface with Phantom/Solflare wallet integration
+- 📱 **Modern UI**: Beautiful, responsive interface with 9 wallet options
+- 🔧 **Admin Dashboard**: Complete withdrawal management and platform controls
 - 💰 **Fee System**: 2.5% platform fee on all mints
+- 📱 **Mobile-First**: Fully responsive design optimized for all devices
 
 ## 📚 Documentation
 
@@ -34,8 +36,9 @@
 - **React 18** with TypeScript
 - **Vite** for fast development and optimized builds
 - **Tailwind CSS** for modern, responsive UI
-- **Solana Wallet Adapter** for wallet integration (Phantom, Solflare, Ledger, etc.)
+- **Solana Wallet Adapter** - 9 wallet options (Phantom, Solflare, Solong, Slope, Trust, TokenPocket, Ledger, MathWallet, Torus)
 - **React Lazy Loading** for optimal performance
+- **Mobile-First Design** with comprehensive responsive fixes
 
 ### Backend
 - **Node.js** with TypeScript
@@ -155,31 +158,59 @@ VITE_SOLANA_CLUSTER=mainnet-beta
 ```
 nftsol/
 ├── apps/
-│   └── backend/              # Backend API server
-│       ├── src/
-│       │   ├── routes/       # API route handlers
-│       │   ├── services/     # Business logic
-│       │   ├── lib/          # Solana/blockchain utilities
-│       │   ├── workers/      # Background jobs
-│       │   └── utils/        # Helper functions
-│       ├── package.json
-│       └── tsconfig.json
+│   ├── backend/              # Production Backend API
+│   │   ├── src/
+│   │   │   ├── routes/       # API routes (NFT, CLOUT, Echo, Admin)
+│   │   │   ├── services/     # Business logic
+│   │   │   ├── lib/          # Solana/PostgreSQL utilities
+│   │   │   ├── middleware/   # Auth, security, validation
+│   │   │   ├── workers/      # Background jobs
+│   │   │   └── utils/        # Helper functions
+│   │   ├── migrations/       # Database migrations
+│   │   ├── package.json
+│   │   └── tsconfig.json
+│   │
+│   └── smart-contracts/      # Solana programs (Rust/Anchor)
+│       ├── programs/
+│       ├── tests/
+│       └── Anchor.toml
 │
-├── client/                   # Frontend React app
+├── client/                   # Frontend React App
 │   ├── src/
-│   │   ├── components/       # React components
+│   │   ├── components/       # UI components (29 files)
+│   │   │   ├── AdminDashboard.tsx  # Admin withdrawal management
+│   │   │   ├── AdminAuth.tsx       # Admin authentication
+│   │   │   ├── CloutBadge.tsx      # CLOUT balance display
+│   │   │   ├── Hero.tsx            # Landing page
+│   │   │   ├── MintForm.tsx        # NFT minting
+│   │   │   ├── NftGrid.tsx         # Marketplace
+│   │   │   └── ...
 │   │   ├── echo/            # Eternal Echoes features
 │   │   ├── hooks/           # Custom React hooks
 │   │   ├── context/         # React context providers
-│   │   └── styles/          # CSS stylesheets
+│   │   ├── styles/          # CSS (design system + mobile fixes)
+│   │   ├── wallet/          # Solana wallet integration
+│   │   └── App.tsx          # Main app with 12 tabs
 │   ├── public/              # Static assets
 │   ├── package.json
 │   └── vite.config.ts
 │
-├── WHITEPAPER.md            # Project overview
-├── TECHNICAL-DOCS.md        # Technical documentation
+├── server/                   # Legacy backend (deprecated)
+├── config/                   # Environment configs
+├── scripts/                  # Deployment & utility scripts
+│
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml           # CI testing
+│   │   ├── deploy.yml       # Auto-deploy to Render/Netlify
+│   │   ├── health-check.yml # Health monitoring
+│   │   └── secret-scan.yml  # Security scanning
+│
+├── WHITEPAPER.md            # Complete project overview
+├── TECHNICAL-DOCS.md        # Architecture & API docs
 ├── DEPLOYMENT.md            # Deployment guide
-└── README.md                # This file
+├── README.md                # This file
+└── package.json             # Root package config
 ```
 
 ## 🔧 Development
@@ -206,17 +237,38 @@ npm run lint         # Lint code
 npm run format       # Format code with Prettier
 ```
 
+## 💎 CLOUT Token
+
+**CLOUT** is NFTSol's native reward token on Solana.
+
+- **Token Address**: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`
+- **Rewards Vault**: `2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps`
+- **Total Supply**: 1,000,000,000 CLOUT
+- **View on Solscan**: [https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw](https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+
+Users earn CLOUT through platform activities: minting NFTs, making purchases, referrals, and community engagement.
+
 ## 📡 API Endpoints
 
 Key endpoints (see [TECHNICAL-DOCS.md](TECHNICAL-DOCS.md) for complete API reference):
 
+**Public Endpoints:**
 - `GET /api/v1/programs` - Get Solana program configuration
-- `POST /api/nfts/mint` - Mint new NFT
 - `GET /api/nfts` - List NFTs with pagination
 - `GET /api/clout/balance/:address` - Get CLOUT token balance
+- `GET /api/echo/trending` - Get trending echoes
+
+**Protected Endpoints:**
+- `POST /api/nfts/mint` - Mint new NFT
 - `POST /api/clout/reward` - Send CLOUT rewards
 - `POST /api/echo/mint` - Mint Eternal Echo
-- `GET /api/echo/trending` - Get trending echoes
+- `POST /api/withdrawals` - Request SOL withdrawal
+
+**Admin Endpoints:**
+- `GET /api/admin/withdrawals` - List withdrawal requests
+- `POST /api/admin/withdrawals/:id/approve` - Approve withdrawal
+- `POST /api/admin/withdrawals/:id/process` - Process withdrawal
+- `POST /api/auth/admin` - Admin authentication
 
 ## 💰 Fee Structure
 

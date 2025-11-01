@@ -1,0 +1,381 @@
+/* Mobile-specific fixes for NFTSol */
+
+/* Base mobile fixes */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Fix header for mobile */
+  header {
+    padding: 1rem !important;
+  }
+
+  /* Logo and title should be side-by-side or stacked */
+  header .flex.items-center.space-x-6 {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  /* Logo should be smaller on mobile */
+  header h1 {
+    font-size: 1.5rem !important;
+    margin-left: 0.5rem;
+  }
+
+  /* Hide performance indicator on mobile */
+  header .hidden.md\\:flex {
+    display: none !important;
+  }
+
+  /* Wallet button needs better mobile styling */
+  header .btn-glass,
+  header button,
+  header div[class*="wallet"] {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 1rem !important;
+    white-space: nowrap;
+  }
+
+  /* Main container padding */
+  main {
+    padding: 1rem !important;
+  }
+
+  /* Navigation buttons - make them stack better */
+  .flex.flex-wrap.justify-center.gap-3 {
+    gap: 0.5rem !important;
+  }
+
+  /* Navigation button styling for mobile */
+  button[class*="px-6"] {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.875rem !important;
+    width: auto !important;
+    min-width: auto !important;
+  }
+
+  /* Navigation button content */
+  button[class*="px-6"] .flex.items-center.space-x-3 {
+    gap: 0.5rem !important;
+  }
+
+  button[class*="px-6"] span.text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+  button[class*="px-6"] .text-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  button[class*="px-6"] .font-bold {
+    font-size: 0.875rem !important;
+    white-space: nowrap;
+  }
+
+  button[class*="px-6"] .text-xs {
+    font-size: 0.75rem !important;
+  }
+
+  /* Hero section */
+  .min-h-screen {
+    min-height: 100vh !important;
+    padding: 1rem !important;
+  }
+
+  /* Footer fixes */
+  footer {
+    padding: 2rem 1rem !important;
+  }
+
+  footer .grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  /* Fixed bottom elements */
+  .fixed.left-4.bottom-4 {
+    left: 1rem !important;
+    right: 1rem !important;
+    bottom: 1rem !important;
+    max-width: 100% !important;
+    position: fixed !important;
+    width: calc(100% - 2rem) !important;
+  }
+
+  /* Notification system */
+  .notification-container {
+    width: calc(100% - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+
+  /* Glass effect adjustments for mobile performance */
+  .glass {
+    backdrop-filter: blur(10px) !important;
+  }
+
+  .glass-strong {
+    backdrop-filter: blur(15px) !important;
+  }
+
+  /* Cards on mobile */
+  .card,
+  .card-glass,
+  .card-gradient {
+    padding: 1rem !important;
+    margin-bottom: 1rem;
+  }
+
+  /* Input fields */
+  .input {
+    padding: 0.75rem !important;
+    font-size: 1rem !important;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Prevent text from being too small */
+  p, span, div {
+    font-size: 0.875rem !important;
+  }
+
+  h1 {
+    font-size: 1.75rem !important;
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+
+  h3 {
+    font-size: 1.25rem !important;
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  /* Wallet multi button specific fixes */
+  div[class*="wallet"] {
+    min-width: auto !important;
+    max-width: 100% !important;
+  }
+}
+
+/* iPhone specific fixes */
+@media (max-width: 480px) {
+  /* Even more aggressive sizing for small phones */
+  header h1 {
+    font-size: 1.25rem !important;
+  }
+
+  .text-4xl {
+    font-size: 1.75rem !important;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.25rem !important;
+  }
+
+  /* Navigation buttons should be even smaller */
+  button[class*="px-6"] {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  button[class*="px-6"] span.text-2xl {
+    font-size: 1rem !important;
+  }
+
+  button[class*="px-6"] .font-bold {
+    font-size: 0.75rem !important;
+  }
+
+  /* Make wallet buttons wrap nicely */
+  .flex.items-center.space-x-4 {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Wallet info card should be compact */
+  .glass.px-4.py-3 {
+    padding: 0.5rem !important;
+  }
+
+  /* Prevent overflowing elements */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Animations might be too heavy on mobile - simplify */
+  .animate-pulse {
+    animation: none !important;
+  }
+
+  .absolute.inset-0.overflow-hidden .absolute {
+    display: none !important; /* Hide animated background elements on very small screens */
+  }
+}
+
+/* Fix for orientation changes */
+@media (orientation: landscape) and (max-height: 500px) {
+  header {
+    padding: 0.5rem !important;
+  }
+
+  header h1 {
+    font-size: 1rem !important;
+  }
+
+  main {
+    padding: 0.5rem !important;
+  }
+
+  /* Hide hero section in landscape on small screens */
+  .min-h-screen {
+    min-height: auto !important;
+  }
+}
+
+/* Touch improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Make sure buttons are large enough for touch */
+  button, a, input, select, textarea {
+    min-height: 44px !important; /* Apple's recommended touch target */
+  }
+
+  /* Remove hover effects on mobile */
+  button:hover,
+  .btn:hover,
+  a:hover {
+    transform: none !important;
+  }
+
+  /* Add active states for touch */
+  button:active,
+  .btn:active {
+    transform: scale(0.95) !important;
+    opacity: 0.8 !important;
+  }
+}
+
+/* Prevent zoom on inputs (iOS Safari) */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  select,
+  textarea,
+  input[type="text"],
+  input[type="password"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="color"] {
+    font-size: 16px !important;
+  }
+}
+
+/* Wallet adapter modal fixes for mobile */
+.wallet-adapter-modal {
+  max-width: 100% !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  padding: 1rem !important;
+}
+
+.wallet-adapter-modal-list {
+  padding: 0 !important;
+}
+
+.wallet-adapter-modal-list-item {
+  padding: 1rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for iOS bounce scroll - commented out as it may cause issues */
+/* body {
+  position: fixed;
+  width: 100%;
+  overflow: hidden;
+}
+
+body > div#root {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+} */
+
+/* Fix backdrop blur performance on mobile */
+@media (max-width: 768px) {
+  .glass,
+  .glass-strong,
+  [class*="backdrop-blur"] {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+}
+
+/* Reduce animations for better mobile performance */
+@media (prefers-reduced-motion: no-preference) {
+  @media (max-width: 768px) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.5s !important;
+      transition-duration: 0.2s !important;
+    }
+  }
+}
+
+/* Improve tap highlighting */
+a, button {
+  -webkit-tap-highlight-color: rgba(153, 69, 255, 0.3);
+  tap-highlight-color: rgba(153, 69, 255, 0.3);
+}
+
+/* Safe area insets for iPhone X+ */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .fixed.left-4.bottom-4 {
+    left: max(1rem, env(safe-area-inset-left)) !important;
+    bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  }
+}
+

@@ -133,7 +133,11 @@ NFTSol addresses these challenges through:
 **Symbol**: CLOUT  
 **Decimals**: 9  
 **Total Supply**: 1,000,000,000 CLOUT  
-**Blockchain**: Solana (SPL Token)
+**Blockchain**: Solana (SPL Token)  
+**Token Address**: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`  
+**Rewards Vault**: `2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps`
+
+View on Solscan: https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
 
 ### 3.2 Token Distribution
 

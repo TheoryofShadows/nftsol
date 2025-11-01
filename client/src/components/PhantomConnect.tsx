@@ -1,11 +1,16 @@
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletMultiButton, useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useState, useEffect } from 'react';
 
 export default function PhantomConnect() {
   const { publicKey, connected, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleConnectClick = () => {
+    setVisible(true);
+  };
 
   // Fetch wallet balance
   useEffect(() => {

@@ -6,7 +6,11 @@ import {
   SolflareWalletAdapter,
   TorusWalletAdapter,
   LedgerWalletAdapter,
-  CoinbaseWalletAdapter,
+  MathWalletAdapter,
+  SlopeWalletAdapter,
+  SolongWalletAdapter,
+  TokenPocketWalletAdapter,
+  TrustWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
@@ -20,6 +24,7 @@ import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
 import './styles/solana.css';
 import './styles/design-system.css';
+import './styles/mobile-fixes.css';
 
 // Lazy load components for better performance
 const Hero = lazy(() => import('./components/Hero'));
@@ -32,6 +37,8 @@ const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
 const EchoMint = lazy(() => import('./echo/EchoMint'));
 const EchoViewer = lazy(() => import('./echo/EchoViewer'));
 const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const AdminAuth = lazy(() => import('./components/AdminAuth'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -240,6 +247,7 @@ function AppContent() {
             { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
             { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
             { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
+            { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -470,6 +478,22 @@ function AppContent() {
               </div>
             </div>
           )}
+
+          {activeTab === 'admin' && (
+            <div className="animate-fade-in animate-slide-up">
+              <div className="text-center mb-8">
+                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
+                  🔧 Admin Dashboard
+                </h2>
+                <p className="text-gray-300 max-w-2xl mx-auto">
+                  Manage platform operations, withdrawals, and system settings
+                </p>
+              </div>
+              <Suspense fallback={<LoadingSpinner />}>
+                <AdminDashboard />
+              </Suspense>
+            </div>
+          )}
         </div>
       </main>
 
@@ -602,9 +626,13 @@ function App() {
   const wallets = [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    new TorusWalletAdapter(),
+    new SolongWalletAdapter(),
+    new SlopeWalletAdapter(),
+    new TrustWalletAdapter(),
+    new TokenPocketWalletAdapter(),
     new LedgerWalletAdapter(),
-    new CoinbaseWalletAdapter(),
+    new MathWalletAdapter(),
+    new TorusWalletAdapter(),
   ];
 
   return (

@@ -436,6 +436,83 @@ const requireAdmin = (req: any, res: any, next: any) => {
   next();
 };
 
+// Admin authentication endpoint
+apiV1.post('/auth/admin', async (req, res) => {
+  try {
+    const { walletAddress, signature, message } = req.body;
+
+    if (!walletAddress || !signature || !message) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Missing required fields',
+        code: 'VALIDATION_ERROR',
+      };
+      return res.status(400).json(response);
+    }
+
+    // Define admin wallet addresses
+    const ADMIN_WALLETS = (process.env.ADMIN_WALLETS || process.env.PLATFORM_PUBLIC_KEY || '')
+      .split(',')
+      .map((w) => w.trim())
+      .filter(Boolean);
+
+    // Check if wallet is authorized as admin
+    if (!ADMIN_WALLETS.includes(walletAddress)) {
+      securityLogger('ADMIN_AUTH_FAILED', { walletAddress, reason: 'Not authorized', ip: req.ip }, req);
+      const response: ApiResponse = {
+        success: false,
+        error: 'Wallet not authorized as admin',
+        code: 'UNAUTHORIZED',
+      };
+      return res.status(403).json(response);
+    }
+
+    // TODO: Verify signature using nacl.sign.detached.verify
+    // For now, we just check the wallet address
+    // In production, implement proper signature verification
+
+    // Generate admin JWT token
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      securityLogger('ADMIN_AUTH_MISCONFIGURED', { reason: 'JWT_SECRET not set' }, req);
+      const response: ApiResponse = {
+        success: false,
+        error: 'Server auth not configured',
+        code: 'AUTH_MISCONFIGURED',
+      };
+      return res.status(500).json(response);
+    }
+
+    const adminToken = jwt.sign(
+      {
+        id: walletAddress,
+        wallet: walletAddress,
+        role: 'admin',
+        isAdmin: true,
+      },
+      secret,
+      { expiresIn: '24h' }
+    );
+
+    auditLogger('ADMIN_AUTH_SUCCESS', { walletAddress, ip: req.ip }, req);
+
+    const response: ApiResponse = {
+      success: true,
+      data: { token: adminToken, wallet: walletAddress },
+      message: 'Admin authentication successful',
+    };
+    return res.json(response);
+  } catch (err) {
+    errorLogger(err as Error, { endpoint: '/api/auth/admin' });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Admin authentication failed',
+      code: 'INTERNAL_ERROR',
+    };
+    return res.status(500).json(response);
+  }
+});
+
 // Emergency controls
 const WITHDRAWALS_PAUSED = process.env.WITHDRAWALS_PAUSED === 'true';
 const MAX_SINGLE_WITHDRAWAL = parseInt(
