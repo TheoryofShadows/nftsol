@@ -59,9 +59,4 @@ root.render(
   </React.StrictMode>
 );
 
-// Performance logging
-if (import.meta.env.DEV) {
-  const endTime = performance.now();
-  // eslint-disable-next-line no-console
-  console.log(`App initialized in ${(endTime - startTime).toFixed(2)}ms`);
-}
+// Performance monitoring complete

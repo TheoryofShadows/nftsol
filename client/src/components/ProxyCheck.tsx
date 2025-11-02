@@ -3,7 +3,7 @@ import { proxify } from '../lib/imgProxy';
 
 export default function ProxyCheck() {
   const [srcRaw, setSrcRaw] = useState(
-    'http://localhost:3003/ipfs-img?u=http://127.0.0.1:8088/image.png'
+    `${import.meta.env.VITE_IMG_PROXY_BASE || import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/ipfs-img?u=http://127.0.0.1:8088/image.png`
   );
   const src = useMemo(() => proxify(srcRaw), [srcRaw]);
 

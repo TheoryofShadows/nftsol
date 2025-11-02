@@ -120,7 +120,7 @@ function AppContent() {
   useEffect(() => {
     const report = getPerformanceReport();
     // eslint-disable-next-line no-console
-    if (import.meta.env.DEV) console.log('Performance Report:', report);
+    // Performance monitoring in dev mode
   }, [getPerformanceReport]);
 
   // Allow programmatic tab changes (used by Echo components)

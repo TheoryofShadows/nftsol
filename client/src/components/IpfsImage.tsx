@@ -30,6 +30,6 @@ export default function IpfsImage({ src, proxy = true, ...rest }: Props) {
   }, [src, proxy, source]);
 
   // eslint-disable-next-line no-console
-  if (import.meta.env.DEV) console.log('[IpfsImage]', { src, using: source });
+  // Using source for IPFS image
   return <img src={source} onError={handleError} {...rest} />;
 }

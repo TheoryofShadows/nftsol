@@ -32,7 +32,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthSuccess }) => {
       const signature = await signMessage(new TextEncoder().encode(challenge));
 
       // Send to backend for verification
-      const response = await fetch('http://localhost:3001/api/auth/admin', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/auth/admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

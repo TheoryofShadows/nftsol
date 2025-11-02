@@ -27,8 +27,8 @@ const AdminDashboard: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       const url = status 
-        ? `http://localhost:3001/api/admin/withdrawals?status=${status}`
-        : 'http://localhost:3001/api/admin/withdrawals?status=pending';
+        ? `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=${status}`
+        : `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=pending';
 
       const response = await fetch(url, {
         headers: {
@@ -68,7 +68,7 @@ const AdminDashboard: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       const response = await fetch(
-        `http://localhost:3001/api/admin/withdrawals/${withdrawalId}/${action}`,
+        `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals/${withdrawalId}/${action}`,
         {
           method: 'POST',
           headers: {
