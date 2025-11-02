@@ -1,12 +1,10 @@
 [build]
-  # Frontend build settings
   base = "client"
   publish = "dist"
-  command = "npm install --include=dev && npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = ""
 
 # Frontend redirects for SPA
 [[redirects]]

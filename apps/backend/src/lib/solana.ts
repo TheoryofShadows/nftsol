@@ -15,9 +15,6 @@ const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
 export const SOLANA_COMMITMENT: Commitment = 'confirmed';
 export const connection = new Connection(RPC_URL, SOLANA_COMMITMENT);
 
-// Debug logging
-console.log('🔗 Solana RPC URL:', RPC_URL);
-console.log('🔑 Platform Key Loaded:', !!process.env.PLATFORM_SECRET_KEY_BASE58);
 
 export function loadPlatformKeypair(): Keypair {
   const base58 = process.env.PLATFORM_SECRET_KEY_BASE58;

@@ -25,7 +25,7 @@ let pool: Pool;
 
 // Initialize pool
 if (!process.env.DATABASE_URL) {
-  console.warn('⚠️  DATABASE_URL not set - using mock database for development');
+  console.warn('DATABASE_URL not set - using mock database for development');
   // Create mock pool
   pool = {
     query: async () => ({ rows: [], rowCount: 0 }),
@@ -43,11 +43,11 @@ if (!process.env.DATABASE_URL) {
   // Test connection on startup
   pool.query('SELECT NOW()')
     .then(() => {
-      console.log('✅ Database connection pool established');
-      console.log(`📊 Pool config: min=${poolConfig.min}, max=${poolConfig.max}`);
+      console.log('Database connection pool established');
+      console.log(`Pool config: min=${poolConfig.min}, max=${poolConfig.max}`);
     })
     .catch((err) => {
-      console.error('❌ Database connection failed:', err.message);
+      console.error('Database connection failed:', err.message);
       console.error('Please check your DATABASE_URL environment variable');
     });
 }

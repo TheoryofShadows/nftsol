@@ -3,22 +3,19 @@ import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types
 
 config();
 
-// Environment validation with defaults
 const requiredEnvVars = [
   'NODE_ENV',
   'PORT',
-  'SOLANA_RPC_DEVNET',
+  'SOLANA_RPC_URL',
   'CLOUT_PROGRAM_ID',
   'MARKET_PROGRAM_ID',
   'LOYALTY_PROGRAM_ID',
   'REWARDS_VAULT',
 ];
 
-// Set defaults for development
 if (process.env.NODE_ENV !== 'production') {
-  process.env.SOLANA_RPC_DEVNET = process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com';
-  // Mainnet CLOUT mint: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-  // Devnet default: CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE
+  process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+  process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
   process.env.CLOUT_PROGRAM_ID =
     process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
   process.env.MARKET_PROGRAM_ID =
@@ -41,10 +38,13 @@ export const appConfig: AppConfig = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [
       'http://localhost:5173',
       'http://localhost:3000',
       'https://nftsol.app',
+      'https://www.nftsol.app',
+      'https://market.nftsol.app',
+      'https://nftsolmarket.netlify.app',
     ],
     credentials: true,
   },
@@ -59,9 +59,9 @@ export const appConfig: AppConfig = {
 };
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
+  rpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
   commitment: 'confirmed',
-  cluster: 'devnet',
+  cluster: (process.env.SOLANA_CLUSTER as 'mainnet-beta' | 'devnet' | 'testnet') || 'devnet',
 };
 
 export const databaseConfig: DatabaseConfig = {
@@ -80,9 +80,8 @@ export const programConfig: ProgramConfig = {
   rewardsVault: process.env.REWARDS_VAULT || '',
 };
 
-// Withdrawal configuration
 export const withdrawalConfig = {
-  solanaRpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  solanaRpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
   platformSecretKeyBase58: process.env.PLATFORM_SECRET_KEY_BASE58 || '',
   platformSecretKeyJson: process.env.PLATFORM_SECRET_KEY_JSON || '',
   autoApproveLamports: parseInt(process.env.WITHDRAWAL_AUTO_APPROVE_LAMPORTS || '100000000', 10), // 0.1 SOL

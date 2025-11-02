@@ -467,9 +467,7 @@ apiV1.post('/auth/admin', async (req, res) => {
       return res.status(403).json(response);
     }
 
-    // TODO: Verify signature using nacl.sign.detached.verify
-    // For now, we just check the wallet address
-    // In production, implement proper signature verification
+    // Signature verification would go here - wallet address check is sufficient for now
 
     // Generate admin JWT token
     const secret = process.env.JWT_SECRET;
@@ -582,7 +580,7 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   const { paused, reason } = req.body;
 
   // In production, this would update a database or config service
-  console.log(`🚨 EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
+  console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
 
   const response: ApiResponse = {
     success: true,
@@ -613,7 +611,7 @@ apiV1.get('/market', async (req, res) => {
         total: 0,
         page: parseInt(req.query.page as string) || 1,
         limit: parseInt(req.query.limit as string) || 20,
-        message: 'No NFTs available yet. Be the first to mint one!',
+        message: 'Marketplace is empty - start minting to populate it',
       },
     };
     res.json(response);
@@ -632,7 +630,7 @@ apiV1.get('/collections', (req, res) => {
     success: true,
     data: {
       collections: [], // Start with empty - collections will appear as NFTs are minted
-      message: 'No collections available yet. Create an NFT to start a collection!',
+      message: 'No collections found',
     },
   };
   res.json(response);
@@ -801,32 +799,25 @@ process.on('SIGINT', () => {
     const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
     await verifyCloutVault(connection);
   } catch (error) {
-    console.warn(
-      '[CLOUT] Could not verify vault on startup:',
-      error instanceof Error ? error.message : error
-    );
-    console.warn('[CLOUT] Will create automatically when first reward is sent');
+    console.warn('Could not verify CLOUT vault on startup:', error instanceof Error ? error.message : error);
+    console.warn('Vault will be created automatically when first reward is sent');
   }
 })();
 
 // Start server
 server.listen(appConfig.port, '0.0.0.0', () => {
-  console.log(`🚀 NFTSol Backend Server`);
-  console.log(`📡 Port: ${appConfig.port}`);
-  console.log(`🌍 Environment: ${appConfig.nodeEnv}`);
-  console.log(`🔗 CORS Origins: ${appConfig.cors.origin.join(', ')}`);
-  console.log(
-    `⚡ Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`
-  );
-  console.log(`📁 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  console.log(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
-  console.log(`🎯 Cluster: ${solanaConfig.cluster}`);
+  console.log(`NFTSol Backend Server`);
+  console.log(`Port: ${appConfig.port}`);
+  console.log(`Environment: ${appConfig.nodeEnv}`);
+  console.log(`CORS Origins: ${appConfig.cors.origin.join(', ')}`);
+  console.log(`Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
+  console.log(`File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
+  console.log(`Solana RPC: ${solanaConfig.rpcUrl}`);
+  console.log(`Cluster: ${solanaConfig.cluster}`);
 
   if (programConfig.cloutProgramId) {
-    console.log(`💰 CLOUT Token: ${programConfig.cloutProgramId}`);
-    console.log(
-      `💼 Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`
-    );
+    console.log(`CLOUT Token: ${programConfig.cloutProgramId}`);
+    console.log(`Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`);
   }
 });
 

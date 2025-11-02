@@ -74,10 +74,10 @@ if (isTestMode) {
   pool
     .query('SELECT NOW()')
     .then(() => {
-      console.log('✅ Database connection established');
+      console.log('Database connection established');
     })
     .catch((err) => {
-      console.error('❌ Database connection failed:', err.message);
+      console.error('Database connection failed:', err.message);
       console.error('Please check your DATABASE_URL environment variable');
     });
 }
