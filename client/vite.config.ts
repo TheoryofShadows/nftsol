@@ -38,6 +38,7 @@ export default defineConfig({
       '@solana/wallet-adapter-react',
       '@solana/web3.js',
       '@tanstack/react-query',
+      'buffer',
     ],
     esbuildOptions: {
       define: {
