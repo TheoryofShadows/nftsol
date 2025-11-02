@@ -1,7 +1,7 @@
 [build]
   base = "client"
   publish = "dist"
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
