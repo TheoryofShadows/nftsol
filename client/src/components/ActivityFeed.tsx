@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 
 interface Activity {
   id: string;
@@ -10,6 +10,17 @@ interface Activity {
 }
 
 export default function ActivityFeed() {
+  // Force re-render every minute to update relative times
+  const [, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUpdateTrigger((prev) => prev + 1);
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Mock activity data - in production, this would come from your API
   // Calculate timestamps once using useMemo to avoid impure function calls during render
   const activities: Activity[] = useMemo(() => {
