@@ -2,7 +2,7 @@
  * Optimized database connection with connection pooling, query optimization, and prepared statements
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { databaseConfig } from '../config';
 
 // Enhanced connection pool configuration
@@ -55,7 +55,7 @@ if (!process.env.DATABASE_URL) {
 /**
  * Execute query with retry logic
  */
-export async function queryWithRetry<T = any>(
+export async function queryWithRetry<T extends QueryResultRow = any>(
   text: string,
   params?: any[],
   retries = 2

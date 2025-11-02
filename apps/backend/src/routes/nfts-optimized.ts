@@ -27,7 +27,7 @@ router.get('/:mintAddress', async (req: Request, res: Response) => {
     } else {
       return res.status(404).json({
         success: false,
-        error: result.error || 'NFT not found',
+        error: ('error' in result ? result.error : 'NFT not found') || 'NFT not found',
         code: 'NOT_FOUND',
       });
     }
@@ -54,7 +54,7 @@ router.get('/owner/:owner', async (req: Request, res: Response) => {
     } else {
       return res.status(500).json({
         success: false,
-        error: result.error || 'Failed to get NFTs',
+        error: ('error' in result ? result.error : 'Failed to get NFTs') || 'Failed to get NFTs',
         code: 'INTERNAL_ERROR',
       });
     }

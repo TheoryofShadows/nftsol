@@ -103,7 +103,7 @@ class OptimizedSolanaService {
     const start = Date.now();
 
     try {
-      await connection.getVersion({ commitment: 'processed' });
+      await connection.getVersion();
       const latency = Date.now() - start;
 
       return {
@@ -255,7 +255,7 @@ class OptimizedSolanaService {
     const connection = await this.getConnection();
 
     try {
-      const simulation = await connection.simulateTransaction(transaction, {
+      const simulation = await connection.simulateTransaction(transaction as any, {
         commitment: 'confirmed',
         replaceRecentBlockhash: true,
         sigVerify: false,
@@ -387,7 +387,7 @@ class OptimizedSolanaService {
       }
     );
 
-    return accounts;
+    return [...accounts];
   }
 
   /**
