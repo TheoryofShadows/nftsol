@@ -48,15 +48,19 @@ export class CloutTokenService {
   private readonly MINT_INFO_CACHE_TTL = 60000; // 1 minute
 
   constructor() {
-    const mintAddress = programConfig.cloutProgramId;
+    // Use CLOUT_MINT if available, otherwise fall back to CLOUT_PROGRAM_ID
+    const mintAddress = process.env.CLOUT_MINT || programConfig.cloutProgramId;
     if (!mintAddress) {
-      throw new Error('[CLOUT] CLOUT_PROGRAM_ID not configured in environment');
+      throw new Error('[CLOUT] CLOUT_MINT or CLOUT_PROGRAM_ID not configured in environment');
     }
 
     this.mint = new PublicKey(mintAddress);
     this.connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
 
-    console.log(`[CLOUT] Service initialized with mint: ${this.mint.toBase58()}`);
+    console.log(`[CLOUT] Service initialized`);
+    console.log(`[CLOUT] Mint address: ${this.mint.toBase58()}`);
+    console.log(`[CLOUT] RPC URL: ${solanaConfig.rpcUrl}`);
+    console.log(`[CLOUT] Cluster: ${solanaConfig.cluster}`);
   }
 
   /**
@@ -287,11 +291,21 @@ export class CloutTokenService {
       try {
         const account = await getAccount(this.connection, ata);
         const mintInfo = await this.getMintInfo();
-        return Number(account.amount) / Number(BigInt(10 ** mintInfo.decimals));
-      } catch {
+        const balance = Number(account.amount) / Number(BigInt(10 ** mintInfo.decimals));
+        
+        console.log(`[CLOUT] Balance for ${walletAddress.slice(0, 8)}...: ${balance} CLOUT`);
+        return balance;
+      } catch (error: any) {
+        // Log the error for debugging
+        if (error.name === 'TokenAccountNotFoundError' || error.message?.includes('not found')) {
+          console.log(`[CLOUT] No token account found for ${walletAddress.slice(0, 8)}... (ATA: ${ata.toBase58()})`);
+        } else {
+          console.error(`[CLOUT] Error fetching balance for ${walletAddress.slice(0, 8)}...:`, error.message || error);
+        }
         return 0; // ATA doesn't exist, balance is 0
       }
-    } catch {
+    } catch (error: any) {
+      console.error(`[CLOUT] Error in getCloutBalance for ${walletAddress}:`, error.message || error);
       return 0;
     }
   }

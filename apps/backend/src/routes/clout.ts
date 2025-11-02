@@ -116,6 +116,7 @@ router.get('/balance/:address', sanitizeInput, async (req, res) => {
       return res.status(400).json(response);
     }
 
+    console.log(`[CLOUT] Fetching balance for: ${address}`);
     const balance = await cloutService.getCloutBalance(address);
 
     const response: ApiResponse = {
@@ -124,15 +125,17 @@ router.get('/balance/:address', sanitizeInput, async (req, res) => {
         address,
         balance,
         token: 'CLOUT',
+        mintAddress: process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || 'Not configured',
       },
     };
     res.json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('CLOUT balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
-      error: 'Failed to get CLOUT balance',
+      error: error.message || 'Failed to get CLOUT balance',
       code: 'INTERNAL_ERROR',
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined,
     };
     res.status(500).json(response);
   }

@@ -16,14 +16,26 @@ const requiredEnvVars = [
 if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
   process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
-  process.env.CLOUT_PROGRAM_ID =
-    process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
-  process.env.MARKET_PROGRAM_ID =
-    process.env.MARKET_PROGRAM_ID || 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
-  process.env.LOYALTY_PROGRAM_ID =
-    process.env.LOYALTY_PROGRAM_ID || '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
-  process.env.REWARDS_VAULT =
-    process.env.REWARDS_VAULT || '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
+}
+
+// CLOUT token mint address (mainnet: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+if (!process.env.CLOUT_MINT) {
+  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
+}
+// CLOUT_PROGRAM_ID is kept for backward compatibility, but CLOUT_MINT is the actual token mint
+if (!process.env.CLOUT_PROGRAM_ID) {
+  process.env.CLOUT_PROGRAM_ID = process.env.CLOUT_MINT;
+}
+
+// Default program IDs (only if not set)
+if (!process.env.MARKET_PROGRAM_ID) {
+  process.env.MARKET_PROGRAM_ID = 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
+}
+if (!process.env.LOYALTY_PROGRAM_ID) {
+  process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
+}
+if (!process.env.REWARDS_VAULT) {
+  process.env.REWARDS_VAULT = '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
 }
 
 if (process.env.NODE_ENV === 'production') {
@@ -74,7 +86,8 @@ export const databaseConfig: DatabaseConfig = {
 };
 
 export const programConfig: ProgramConfig = {
-  cloutProgramId: process.env.CLOUT_PROGRAM_ID || '',
+  // Use CLOUT_MINT if available (actual token mint), otherwise CLOUT_PROGRAM_ID
+  cloutProgramId: process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || '',
   marketProgramId: process.env.MARKET_PROGRAM_ID || '',
   loyaltyProgramId: process.env.LOYALTY_PROGRAM_ID || '',
   rewardsVault: process.env.REWARDS_VAULT || '',
