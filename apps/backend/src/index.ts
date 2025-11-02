@@ -195,8 +195,8 @@ app.get('/healthz', async (req, res) => {
     const solanaHealth = solanaResult.status === 'fulfilled' ? solanaResult.value : { healthy: false, details: { error: 'Check failed' } };
     const dbHealth = dbResult.status === 'fulfilled' ? dbResult.value : { healthy: false, details: { error: 'Check failed' } };
 
-    // At least one service must be healthy for overall health
-    const overallHealthy = solanaHealth.healthy || dbHealth.healthy;
+    // Both services must be healthy for overall health
+    const overallHealthy = solanaHealth.healthy && dbHealth.healthy;
     const statusCode = overallHealthy ? 200 : 503;
 
     const response: ApiResponse = {

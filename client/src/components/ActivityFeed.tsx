@@ -72,7 +72,8 @@ export default function ActivityFeed() {
     }
   };
 
-  const formatTimeAgo = (date: Date, currentTime: number) => {
+  const formatTimeAgo = (date: Date) => {
+    const currentTime = Date.now();
     const seconds = Math.floor((currentTime - date.getTime()) / 1000);
     if (seconds < 60) return 'Just now';
     const minutes = Math.floor(seconds / 60);
@@ -82,8 +83,6 @@ export default function ActivityFeed() {
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
   };
-
-  const currentTime = useMemo(() => Date.now(), []);
 
   return (
     <div className="glass-card p-6">
@@ -125,7 +124,7 @@ export default function ActivityFeed() {
                 </div>
                 <p className="text-xs text-gray-400 mb-1">{activity.description}</p>
                 <p className="text-xs text-gray-500">
-                  {formatTimeAgo(activity.timestamp, currentTime)}
+                  {formatTimeAgo(activity.timestamp)}
                 </p>
               </div>
             </div>
