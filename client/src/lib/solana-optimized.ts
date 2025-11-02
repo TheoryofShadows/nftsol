@@ -19,7 +19,7 @@ import {
 } from '@solana/web3.js';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useQuery } from '@tanstack/react-query';
-import { queryClient, queryKeys } from './react-query';
+import { queryClient, queryKeys } from './react-query.tsx';
 
 // Connection configuration
 export const getOptimizedConnection = (endpoint: string): Connection => {

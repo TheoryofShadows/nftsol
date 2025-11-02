@@ -4,7 +4,7 @@
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { apiService } from '../services/api';
-import { queryKeys } from '../lib/react-query';
+import { queryKeys } from '../lib/react-query.tsx';
 import { ApiResponse, NFT, WalletInfo, ProgramConfig, Collection } from '../types';
 
 // Marketplace queries

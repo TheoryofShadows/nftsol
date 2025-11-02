@@ -7,7 +7,7 @@ import './styles/tailwind.css';
 import './styles/onboarding.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
-import { QueryProvider } from './lib/react-query';
+import { QueryProvider } from './lib/react-query.tsx';
 
 // Polyfill Buffer for browser
 interface WindowWithBuffer extends Window {
