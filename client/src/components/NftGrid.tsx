@@ -100,12 +100,41 @@ export default function NftGrid({ nfts }: NftGridProps) {
             />
 
             {/* Overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex space-x-2">
-                  <button className="btn-primary text-xs px-3 py-1">View</button>
-                  <button className="btn-secondary text-xs px-3 py-1">Buy</button>
-                </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+              <div className="w-full space-y-2">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Open NFT details modal or navigate
+                    alert(`Viewing ${nft.name} details`);
+                  }}
+                  className="w-full glass px-4 py-2 rounded-lg text-white font-semibold hover:bg-white/20 transition-all text-sm"
+                >
+                  👁️ View Details
+                </button>
+                {nft.price ? (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle buy action
+                      alert(`Buying ${nft.name} for ${nft.price} SOL`);
+                    }}
+                    className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 px-4 py-2 rounded-lg text-white font-bold hover:shadow-lg transition-all text-sm"
+                  >
+                    💰 Buy {nft.price} SOL
+                  </button>
+                ) : (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Handle list for sale
+                      alert(`Listing ${nft.name} for sale`);
+                    }}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 rounded-lg text-white font-bold hover:shadow-lg transition-all text-sm"
+                  >
+                    📋 List for Sale
+                  </button>
+                )}
               </div>
             </div>
 

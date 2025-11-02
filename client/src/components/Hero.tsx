@@ -179,6 +179,28 @@ export default function Hero() {
           )}
         </div>
 
+        {/* Quick Action Buttons */}
+        <div className="flex flex-wrap justify-center gap-4 mt-12 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
+            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            🏪 Browse Marketplace
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'mint' }))}
+            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            ✨ Mint NFT
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-mint' }))}
+            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          >
+            🎬 Create Eternal Echo
+          </button>
+        </div>
+
         {/* Scroll indicator */}
         <div className="mt-16 animate-bounce">
           <div className="text-gray-400 text-sm mb-2">Scroll to explore</div>

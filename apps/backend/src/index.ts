@@ -559,6 +559,39 @@ apiV1.use((req, res, next) => {
   next();
 });
 
+// Public stats endpoint (for landing page)
+app.get('/api/public/stats', async (req, res) => {
+  try {
+    // Get NFT count from database or in-memory store
+    const nftCount = 0; // TODO: Query database for actual count
+    const listedCount = 0; // TODO: Query database for listed NFTs
+    const soldCount = 0; // TODO: Query database for sold NFTs
+    const totalVolume = 0; // TODO: Calculate total volume
+
+    res.json({
+      success: true,
+      platform: {
+        totalNFTs: nftCount,
+        listedNFTs: listedCount,
+        soldNFTs: soldCount,
+        totalVolume,
+      },
+    });
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/public/stats' });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch platform statistics',
+      platform: {
+        totalNFTs: 0,
+        listedNFTs: 0,
+        soldNFTs: 0,
+        totalVolume: 0,
+      },
+    });
+  }
+});
+
 // Echo routes
 app.use('/api/echo', echoRouter);
 app.use('/api/orb', orbRouter);
@@ -600,23 +633,41 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   res.json(response);
 });
 
-// Marketplace endpoints
+// Marketplace endpoints - Get all NFTs for marketplace
 apiV1.get('/market', async (req, res) => {
   try {
-    // For now, return empty marketplace with helpful message
-    // In production, this would query:
-    // 1. Database for minted NFTs
-    // 2. Solana blockchain for on-chain NFTs
-    // 3. Marketplace listings
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const collection = req.query.collection as string;
+    const status = req.query.status as string;
+
+    // Query NFTs from service
+    let nfts: any[] = [];
     
+    // If collection filter, use Echo route logic
+    if (collection === 'eternal-echoes') {
+      // Will be handled by echo marketplace route
+      nfts = [];
+    } else {
+      // Get NFTs from NFT service
+      // For now, try to get from any available NFTs
+      // In production, this would query database
+      try {
+        // This is a placeholder - in production would query database
+        nfts = [];
+      } catch (e) {
+        nfts = [];
+      }
+    }
+
     const response: ApiResponse = {
       success: true,
       data: {
-        nfts: [], // Start with empty - NFTs will appear as they're minted
-        total: 0,
-        page: parseInt(req.query.page as string) || 1,
-        limit: parseInt(req.query.limit as string) || 20,
-        message: 'Marketplace is empty - start minting to populate it',
+        nfts,
+        total: nfts.length,
+        page,
+        limit,
+        message: nfts.length > 0 ? 'Marketplace data loaded' : 'Marketplace is empty - start minting to populate it',
       },
     };
     res.json(response);
@@ -625,6 +676,64 @@ apiV1.get('/market', async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get marketplace data',
+    });
+  }
+});
+
+// Generic NFTs endpoint - supports filtering
+app.get('/api/nfts', async (req, res) => {
+  try {
+    const collection = req.query.collection as string;
+    const status = req.query.status as string;
+    const owner = req.query.owner as string;
+    
+    let nfts: any[] = [];
+
+    // If Echo collection, use Echo router logic
+    if (collection === 'eternal-echoes') {
+      // Query in-memory echo store or database
+      try {
+        // For now, return empty - Echo NFTs are stored separately
+        nfts = [];
+      } catch (e) {
+        nfts = [];
+      }
+    } else if (owner) {
+      // Get NFTs by owner
+      try {
+        const result = await nftService.getNFTsByOwner(owner);
+        if (result.success && result.data) {
+          nfts = Array.isArray(result.data) ? result.data : [result.data];
+        }
+      } catch (e) {
+        nfts = [];
+      }
+    } else {
+      // Get all NFTs from marketplace
+      try {
+        // Query database or in-memory store
+        nfts = [];
+      } catch (e) {
+        nfts = [];
+      }
+    }
+
+    // Apply status filter if provided
+    if (status && nfts.length > 0) {
+      nfts = nfts.filter((nft: any) => nft.status === status);
+    }
+
+    res.json({
+      success: true,
+      nfts,
+      total: nfts.length,
+    });
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/nfts' });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get NFTs',
+      nfts: [],
     });
   }
 });

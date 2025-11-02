@@ -55,7 +55,7 @@ const LoadingSpinner = () => (
 import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('home');
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
@@ -214,32 +214,34 @@ function AppContent() {
       </header>
 
       <main className="relative z-10 max-w-7xl mx-auto p-6">
-        {/* Hero Section - Full Screen Animated Landing */}
-        <Suspense
-          fallback={
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="loading-spinner"></div>
-            </div>
-          }
-        >
-          <Hero />
-        </Suspense>
+        {/* Hero Section - Full Screen Animated Landing (Only on home) */}
+        {activeTab === 'home' && (
+          <Suspense
+            fallback={
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="loading-spinner"></div>
+              </div>
+            }
+          >
+            <Hero />
+          </Suspense>
+        )}
 
         {/* Enhanced Navigation */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {[
+            { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
             { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
             { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
             { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
             { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
             { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
             { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
-            { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
-            { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
-            { id: 'waitlist', label: 'Waitlist', icon: '🚀', desc: 'Join early' },
-            { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
             { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
             { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
+            { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
+            { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
+            { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
             { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
           ].map((tab) => (
             <button
@@ -266,6 +268,76 @@ function AppContent() {
         </div>
 
         <div className="min-h-[600px]">
+          {activeTab === 'home' && (
+            <div className="animate-fade-in animate-slide-up mt-12">
+              {/* Quick Actions Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {[
+                  { id: 'market', label: 'Browse Marketplace', icon: '🏪', color: 'from-purple-500 to-pink-500' },
+                  { id: 'mint', label: 'Mint NFT', icon: '✨', color: 'from-cyan-500 to-blue-500' },
+                  { id: 'echo-mint', label: 'Create Echo', icon: '🎬', color: 'from-green-500 to-emerald-500' },
+                  { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', color: 'from-orange-500 to-red-500' },
+                ].map((action) => (
+                  <button
+                    key={action.id}
+                    onClick={() => handleTabChange(action.id)}
+                    className={`group relative overflow-hidden glass p-6 rounded-xl transform transition-all duration-300 hover:scale-105 hover:shadow-2xl`}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-20 transition-opacity`}></div>
+                    <div className="relative z-10">
+                      <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform">{action.icon}</div>
+                      <div className="text-lg font-bold text-white">{action.label}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Featured NFTs Preview */}
+              {!loading && nfts.length > 0 && (
+                <div className="mb-12">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-3xl font-bold gradient-text font-display">✨ Featured NFTs</h2>
+                    <button
+                      onClick={() => handleTabChange('market')}
+                      className="text-cyan-400 hover:text-cyan-300 transition-colors font-semibold"
+                    >
+                      View All →
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {nfts.slice(0, 4).map((nft) => (
+                      <div
+                        key={nft.id}
+                        onClick={() => handleTabChange('market')}
+                        className="group glass rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                      >
+                        <div className="aspect-square relative overflow-hidden">
+                          <img
+                            src={nft.imageUrl || '/placeholder-nft.png'}
+                            alt={nft.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/placeholder-nft.png';
+                            }}
+                          />
+                          {nft.price && (
+                            <div className="absolute top-2 right-2 glass px-2 py-1 rounded-lg">
+                              <span className="text-yellow-400 font-bold text-sm">{nft.price} SOL</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <h3 className="font-bold text-white text-sm truncate">{nft.name}</h3>
+                          <p className="text-gray-400 text-xs truncate">{nft.description || 'No description'}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {activeTab === 'dashboard' && (
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
