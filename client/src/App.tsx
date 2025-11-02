@@ -42,6 +42,8 @@ const Dashboard = lazy(() => import('./components/Dashboard'));
 const WelcomeOnboarding = lazy(() => import('./components/WelcomeOnboarding'));
 const FeatureTour = lazy(() => import('./components/FeatureTour'));
 const OnboardingProgress = lazy(() => import('./components/OnboardingProgress'));
+const MyNfts = lazy(() => import('./components/MyNfts'));
+const Collections = lazy(() => import('./components/Collections'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -473,21 +475,8 @@ function AppContent() {
 
           {activeTab === 'my-nfts' && (
             <div className="animate-fade-in animate-slide-up">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-4xl font-bold gradient-text font-display">👤 My NFTs</h2>
-                <div className="glass px-4 py-2 rounded-lg">
-                  <span className="text-sm text-gray-300">Your Collection</span>
-                </div>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex justify-center items-center py-20">
-                    <div className="loading-spinner"></div>
-                    <span className="ml-4 text-gray-300">Loading your NFTs...</span>
-                  </div>
-                }
-              >
-                <NftGrid nfts={nfts} />
+              <Suspense fallback={<LoadingSpinner />}>
+                <MyNfts />
               </Suspense>
             </div>
           )}
@@ -541,21 +530,9 @@ function AppContent() {
 
           {activeTab === 'collections' && (
             <div className="animate-fade-in animate-slide-up">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold gradient-text font-display mb-4">
-                  📚 Collections
-                </h2>
-                <p className="text-gray-300 max-w-2xl mx-auto">
-                  Browse NFTs by collection and discover curated digital art.
-                </p>
-              </div>
-              <div className="text-center py-20">
-                <div className="glass p-12 rounded-2xl max-w-md mx-auto">
-                  <div className="text-6xl mb-4">🚀</div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Coming Soon</h3>
-                  <p className="text-gray-300">Collections feature is in development</p>
-                </div>
-              </div>
+              <Suspense fallback={<LoadingSpinner />}>
+                <Collections />
+              </Suspense>
             </div>
           )}
 
