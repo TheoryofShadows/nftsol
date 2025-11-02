@@ -28,7 +28,7 @@ const AdminDashboard: React.FC = () => {
       const token = localStorage.getItem('admin_token');
       const url = status 
         ? `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=${status}`
-        : `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=pending';
+        : `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals`;
 
       const response = await fetch(url, {
         headers: {
