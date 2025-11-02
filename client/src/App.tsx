@@ -118,9 +118,10 @@ function AppContent() {
 
   // Performance monitoring
   useEffect(() => {
-    const report = getPerformanceReport();
-    // eslint-disable-next-line no-console
-    // Performance monitoring in dev mode
+    if (import.meta.env.DEV) {
+      const report = getPerformanceReport();
+      // Performance metrics available for development
+    }
   }, [getPerformanceReport]);
 
   // Allow programmatic tab changes (used by Echo components)
