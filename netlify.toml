@@ -1,11 +1,10 @@
 [build]
   base = "client"
   publish = "dist"
-  command = "npm install && npm run build"
+  command = "npm --version && node --version && npm install && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_VERSION = "10"
 
 # Frontend redirects for SPA
 [[redirects]]
