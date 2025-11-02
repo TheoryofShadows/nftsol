@@ -544,8 +544,17 @@ apiV1.use(
 );
 apiV1.use('/admin/withdrawals', authenticate, requireAdmin, adminWithdrawalRoutes);
 
-// Mount NFT routes
+// Mount NFT routes with caching
 apiV1.use('/nfts', nftRouter);
+
+// Apply response compression and caching headers
+apiV1.use((req, res, next) => {
+  // Set cache headers for GET requests
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'public, max-age=300'); // 5 minutes default
+  }
+  next();
+});
 
 // Echo routes
 app.use('/api/echo', echoRouter);

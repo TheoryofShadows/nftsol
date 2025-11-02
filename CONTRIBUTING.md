@@ -2,113 +2,136 @@
 
 Thank you for your interest in contributing to NFTSol! This document provides guidelines and instructions for contributing.
 
-## Getting Started
+## 🚀 Getting Started
 
-1. **Fork the repository** on GitHub
-2. **Clone your fork** locally:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/nftsol.git
-   cd nftsol
-   ```
-3. **Add upstream remote**:
-   ```bash
-   git remote add upstream https://github.com/TheoryofShadows/nftsol.git
-   ```
-4. **Create a branch** for your feature:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+1. **Fork the repository**
+2. **Clone your fork**: `git clone https://github.com/your-username/nftsol.git`
+3. **Create a branch**: `git checkout -b feature/your-feature-name`
+4. **Make your changes**
+5. **Test thoroughly**
+6. **Commit with clear messages**
+7. **Push and open a Pull Request**
 
-## Development Workflow
+## 📋 Development Guidelines
 
-### Backend Development
+### Code Style
 
+- **TypeScript**: Use strict mode, proper typing
+- **Formatting**: Run `npm run format` before committing
+- **Linting**: All lint checks must pass (`npm run lint`)
+- **Naming**: Use clear, descriptive names
+
+### Commit Messages
+
+Use [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+feat: Add new dashboard component
+fix: Resolve wallet connection issue
+docs: Update API documentation
+perf: Optimize database queries
+refactor: Clean up service layer
+test: Add unit tests for NFT service
+```
+
+### Pull Request Process
+
+1. **Update Documentation** - Update relevant docs for API/feature changes
+2. **Add Tests** - Include tests for new features
+3. **Update CHANGELOG.md** - Document your changes
+4. **Ensure CI Passes** - All checks must pass
+5. **Request Review** - Assign reviewers
+
+## 🧪 Testing
+
+### Backend Tests
 ```bash
 cd apps/backend
-npm install
-npm run dev
+npm test
 ```
 
-### Frontend Development
-
+### Frontend Tests
 ```bash
 cd client
-npm install
-npm run dev
+npm test
 ```
 
-## Code Style
-
-### TypeScript
-
-- Use TypeScript for all new code
-- Follow existing code patterns
-- Use explicit types where helpful
-- Avoid `any` type
-
-### React/Component Guidelines
-
-- Use functional components with hooks
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Use lazy loading for large components
-
-### Commits
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting)
-- `refactor:` Code refactoring
-- `test:` Adding tests
-- `chore:` Maintenance tasks
-
-Example:
+### Type Checking
 ```bash
-git commit -m "feat: add new dashboard stats component"
+# Backend
+cd apps/backend && npm run type-check
+
+# Frontend
+cd client && npm run type-check
 ```
 
-## Pull Request Process
+## 📝 Documentation
 
-1. **Update your branch** from upstream:
-   ```bash
-   git checkout main
-   git pull upstream main
-   git checkout feature/your-feature-name
-   git rebase main
-   ```
+- **Code Comments**: Document complex logic
+- **README Updates**: Update README for user-facing changes
+- **API Docs**: Update TECHNICAL-DOCS.md for API changes
+- **CHANGELOG**: Add entries for all changes
 
-2. **Ensure all checks pass**:
-   - Tests pass
-   - Linting passes (`npm run lint`)
-   - Type checking passes (`npm run type-check`)
-   - Build succeeds
+## 🔒 Security
 
-3. **Push your branch**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+- **Never commit secrets** - Use environment variables
+- **Validate inputs** - All user inputs must be validated
+- **Follow security best practices** - See SECURITY.md
+- **Report vulnerabilities** - Use GitHub Security Advisories
 
-4. **Open a Pull Request** on GitHub
+## 🎯 Feature Development
 
-## Testing
+### Before Starting
+1. Check existing issues and PRs
+2. Discuss major features in an issue first
+3. Get approval for breaking changes
 
-- Write tests for new features
-- Ensure existing tests pass
-- Add integration tests for API endpoints
+### Implementation Checklist
+- [ ] Code follows style guidelines
+- [ ] All tests pass
+- [ ] Documentation updated
+- [ ] No console.logs in production code
+- [ ] Environment variables documented
+- [ ] Error handling implemented
+- [ ] Security considerations addressed
 
-## Documentation
+## 🐛 Bug Reports
 
-- Update README.md if adding new features
-- Update TECHNICAL-DOCS.md for API changes
-- Add JSDoc comments for new functions/classes
+Use GitHub Issues with:
+- Clear title
+- Steps to reproduce
+- Expected vs. actual behavior
+- Environment details
+- Screenshots (if applicable)
 
-## Questions?
+## 💡 Feature Requests
 
-- Open an issue on GitHub
-- Check existing documentation in `/docs`
-- Review code examples in the codebase
+Open an issue with:
+- Use case description
+- Proposed solution
+- Benefits
+- Potential drawbacks
 
-Thank you for contributing! 🎉
+## 📦 Release Process
+
+Releases are managed by maintainers:
+1. Version bump in package.json
+2. CHANGELOG.md update
+3. Git tag creation
+4. Release notes
+5. Deployment
+
+## 🤝 Code of Conduct
+
+- Be respectful
+- Welcome newcomers
+- Focus on constructive feedback
+- Follow the project's guidelines
+
+## 📞 Questions?
+
+- **GitHub Issues**: For bug reports and feature requests
+- **Discussions**: For questions and discussions
+- **Documentation**: See TECHNICAL-DOCS.md
+
+Thank you for contributing to NFTSol! 🎉

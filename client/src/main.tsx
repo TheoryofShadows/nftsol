@@ -7,6 +7,7 @@ import './styles/tailwind.css';
 import './styles/onboarding.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
+import { QueryProvider } from './lib/react-query';
 
 // Polyfill Buffer for browser
 interface WindowWithBuffer extends Window {
@@ -52,7 +53,9 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <App />
+    <QueryProvider>
+      <App />
+    </QueryProvider>
   </React.StrictMode>
 );
 
