@@ -5,7 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = ""
+  NPM_VERSION = "10"
 
 # Frontend redirects for SPA
 [[redirects]]
