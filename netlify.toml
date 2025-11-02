@@ -1,12 +1,12 @@
 [build]
   # Frontend build settings
-  # Netlify UI Base directory is set to "client", so publish/command are relative to that
+  base = "client"
   publish = "dist"
-  command = "npm ci && npm run build"
+  command = "npm install --include=dev && npm run build"
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = "--production=false"
+  NPM_FLAGS = ""
 
 # Frontend redirects for SPA
 [[redirects]]
