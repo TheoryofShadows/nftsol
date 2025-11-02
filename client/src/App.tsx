@@ -14,10 +14,12 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
+import { OnboardingProvider } from './context/OnboardingContext';
 import { NotificationProvider } from './components/NotificationSystem';
 import { usePerformance } from './hooks/usePerformance';
 import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
+import { useOnboarding } from './context/OnboardingContext';
 import { trackPageView, trackWalletConnect, trackTabChange } from './utils/analytics';
 import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
@@ -39,6 +41,10 @@ const EchoViewer = lazy(() => import('./echo/EchoViewer'));
 const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const AdminAuth = lazy(() => import('./components/AdminAuth'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const WelcomeOnboarding = lazy(() => import('./components/WelcomeOnboarding'));
+const FeatureTour = lazy(() => import('./components/FeatureTour'));
+const OnboardingProgress = lazy(() => import('./components/OnboardingProgress'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -92,11 +98,12 @@ class ErrorBoundary extends React.Component<
 }
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('market');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
   const { connected, publicKey, disconnect, connecting } = useWallet();
+  const { startOnboarding, isStepCompleted, completeStep } = useOnboarding();
 
   // Load NFTs on mount
   useEffect(() => {
@@ -108,19 +115,46 @@ function AppContent() {
     trackPageView(window.location.pathname);
   }, []);
 
-  // Track wallet connections
+  // Track wallet connections and trigger onboarding
   useEffect(() => {
     if (connected && publicKey) {
       // Try to detect wallet type from available adapters
       const walletType = 'Solana Wallet'; // Default, could be enhanced
       trackWalletConnect(walletType);
+      
+      // Complete wallet connection step
+      if (!isStepCompleted('wallet-connect')) {
+        completeStep('wallet-connect');
+        
+        // Start dashboard tour after wallet connection if not completed
+        if (!isStepCompleted('dashboard-tour')) {
+          setTimeout(() => {
+            startOnboarding('dashboard-tour');
+          }, 1000);
+        }
+      }
     }
-  }, [connected, publicKey]);
+  }, [connected, publicKey, isStepCompleted, completeStep, startOnboarding]);
 
-  // Track tab changes
+  // Track tab changes and trigger relevant tours
   useEffect(() => {
     trackTabChange(activeTab);
-  }, [activeTab]);
+    
+    // Trigger tours based on tab selection if not completed
+    if (activeTab === 'market' && !isStepCompleted('marketplace-tour')) {
+      setTimeout(() => {
+        startOnboarding('marketplace-tour');
+      }, 500);
+    } else if (activeTab === 'mint' && !isStepCompleted('mint-tour')) {
+      setTimeout(() => {
+        startOnboarding('mint-tour');
+      }, 500);
+    } else if (activeTab === 'my-nfts' && !isStepCompleted('portfolio-tour')) {
+      setTimeout(() => {
+        startOnboarding('portfolio-tour');
+      }, 500);
+    }
+  }, [activeTab, isStepCompleted, startOnboarding]);
 
   // Performance monitoring
   useEffect(() => {
@@ -236,6 +270,7 @@ function AppContent() {
         {/* Enhanced Navigation */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {[
+            { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
             { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
             { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
             { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
@@ -273,9 +308,17 @@ function AppContent() {
         </div>
 
         <div className="min-h-[600px]">
+          {activeTab === 'dashboard' && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <Dashboard />
+              </Suspense>
+            </div>
+          )}
+
           {activeTab === 'market' && (
             <div className="animate-fade-in animate-slide-up">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-8" data-tour="marketplace-header">
                 <h2 className="text-4xl font-bold gradient-text font-display">
                   🏪 NFT Marketplace
                 </h2>
@@ -299,7 +342,9 @@ function AppContent() {
                     </div>
                   }
                 >
-                  <NftGrid nfts={nfts} />
+                  <div data-tour="nft-grid">
+                    <NftGrid nfts={nfts} />
+                  </div>
                 </Suspense>
               )}
             </div>
@@ -363,7 +408,9 @@ function AppContent() {
                   </div>
                 }
               >
-                <MintForm />
+                <div data-tour="mint-form">
+                  <MintForm />
+                </div>
               </Suspense>
             </div>
           )}
@@ -613,6 +660,13 @@ function AppContent() {
       <div className="fixed left-4 bottom-4 z-40 max-w-xs">
         <ContractInfo />
       </div>
+
+      {/* Onboarding Components */}
+      <Suspense fallback={null}>
+        <WelcomeOnboarding />
+        <FeatureTour />
+        <OnboardingProgress />
+      </Suspense>
     </div>
   );
 }
@@ -641,9 +695,11 @@ function App() {
         <WalletProvider wallets={wallets} autoConnect>
           <WalletModalProvider>
             <AppProvider>
-              <NotificationProvider>
-                <AppContent />
-              </NotificationProvider>
+              <OnboardingProvider>
+                <NotificationProvider>
+                  <AppContent />
+                </NotificationProvider>
+              </OnboardingProvider>
             </AppProvider>
           </WalletModalProvider>
         </WalletProvider>

@@ -52,10 +52,12 @@
 #### Frontend
 - **Framework**: React 18.3.1
 - **Language**: TypeScript 5.6+
-- **Build Tool**: Vite 5.4+
-- **UI**: Tailwind CSS + Custom Design System
-- **Wallet**: @solana/wallet-adapter-react
+- **Build Tool**: Vite 7.1+
+- **UI**: Tailwind CSS 4.1 + Custom Design System with glassmorphism
+- **Wallet**: @solana/wallet-adapter-react (9 wallet adapters)
+- **Onboarding**: react-joyride for interactive tours
 - **Blockchain**: @solana/web3.js 1.98+
+- **Dashboard**: Modern 2026-style UI with real-time stats
 
 #### Backend
 - **Runtime**: Node.js 18+

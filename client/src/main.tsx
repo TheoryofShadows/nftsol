@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import './styles/solana.css';
+import './styles/tailwind.css';
+import './styles/onboarding.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
 

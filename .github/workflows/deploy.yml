@@ -61,11 +61,13 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_SOLANA_NETWORK: mainnet-beta
       
+      - name: Install Netlify CLI
+        if: github.ref == 'refs/heads/main'
+        run: npm install -g netlify-cli
+      
       - name: Deploy to Netlify
         if: github.ref == 'refs/heads/main'
-        uses: netlify/actions/cli@master
+        run: netlify deploy --dir=dist --prod
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        with:
-          args: deploy --dir=dist --prod

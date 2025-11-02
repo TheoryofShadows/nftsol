@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-MIT-informational)
 ![Stars](https://img.shields.io/github/stars/TheoryofShadows/nftsol?style=social)
 
-**NFTSol** is a production-ready, decentralized NFT marketplace built on Solana blockchain, featuring compressed NFTs, CLOUT token rewards, and Eternal Echoes collaborative NFT creation.
+**NFTSol** is a production-ready, decentralized NFT marketplace built on Solana blockchain, featuring compressed NFTs, CLOUT token rewards, Eternal Echoes collaborative NFT creation, modern dashboard, and comprehensive onboarding experience.
 
 ## 🚀 Live Demo
 
@@ -14,6 +14,8 @@
 ## ✨ Features
 
 - 🎨 **Full NFT Marketplace**: Create, buy, and sell NFTs on Solana
+- 📊 **Modern Dashboard**: Beautiful 2026-style dashboard with portfolio overview, stats, and activity feed
+- 🎓 **Smart Onboarding**: Interactive tours and welcome experience for new users
 - ⭐ **CLOUT Token System**: Native reward token for platform engagement
 - 🎬 **Eternal Echoes**: Collaborative, layered NFT creation with historical verification
 - 🌳 **Compressed NFTs (cNFTs)**: Low-cost NFT minting using Metaplex Bubblegum
@@ -29,19 +31,21 @@
 - **[WHITEPAPER.md](WHITEPAPER.md)** - Complete project overview, tokenomics, and roadmap
 - **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)** - Technical documentation, API reference, and architecture
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Deployment guide for Render and Netlify
+- **[SECURITY.md](SECURITY.md)** - Security policy and best practices
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 - **React 18** with TypeScript
 - **Vite** for fast development and optimized builds
-- **Tailwind CSS** for modern, responsive UI
+- **Tailwind CSS 4** for modern, responsive UI with glassmorphism effects
 - **Solana Wallet Adapter** - 9 wallet options (Phantom, Solflare, Solong, Slope, Trust, TokenPocket, Ledger, MathWallet, Torus)
+- **React Joyride** for interactive onboarding tours
 - **React Lazy Loading** for optimal performance
-- **Mobile-First Design** with comprehensive responsive fixes
+- **Modern 2026 Design** with animations and gradients
 
 ### Backend
-- **Node.js** with TypeScript
+- **Node.js 20** with TypeScript
 - **Express.js** REST API
 - **PostgreSQL** database with Drizzle ORM
 - **Solana Web3.js** for blockchain interactions
@@ -61,8 +65,8 @@
 
 - **Node.js** 20.x or later
 - **PostgreSQL** 14+ database
-- **Solana CLI** (optional, for program deployment)
 - **Git** for version control
+- **Solana CLI** (optional, for program deployment)
 
 ### 1. Clone the Repository
 
@@ -81,12 +85,12 @@ cd apps/backend
 npm install
 
 # Copy environment template
-cp .env.example .env
+cp config/development/backend.env .env
 
 # Configure environment variables (see DEPLOYMENT.md)
 # Edit .env with your database URL, Solana RPC, and keys
 
-# Run database migrations
+# Run database migrations (if applicable)
 npm run db:migrate
 
 # Start development server
@@ -104,9 +108,9 @@ cd client
 npm install
 
 # Copy environment template
-cp .env.example .env
+cp config/development/frontend.env .env
 
-# Configure environment variables (see DEPLOYMENT.md)
+# Configure environment variables
 # Edit .env with your backend URL and Solana RPC
 
 # Start development server
@@ -136,6 +140,10 @@ PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key
 # CLOUT Token Configuration
 CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
 REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+
+# Security
+JWT_SECRET=your_jwt_secret
+SESSION_SECRET=your_session_secret
 ```
 
 #### Frontend (`.env` in `client/`)
@@ -177,38 +185,53 @@ nftsol/
 │
 ├── client/                   # Frontend React App
 │   ├── src/
-│   │   ├── components/       # UI components (29 files)
-│   │   │   ├── AdminDashboard.tsx  # Admin withdrawal management
-│   │   │   ├── AdminAuth.tsx       # Admin authentication
-│   │   │   ├── CloutBadge.tsx      # CLOUT balance display
-│   │   │   ├── Hero.tsx            # Landing page
-│   │   │   ├── MintForm.tsx        # NFT minting
-│   │   │   ├── NftGrid.tsx         # Marketplace
-│   │   │   └── ...
-│   │   ├── echo/            # Eternal Echoes features
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── context/         # React context providers
-│   │   ├── styles/          # CSS (design system + mobile fixes)
-│   │   ├── wallet/          # Solana wallet integration
-│   │   └── App.tsx          # Main app with 12 tabs
+│   │   ├── components/       # UI components (28+ files)
+│   │   │   ├── Dashboard.tsx         # Modern dashboard
+│   │   │   ├── DashboardStats.tsx     # Stats cards
+│   │   │   ├── PortfolioOverview.tsx  # Portfolio view
+│   │   │   ├── ActivityFeed.tsx      # Activity timeline
+│   │   │   ├── QuickActions.tsx      # Quick action buttons
+│   │   │   ├── ModernWalletConnect.tsx # Enhanced wallet UI
+│   │   │   ├── WelcomeOnboarding.tsx  # Welcome modal
+│   │   │   ├── FeatureTour.tsx        # Interactive tours
+│   │   │   ├── OnboardingProgress.tsx # Progress tracker
+│   │   │   ├── AdminDashboard.tsx     # Admin management
+│   │   │   ├── MintForm.tsx           # NFT minting
+│   │   │   ├── NftGrid.tsx           # Marketplace
+│   │   │   └── ...                    # More components
+│   │   ├── echo/             # Eternal Echoes features
+│   │   ├── hooks/            # Custom React hooks
+│   │   ├── context/          # React context providers
+│   │   │   ├── AppContext.tsx
+│   │   │   └── OnboardingContext.tsx
+│   │   ├── styles/           # CSS (Tailwind + custom)
+│   │   │   ├── tailwind.css
+│   │   │   ├── onboarding.css
+│   │   │   └── design-system.css
+│   │   ├── wallet/           # Solana wallet integration
+│   │   └── App.tsx           # Main app with tabs
 │   ├── public/              # Static assets
 │   ├── package.json
 │   └── vite.config.ts
 │
-├── server/                   # Legacy backend (deprecated)
 ├── config/                   # Environment configs
-├── scripts/                  # Deployment & utility scripts
+│   ├── development/
+│   ├── production/
+│   └── test/
+│
+├── scripts/                  # Utility scripts
+│   ├── production/
+│   └── development/
 │
 ├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml           # CI testing
-│   │   ├── deploy.yml       # Auto-deploy to Render/Netlify
-│   │   ├── health-check.yml # Health monitoring
-│   │   └── secret-scan.yml  # Security scanning
+│   └── workflows/
+│       ├── deploy.yml        # Auto-deploy to Render/Netlify
+│       └── ...
 │
 ├── WHITEPAPER.md            # Complete project overview
 ├── TECHNICAL-DOCS.md        # Architecture & API docs
 ├── DEPLOYMENT.md            # Deployment guide
+├── SECURITY.md              # Security policy
 ├── README.md                # This file
 └── package.json             # Root package config
 ```
@@ -223,7 +246,7 @@ nftsol/
 npm run dev          # Start development server with hot reload
 npm run build        # Build TypeScript to JavaScript
 npm run start        # Start production server
-npm run db:migrate   # Run database migrations
+npm run type-check   # Type check without building
 npm run lint         # Lint code
 ```
 
@@ -236,6 +259,26 @@ npm run preview      # Preview production build
 npm run lint         # Lint code
 npm run format       # Format code with Prettier
 ```
+
+## 🎯 Key Features Explained
+
+### Modern Dashboard
+- **Stats Overview**: SOL balance, NFT count, portfolio value, activity metrics
+- **Portfolio Grid**: Visual grid of owned NFTs with quick actions
+- **Activity Feed**: Real-time activity timeline with mint/sale/transfer events
+- **Quick Actions**: One-click access to mint, browse, manage funds
+
+### Smart Onboarding
+- **Welcome Experience**: Multi-slide introduction for new users
+- **Interactive Tours**: Context-aware feature tours (dashboard, marketplace, mint)
+- **Progress Tracking**: Visual progress indicator with completion tracking
+- **Skip/Resume**: Users can skip or resume onboarding anytime
+
+### Wallet Integration
+- **9 Wallet Options**: Phantom, Solflare, Solong, Slope, Trust, TokenPocket, Ledger, MathWallet, Torus
+- **Real-time Balance**: Live SOL balance updates with subscriptions
+- **Modern UI**: Glassmorphism design with dropdown details
+- **Auto-reconnect**: Automatic wallet reconnection on page load
 
 ## 💎 CLOUT Token
 
@@ -286,6 +329,7 @@ Fees are automatically collected and sent to the platform wallet configured via 
 - JWT authentication for protected endpoints
 - Rate limiting on API endpoints
 - Input validation and sanitization
+- See [SECURITY.md](SECURITY.md) for details
 
 ## 🌐 Deployment
 
@@ -315,6 +359,7 @@ We welcome contributions! Please:
 - Update documentation for API changes
 - Follow existing code style (run `npm run format`)
 - Ensure all lint checks pass (`npm run lint`)
+- Use conventional commit messages
 
 ## 📝 License
 
