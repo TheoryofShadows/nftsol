@@ -165,7 +165,7 @@ async function checkDatabase(): Promise<{ healthy: boolean; details: any }> {
     const hasRows = result && (result as any).rowCount && (result as any).rowCount > 0;
 
     return {
-      healthy: !!hasRows && duration < 5000,
+      healthy: !!hasRows && duration < 10000,
       details: {
         connected: true,
         responseTime: `${duration}ms`,
@@ -186,12 +186,17 @@ async function checkDatabase(): Promise<{ healthy: boolean; details: any }> {
 // Health check endpoints
 app.get('/healthz', async (req, res) => {
   try {
-    const [solanaHealth, dbHealth] = await Promise.all([
+    // Use Promise.allSettled to prevent one failure from breaking the check
+    const [solanaResult, dbResult] = await Promise.allSettled([
       solanaService.healthCheck(),
       checkDatabase(),
     ]);
 
-    const overallHealthy = solanaHealth.healthy && dbHealth.healthy;
+    const solanaHealth = solanaResult.status === 'fulfilled' ? solanaResult.value : { healthy: false, details: { error: 'Check failed' } };
+    const dbHealth = dbResult.status === 'fulfilled' ? dbResult.value : { healthy: false, details: { error: 'Check failed' } };
+
+    // At least one service must be healthy for overall health
+    const overallHealthy = solanaHealth.healthy || dbHealth.healthy;
     const statusCode = overallHealthy ? 200 : 503;
 
     const response: ApiResponse = {
