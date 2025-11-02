@@ -32,17 +32,20 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthSuccess }) => {
       const signature = await signMessage(new TextEncoder().encode(challenge));
 
       // Send to backend for verification
-      const response = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/auth/admin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          walletAddress: publicKey.toBase58(),
-          signature: Array.from(signature),
-          message: challenge,
-        }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/auth/admin`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            walletAddress: publicKey.toBase58(),
+            signature: Array.from(signature),
+            message: challenge,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -137,4 +140,3 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthSuccess }) => {
 };
 
 export default AdminAuth;
-

@@ -12,16 +12,16 @@ const queryClientConfig: DefaultOptions = {
   queries: {
     // Stale time: data is considered fresh for this duration
     staleTime: 1000 * 60 * 5, // 5 minutes
-    
+
     // Cache time: how long unused/inactive cache data remains in memory
     gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
-    
+
     // Refetch on window focus for real-time updates
     refetchOnWindowFocus: true,
-    
+
     // Refetch on reconnect
     refetchOnReconnect: true,
-    
+
     // Retry failed requests with exponential backoff
     retry: (failureCount, error: any) => {
       // Don't retry on 4xx errors (client errors)
@@ -32,10 +32,10 @@ const queryClientConfig: DefaultOptions = {
       return failureCount < 3;
     },
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    
+
     // Use network-first strategy (stale-while-revalidate)
     refetchOnMount: true,
-    
+
     // Structural sharing to prevent unnecessary re-renders
     structuralSharing: true,
   },
@@ -65,26 +65,25 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 export const queryKeys = {
   // Marketplace
   marketplace: (page = 1, limit = 20) => ['marketplace', page, limit] as const,
-  
+
   // NFTs
   nft: (mintAddress: string) => ['nft', mintAddress] as const,
   nftsByOwner: (owner: string) => ['nfts', 'owner', owner] as const,
-  
+
   // Wallet
   wallet: (address: string) => ['wallet', address] as const,
   walletBalance: (address: string) => ['wallet', address, 'balance'] as const,
-  
+
   // CLOUT
   cloutBalance: (address: string) => ['clout', 'balance', address] as const,
-  
+
   // Programs
   programs: () => ['programs'] as const,
-  
+
   // Collections
   collections: () => ['collections'] as const,
-  
+
   // Echo
   echo: (id: string) => ['echo', id] as const,
   echoTrending: () => ['echo', 'trending'] as const,
 };
-

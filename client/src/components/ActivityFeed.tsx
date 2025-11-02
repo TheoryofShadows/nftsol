@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface Activity {
   id: string;
@@ -11,32 +11,36 @@ interface Activity {
 
 export default function ActivityFeed() {
   // Mock activity data - in production, this would come from your API
-  const activities: Activity[] = [
-    {
-      id: '1',
-      type: 'mint',
-      title: 'NFT Minted',
-      description: 'You minted "Digital Dream #42"',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      amount: '0.5 SOL',
-    },
-    {
-      id: '2',
-      type: 'sale',
-      title: 'NFT Sold',
-      description: 'Digital Dream #42 was sold',
-      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-      amount: '2.5 SOL',
-    },
-    {
-      id: '3',
-      type: 'listing',
-      title: 'NFT Listed',
-      description: 'You listed "Cool Art #123"',
-      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
-      amount: '1.0 SOL',
-    },
-  ];
+  // Calculate timestamps once using useMemo to avoid impure function calls during render
+  const activities: Activity[] = useMemo(() => {
+    const now = Date.now();
+    return [
+      {
+        id: '1',
+        type: 'mint' as const,
+        title: 'NFT Minted',
+        description: 'You minted "Digital Dream #42"',
+        timestamp: new Date(now - 2 * 60 * 60 * 1000), // 2 hours ago
+        amount: '0.5 SOL',
+      },
+      {
+        id: '2',
+        type: 'sale' as const,
+        title: 'NFT Sold',
+        description: 'Digital Dream #42 was sold',
+        timestamp: new Date(now - 5 * 60 * 60 * 1000), // 5 hours ago
+        amount: '2.5 SOL',
+      },
+      {
+        id: '3',
+        type: 'listing' as const,
+        title: 'NFT Listed',
+        description: 'You listed "Cool Art #123"',
+        timestamp: new Date(now - 24 * 60 * 60 * 1000), // 1 day ago
+        amount: '1.0 SOL',
+      },
+    ];
+  }, []);
 
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
@@ -68,8 +72,8 @@ export default function ActivityFeed() {
     }
   };
 
-  const formatTimeAgo = (date: Date) => {
-    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  const formatTimeAgo = (date: Date, currentTime: number) => {
+    const seconds = Math.floor((currentTime - date.getTime()) / 1000);
     if (seconds < 60) return 'Just now';
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) return `${minutes}m ago`;
@@ -78,6 +82,8 @@ export default function ActivityFeed() {
     const days = Math.floor(hours / 24);
     return `${days}d ago`;
   };
+
+  const currentTime = useMemo(() => Date.now(), []);
 
   return (
     <div className="glass-card p-6">
@@ -100,10 +106,12 @@ export default function ActivityFeed() {
               key={activity.id}
               className="flex items-start space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors group cursor-pointer"
             >
-              <div className={`w-10 h-10 rounded-lg ${getActivityColor(activity.type)} flex items-center justify-center text-lg flex-shrink-0`}>
+              <div
+                className={`w-10 h-10 rounded-lg ${getActivityColor(activity.type)} flex items-center justify-center text-lg flex-shrink-0`}
+              >
                 {getActivityIcon(activity.type)}
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-1">
                   <h3 className="font-semibold text-white text-sm group-hover:text-purple-400 transition-colors">
@@ -116,7 +124,9 @@ export default function ActivityFeed() {
                   )}
                 </div>
                 <p className="text-xs text-gray-400 mb-1">{activity.description}</p>
-                <p className="text-xs text-gray-500">{formatTimeAgo(activity.timestamp)}</p>
+                <p className="text-xs text-gray-500">
+                  {formatTimeAgo(activity.timestamp, currentTime)}
+                </p>
               </div>
             </div>
           ))

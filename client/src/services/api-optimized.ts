@@ -2,7 +2,16 @@
  * Optimized API service with intelligent caching, retry logic, and request deduplication
  */
 
-import { ApiResponse, NFT, Collection, WalletInfo, ProgramConfig, MintRequest, MintResponse, MarketData } from '../types';
+import {
+  ApiResponse,
+  NFT,
+  Collection,
+  WalletInfo,
+  ProgramConfig,
+  MintRequest,
+  MintResponse,
+  MarketData,
+} from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
@@ -20,22 +29,27 @@ const DEFAULT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function getCacheKey(endpoint: string, params?: Record<string, any>): string {
   if (!params) return endpoint;
-  const sortedParams = Object.keys(params).sort().reduce((acc, key) => {
-    acc[key] = params[key];
-    return acc;
-  }, {} as Record<string, any>);
+  const sortedParams = Object.keys(params)
+    .sort()
+    .reduce(
+      (acc, key) => {
+        acc[key] = params[key];
+        return acc;
+      },
+      {} as Record<string, any>
+    );
   return `${endpoint}:${JSON.stringify(sortedParams)}`;
 }
 
 function getCached<T>(key: string): T | null {
   const entry = cache.get(key);
   if (!entry) return null;
-  
+
   if (Date.now() > entry.expires) {
     cache.delete(key);
     return null;
   }
-  
+
   return entry.data as T;
 }
 
@@ -55,13 +69,13 @@ async function fetchWithRetry(
 ): Promise<Response> {
   try {
     const response = await fetch(url, options);
-    
+
     // Retry on 5xx errors
     if (response.status >= 500 && retries > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
       return fetchWithRetry(url, options, retries - 1, delay * 2);
     }
-    
+
     return response;
   } catch (error) {
     // Retry on network errors
@@ -115,7 +129,7 @@ class OptimizedApiService {
           ...defaultOptions,
           signal: controller.signal,
         });
-        
+
         clearTimeout(timeoutId);
 
         // Handle non-JSON responses
@@ -145,7 +159,7 @@ class OptimizedApiService {
       } catch (error) {
         // Return user-friendly error
         let errorMessage = 'Network error. Please check your connection.';
-        
+
         if (error instanceof Error) {
           if (error.name === 'AbortError') {
             errorMessage = 'Request timed out. Please try again.';
@@ -199,11 +213,15 @@ class OptimizedApiService {
       formData.append('imageUrl', request.imageUrl);
     }
 
-    return this.request('/api/v1/simple-mint', {
-      method: 'POST',
-      headers: {}, // Let browser set Content-Type for FormData
-      body: formData,
-    }, { skipCache: true });
+    return this.request(
+      '/api/v1/simple-mint',
+      {
+        method: 'POST',
+        headers: {}, // Let browser set Content-Type for FormData
+        body: formData,
+      },
+      { skipCache: true }
+    );
   }
 
   // Get NFT metadata (long cache)
@@ -269,4 +287,3 @@ class OptimizedApiService {
 
 export const apiServiceOptimized = new OptimizedApiService();
 export default apiServiceOptimized;
-

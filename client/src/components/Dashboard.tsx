@@ -39,9 +39,7 @@ export default function Dashboard() {
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg">
               👛
             </div>
-            <h2 className="text-3xl font-bold gradient-text-primary mb-2">
-              Connect Your Wallet
-            </h2>
+            <h2 className="text-3xl font-bold gradient-text-primary mb-2">Connect Your Wallet</h2>
             <p className="text-gray-300 text-lg">
               Connect your Solana wallet to access your dashboard and manage your NFTs
             </p>
@@ -58,12 +56,8 @@ export default function Dashboard() {
       <div className="dashboard-section">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold gradient-text-primary mb-2">
-              Dashboard
-            </h1>
-            <p className="text-gray-300">
-              Welcome back! Here's your portfolio overview
-            </p>
+            <h1 className="text-4xl font-bold gradient-text-primary mb-2">Dashboard</h1>
+            <p className="text-gray-300">Welcome back! Here&apos;s your portfolio overview</p>
           </div>
           <ModernWalletConnect />
         </div>

@@ -136,13 +136,10 @@ export async function sendAndConfirmTransactionOptimized(
   }
 
   // Send transaction
-  const signature = await connection.sendRawTransaction(
-    transaction.serialize(),
-    {
-      skipPreflight: confirmOptions?.skipPreflight || false,
-      maxRetries: 3,
-    }
-  );
+  const signature = await connection.sendRawTransaction(transaction.serialize(), {
+    skipPreflight: confirmOptions?.skipPreflight || false,
+    maxRetries: 3,
+  });
 
   // Confirm with optimized strategy
   const confirmation = await connection.confirmTransaction(signature, commitment);
@@ -224,4 +221,3 @@ export function parseSOL(sol: string | number): number {
 // Export connection helpers
 export { useWallet, useConnection } from '@solana/wallet-adapter-react';
 export { clusterApiUrl } from '@solana/web3.js';
-

@@ -33,7 +33,7 @@
   /* Wallet button needs better mobile styling */
   header .btn-glass,
   header button,
-  header div[class*="wallet"] {
+  header div[class*='wallet'] {
     font-size: 0.875rem !important;
     padding: 0.5rem 1rem !important;
     white-space: nowrap;
@@ -50,7 +50,7 @@
   }
 
   /* Navigation button styling for mobile */
-  button[class*="px-6"] {
+  button[class*='px-6'] {
     padding: 0.75rem 1rem !important;
     font-size: 0.875rem !important;
     width: auto !important;
@@ -58,26 +58,26 @@
   }
 
   /* Navigation button content */
-  button[class*="px-6"] .flex.items-center.space-x-3 {
+  button[class*='px-6'] .flex.items-center.space-x-3 {
     gap: 0.5rem !important;
   }
 
-  button[class*="px-6"] span.text-2xl {
+  button[class*='px-6'] span.text-2xl {
     font-size: 1.25rem !important;
   }
 
-  button[class*="px-6"] .text-left {
+  button[class*='px-6'] .text-left {
     display: flex;
     flex-direction: column;
     gap: 0;
   }
 
-  button[class*="px-6"] .font-bold {
+  button[class*='px-6'] .font-bold {
     font-size: 0.875rem !important;
     white-space: nowrap;
   }
 
-  button[class*="px-6"] .text-xs {
+  button[class*='px-6'] .text-xs {
     font-size: 0.75rem !important;
   }
 
@@ -144,7 +144,9 @@
   }
 
   /* Prevent text from being too small */
-  p, span, div {
+  p,
+  span,
+  div {
     font-size: 0.875rem !important;
   }
 
@@ -167,7 +169,7 @@
   }
 
   /* Wallet multi button specific fixes */
-  div[class*="wallet"] {
+  div[class*='wallet'] {
     min-width: auto !important;
     max-width: 100% !important;
   }
@@ -193,16 +195,16 @@
   }
 
   /* Navigation buttons should be even smaller */
-  button[class*="px-6"] {
+  button[class*='px-6'] {
     padding: 0.5rem 0.75rem !important;
     font-size: 0.75rem !important;
   }
 
-  button[class*="px-6"] span.text-2xl {
+  button[class*='px-6'] span.text-2xl {
     font-size: 1rem !important;
   }
 
-  button[class*="px-6"] .font-bold {
+  button[class*='px-6'] .font-bold {
     font-size: 0.75rem !important;
   }
 
@@ -256,7 +258,11 @@
 /* Touch improvements */
 @media (hover: none) and (pointer: coarse) {
   /* Make sure buttons are large enough for touch */
-  button, a, input, select, textarea {
+  button,
+  a,
+  input,
+  select,
+  textarea {
     min-height: 44px !important; /* Apple's recommended touch target */
   }
 
@@ -279,20 +285,20 @@
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   select,
   textarea,
-  input[type="text"],
-  input[type="password"],
-  input[type="datetime"],
-  input[type="datetime-local"],
-  input[type="date"],
-  input[type="month"],
-  input[type="time"],
-  input[type="week"],
-  input[type="number"],
-  input[type="email"],
-  input[type="url"],
-  input[type="search"],
-  input[type="tel"],
-  input[type="color"] {
+  input[type='text'],
+  input[type='password'],
+  input[type='datetime'],
+  input[type='datetime-local'],
+  input[type='date'],
+  input[type='month'],
+  input[type='time'],
+  input[type='week'],
+  input[type='number'],
+  input[type='email'],
+  input[type='url'],
+  input[type='search'],
+  input[type='tel'],
+  input[type='color'] {
     font-size: 16px !important;
   }
 }
@@ -342,7 +348,7 @@ body > div#root {
 @media (max-width: 768px) {
   .glass,
   .glass-strong,
-  [class*="backdrop-blur"] {
+  [class*='backdrop-blur'] {
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
   }
@@ -361,7 +367,8 @@ body > div#root {
 }
 
 /* Improve tap highlighting */
-a, button {
+a,
+button {
   -webkit-tap-highlight-color: rgba(153, 69, 255, 0.3);
   tap-highlight-color: rgba(153, 69, 255, 0.3);
 }
@@ -378,4 +385,3 @@ a, button {
     bottom: max(1rem, env(safe-area-inset-bottom)) !important;
   }
 }
-

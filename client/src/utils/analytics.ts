@@ -31,7 +31,7 @@ export const initAnalytics = (trackingId: string) => {
   if (!window.dataLayer) {
     window.dataLayer = [];
   }
-  window.gtag = function() {
+  window.gtag = function () {
     if (window.dataLayer) {
       window.dataLayer.push(arguments);
     }
@@ -113,4 +113,3 @@ export const trackTabChange = (tabName: string) => {
     event_label: tabName,
   });
 };
-

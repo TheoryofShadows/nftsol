@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    background: linear-gradient(to bottom right, rgb(17 24 39), rgb(88 28 135), rgb(109 40 217));
+    @apply bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900;
   }
 }
 

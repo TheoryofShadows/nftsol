@@ -38,7 +38,6 @@ const EchoMint = lazy(() => import('./echo/EchoMint'));
 const EchoViewer = lazy(() => import('./echo/EchoViewer'));
 const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const AdminAuth = lazy(() => import('./components/AdminAuth'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const WelcomeOnboarding = lazy(() => import('./components/WelcomeOnboarding'));
 const FeatureTour = lazy(() => import('./components/FeatureTour'));
@@ -60,7 +59,7 @@ function AppContent() {
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
-  const { connected, publicKey, disconnect, connecting } = useWallet();
+  const { connected, publicKey } = useWallet();
   const { startOnboarding, isStepCompleted, completeStep } = useOnboarding();
 
   // Load NFTs on mount
@@ -79,11 +78,11 @@ function AppContent() {
       // Try to detect wallet type from available adapters
       const walletType = 'Solana Wallet'; // Default, could be enhanced
       trackWalletConnect(walletType);
-      
+
       // Complete wallet connection step
       if (!isStepCompleted('wallet-connect')) {
         completeStep('wallet-connect');
-        
+
         // Start dashboard tour after wallet connection if not completed
         if (!isStepCompleted('dashboard-tour')) {
           setTimeout(() => {
@@ -97,7 +96,7 @@ function AppContent() {
   // Track tab changes and trigger relevant tours
   useEffect(() => {
     trackTabChange(activeTab);
-    
+
     // Trigger tours based on tab selection if not completed
     if (activeTab === 'market' && !isStepCompleted('marketplace-tour')) {
       setTimeout(() => {
@@ -117,7 +116,7 @@ function AppContent() {
   // Performance monitoring
   useEffect(() => {
     if (import.meta.env.DEV) {
-      const report = getPerformanceReport();
+      getPerformanceReport();
       // Performance metrics available for development
     }
   }, [getPerformanceReport]);
@@ -277,7 +276,10 @@ function AppContent() {
 
           {activeTab === 'market' && (
             <div className="animate-fade-in animate-slide-up">
-              <div className="flex items-center justify-between mb-8" data-tour="marketplace-header">
+              <div
+                className="flex items-center justify-between mb-8"
+                data-tour="marketplace-header"
+              >
                 <h2 className="text-4xl font-bold gradient-text font-display">
                   🏪 NFT Marketplace
                 </h2>

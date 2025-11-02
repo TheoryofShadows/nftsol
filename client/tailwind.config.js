@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -28,7 +25,8 @@ export default {
         'gradient-primary': 'linear-gradient(135deg, #9945ff 0%, #14f195 100%)',
         'gradient-secondary': 'linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%)',
         'gradient-dark': 'linear-gradient(135deg, #0a0b0d 0%, #1a1b23 100%)',
-        'gradient-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+        'gradient-glass':
+          'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
       },
       backdropBlur: {
         xs: '2px',
@@ -53,13 +51,10 @@ export default {
         },
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(153, 69, 255, 0.3)',
+        glow: '0 0 20px rgba(153, 69, 255, 0.3)',
         'glow-lg': '0 0 40px rgba(153, 69, 255, 0.5)',
       },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
-}
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+};

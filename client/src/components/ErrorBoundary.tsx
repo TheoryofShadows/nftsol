@@ -87,7 +87,8 @@ class ErrorBoundaryClass extends Component<Props, State> {
                 Something went wrong
               </h1>
               <p className="text-gray-300 mb-4">
-                We're sorry, but something unexpected happened. Don't worry, your data is safe.
+                We&apos;re sorry, but something unexpected happened. Don&apos;t worry, your data is
+                safe.
               </p>
               {import.meta.env.DEV && this.state.error && (
                 <div className="mt-4 p-4 bg-red-500/10 rounded-lg text-left">
@@ -107,7 +108,7 @@ class ErrorBoundaryClass extends Component<Props, State> {
                 </div>
               )}
             </div>
-            
+
             <div className="flex gap-4 justify-center">
               <button
                 onClick={this.handleReset}
@@ -139,4 +140,3 @@ export function ErrorBoundary({ children, fallback }: Props) {
 }
 
 export default ErrorBoundary;
-

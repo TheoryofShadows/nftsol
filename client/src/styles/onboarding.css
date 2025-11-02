@@ -68,5 +68,7 @@
 
 .react-joyride__spotlight {
   border-radius: 12px !important;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8), 0 0 40px rgba(153, 69, 255, 0.6) !important;
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.8),
+    0 0 40px rgba(153, 69, 255, 0.6) !important;
 }

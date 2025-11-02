@@ -50,11 +50,11 @@ export default function QuickActions() {
   return (
     <div className="glass-card p-6">
       <h2 className="text-xl font-bold gradient-text-primary mb-6">Quick Actions</h2>
-      
+
       <div className="grid grid-cols-2 gap-3">
         {actions.map((action) => {
           const isDisabled = action.requiresConnection && !connected;
-          
+
           return (
             <button
               key={action.label}
@@ -74,7 +74,7 @@ export default function QuickActions() {
                 <div className="text-sm font-semibold text-white">{action.label}</div>
                 <div className="text-xs text-white/80 mt-1">{action.description}</div>
               </div>
-              
+
               {!isDisabled && (
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
               )}

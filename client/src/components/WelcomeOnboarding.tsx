@@ -12,25 +12,29 @@ export default function WelcomeOnboarding() {
   const slides = [
     {
       title: 'Welcome to NFTSol! 🎉',
-      description: 'Your gateway to the Solana NFT ecosystem. Create, discover, and trade unique digital assets with lightning-fast transactions.',
+      description:
+        'Your gateway to the Solana NFT ecosystem. Create, discover, and trade unique digital assets with lightning-fast transactions.',
       icon: '✨',
       gradient: 'from-purple-500 to-pink-500',
     },
     {
       title: 'Connect Your Wallet',
-      description: 'Securely connect your Solana wallet to start minting, buying, and selling NFTs. We support Phantom, Solflare, and more!',
+      description:
+        'Securely connect your Solana wallet to start minting, buying, and selling NFTs. We support Phantom, Solflare, and more!',
       icon: '👛',
       gradient: 'from-cyan-500 to-blue-500',
     },
     {
       title: 'Explore & Create',
-      description: 'Browse our marketplace, mint your own NFTs, and build your digital collection. Everything happens on-chain on Solana.',
+      description:
+        'Browse our marketplace, mint your own NFTs, and build your digital collection. Everything happens on-chain on Solana.',
       icon: '🚀',
       gradient: 'from-green-500 to-emerald-500',
     },
     {
       title: 'Earn Rewards',
-      description: 'Earn CLOUT tokens for activities, participate in referrals, and unlock exclusive features as you engage with the platform.',
+      description:
+        'Earn CLOUT tokens for activities, participate in referrals, and unlock exclusive features as you engage with the platform.',
       icon: '⭐',
       gradient: 'from-yellow-500 to-orange-500',
     },
@@ -62,14 +66,16 @@ export default function WelcomeOnboarding() {
 
         {/* Slide Content */}
         <div className="text-center py-8">
-          <div className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-5xl shadow-2xl animate-pulse-glow`}>
+          <div
+            className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-5xl shadow-2xl animate-pulse-glow`}
+          >
             {slides[currentSlide].icon}
           </div>
-          
+
           <h2 className="text-4xl md:text-5xl font-bold gradient-text-primary mb-4">
             {slides[currentSlide].title}
           </h2>
-          
+
           <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-md mx-auto leading-relaxed">
             {slides[currentSlide].description}
           </p>
@@ -100,7 +106,7 @@ export default function WelcomeOnboarding() {
                 Previous
               </button>
             )}
-            
+
             {currentSlide < slides.length - 1 ? (
               <button
                 onClick={() => setCurrentSlide(currentSlide + 1)}

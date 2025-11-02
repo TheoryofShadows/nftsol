@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface DashboardStatsProps {
   solBalance: number;
@@ -6,7 +6,14 @@ interface DashboardStatsProps {
   isLoadingBalance: boolean;
 }
 
-export default function DashboardStats({ solBalance, nftCount, isLoadingBalance }: DashboardStatsProps) {
+export default function DashboardStats({
+  solBalance,
+  nftCount,
+  isLoadingBalance,
+}: DashboardStatsProps) {
+  // Calculate random value once using useMemo to avoid impure function calls
+  const randomChange = useMemo(() => Math.floor(Math.random() * 3), []);
+
   const stats = [
     {
       label: 'SOL Balance',
@@ -21,7 +28,7 @@ export default function DashboardStats({ solBalance, nftCount, isLoadingBalance 
       value: nftCount.toString(),
       icon: '🎨',
       gradient: 'from-cyan-500 to-cyan-600',
-      change: `+${nftCount > 0 ? Math.floor(Math.random() * 3) : 0} this month`,
+      change: `+${nftCount > 0 ? randomChange : 0} this month`,
       changePositive: true,
     },
     {
@@ -51,25 +58,27 @@ export default function DashboardStats({ solBalance, nftCount, isLoadingBalance 
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <div className="flex items-start justify-between mb-4">
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-2xl shadow-lg`}>
+            <div
+              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center text-2xl shadow-lg`}
+            >
               {stat.icon}
             </div>
             {stat.changePositive !== null && (
-              <div className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                stat.changePositive
-                  ? 'bg-green-500/20 text-green-400'
-                  : 'bg-red-500/20 text-red-400'
-              }`}>
+              <div
+                className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                  stat.changePositive
+                    ? 'bg-green-500/20 text-green-400'
+                    : 'bg-red-500/20 text-red-400'
+                }`}
+              >
                 {stat.change}
               </div>
             )}
           </div>
-          
+
           <div className="space-y-1">
             <div className="text-sm text-gray-400 font-medium">{stat.label}</div>
-            <div className="text-2xl font-bold gradient-text-primary">
-              {stat.value}
-            </div>
+            <div className="text-2xl font-bold gradient-text-primary">{stat.value}</div>
           </div>
 
           <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">

@@ -2,7 +2,13 @@
  * Custom hooks for React Query with proper typing and error handling
  */
 
-import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  UseQueryOptions,
+  UseMutationOptions,
+} from '@tanstack/react-query';
 import { apiService } from '../services/api';
 import { queryKeys } from '../lib/react-query.tsx';
 import { ApiResponse, NFT, WalletInfo, ProgramConfig, Collection } from '../types';
@@ -105,9 +111,15 @@ export function useCollections() {
 // Mutation for minting NFT
 export function useMintNFT() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async (data: { name: string; description: string; imageUrl?: string; file?: File; creatorWallet: string }) => {
+    mutationFn: async (data: {
+      name: string;
+      description: string;
+      imageUrl?: string;
+      file?: File;
+      creatorWallet: string;
+    }) => {
       const response = await apiService.mintNFT(data);
       if (!response.success || !response.data) {
         throw new Error(response.error || 'Failed to mint NFT');
@@ -121,4 +133,3 @@ export function useMintNFT() {
     },
   });
 }
-
