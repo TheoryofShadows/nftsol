@@ -7,8 +7,6 @@ import {
   TorusWalletAdapter,
   LedgerWalletAdapter,
   MathWalletAdapter,
-  SlopeWalletAdapter,
-  SolongWalletAdapter,
   TokenPocketWalletAdapter,
   TrustWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
@@ -641,8 +639,6 @@ function App() {
   const wallets = [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
-    new SolongWalletAdapter(),
-    new SlopeWalletAdapter(),
     new TrustWalletAdapter(),
     new TokenPocketWalletAdapter(),
     new LedgerWalletAdapter(),
