@@ -5,13 +5,6 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  NPM_FLAGS = ""
-
-# Ensure Node is available
-[[plugins]]
-  package = "@netlify/plugin-node"
-  inputs:
-    nodeVersion = "20"
 
 # Frontend redirects for SPA
 [[redirects]]
