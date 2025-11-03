@@ -75,7 +75,7 @@ export default function FeatureTour() {
           <h3 className="text-xl font-bold gradient-text-primary mb-2">NFT Marketplace</h3>
           <p className="text-gray-300">
             Browse and discover unique NFTs. Filter by collection, price, and more to find exactly
-            what you're looking for.
+            what you&apos;re looking for.
           </p>
         </div>
       ),

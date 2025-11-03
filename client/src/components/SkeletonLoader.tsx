@@ -19,9 +19,11 @@ export default function SkeletonLoader({
   if (variant === 'text') {
     return (
       <div className={`space-y-3 ${className}`}>
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="skeleton h-4 w-full" style={{ width: `${80 + Math.random() * 20}%` }} />
-        ))}
+        {Array.from({ length: count }).map((_, i) => {
+          // Use index-based width to avoid Math.random() purity issues
+          const width = 80 + ((i * 7) % 20);
+          return <div key={i} className="skeleton h-4 w-full" style={{ width: `${width}%` }} />;
+        })}
       </div>
     );
   }

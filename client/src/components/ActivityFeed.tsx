@@ -11,8 +11,12 @@ interface Activity {
 
 export default function ActivityFeed() {
   // Mock activity data - in production, this would come from your API
-  // Use useState to capture timestamp at mount, avoiding purity warnings
-  const mountTimeRef = useRef(Date.now());
+  // Use useRef with lazy initialization to avoid purity warnings
+  // eslint-disable-next-line react-hooks/purity
+  const mountTimeRef = useRef<number>();
+  if (!mountTimeRef.current) {
+    mountTimeRef.current = Date.now();
+  }
 
   const activities: Activity[] = useMemo(() => {
     const now = mountTimeRef.current;

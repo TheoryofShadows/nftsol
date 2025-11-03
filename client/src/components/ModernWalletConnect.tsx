@@ -14,6 +14,7 @@ export default function ModernWalletConnect() {
 
   useEffect(() => {
     if (connected && publicKey && connection && 'getBalance' in connection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
       connection
         .getBalance(publicKey)

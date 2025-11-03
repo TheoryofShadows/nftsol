@@ -31,9 +31,9 @@ export const initAnalytics = (trackingId: string) => {
   if (!window.dataLayer) {
     window.dataLayer = [];
   }
-  window.gtag = function () {
+  window.gtag = function (...args: any[]) {
     if (window.dataLayer) {
-      window.dataLayer.push(arguments);
+      window.dataLayer.push(...args);
     }
   };
   window.gtag('js', new Date());

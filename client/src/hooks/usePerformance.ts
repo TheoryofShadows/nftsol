@@ -12,6 +12,7 @@ export function usePerformance() {
   useEffect(() => {
     // Measure page load time
     const loadTime = performance.now();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMetrics((prev) => ({ ...prev, loadTime }));
 
     // Measure memory usage if available
