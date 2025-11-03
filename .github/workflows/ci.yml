@@ -20,7 +20,11 @@ jobs:
           cache: 'npm'
 
       - name: Install root tools
-        run: npm ci --ignore-scripts
+        run: |
+          # Clear npm cache to avoid stale lockfile issues
+          npm cache clean --force
+          # Try npm ci first (faster, deterministic)
+          npm ci --ignore-scripts || npm install --ignore-scripts
 
       - name: Client install and build
         working-directory: client
