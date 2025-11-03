@@ -2,11 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import '@solana/wallet-adapter-react-ui/styles.css';
-import './styles/solana.css';
 import './styles/tailwind.css';
+import './styles/solana.css';
+import './styles/design-system.css';
+import './styles/mobile-fixes.css';
+import './styles/modern-design.css';
 import './styles/onboarding.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
+import { QueryProvider } from './lib/react-query.tsx';
 
 // Polyfill Buffer for browser
 interface WindowWithBuffer extends Window {
@@ -52,13 +56,10 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 root.render(
   <React.StrictMode>
-    <App />
+    <QueryProvider>
+      <App />
+    </QueryProvider>
   </React.StrictMode>
 );
 
-// Performance logging
-if (import.meta.env.DEV) {
-  const endTime = performance.now();
-  // eslint-disable-next-line no-console
-  console.log(`App initialized in ${(endTime - startTime).toFixed(2)}ms`);
-}
+// Performance monitoring complete

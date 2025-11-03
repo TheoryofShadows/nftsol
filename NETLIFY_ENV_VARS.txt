@@ -1,0 +1,170 @@
+## 🌐 NETLIFY ENVIRONMENT VARIABLES - COPY & PASTE READY
+
+Copy each line below into your Netlify Dashboard:
+Settings → Environment variables → Add a variable
+
+═══════════════════════════════════════════════════════════
+REQUIRED VARIABLES
+═══════════════════════════════════════════════════════════
+
+Key: VITE_API_BASE
+Value: https://your-backend.onrender.com
+(Replace with your actual Render backend URL)
+
+───────────────────────────────────────────────────────────
+
+Key: VITE_SOLANA_RPC_URL
+Value: https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+(Your Helius RPC URL with API key embedded)
+
+───────────────────────────────────────────────────────────
+
+Key: VITE_SOLANA_CLUSTER
+Value: mainnet-beta
+(Solana network cluster)
+
+───────────────────────────────────────────────────────────
+
+Key: VITE_HELIUS_API_KEY
+Value: ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+(Your Helius API key - separate from RPC URL)
+
+═══════════════════════════════════════════════════════════
+OPTIONAL VARIABLES (Recommended)
+═══════════════════════════════════════════════════════════
+
+Key: VITE_IMG_PROXY_BASE
+Value: https://your-backend.onrender.com
+(Usually same as VITE_API_BASE)
+
+───────────────────────────────────────────────────────────
+
+Key: VITE_GA_TRACKING_ID
+Value: G-XXXXXXXXXX
+(Your Google Analytics 4 tracking ID - optional)
+
+═══════════════════════════════════════════════════════════
+CLOUT TOKEN ADDRESSES (For Display/Reference)
+═══════════════════════════════════════════════════════════
+
+These are already hardcoded in the backend config, but you can add
+them to the frontend if needed for client-side validation:
+
+Key: VITE_CLOUT_MINT
+Value: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+(Optional - CLOUT token mint address)
+
+───────────────────────────────────────────────────────────
+
+Key: VITE_REWARDS_VAULT
+Value: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+(Optional - Rewards vault address)
+
+═══════════════════════════════════════════════════════════
+📋 QUICK SETUP STEPS
+═══════════════════════════════════════════════════════════
+
+1. Go to: https://app.netlify.com/sites/YOUR_SITE/settings/deploys#environment
+
+2. Click "Add a variable" for each entry above
+
+3. Copy the Key and Value exactly as shown
+
+4. Click "Save" after adding each variable
+
+5. Trigger a new deploy: Deploys → Trigger deploy → Deploy site
+
+═══════════════════════════════════════════════════════════
+🎯 WHAT EACH VARIABLE DOES
+═══════════════════════════════════════════════════════════
+
+VITE_API_BASE
+  → Tells your frontend where your backend API is hosted
+  → Must match your Render backend URL
+  → Example: https://nftsol-xyz123.onrender.com
+
+VITE_SOLANA_RPC_URL
+  → Solana blockchain RPC endpoint for frontend
+  → Uses Helius enhanced RPC for better performance
+  → Includes your API key in the URL
+
+VITE_SOLANA_CLUSTER
+  → Which Solana network to use
+  → mainnet-beta = production
+  → devnet = testing
+
+VITE_HELIUS_API_KEY
+  → Your Helius API key (separate from RPC URL)
+  → Used by Helius service for DAS API calls
+  → Same key as in your RPC URL
+
+VITE_IMG_PROXY_BASE
+  → Backend URL for proxying IPFS images
+  → Usually same as VITE_API_BASE
+  → Helps with CORS and performance
+
+VITE_GA_TRACKING_ID
+  → Google Analytics tracking ID
+  → Format: G-XXXXXXXXXX
+  → Optional - for analytics tracking
+
+═══════════════════════════════════════════════════════════
+⚠️ IMPORTANT NOTES
+═══════════════════════════════════════════════════════════
+
+✓ All VITE_* variables are exposed to the frontend
+✓ Never put backend secrets in VITE_* variables
+✓ Your Helius API key is safe to expose (it's rate-limited)
+✓ The backend URL must be HTTPS in production
+✓ After adding variables, redeploy for changes to take effect
+
+═══════════════════════════════════════════════════════════
+🔧 TROUBLESHOOTING
+═══════════════════════════════════════════════════════════
+
+If frontend can't connect to backend:
+  → Check VITE_API_BASE matches your Render URL
+  → Ensure backend CORS includes your Netlify URL
+  → Verify backend is deployed and running
+
+If wallet connection fails:
+  → Check VITE_SOLANA_RPC_URL is correct
+  → Verify Helius API key is valid
+  → Test RPC URL in browser
+
+If images don't load:
+  → Check VITE_IMG_PROXY_BASE is set
+  → Verify backend image proxy endpoint works
+  → Check IPFS gateway is accessible
+
+═══════════════════════════════════════════════════════════
+✅ VERIFICATION CHECKLIST
+═══════════════════════════════════════════════════════════
+
+Before deploying, make sure:
+
+□ VITE_API_BASE points to your Render backend URL
+□ VITE_SOLANA_RPC_URL includes your Helius API key
+□ VITE_SOLANA_CLUSTER is "mainnet-beta" for production
+□ VITE_HELIUS_API_KEY matches the key in RPC URL
+□ All variable names start with VITE_ (required by Vite)
+□ No trailing slashes in URLs
+□ URLs use HTTPS (not HTTP)
+□ After adding variables, trigger new deploy
+
+═══════════════════════════════════════════════════════════
+
+Your actual values to use:
+
+1. VITE_API_BASE: Get this from your Render dashboard
+   (Example: https://nftsol-abc123.onrender.com)
+
+2. VITE_SOLANA_RPC_URL: 
+   https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+
+3. VITE_SOLANA_CLUSTER: mainnet-beta
+
+4. VITE_HELIUS_API_KEY: ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+
+═══════════════════════════════════════════════════════════
+

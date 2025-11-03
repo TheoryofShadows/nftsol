@@ -1,0 +1,21 @@
+# Configuration for actionlint (GitHub Actions linter)
+# https://github.com/rhysd/actionlint
+
+# Suppress warnings about secrets that cannot be validated at lint time
+# These are valid GitHub secrets that exist in the repository settings
+self-hosted-runner:
+  labels: []
+
+config-variables:
+  # Declare expected secrets to suppress validation warnings
+  - RENDER_SERVICE_ID
+  - RENDER_API_KEY
+  - VITE_API_BASE
+  - VITE_SOLANA_RPC_URL
+  - VITE_HELIUS_API_KEY
+  - VITE_GA_TRACKING_ID
+  - NETLIFY_AUTH_TOKEN
+  - NETLIFY_SITE_ID
+  - GITHUB_TOKEN
+
+

@@ -1,0 +1,123 @@
+.error-boundary-container {
+  padding: 32px;
+  font-family: system-ui, -apple-system, sans-serif;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.error-boundary-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 32px;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.error-boundary-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.error-boundary-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: #333;
+  font-weight: bold;
+}
+
+.error-boundary-message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.error-boundary-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.error-boundary-btn-primary {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.error-boundary-btn-primary:hover {
+  background: #5568d3;
+}
+
+.error-boundary-btn-secondary {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.error-boundary-btn-secondary:hover {
+  background: #667eea;
+  color: white;
+}
+
+.error-boundary-details {
+  margin-top: 24px;
+  text-align: left;
+}
+
+.error-boundary-summary {
+  cursor: pointer;
+  color: #667eea;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.error-boundary-tech-details {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.error-boundary-error-name {
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  color: #d32f2f;
+}
+
+.error-boundary-stack {
+  background: #fff;
+  padding: 12px;
+  border-radius: 4px;
+  overflow: auto;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  border: 1px solid #ddd;
+}
+
+.error-boundary-stack-label {
+  margin: 16px 0 8px 0;
+  font-weight: bold;
+}
+
+

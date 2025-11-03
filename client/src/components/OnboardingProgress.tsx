@@ -24,7 +24,7 @@ export default function OnboardingProgress() {
               Onboarding Complete! 🎉
             </h3>
             <p className="text-sm text-gray-300 mb-4">
-              You've completed the tour. Want to restart it?
+              You&apos;ve completed the tour. Want to restart it?
             </p>
             <div className="flex space-x-2">
               <button
@@ -100,10 +100,8 @@ export default function OnboardingProgress() {
 
       {isExpanded && (
         <div className="absolute bottom-20 right-0 glass-card p-6 rounded-2xl w-80 animate-fade-in animate-slide-up">
-          <h3 className="text-lg font-bold gradient-text-primary mb-4">
-            Your Progress
-          </h3>
-          
+          <h3 className="text-lg font-bold gradient-text-primary mb-4">Your Progress</h3>
+
           <div className="space-y-3 mb-4">
             {[
               { step: 'wallet-connect', label: 'Connect Wallet', icon: '👛' },
@@ -122,7 +120,9 @@ export default function OnboardingProgress() {
                   }`}
                 >
                   <span className="text-xl">{item.icon}</span>
-                  <span className={`text-sm flex-1 ${isCompleted ? 'text-green-400' : 'text-gray-400'}`}>
+                  <span
+                    className={`text-sm flex-1 ${isCompleted ? 'text-green-400' : 'text-gray-400'}`}
+                  >
                     {item.label}
                   </span>
                   {isCompleted && <span className="text-green-400">✓</span>}

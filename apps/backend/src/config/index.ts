@@ -1,32 +1,45 @@
 import { config } from 'dotenv';
 import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types';
+import { initializeSecrets } from '../lib/secrets-loader';
 
 config();
 
-// Environment validation with defaults
+// Initialize secrets from /etc/secrets/ or environment variables
+initializeSecrets();
+
 const requiredEnvVars = [
   'NODE_ENV',
   'PORT',
-  'SOLANA_RPC_DEVNET',
+  'SOLANA_RPC_URL',
   'CLOUT_PROGRAM_ID',
   'MARKET_PROGRAM_ID',
   'LOYALTY_PROGRAM_ID',
   'REWARDS_VAULT',
 ];
 
-// Set defaults for development
 if (process.env.NODE_ENV !== 'production') {
-  process.env.SOLANA_RPC_DEVNET = process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com';
-  // Mainnet CLOUT mint: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-  // Devnet default: CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE
-  process.env.CLOUT_PROGRAM_ID =
-    process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
-  process.env.MARKET_PROGRAM_ID =
-    process.env.MARKET_PROGRAM_ID || 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
-  process.env.LOYALTY_PROGRAM_ID =
-    process.env.LOYALTY_PROGRAM_ID || '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
-  process.env.REWARDS_VAULT =
-    process.env.REWARDS_VAULT || '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
+  process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+  process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
+}
+
+// CLOUT token mint address (mainnet: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+if (!process.env.CLOUT_MINT) {
+  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
+}
+// CLOUT_PROGRAM_ID is kept for backward compatibility, but CLOUT_MINT is the actual token mint
+if (!process.env.CLOUT_PROGRAM_ID) {
+  process.env.CLOUT_PROGRAM_ID = process.env.CLOUT_MINT;
+}
+
+// Default program IDs (only if not set)
+if (!process.env.MARKET_PROGRAM_ID) {
+  process.env.MARKET_PROGRAM_ID = 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
+}
+if (!process.env.LOYALTY_PROGRAM_ID) {
+  process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
+}
+if (!process.env.REWARDS_VAULT) {
+  process.env.REWARDS_VAULT = '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
 }
 
 if (process.env.NODE_ENV === 'production') {
@@ -41,10 +54,13 @@ export const appConfig: AppConfig = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+    origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [
       'http://localhost:5173',
       'http://localhost:3000',
       'https://nftsol.app',
+      'https://www.nftsol.app',
+      'https://market.nftsol.app',
+      'https://nftsolmarket.netlify.app',
     ],
     credentials: true,
   },
@@ -59,9 +75,9 @@ export const appConfig: AppConfig = {
 };
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
+  rpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
   commitment: 'confirmed',
-  cluster: 'devnet',
+  cluster: (process.env.SOLANA_CLUSTER as 'mainnet-beta' | 'devnet' | 'testnet') || 'devnet',
 };
 
 export const databaseConfig: DatabaseConfig = {
@@ -74,15 +90,15 @@ export const databaseConfig: DatabaseConfig = {
 };
 
 export const programConfig: ProgramConfig = {
-  cloutProgramId: process.env.CLOUT_PROGRAM_ID || '',
+  // Use CLOUT_MINT if available (actual token mint), otherwise CLOUT_PROGRAM_ID
+  cloutProgramId: process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || '',
   marketProgramId: process.env.MARKET_PROGRAM_ID || '',
   loyaltyProgramId: process.env.LOYALTY_PROGRAM_ID || '',
   rewardsVault: process.env.REWARDS_VAULT || '',
 };
 
-// Withdrawal configuration
 export const withdrawalConfig = {
-  solanaRpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  solanaRpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
   platformSecretKeyBase58: process.env.PLATFORM_SECRET_KEY_BASE58 || '',
   platformSecretKeyJson: process.env.PLATFORM_SECRET_KEY_JSON || '',
   autoApproveLamports: parseInt(process.env.WITHDRAWAL_AUTO_APPROVE_LAMPORTS || '100000000', 10), // 0.1 SOL

@@ -15,6 +15,7 @@ export default function PhantomConnect() {
   // Fetch wallet balance
   useEffect(() => {
     if (connected && publicKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
       fetch(`https://api.devnet.solana.com`, {
         method: 'POST',

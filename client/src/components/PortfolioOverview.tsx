@@ -25,10 +25,10 @@ export default function PortfolioOverview({ nfts, loading }: PortfolioOverviewPr
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🎨</div>
           <h3 className="text-xl font-semibold text-white mb-2">No NFTs Yet</h3>
-          <p className="text-gray-400 mb-6">Start building your collection by minting your first NFT</p>
-          <button className="btn-primary-modern">
-            Mint Your First NFT
-          </button>
+          <p className="text-gray-400 mb-6">
+            Start building your collection by minting your first NFT
+          </p>
+          <button className="btn-primary-modern">Mint Your First NFT</button>
         </div>
       </div>
     );
@@ -47,14 +47,11 @@ export default function PortfolioOverview({ nfts, loading }: PortfolioOverviewPr
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {nfts.slice(0, 6).map((nft, index) => (
-          <div
-            key={nft.id || index}
-            className="glass-card-hover p-4 group cursor-pointer"
-          >
-            {nft.image ? (
+          <div key={nft.id || index} className="glass-card-hover p-4 group cursor-pointer">
+            {nft.imageUrl ? (
               <div className="relative overflow-hidden rounded-lg mb-3 aspect-square">
                 <img
-                  src={nft.image}
+                  src={nft.imageUrl}
                   alt={nft.name || 'NFT'}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
@@ -65,19 +62,15 @@ export default function PortfolioOverview({ nfts, loading }: PortfolioOverviewPr
                 🖼️
               </div>
             )}
-            
+
             <div className="space-y-1">
               <h3 className="font-semibold text-white truncate">
                 {nft.name || `NFT #${index + 1}`}
               </h3>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-400">
-                  {nft.collection || 'Unlisted'}
-                </span>
+                <span className="text-sm text-gray-400">Unlisted</span>
                 {nft.price && (
-                  <span className="text-sm font-bold gradient-text-primary">
-                    {nft.price} SOL
-                  </span>
+                  <span className="text-sm font-bold gradient-text-primary">{nft.price} SOL</span>
                 )}
               </div>
             </div>

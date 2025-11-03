@@ -16,7 +16,8 @@ interface Withdrawal {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
+  // publicKey not used in current implementation
   const { addNotification } = useNotification();
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,13 +27,13 @@ const AdminDashboard: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('admin_token');
-      const url = status 
-        ? `http://localhost:3001/api/admin/withdrawals?status=${status}`
-        : 'http://localhost:3001/api/admin/withdrawals?status=pending';
+      const url = status
+        ? `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=${status}`
+        : `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals`;
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -61,6 +62,7 @@ const AdminDashboard: React.FC = () => {
     } else {
       fetchWithdrawals();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
   const handleAction = async (withdrawalId: string, action: 'approve' | 'process' | 'reject') => {
@@ -68,11 +70,11 @@ const AdminDashboard: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       const response = await fetch(
-        `http://localhost:3001/api/admin/withdrawals/${withdrawalId}/${action}`,
+        `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals/${withdrawalId}/${action}`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ reason: `${action} by admin` }),
@@ -140,9 +142,7 @@ const AdminDashboard: React.FC = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-bold gradient-text font-display mb-2">
-            🔧 Admin Dashboard
-          </h2>
+          <h2 className="text-4xl font-bold gradient-text font-display mb-2">🔧 Admin Dashboard</h2>
           <p className="text-gray-300">Manage withdrawal requests</p>
         </div>
         <div className="flex items-center space-x-3">
@@ -190,7 +190,9 @@ const AdminDashboard: React.FC = () => {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3 mb-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadge(withdrawal.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadge(withdrawal.status)}`}
+                    >
                       {withdrawal.status.toUpperCase()}
                     </span>
                     <span className="text-gray-400 text-sm">ID: {withdrawal.id}</span>
@@ -198,15 +200,21 @@ const AdminDashboard: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Amount</p>
-                      <p className="text-xl font-bold text-white">{formatAmount(withdrawal.amount_lamports)} SOL</p>
+                      <p className="text-xl font-bold text-white">
+                        {formatAmount(withdrawal.amount_lamports)} SOL
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Recipient</p>
-                      <p className="text-sm font-mono text-cyan-400 break-all">{withdrawal.to_address}</p>
+                      <p className="text-sm font-mono text-cyan-400 break-all">
+                        {withdrawal.to_address}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-400 mb-1">Created</p>
-                      <p className="text-sm text-gray-300">{new Date(withdrawal.created_at).toLocaleString()}</p>
+                      <p className="text-sm text-gray-300">
+                        {new Date(withdrawal.created_at).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                   {withdrawal.failure_reason && (
@@ -217,7 +225,8 @@ const AdminDashboard: React.FC = () => {
                   {withdrawal.processed_tx_sig && (
                     <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 mb-3">
                       <p className="text-green-300 text-sm">
-                        ✅ Transaction: <span className="font-mono">{withdrawal.processed_tx_sig}</span>
+                        ✅ Transaction:{' '}
+                        <span className="font-mono">{withdrawal.processed_tx_sig}</span>
                       </p>
                     </div>
                   )}
@@ -259,4 +268,3 @@ const AdminDashboard: React.FC = () => {
 };
 
 export default AdminDashboard;
-

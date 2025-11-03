@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { NFTCardSkeleton } from './SkeletonLoader';
 
 interface NFT {
   id: string;
@@ -20,21 +21,44 @@ interface NFT {
 
 interface NftGridProps {
   nfts: NFT[];
+  loading?: boolean;
+  error?: string | null;
 }
 
-export default function NftGrid({ nfts }: NftGridProps) {
+export default function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+
+  if (loading) {
+    return <NFTCardSkeleton count={8} />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <div className="card-modern max-w-md mx-auto p-12">
+          <div className="text-6xl mb-6">❌</div>
+          <h3 className="text-heading text-white mb-4">Error Loading NFTs</h3>
+          <p className="text-body mb-6">{error}</p>
+          <button className="btn-modern" onClick={() => window.location.reload()}>
+            <span className="relative z-10">Try Again</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!nfts?.length) {
     return (
       <div className="text-center py-20">
-        <div className="glass p-12 rounded-2xl max-w-md mx-auto">
+        <div className="card-modern max-w-md mx-auto p-12">
           <div className="text-6xl mb-6 animate-pulse">🎨</div>
-          <h3 className="text-2xl font-bold text-white mb-4">No NFTs Yet</h3>
-          <p className="text-gray-300 mb-6">
+          <h3 className="text-heading text-white mb-4">No NFTs Yet</h3>
+          <p className="text-body mb-6">
             Be the first to mint an NFT and start the marketplace!
           </p>
-          <div className="btn-primary">Start Minting</div>
+          <button className="btn-modern">
+            <span className="relative z-10">Start Minting</span>
+          </button>
         </div>
       </div>
     );
@@ -67,16 +91,18 @@ export default function NftGrid({ nfts }: NftGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid-modern">
       {nfts.map((nft, index) => (
         <div
           key={nft.id}
-          className={`group relative card-gradient transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 ${
-            hoveredCard === nft.id ? 'animate-glow' : ''
-          }`}
-          style={{ animationDelay: `${index * 100}ms` }}
+          className="card-modern glow-border scroll-reveal overflow-hidden cursor-pointer"
+          style={{ animationDelay: `${index * 50}ms` }}
           onMouseEnter={() => setHoveredCard(nft.id)}
           onMouseLeave={() => setHoveredCard(null)}
+          onClick={() => {
+            // TODO: Implement NFT detail modal
+            console.log('View NFT details:', nft);
+          }}
         >
           {/* Rarity indicator */}
           {nft.rarity && (
@@ -99,38 +125,66 @@ export default function NftGrid({ nfts }: NftGridProps) {
               }}
             />
 
-            {/* Overlay on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex space-x-2">
-                  <button className="btn-primary text-xs px-3 py-1">View</button>
-                  <button className="btn-secondary text-xs px-3 py-1">Buy</button>
-                </div>
+            {/* Overlay on hover - Modern */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-purple-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 backdrop-blur-sm">
+              <div className="w-full space-y-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    alert(`Viewing ${nft.name} details`);
+                  }}
+                  className="w-full glass-modern px-4 py-2.5 text-white font-semibold hover:bg-white/20 transition-all text-sm flex items-center justify-center gap-2"
+                >
+                  <span className="text-lg">👁️</span> View Details
+                </button>
+                {nft.price ? (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert(`Buying ${nft.name} for ${nft.price} SOL`);
+                    }}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
+                  >
+                    <span className="text-lg">💰</span> Buy {nft.price} SOL
+                  </button>
+                ) : (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert(`Listing ${nft.name} for sale`);
+                    }}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
+                  >
+                    <span className="text-lg">📋</span> List for Sale
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Solana badge */}
-            <div className="absolute top-3 right-3 glass px-2 py-1 rounded-full text-xs font-bold text-cyan-300">
-              SOL
+            {/* Solana badge - Modern */}
+            <div className="absolute top-3 right-3 badge-modern text-xs">
+              SOL ◎
             </div>
           </div>
 
-          {/* NFT Details */}
-          <div className="space-y-3">
+          {/* NFT Details - Modern Typography */}
+          <div className="space-y-3 p-4">
             <div>
-              <h3 className="text-lg font-bold text-white mb-1 truncate">{nft.name}</h3>
-              <p className="text-sm text-gray-400 line-clamp-2">{nft.description}</p>
+              <h3 className="text-lg font-bold text-white mb-1 truncate font-display">{nft.name}</h3>
+              <p className="text-sm text-gray-400 line-clamp-2 text-body">{nft.description}</p>
             </div>
 
-            {/* Creator info */}
+            {/* Creator info - Modern */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-cyan-400 rounded-full"></div>
-                <span className="text-gray-400">
-                  {nft.creator.slice(0, 8)}...{nft.creator.slice(-4)}
+                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">
+                  {nft.creator.slice(0, 2).toUpperCase()}
+                </div>
+                <span className="text-gray-400 font-mono text-xs">
+                  {nft.creator.slice(0, 6)}...{nft.creator.slice(-4)}
                 </span>
               </div>
-              {nft.price && <div className="text-cyan-400 font-bold">{nft.price} SOL</div>}
+              {nft.price && <div className="gradient-text-modern font-bold text-lg">{nft.price} ◎</div>}
             </div>
 
             {/* Mint address (collapsible) */}

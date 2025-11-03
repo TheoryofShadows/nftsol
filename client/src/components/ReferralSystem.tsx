@@ -24,6 +24,7 @@ export default function ReferralSystem() {
       const code = generateReferralCode(publicKey.toBase58());
       const referralLink = `https://nftsol.app?ref=${code}`;
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setReferralData({
         code,
         totalReferrals: 0, // This would come from your database

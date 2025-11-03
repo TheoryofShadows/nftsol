@@ -1,17 +1,12 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useOnboarding } from '../context/OnboardingContext';
-import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function FeatureTour() {
-  const { 
-    isOnboardingActive, 
-    currentStep, 
-    completeStep, 
-    skipOnboarding,
-    isStepCompleted,
-  } = useOnboarding();
-  const { connected } = useWallet();
+  const { isOnboardingActive, currentStep, completeStep, skipOnboarding } =
+    useOnboarding();
+  // Note: connected and isStepCompleted not used in current implementation
+  // const { connected } = useWallet();
 
   // Dashboard Tour Steps
   const dashboardSteps: Step[] = [
@@ -47,7 +42,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">Portfolio Overview</h3>
           <p className="text-gray-300">
-            View all your NFTs in one place. Click on any NFT to see details and manage your collection.
+            View all your NFTs in one place. Click on any NFT to see details and manage your
+            collection.
           </p>
         </div>
       ),
@@ -60,7 +56,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">Quick Actions</h3>
           <p className="text-gray-300">
-            Quick access to mint NFTs, browse the marketplace, view your collection, and manage funds.
+            Quick access to mint NFTs, browse the marketplace, view your collection, and manage
+            funds.
           </p>
         </div>
       ),
@@ -77,7 +74,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">NFT Marketplace</h3>
           <p className="text-gray-300">
-            Browse and discover unique NFTs. Filter by collection, price, and more to find exactly what you're looking for.
+            Browse and discover unique NFTs. Filter by collection, price, and more to find exactly
+            what you&apos;re looking for.
           </p>
         </div>
       ),
@@ -90,7 +88,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">NFT Gallery</h3>
           <p className="text-gray-300">
-            Click on any NFT to view details, see metadata, check ownership history, and make purchases.
+            Click on any NFT to view details, see metadata, check ownership history, and make
+            purchases.
           </p>
         </div>
       ),
@@ -107,7 +106,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">Mint Your NFT</h3>
           <p className="text-gray-300">
-            Create your own NFT by uploading an image, adding metadata, and setting your preferences. Minting happens instantly on Solana!
+            Create your own NFT by uploading an image, adding metadata, and setting your
+            preferences. Minting happens instantly on Solana!
           </p>
         </div>
       ),
@@ -124,7 +124,8 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">Your Portfolio</h3>
           <p className="text-gray-300">
-            View all your NFTs in one place. Click on any NFT to see details, transfer, or list it for sale.
+            View all your NFTs in one place. Click on any NFT to see details, transfer, or list it
+            for sale.
           </p>
         </div>
       ),
@@ -148,17 +149,21 @@ export default function FeatureTour() {
     }
   };
 
-  const handleJoyrideCallback = useCallback((data: CallBackProps) => {
-    const { status, type } = data;
+  const handleJoyrideCallback = useCallback(
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    (data: CallBackProps) => {
+      const { status, type } = data;
 
-    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
-      if (status === STATUS.FINISHED) {
-        completeStep(currentStep as any);
-      } else {
-        skipOnboarding();
+      if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
+        if (status === STATUS.FINISHED) {
+          completeStep(currentStep as any);
+        } else {
+          skipOnboarding();
+        }
       }
-    }
-  }, [currentStep, completeStep, skipOnboarding]);
+    },
+    [currentStep, completeStep, skipOnboarding]
+  );
 
   const steps = getSteps();
   const shouldRun = isOnboardingActive && steps.length > 0 && currentStep !== 'welcome';

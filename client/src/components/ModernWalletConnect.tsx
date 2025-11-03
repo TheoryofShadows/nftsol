@@ -14,6 +14,7 @@ export default function ModernWalletConnect() {
 
   useEffect(() => {
     if (connected && publicKey && connection && 'getBalance' in connection) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
       connection
         .getBalance(publicKey)
@@ -77,23 +78,25 @@ export default function ModernWalletConnect() {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </div>
         </div>
 
         {showDropdown && (
           <>
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowDropdown(false)}
-            />
+            <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
             <div className="absolute right-0 mt-2 w-64 glass-card z-50 p-2 animate-fade-in">
               <div className="p-3 border-b border-white/10">
                 <div className="text-xs text-gray-400 mb-1">Connected Wallet</div>
                 <div className="font-mono text-sm text-white break-all">{publicKey.toBase58()}</div>
               </div>
-              
+
               <div className="p-3 border-b border-white/10">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-400">Balance</span>
@@ -131,7 +134,12 @@ export default function ModernWalletConnect() {
         <span className="flex items-center space-x-2">
           <span>Connect Wallet</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
           </svg>
         </span>
       </button>

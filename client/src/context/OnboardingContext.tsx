@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export type OnboardingStep = 
+export type OnboardingStep =
   | 'welcome'
   | 'wallet-connect'
   | 'dashboard-tour'
@@ -48,12 +48,14 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
 
   const [state, setState] = useState<OnboardingState>(() => {
     // Check if user is new (first visit in last 30 days)
-    const isNewUser = !storedState.lastShownAt || 
-      Date.now() - storedState.lastShownAt > 30 * 24 * 60 * 60 * 1000;
-    
+    const isNewUser =
+      !storedState.lastShownAt || Date.now() - storedState.lastShownAt > 30 * 24 * 60 * 60 * 1000;
+
     return {
       ...storedState,
-      showWelcome: storedState.skipped ? false : isNewUser && !storedState.completedSteps.includes('completed'),
+      showWelcome: storedState.skipped
+        ? false
+        : isNewUser && !storedState.completedSteps.includes('completed'),
     };
   });
 
@@ -75,7 +77,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     setState((prev) => {
       const newCompletedSteps = [...prev.completedSteps, step];
       const isFullyCompleted = newCompletedSteps.length >= 6; // All major steps
-      
+
       return {
         ...prev,
         completedSteps: newCompletedSteps,
@@ -113,9 +115,12 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }));
   }, []);
 
-  const isStepCompleted = useCallback((step: OnboardingStep) => {
-    return state.completedSteps.includes(step);
-  }, [state.completedSteps]);
+  const isStepCompleted = useCallback(
+    (step: OnboardingStep) => {
+      return state.completedSteps.includes(step);
+    },
+    [state.completedSteps]
+  );
 
   const getProgress = useCallback(() => {
     const totalSteps = 6;
@@ -133,11 +138,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     getProgress,
   };
 
-  return (
-    <OnboardingContext.Provider value={value}>
-      {children}
-    </OnboardingContext.Provider>
-  );
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
 }
 
 export function useOnboarding() {

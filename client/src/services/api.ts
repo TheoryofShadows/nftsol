@@ -38,7 +38,7 @@ class ApiService {
         // eslint-disable-next-line no-console
         console.error(`API Error (${endpoint}):`, error);
       }
-      
+
       // Return user-friendly error message
       let errorMessage = 'Network error. Please check your connection and try again.';
       if (error instanceof Error) {
@@ -48,7 +48,7 @@ class ApiService {
           errorMessage = error.message;
         }
       }
-      
+
       return {
         success: false,
         error: errorMessage,
