@@ -305,7 +305,7 @@ export class CloutTokenService {
         return 0; // ATA doesn't exist, balance is 0
       }
     } catch (error: any) {
-      console.error(`[CLOUT] Error in getCloutBalance for ${walletAddress}:`, error.message || error);
+      console.error('[CLOUT] Error in getCloutBalance for %s:', walletAddress, error.message || error);
       return 0;
     }
   }
