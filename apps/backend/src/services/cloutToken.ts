@@ -300,7 +300,7 @@ export class CloutTokenService {
         if (error.name === 'TokenAccountNotFoundError' || error.message?.includes('not found')) {
           console.log(`[CLOUT] No token account found for ${walletAddress.slice(0, 8)}... (ATA: ${ata.toBase58()})`);
         } else {
-          console.error(`[CLOUT] Error fetching balance for ${walletAddress.slice(0, 8)}...:`, error.message || error);
+          console.error('[CLOUT] Error fetching balance for %s...:', walletAddress.slice(0, 8), error.message || error);
         }
         return 0; // ATA doesn't exist, balance is 0
       }
