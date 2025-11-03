@@ -178,7 +178,7 @@ curl https://nftsol.onrender.com/api/clout/balance/YOUR_WALLET_ADDRESS
 {
   "success": true,
   "balance": 100.5,
-  "mintAddress": "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+  "mintAddress": "<YOUR_CLOUT_MINT_ADDRESS>"
 }
 ```
 - [ ] Balance returns (not stuck on 0)

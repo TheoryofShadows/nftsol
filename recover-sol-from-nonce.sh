@@ -2,7 +2,7 @@
 # Recover SOL from nonce account
 
 NONCE_ACCOUNT="K23Cgc3Jxp2RQ189Ki5oiQJKq2XMiFDN33aALLY35AW"
-WALLET="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
+WALLET="<YOUR_OWNER_ADDRESS>"
 
 echo "=== Checking Nonce Account ==="
 echo "Nonce account: $NONCE_ACCOUNT"

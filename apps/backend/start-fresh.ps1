@@ -21,10 +21,10 @@ if (Test-Path ".env") {
 
 # Set CLOUT defaults only if not already set
 if (!$env:CLOUT_PROGRAM_ID) {
-    $env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+    $env:CLOUT_PROGRAM_ID = "<YOUR_CLOUT_MINT_ADDRESS>"
 }
 if (!$env:REWARDS_VAULT) {
-    $env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    $env:REWARDS_VAULT = "<YOUR_REWARDS_VAULT_ADDRESS>"
 }
 if (!$env:PORT) {
     $env:PORT = "3002"

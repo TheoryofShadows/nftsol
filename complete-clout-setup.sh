@@ -5,8 +5,8 @@
 set -e
 
 OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-REWARDS_VAULT="2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+MINT="26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab"
+REWARDS_VAULT="7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v"
 TEMP_KEYPAIR="/mnt/c/Users/KHK89/NFTSol/temp-keypair.json"
 
 echo "=== CLOUT Setup Complete Verification ==="

@@ -89,8 +89,8 @@ import.meta.env.VITE_API_BASE || 'http://localhost:3001'
 - **Cluster**: mainnet-beta
 - **Commitment**: confirmed
 - **Wallet Adapters**: 7 active (Phantom, Solflare, Trust, etc.)
-- **CLOUT Token**: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-- **Rewards Vault**: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+- **CLOUT Token**: <YOUR_CLOUT_MINT_ADDRESS>
+- **Rewards Vault**: <YOUR_REWARDS_VAULT_ADDRESS>
 
 ### 10. Database & Backend ✅
 - **PostgreSQL**: Render-hosted

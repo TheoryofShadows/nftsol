@@ -52,9 +52,9 @@ export default function ContractInfo() {
 
   // Fallback to mainnet addresses if API fails
   const defaultPrograms: ProgramConfig = {
-    CLOUT_PROGRAM_ID: '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw',
-    CLOUT_MINT: '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw',
-    REWARDS_VAULT: '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps',
+    CLOUT_PROGRAM_ID: '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab',
+    CLOUT_MINT: '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab',
+    REWARDS_VAULT: '7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v',
     MARKET_PROGRAM_ID: 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7',
     LOYALTY_PROGRAM_ID: '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9',
   };

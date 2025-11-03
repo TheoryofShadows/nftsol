@@ -4,7 +4,7 @@
 echo "=== Current Balances ==="
 echo ""
 echo "3XE wallet (your rewards owner):"
-solana balance 3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o --url https://api.mainnet-beta.solana.com
+solana balance <YOUR_OWNER_ADDRESS> --url https://api.mainnet-beta.solana.com
 
 echo ""
 echo "Fee-payer (temp-keypair):"

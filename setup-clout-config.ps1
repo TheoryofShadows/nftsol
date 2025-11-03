@@ -4,7 +4,7 @@
 Write-Host "=== CLOUT Token Configuration ===" -ForegroundColor Cyan
 
 # 1. CLOUT Token Mint Address (from user)
-$CLOUT_MINT = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+$CLOUT_MINT = "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab"
 Write-Host "✓ CLOUT Token Mint: $CLOUT_MINT" -ForegroundColor Green
 
 # 2. Fee-payer wallet (temp-keypair.json)

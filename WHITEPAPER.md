@@ -134,10 +134,10 @@ NFTSol addresses these challenges through:
 **Decimals**: 9  
 **Total Supply**: 1,000,000,000 CLOUT  
 **Blockchain**: Solana (SPL Token)  
-**Token Address**: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`  
-**Rewards Vault**: `2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps`
+**Token Address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`  
+**Rewards Vault**: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
 
-View on Solscan: https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+View on Solscan: https://solscan.io/token/26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
 
 ### 3.2 Token Distribution
 
@@ -370,8 +370,8 @@ Full API documentation available at: `/api/docs`
 ### 11.2 Smart Contract Addresses
 
 **Mainnet**:
-- CLOUT Program: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`
-- Rewards Vault: `2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps`
+- CLOUT Program: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`
+- Rewards Vault: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
 
 **Devnet** (Development/Testing):
 - CLOUT Program: `CE9VN3Bkh4Mn77GSTdfhf7KNpUKeqpmMX7s8463EFvJE`

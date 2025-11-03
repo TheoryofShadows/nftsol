@@ -1,8 +1,8 @@
 # Start server with CLOUT configuration
 Write-Host "Setting CLOUT environment variables..." -ForegroundColor Cyan
 
-$env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-$env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+$env:CLOUT_PROGRAM_ID = "<YOUR_CLOUT_MINT_ADDRESS>"
+$env:REWARDS_VAULT = "<YOUR_REWARDS_VAULT_ADDRESS>"
 $env:PORT = "3002"
 $env:SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
 

@@ -51,8 +51,8 @@ export default function CloutInfo() {
   const cloutMint =
     programs.CLOUT_PROGRAM_ID ||
     programs.CLOUT_MINT ||
-    '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
-  const rewardsVault = programs.REWARDS_VAULT || '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
+    '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab';
+  const rewardsVault = programs.REWARDS_VAULT || '7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v';
 
   return (
     <div className="space-y-6 animate-fade-in">

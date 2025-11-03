@@ -1,9 +1,9 @@
 #!/bin/bash
 # Check if ATA exists, if not create it with funded wallet
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-REWARDS_VAULT="2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
+REWARDS_VAULT="<YOUR_REWARDS_VAULT_ADDRESS>"
 
 echo "=== Checking if ATA already exists ==="
 solana account "$REWARDS_VAULT" --url https://api.mainnet-beta.solana.com 2>&1 | head -5

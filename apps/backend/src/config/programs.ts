@@ -1,9 +1,9 @@
 // Real Program IDs for NFTSol Smart Contracts (MAINNET)
 export const PROGRAM_IDS = {
-  CLOUT_STAKING: '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw', // Mainnet CLOUT token
+  CLOUT_STAKING: '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab', // Mainnet CLOUT token
   MARKET_ESCROW: 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7',
   LOYALTY_REGISTRY: '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9',
-  REWARDS_VAULT: '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps',
+  REWARDS_VAULT: '7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v',
 } as const;
 
 // Environment-based configuration

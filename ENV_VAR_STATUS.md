@@ -1,11 +1,11 @@
 # Environment Variables Status
 
 ## ✅ CLOUT Configuration (All Set)
-- `CLOUT_MINT=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw` ✅
-- `CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw` ✅
+- `CLOUT_MINT=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab` ✅
+- `CLOUT_PROGRAM_ID=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab` ✅
 - `SOLANA_RPC_URL="https://mainnet.helius-rpc.com/?api-key=..."` ✅
 - `SOLANA_CLUSTER=mainnet-beta` ✅
-- `REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps` ✅
+- `REWARDS_VAULT=7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v` ✅
 
 ## ⚠️ Missing Variables (May Cause Issues)
 

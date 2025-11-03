@@ -1,9 +1,9 @@
 #!/bin/bash
 # Complete setup after receiving external SOL
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
+OWNER="<YOUR_OWNER_ADDRESS>"
 NONCE_ACCOUNT="K23Cgc3Jxp2RQ189Ki5oiQJKq2XMiFDN33aALLY35AW"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Step 1: Check Balance ==="
 BALANCE=$(solana balance "$OWNER" --url https://api.mainnet-beta.solana.com 2>&1)
@@ -48,7 +48,7 @@ if [ $? -eq 0 ]; then
         echo ""
         echo "✓✓✓ SUCCESS! ATA CREATED! ✓✓✓"
         echo ""
-        echo "Rewards Vault: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+        echo "Rewards Vault: <YOUR_REWARDS_VAULT_ADDRESS>"
         echo ""
         echo "🎉 CLOUT SETUP COMPLETE! 🎉"
         echo "Restart your backend now!"
