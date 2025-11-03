@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { useNotification } from './NotificationSystem';
+// useNotification not used in class component
+// import { useNotification } from './NotificationSystem';
 
 interface Props {
   children: ReactNode;

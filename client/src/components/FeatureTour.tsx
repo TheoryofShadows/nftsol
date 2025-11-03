@@ -1,12 +1,12 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step } from 'react-joyride';
 import { useOnboarding } from '../context/OnboardingContext';
-import { useWallet } from '@solana/wallet-adapter-react';
 
 export default function FeatureTour() {
-  const { isOnboardingActive, currentStep, completeStep, skipOnboarding, isStepCompleted } =
+  const { isOnboardingActive, currentStep, completeStep, skipOnboarding } =
     useOnboarding();
-  const { connected } = useWallet();
+  // Note: connected and isStepCompleted not used in current implementation
+  // const { connected } = useWallet();
 
   // Dashboard Tour Steps
   const dashboardSteps: Step[] = [

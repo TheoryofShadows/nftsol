@@ -22,9 +22,11 @@ export default function ActivityFeed() {
   }, []);
 
   // Mock activity data - in production, this would come from your API
-  // Calculate timestamps once using useMemo to avoid impure function calls during render
+  // Use useState to capture timestamp at mount, avoiding purity warnings
+  const [mountTime] = useState(() => Date.now());
+  
   const activities: Activity[] = useMemo(() => {
-    const now = Date.now();
+    const now = mountTime;
     return [
       {
         id: '1',
@@ -51,7 +53,7 @@ export default function ActivityFeed() {
         amount: '1.0 SOL',
       },
     ];
-  }, []);
+  }, [mountTime]);
 
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
@@ -83,8 +85,20 @@ export default function ActivityFeed() {
     }
   };
 
+  // Use state to track current time for relative timestamps
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
+  
+  // Update current time every minute for fresh relative times
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000); // Update every minute
+    
+    return () => clearInterval(interval);
+  }, []);
+  
   const formatTimeAgo = (date: Date) => {
-    const currentTime = Date.now();
+    // Use the state-tracked current time
     const seconds = Math.floor((currentTime - date.getTime()) / 1000);
     if (seconds < 60) return 'Just now';
     const minutes = Math.floor(seconds / 60);

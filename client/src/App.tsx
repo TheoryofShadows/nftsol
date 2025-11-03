@@ -46,6 +46,7 @@ const FeatureTour = lazy(() => import('./components/FeatureTour'));
 const OnboardingProgress = lazy(() => import('./components/OnboardingProgress'));
 const MyNfts = lazy(() => import('./components/MyNfts'));
 const Collections = lazy(() => import('./components/Collections'));
+const UnifiedDashboard = lazy(() => import('./components/UnifiedDashboard'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -406,7 +407,7 @@ function AppContent() {
           {activeTab === 'echo-mint' && (
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
-                <EchoMint />
+                <UnifiedDashboard />
               </Suspense>
             </div>
           )}

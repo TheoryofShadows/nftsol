@@ -318,5 +318,229 @@ export class MarketplaceService {
   }
 }
 
+  /**
+   * Get all listings with filters
+   */
+  async getAllListings(options: {
+    page: number;
+    limit: number;
+    collection?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+  }): Promise<{ items: any[]; total: number }> {
+    try {
+      const { page, limit, collection, minPrice, maxPrice, sortBy = 'recent' } = options;
+      const offset = (page - 1) * limit;
+
+      let query = `
+        SELECT 
+          l.id, l.mint_address, l.seller, l.price, l.listed_at, l.listed,
+          n.name, n.image_url, n.description, n.collection_id
+        FROM listings l
+        LEFT JOIN nfts n ON l.mint_address = n.mint_address
+        WHERE l.listed = true
+      `;
+
+      const params: any[] = [];
+      let paramIndex = 1;
+
+      if (collection) {
+        query += ` AND n.collection_id = $${paramIndex}`;
+        params.push(collection);
+        paramIndex++;
+      }
+
+      if (minPrice !== undefined) {
+        query += ` AND l.price >= $${paramIndex}`;
+        params.push(minPrice);
+        paramIndex++;
+      }
+
+      if (maxPrice !== undefined) {
+        query += ` AND l.price <= $${paramIndex}`;
+        params.push(maxPrice);
+        paramIndex++;
+      }
+
+      // Sorting
+      if (sortBy === 'price_asc') {
+        query += ' ORDER BY l.price ASC';
+      } else if (sortBy === 'price_desc') {
+        query += ' ORDER BY l.price DESC';
+      } else {
+        query += ' ORDER BY l.listed_at DESC';
+      }
+
+      query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+      params.push(limit, offset);
+
+      const result = await pool.query(query, params);
+
+      // Get total count
+      let countQuery = 'SELECT COUNT(*) FROM listings l LEFT JOIN nfts n ON l.mint_address = n.mint_address WHERE l.listed = true';
+      const countParams: any[] = [];
+      let countParamIndex = 1;
+
+      if (collection) {
+        countQuery += ` AND n.collection_id = $${countParamIndex}`;
+        countParams.push(collection);
+        countParamIndex++;
+      }
+
+      if (minPrice !== undefined) {
+        countQuery += ` AND l.price >= $${countParamIndex}`;
+        countParams.push(minPrice);
+        countParamIndex++;
+      }
+
+      if (maxPrice !== undefined) {
+        countQuery += ` AND l.price <= $${countParamIndex}`;
+        countParams.push(maxPrice);
+      }
+
+      const countResult = await pool.query(countQuery, countParams);
+      const total = parseInt(countResult.rows[0]?.count || '0', 10);
+
+      return {
+        items: result.rows,
+        total,
+      };
+    } catch (error) {
+      console.error('[Marketplace] Error getting all listings:', error);
+      return { items: [], total: 0 };
+    }
+  }
+
+  /**
+   * Get all collections with stats
+   */
+  async getAllCollections(): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          c.id, c.name, c.description, c.image_url, c.verified,
+          COUNT(DISTINCT n.id) as total_nfts,
+          COUNT(DISTINCT l.id) as listed_count,
+          MIN(l.price) as floor_price,
+          SUM(CASE WHEN s.created_at >= NOW() - INTERVAL '24 hours' THEN 1 ELSE 0 END) as sales_24h
+        FROM collections c
+        LEFT JOIN nfts n ON c.id = n.collection_id
+        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
+        LEFT JOIN sales s ON n.mint_address = s.mint_address
+        GROUP BY c.id, c.name, c.description, c.image_url, c.verified
+        ORDER BY c.verified DESC, sales_24h DESC, total_nfts DESC
+      `;
+
+      const result = await pool.query(query);
+      return result.rows;
+    } catch (error) {
+      console.error('[Marketplace] Error getting collections:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Search NFTs by name or description
+   */
+  async searchNFTs(query: string, options: { page: number; limit: number }): Promise<{ items: any[]; total: number }> {
+    try {
+      const { page, limit } = options;
+      const offset = (page - 1) * limit;
+
+      const searchQuery = `
+        SELECT 
+          n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
+          l.price, l.listed, l.seller
+        FROM nfts n
+        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
+        WHERE 
+          n.name ILIKE $1 OR 
+          n.description ILIKE $1
+        ORDER BY 
+          CASE WHEN l.listed = true THEN 0 ELSE 1 END,
+          n.created_at DESC
+        LIMIT $2 OFFSET $3
+      `;
+
+      const searchPattern = `%${query}%`;
+      const result = await pool.query(searchQuery, [searchPattern, limit, offset]);
+
+      // Get total count
+      const countQuery = `
+        SELECT COUNT(*) 
+        FROM nfts n
+        WHERE n.name ILIKE $1 OR n.description ILIKE $1
+      `;
+      const countResult = await pool.query(countQuery, [searchPattern]);
+      const total = parseInt(countResult.rows[0]?.count || '0', 10);
+
+      return {
+        items: result.rows,
+        total,
+      };
+    } catch (error) {
+      console.error('[Marketplace] Error searching NFTs:', error);
+      return { items: [], total: 0 };
+    }
+  }
+
+  /**
+   * Get trending NFTs (most views/sales in last 24h)
+   */
+  async getTrendingNFTs(limit: number): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
+          l.price, l.listed, l.seller,
+          COUNT(DISTINCT s.id) as sales_count,
+          COUNT(DISTINCT nv.id) as view_count
+        FROM nfts n
+        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
+        LEFT JOIN sales s ON n.mint_address = s.mint_address AND s.created_at >= NOW() - INTERVAL '24 hours'
+        LEFT JOIN nft_views nv ON n.mint_address = nv.mint_address AND nv.viewed_at >= NOW() - INTERVAL '24 hours'
+        GROUP BY n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id, l.price, l.listed, l.seller
+        HAVING COUNT(DISTINCT s.id) > 0 OR COUNT(DISTINCT nv.id) > 0
+        ORDER BY (COUNT(DISTINCT s.id) * 3 + COUNT(DISTINCT nv.id)) DESC
+        LIMIT $1
+      `;
+
+      const result = await pool.query(query, [limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('[Marketplace] Error getting trending NFTs:', error);
+      // Return empty array if nft_views table doesn't exist yet
+      return [];
+    }
+  }
+
+  /**
+   * Get featured NFTs (high quality/verified collections)
+   */
+  async getFeaturedNFTs(limit: number): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
+          l.price, l.listed, l.seller,
+          c.verified
+        FROM nfts n
+        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
+        LEFT JOIN collections c ON n.collection_id = c.id
+        WHERE c.verified = true AND l.listed = true
+        ORDER BY l.listed_at DESC
+        LIMIT $1
+      `;
+
+      const result = await pool.query(query, [limit]);
+      return result.rows;
+    } catch (error) {
+      console.error('[Marketplace] Error getting featured NFTs:', error);
+      return [];
+    }
+  }
+}
+
 export const marketplaceService = new MarketplaceService();
 

@@ -16,7 +16,8 @@ interface Withdrawal {
 }
 
 const AdminDashboard: React.FC = () => {
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
+  // publicKey not used in current implementation
   const { addNotification } = useNotification();
   const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [loading, setLoading] = useState(false);
@@ -61,6 +62,7 @@ const AdminDashboard: React.FC = () => {
     } else {
       fetchWithdrawals();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTab]);
 
   const handleAction = async (withdrawalId: string, action: 'approve' | 'process' | 'reject') => {

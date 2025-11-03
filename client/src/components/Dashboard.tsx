@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
-import { Connection, PublicKey } from '@solana/web3.js';
+// Connection and PublicKey not needed - using wallet adapter
+// import { Connection, PublicKey } from '@solana/web3.js';
 import { useApp } from '../context/AppContext';
 import ModernWalletConnect from './ModernWalletConnect';
 import DashboardStats from './DashboardStats';
@@ -18,6 +19,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (connected && publicKey && connection && 'getBalance' in connection) {
+      // Note: This setState in effect is intentional for loading state
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingBalance(true);
       connection
         .getBalance(publicKey)

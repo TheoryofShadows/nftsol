@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 
 interface DashboardStatsProps {
   solBalance: number;
@@ -11,8 +11,8 @@ export default function DashboardStats({
   nftCount,
   isLoadingBalance,
 }: DashboardStatsProps) {
-  // Calculate random value once using useMemo to avoid impure function calls
-  const randomChange = useMemo(() => Math.floor(Math.random() * 3), []);
+  // Calculate random value once at mount time (accepted pattern for demo data)
+  const [randomChange] = useState(() => Math.floor(Math.random() * 3));
 
   const stats = [
     {
