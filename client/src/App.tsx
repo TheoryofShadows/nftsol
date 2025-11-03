@@ -19,12 +19,14 @@ import { useApp } from './context/AppContext';
 import { useNotification } from './components/NotificationSystem';
 import { useOnboarding } from './context/OnboardingContext';
 import { trackPageView, trackWalletConnect, trackTabChange } from './utils/analytics';
+import { initScrollReveal } from './hooks/useScrollReveal';
 import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
 import './styles/solana.css';
 import './styles/design-system.css';
 import './styles/mobile-fixes.css';
+import './styles/modern-design.css';
 
 // Lazy load components for better performance
 const Hero = lazy(() => import('./components/Hero'));
@@ -68,6 +70,12 @@ function AppContent() {
   useEffect(() => {
     loadMarketplace();
   }, [loadMarketplace]);
+
+  // Initialize scroll reveal animations
+  useEffect(() => {
+    const cleanup = initScrollReveal();
+    return cleanup;
+  }, []);
 
   // Track page views
   useEffect(() => {
@@ -170,33 +178,38 @@ function AppContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-40 left-1/2 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+    <div className="min-h-screen gradient-mesh relative overflow-hidden">
+      {/* Modern background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/4 -right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl float-animation"></div>
+        <div className="absolute -bottom-1/4 -left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '4s' }}></div>
       </div>
 
-      <header className="relative z-10 p-6 backdrop-blur-sm bg-black/20 border-b border-white/10">
+      <header className="relative z-10 p-6 glass-modern border-b border-white/5 sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-6">
-            {/* Solana-style logo */}
-            <div className="flex items-center space-x-3">
+            {/* Modern logo */}
+            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleTabChange('home')}>
               <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-lg transform rotate-12 shadow-lg"></div>
-                <div className="absolute top-1 left-1 w-8 h-8 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg transform rotate-12"></div>
-                <div className="absolute top-2 left-2 w-6 h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded-lg transform rotate-12"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
+                <div className="absolute top-1.5 left-1.5 w-9 h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-xl"></div>
+                <div className="absolute top-3 left-3 w-6 h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded-lg flex items-center justify-center text-xs font-bold text-white">
+                  NS
+                </div>
               </div>
-              <h1 className="text-4xl font-bold gradient-text font-display tracking-tight">
-                NFTSol
-              </h1>
+              <div>
+                <h1 className="text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
+                  NFTSol
+                </h1>
+                <p className="text-xs text-gray-400 font-mono">Solana NFT Platform</p>
+              </div>
             </div>
 
-            {/* Performance indicator with Solana styling */}
-            <div className="hidden md:flex items-center space-x-2 px-3 py-1 bg-black/30 rounded-full border border-cyan-400/30">
+            {/* Performance indicator - Modern */}
+            <div className="hidden md:flex items-center space-x-2 badge-modern">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs text-cyan-300 font-mono">
+              <span className="text-xs font-mono">
                 {metrics.loadTime.toFixed(0)}ms
               </span>
             </div>
@@ -204,10 +217,7 @@ function AppContent() {
 
           <Suspense
             fallback={
-              <div className="btn-glass animate-pulse">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                Loading...
-              </div>
+              <div className="skeleton h-10 w-40 rounded-2xl"></div>
             }
           >
             <PhantomConnect />

@@ -71,56 +71,71 @@ export default function Hero() {
   const trendingToday = echoStats.trendingCount || 0;
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
-        <div
-          className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"
-          style={{ animationDelay: '1s' }}
-        ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"
+    <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden gradient-mesh">
+      {/* Modern gradient mesh background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Animated gradient orbs */}
+        <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl float-animation"></div>
+        <div 
+          className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl float-animation"
           style={{ animationDelay: '2s' }}
         ></div>
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-pink-500/20 to-orange-500/20 rounded-full blur-3xl float-animation"
+          style={{ animationDelay: '4s' }}
+        ></div>
 
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
+        {/* Floating particles with modern styling */}
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-white/40 rounded-full"
             style={{
-              top: `${20 + i * 15}%`,
-              left: `${10 + i * 12}%`,
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: `${3 + i * 0.5}s`,
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              animation: `float ${8 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
             }}
           />
         ))}
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-5xl mx-auto animate-fade-in">
-        <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold gradient-text font-display mb-6 drop-shadow-2xl">
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+        {/* Badge */}
+        <div className="mb-8 animate-fade-in">
+          <div className="badge-modern inline-flex">
+            <span className="text-2xl">⚡</span>
+            <span>Powered by Solana & Helius</span>
+          </div>
+        </div>
+
+        {/* Hero Title - Modern Typography */}
+        <h1 className="text-display gradient-text-modern mb-6 animate-fade-in leading-none">
           NFTSol + Eternal Echoes
         </h1>
 
-        <p className="text-xl md:text-2xl text-gray-200 mb-12 max-w-3xl mx-auto leading-relaxed">
-          NFTSol: Mint NFTs, Capture Eternal Echoes, Verify History on Solana.
+        <p className="text-body text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          Create, collect, and immortalize moments on Solana.
+          <span className="block mt-2 text-lg text-gray-400">
+            Next-generation NFTs with eternal on-chain memory.
+          </span>
         </p>
 
-        {/* Wallet Connect Button */}
-        <div className="mb-16 animate-slide-up">
+        {/* Wallet Connect Button - Modern Design */}
+        <div className="mb-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           {!connected ? (
-            <div className="relative inline-block">
-              <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-cyan-500 !text-white !font-bold !text-lg !px-8 !py-4 !rounded-xl !shadow-2xl !shadow-purple-500/25 hover:!scale-105 !transition-all !duration-300 hover:!shadow-purple-500/50 animate-pulse" />
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20 blur-xl animate-pulse"></div>
+            <div className="relative inline-block group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <WalletMultiButton className="relative !bg-gradient-to-r !from-purple-600 !via-pink-600 !to-cyan-600 !text-white !font-bold !text-lg !px-10 !py-5 !rounded-2xl !shadow-2xl hover:!scale-105 !transition-all !duration-300" />
             </div>
           ) : (
-            <div className="glass px-6 py-4 rounded-xl backdrop-blur-md">
-              <p className="text-white font-semibold">
+            <div className="glass-modern inline-block px-8 py-4">
+              <p className="text-white font-semibold flex items-center gap-3">
+                <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
                 Connected:{' '}
-                <span className="text-cyan-300 font-mono">
+                <span className="text-cyan-300 font-mono text-lg">
                   {publicKey
                     ? `${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-6)}`
                     : 'Unknown'}
@@ -130,82 +145,87 @@ export default function Hero() {
           )}
         </div>
 
-        {/* Live Counters */}
-        <div
-          className="flex flex-wrap justify-center gap-8 md:gap-12 animate-slide-up"
-          style={{ animationDelay: '0.3s' }}
-        >
-          <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-            <div className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up">
-              {loading ? '...' : nftCount.toLocaleString()}
+        {/* Live Counters - Modern Card Design */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
+          <div className="card-modern text-center p-6 glow-border">
+            <div className="text-5xl mb-2">🖼️</div>
+            <div className="text-4xl font-bold gradient-text-modern mb-2">
+              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : nftCount.toLocaleString()}
             </div>
-            <div className="text-sm md:text-base text-gray-300 font-semibold">🖼️ NFTs Minted</div>
+            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">NFTs Minted</div>
           </div>
 
-          <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-            <div
-              className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up"
-              style={{ animationDelay: '0.1s' }}
-            >
-              {loading ? '...' : echoLayers.toLocaleString()}
+          <div className="card-modern text-center p-6 glow-border">
+            <div className="text-5xl mb-2">🌌</div>
+            <div className="text-4xl font-bold gradient-text-modern mb-2">
+              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : echoLayers.toLocaleString()}
             </div>
-            <div className="text-sm md:text-base text-gray-300 font-semibold">🌌 Echo Layers</div>
+            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">Echo Layers</div>
           </div>
 
-          <div className="glass px-6 py-4 rounded-xl backdrop-blur-md transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-            <div
-              className="text-4xl md:text-5xl font-bold gradient-text font-display mb-2 animate-counter-up"
-              style={{ animationDelay: '0.2s' }}
-            >
-              {loading ? '...' : trendingToday.toLocaleString()}
+          <div className="card-modern text-center p-6 glow-border">
+            <div className="text-5xl mb-2">🔥</div>
+            <div className="text-4xl font-bold gradient-text-modern mb-2">
+              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : trendingToday.toLocaleString()}
             </div>
-            <div className="text-sm md:text-base text-gray-300 font-semibold">
-              🔥 Trending Today
-            </div>
+            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">Trending</div>
           </div>
 
           {connected && (
-            <div className="glass px-6 py-4 rounded-xl backdrop-blur-md text-center transform transition-all duration-300 hover:scale-110 hover:shadow-xl">
-              <div
-                className="text-4xl md:text-5xl font-bold text-yellow-400 mb-2 animate-counter-up"
-                style={{ animationDelay: '0.3s' }}
-              >
-                {cloutBalance > 0
-                  ? cloutBalance.toLocaleString(undefined, { maximumFractionDigits: 0 })
-                  : '—'}
+            <div className="card-modern text-center p-6 glow-border">
+              <div className="text-5xl mb-2">⭐</div>
+              <div className="text-4xl font-bold text-yellow-400 mb-2">
+                {cloutBalance > 0 ? cloutBalance.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
               </div>
-              <div className="text-sm md:text-base text-gray-300 font-semibold">⭐ CLOUT</div>
+              <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">CLOUT</div>
             </div>
           )}
         </div>
 
-        {/* Quick Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-4 mt-12 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+        {/* Quick Action Buttons - Modern Design */}
+        <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
-            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="btn-modern"
           >
-            🏪 Browse Marketplace
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="text-2xl">🏪</span>
+              Browse Marketplace
+            </span>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'mint' }))}
-            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="btn-modern"
+            style={{ 
+              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
+              boxShadow: '0 8px 24px rgba(6, 182, 212, 0.3)'
+            }}
           >
-            ✨ Mint NFT
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="text-2xl">✨</span>
+              Mint NFT
+            </span>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-mint' }))}
-            className="glass px-8 py-3 rounded-xl font-semibold text-white hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+            className="btn-modern"
+            style={{ 
+              background: 'linear-gradient(135deg, #ec4899, #f97316)',
+              boxShadow: '0 8px 24px rgba(236, 72, 153, 0.3)'
+            }}
           >
-            🎬 Create Eternal Echo
+            <span className="relative z-10 flex items-center gap-2">
+              <span className="text-2xl">🎬</span>
+              Create Echo
+            </span>
           </button>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="mt-16 animate-bounce">
-          <div className="text-gray-400 text-sm mb-2">Scroll to explore</div>
-          <div className="w-6 h-10 border-2 border-gray-400 rounded-full mx-auto flex items-start justify-center p-2">
-            <div className="w-1 h-3 bg-gray-400 rounded-full animate-pulse"></div>
+        {/* Scroll indicator - Modern */}
+        <div className="mt-20 animate-bounce opacity-60">
+          <div className="text-gray-400 text-xs uppercase tracking-widest mb-3 font-semibold">Explore More</div>
+          <div className="w-6 h-10 border-2 border-gray-500/50 rounded-full mx-auto flex items-start justify-center p-2 backdrop-blur-sm">
+            <div className="w-1 h-3 bg-gradient-to-b from-purple-400 to-cyan-400 rounded-full animate-pulse"></div>
           </div>
         </div>
       </div>
