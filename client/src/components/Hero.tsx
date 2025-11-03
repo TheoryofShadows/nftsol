@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useCloutBalance } from '../hooks/useCloutBalance';
+import { useMintCost } from '../hooks/useMintCost';
 
 type PlatformStats = {
   totalNFTs?: number;
@@ -24,6 +25,7 @@ const API_BASE =
 export default function Hero() {
   const { connected, publicKey } = useWallet();
   const { balance: cloutBalance } = useCloutBalance();
+  const { estimate: mintCost, comparison: mintComparison } = useMintCost();
   const [platformStats, setPlatformStats] = useState<PlatformStats>({});
   const [echoStats, setEchoStats] = useState<EchoStats>({});
   const [loading, setLoading] = useState(true);

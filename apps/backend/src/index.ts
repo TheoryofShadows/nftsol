@@ -30,6 +30,7 @@ import orbRouter from './routes/orb';
 import echoRouter from './routes/echo';
 import cloutRouter from './routes/clout';
 import marketplaceRouter from './routes/marketplace';
+import mintRouter from './routes/mint';
 
 const app = express();
 const server = createServer(app);
@@ -614,6 +615,9 @@ app.use('/api/clout', cloutRouter);
 
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRouter);
+
+// Ultra-cheap minting routes
+app.use('/api/mint', mintRouter);
 
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
