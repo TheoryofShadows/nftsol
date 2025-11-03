@@ -1,8 +1,8 @@
 #!/bin/bash
 # Alternative method - check account type and try different approach
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Checking Account Type ==="
 echo "Inspecting account: $OWNER"
@@ -27,7 +27,7 @@ spl-token create-account "$MINT" --url https://api.mainnet-beta.solana.com
 if [ $? -eq 0 ]; then
     echo ""
     echo "✓✓✓ SUCCESS! ✓✓✓"
-    echo "Rewards Vault: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "Rewards Vault: <YOUR_REWARDS_VAULT_ADDRESS>"
     echo "🎉 SETUP COMPLETE! 🎉"
 else
     echo ""

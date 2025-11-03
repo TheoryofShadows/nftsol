@@ -12,7 +12,7 @@ solana confirm "$TX_SIG" --url https://api.mainnet-beta.solana.com 2>&1 | head -
 
 echo ""
 echo "=== Checking Wallet Balance ==="
-solana balance 3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o --url https://api.mainnet-beta.solana.com
+solana balance <YOUR_OWNER_ADDRESS> --url https://api.mainnet-beta.solana.com
 
 echo ""
 echo "=== Note ==="

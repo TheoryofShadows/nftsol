@@ -22,9 +22,9 @@ if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
 }
 
-// CLOUT token mint address (mainnet: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+// CLOUT token mint address (mainnet: <YOUR_CLOUT_MINT_ADDRESS>)
 if (!process.env.CLOUT_MINT) {
-  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
+  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '<YOUR_CLOUT_MINT_ADDRESS>';
 }
 // CLOUT_PROGRAM_ID is kept for backward compatibility, but CLOUT_MINT is the actual token mint
 if (!process.env.CLOUT_PROGRAM_ID) {
@@ -39,7 +39,7 @@ if (!process.env.LOYALTY_PROGRAM_ID) {
   process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
 }
 if (!process.env.REWARDS_VAULT) {
-  process.env.REWARDS_VAULT = '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
+  process.env.REWARDS_VAULT = '<YOUR_REWARDS_VAULT_ADDRESS>';
 }
 
 if (process.env.NODE_ENV === 'production') {

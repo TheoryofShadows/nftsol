@@ -1,11 +1,11 @@
 #!/bin/bash
 # Final solution to create ATA
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Verifying ATA Status ==="
-REWARDS_VAULT="2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+REWARDS_VAULT="<YOUR_REWARDS_VAULT_ADDRESS>"
 CHECK=$(solana account "$REWARDS_VAULT" --url https://api.mainnet-beta.solana.com 2>&1)
 
 if echo "$CHECK" | grep -q "AccountNotFound"; then

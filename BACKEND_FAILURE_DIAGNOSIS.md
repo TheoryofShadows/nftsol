@@ -59,10 +59,10 @@ In production, if ANY of these are missing → **Backend throws error and fails 
 ✅ NODE_ENV=production
 ✅ PORT=3001
 ✅ SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=...
-✅ CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+✅ CLOUT_PROGRAM_ID=<YOUR_CLOUT_MINT_ADDRESS>
 ✅ MARKET_PROGRAM_ID=HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7
 ✅ LOYALTY_PROGRAM_ID=2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9
-✅ REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+✅ REWARDS_VAULT=<YOUR_REWARDS_VAULT_ADDRESS>
 ```
 
 **Any missing → Backend will crash on startup!**
@@ -363,7 +363,7 @@ Your logs should show:
 ✅ CORS Origins: https://nftsol.app,...
 ✅ Solana RPC: https://mainnet.helius-rpc.com/...
 ✅ Cluster: mainnet-beta
-✅ CLOUT Token: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+✅ CLOUT Token: <YOUR_CLOUT_MINT_ADDRESS>
 ✅ Server is listening
 ```
 

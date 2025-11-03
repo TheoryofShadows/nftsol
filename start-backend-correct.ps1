@@ -17,8 +17,8 @@ if ($portInfo) {
 # Set environment variables for THIS session
 Write-Host "`n🔧 Setting Environment Variables..." -ForegroundColor Cyan
 $env:PORT = "3001"
-$env:CLOUT_PROGRAM_ID = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-$env:REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+$env:CLOUT_PROGRAM_ID = "<YOUR_CLOUT_MINT_ADDRESS>"
+$env:REWARDS_VAULT = "<YOUR_REWARDS_VAULT_ADDRESS>"
 $env:NODE_ENV = "development"
 # ⚠️  SECURITY: Set this from environment or secure storage
 # $env:PLATFORM_SECRET_KEY_BASE58 = "<your_secret_key_from_secure_storage>"
@@ -50,7 +50,7 @@ Write-Host "   Using port: $env:PORT" -ForegroundColor Cyan
 Write-Host ""
 
 # Start in new window so user can see output
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\KHK89\NFTSol\apps\backend'; `$env:PORT='3001'; `$env:CLOUT_PROGRAM_ID='62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw'; `$env:REWARDS_VAULT='2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps'; `$env:NODE_ENV='development'; Write-Host '🚀 Starting NFTSol Backend...' -ForegroundColor Green; Write-Host 'CLOUT_PROGRAM_ID: ' `$env:CLOUT_PROGRAM_ID -ForegroundColor Cyan; Write-Host 'REWARDS_VAULT: ' `$env:REWARDS_VAULT -ForegroundColor Cyan; npm run dev" -WindowStyle Normal
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd 'C:\Users\KHK89\NFTSol\apps\backend'; `$env:PORT='3001'; `$env:CLOUT_PROGRAM_ID='<YOUR_CLOUT_MINT_ADDRESS>'; `$env:REWARDS_VAULT='<YOUR_REWARDS_VAULT_ADDRESS>'; `$env:NODE_ENV='development'; Write-Host '🚀 Starting NFTSol Backend...' -ForegroundColor Green; Write-Host 'CLOUT_PROGRAM_ID: ' `$env:CLOUT_PROGRAM_ID -ForegroundColor Cyan; Write-Host 'REWARDS_VAULT: ' `$env:REWARDS_VAULT -ForegroundColor Cyan; npm run dev" -WindowStyle Normal
 
 Write-Host "✅ Backend start command executed!" -ForegroundColor Green
 Write-Host "`n⏳ Waiting 20 seconds for server to initialize..." -ForegroundColor Yellow
@@ -68,7 +68,7 @@ try {
     $progs = Invoke-RestMethod -Uri "http://localhost:3001/api/programs" -Method Get -TimeoutSec 5
     if ($progs.data.programs.CLOUT_PROGRAM_ID) {
         Write-Host "✅ CLOUT_PROGRAM_ID in response: $($progs.data.programs.CLOUT_PROGRAM_ID)" -ForegroundColor Green
-        if ($progs.data.programs.CLOUT_PROGRAM_ID -eq "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw") {
+        if ($progs.data.programs.CLOUT_PROGRAM_ID -eq "<YOUR_CLOUT_MINT_ADDRESS>") {
             Write-Host "✅ CORRECT mint address is being used!" -ForegroundColor Green
         } else {
             Write-Host "⚠️  Different mint address - check environment variables" -ForegroundColor Yellow

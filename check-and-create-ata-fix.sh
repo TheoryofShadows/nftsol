@@ -1,9 +1,9 @@
 #!/bin/bash
 # Check if ATA exists and try alternative creation method
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-REWARDS_VAULT="2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
+REWARDS_VAULT="<YOUR_REWARDS_VAULT_ADDRESS>"
 
 echo "=== Checking if ATA Already Exists ==="
 ACCOUNT_CHECK=$(solana account "$REWARDS_VAULT" --url https://api.mainnet-beta.solana.com 2>&1)
@@ -26,7 +26,7 @@ if [ "$ATA_EXISTS" = "true" ]; then
     echo "🎉 Your CLOUT setup is actually COMPLETE! 🎉"
     echo ""
     echo "Environment variables are already set:"
-    echo "  CLOUT_PROGRAM_ID: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+    echo "  CLOUT_PROGRAM_ID: <YOUR_CLOUT_MINT_ADDRESS>"
     echo "  REWARDS_VAULT: $REWARDS_VAULT"
     echo ""
     echo "Restart your backend: node apps/backend/dist/index.js"

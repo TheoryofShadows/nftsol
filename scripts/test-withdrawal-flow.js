@@ -150,7 +150,7 @@ async function createWithdrawal() {
     try {
         const withdrawalData = {
             amount_sol: 0.01, // Small test amount
-            to_address: '3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o', // Test wallet
+            to_address: '<YOUR_OWNER_ADDRESS>', // Test wallet
             idempotency_key: `test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         };
 

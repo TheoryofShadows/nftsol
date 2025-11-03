@@ -3,8 +3,8 @@
 
 Write-Host "=== Setting CLOUT Environment Variables ===" -ForegroundColor Cyan
 
-[Environment]::SetEnvironmentVariable("CLOUT_PROGRAM_ID","62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw","User")
-[Environment]::SetEnvironmentVariable("REWARDS_VAULT","2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps","User")
+[Environment]::SetEnvironmentVariable("CLOUT_PROGRAM_ID","<YOUR_CLOUT_MINT_ADDRESS>","User")
+[Environment]::SetEnvironmentVariable("REWARDS_VAULT","<YOUR_REWARDS_VAULT_ADDRESS>","User")
 
 Write-Host ""
 Write-Host "✓ CLOUT_PROGRAM_ID set" -ForegroundColor Green

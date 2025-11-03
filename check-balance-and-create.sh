@@ -1,8 +1,8 @@
 #!/bin/bash
 # Check balance and create ATA if enough funds
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Checking Balance ==="
 BALANCE=$(solana balance "$OWNER" --url https://api.mainnet-beta.solana.com 2>&1 | grep -oP '\d+\.\d+' | head -1)
@@ -19,7 +19,7 @@ if (( $(echo "$BALANCE >= 0.0025" | bc -l) )); then
     
     if [ $? -eq 0 ]; then
         echo ""
-        echo "✓ SUCCESS! Rewards Vault created: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+        echo "✓ SUCCESS! Rewards Vault created: <YOUR_REWARDS_VAULT_ADDRESS>"
     fi
 else
     echo "✗ Insufficient funds. Need at least 0.0025 SOL"

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Final ATA creation - same address, verify balance and create
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Current Balance Check ==="
 BALANCE_OUTPUT=$(solana balance "$OWNER" --url https://api.mainnet-beta.solana.com 2>&1)
@@ -34,7 +34,7 @@ if [ -n "$BALANCE" ]; then
             echo ""
             echo "✓✓✓ SUCCESS! ATA CREATED!"
             echo ""
-            echo "Rewards Vault: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+            echo "Rewards Vault: <YOUR_REWARDS_VAULT_ADDRESS>"
             echo ""
             echo "✓ Environment variables already set!"
             echo "✓ CLOUT setup is COMPLETE!"

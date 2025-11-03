@@ -1,8 +1,8 @@
 #!/bin/bash
 # Simple ATA creation - skip nonce account
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Current Balance ==="
 solana balance "$OWNER" --url https://api.mainnet-beta.solana.com
@@ -17,7 +17,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "✓✓✓ SUCCESS! ✓✓✓"
     echo ""
-    echo "Rewards Vault: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "Rewards Vault: <YOUR_REWARDS_VAULT_ADDRESS>"
     echo ""
     echo "🎉 CLOUT SETUP COMPLETE! 🎉"
     echo "Restart your backend: node apps/backend/dist/index.js"

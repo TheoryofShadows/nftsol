@@ -130,12 +130,12 @@ mainnet-beta
 
 **CLOUT Token Mint (optional, for reference):**
 ```
-62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+<YOUR_CLOUT_MINT_ADDRESS>
 ```
 
 **Rewards Vault (optional, for reference):**
 ```
-2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+<YOUR_REWARDS_VAULT_ADDRESS>
 ```
 
 ---

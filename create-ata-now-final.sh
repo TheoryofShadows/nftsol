@@ -1,8 +1,8 @@
 #!/bin/bash
 # Create CLOUT ATA - Final attempt
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Creating CLOUT Rewards Vault ==="
 echo "Owner: $OWNER"
@@ -26,12 +26,12 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "========================================="
     echo "  Rewards Vault Address:"
-    echo "  2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "  <YOUR_REWARDS_VAULT_ADDRESS>"
     echo "========================================="
     echo ""
     echo "✓ Environment variables already set!"
-    echo "✓ CLOUT_PROGRAM_ID: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-    echo "✓ REWARDS_VAULT: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "✓ CLOUT_PROGRAM_ID: <YOUR_CLOUT_MINT_ADDRESS>"
+    echo "✓ REWARDS_VAULT: <YOUR_REWARDS_VAULT_ADDRESS>"
     echo ""
     echo "🎉 CLOUT SETUP IS COMPLETE! 🎉"
     echo ""

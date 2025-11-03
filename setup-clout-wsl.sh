@@ -24,8 +24,8 @@ solana balance
 # 2. Create CLOUT Rewards Vault
 echo ""
 echo "=== Step 2: Creating CLOUT Rewards Vault ==="
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "Creating ATA for owner: $OWNER"
 echo "Mint: $MINT"

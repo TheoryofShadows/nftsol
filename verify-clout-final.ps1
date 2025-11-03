@@ -1,8 +1,8 @@
 # Final CLOUT Verification - Run in PowerShell after setup
 Write-Host "`n=== Final CLOUT Setup Verification ===" -ForegroundColor Cyan
 
-$CLOUT_MINT = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
-$REWARDS_VAULT = "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+$CLOUT_MINT = "<YOUR_CLOUT_MINT_ADDRESS>"
+$REWARDS_VAULT = "<YOUR_REWARDS_VAULT_ADDRESS>"
 
 # Check environment variables
 Write-Host "`n1. Environment Variables:" -ForegroundColor Yellow

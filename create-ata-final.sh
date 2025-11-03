@@ -1,8 +1,8 @@
 #!/bin/bash
 # Final ATA Creation - Corrected URL
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Creating CLOUT Rewards Vault ==="
 echo "Owner: $OWNER"
@@ -28,7 +28,7 @@ if (( $(echo "$BALANCE >= 0.0025" | bc -l 2>/dev/null || echo "0") )); then
         echo ""
         echo "✓✓✓ SUCCESS! Rewards Vault created!" 
         echo ""
-        echo "Address: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+        echo "Address: <YOUR_REWARDS_VAULT_ADDRESS>"
         echo ""
         echo "✓ Environment variables are already set!"
         echo "✓ Your CLOUT setup is COMPLETE!"

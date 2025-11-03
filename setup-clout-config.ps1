@@ -4,11 +4,11 @@
 Write-Host "=== CLOUT Token Configuration ===" -ForegroundColor Cyan
 
 # 1. CLOUT Token Mint Address (from user)
-$CLOUT_MINT = "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+$CLOUT_MINT = "<YOUR_CLOUT_MINT_ADDRESS>"
 Write-Host "✓ CLOUT Token Mint: $CLOUT_MINT" -ForegroundColor Green
 
 # 2. Fee-payer wallet (temp-keypair.json)
-$FEE_PAYER = "3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
+$FEE_PAYER = "<YOUR_OWNER_ADDRESS>"
 Write-Host "✓ Fee-payer Wallet: $FEE_PAYER" -ForegroundColor Green
 
 # 3. Check current balances

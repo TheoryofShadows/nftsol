@@ -1,8 +1,8 @@
 #!/bin/bash
 # Create CLOUT Rewards Vault ATA - Run this now!
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 
 echo "=== Creating CLOUT Rewards Vault ==="
 echo "Owner: $OWNER"
@@ -24,7 +24,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "✓ SUCCESS! ATA created!"
     echo ""
-    echo "Rewards Vault Address: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "Rewards Vault Address: <YOUR_REWARDS_VAULT_ADDRESS>"
     echo ""
     echo "✓ Environment variables are already set!"
     echo "✓ You're ready to restart your backend!"

@@ -18,7 +18,7 @@
 - 🎨 **Full NFT Marketplace** - Mint, buy, sell NFTs on Solana
 - 📊 **Modern Dashboard** - 2026-style UI with portfolio, stats, activity feed
 - 🎓 **Smart Onboarding** - Interactive tours and welcome experience
-- ⭐ **CLOUT Token** - Native reward token (`62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`)
+- ⭐ **CLOUT Token** - Native reward token (`<YOUR_CLOUT_MINT_ADDRESS>`)
 - 🎬 **Eternal Echoes** - Collaborative, layered NFT creation
 - 🌳 **Compressed NFTs** - Low-cost minting via Metaplex Bubblegum
 - 💰 **Fee System** - 2.5% platform fee on all mints
@@ -112,8 +112,8 @@ SOLANA_CLUSTER=mainnet-beta
 HELIUS_API_KEY=your_helius_key
 
 # CLOUT Token
-CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+CLOUT_PROGRAM_ID=<YOUR_CLOUT_MINT_ADDRESS>
+REWARDS_VAULT=<YOUR_REWARDS_VAULT_ADDRESS>
 
 # Platform Wallet
 PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key
@@ -179,10 +179,10 @@ Full API docs: **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)**
 
 **CLOUT** is NFTSol's native reward token on Solana.
 
-- **Token Address**: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`
-- **Rewards Vault**: `2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps`
+- **Token Address**: `<YOUR_CLOUT_MINT_ADDRESS>`
+- **Rewards Vault**: `<YOUR_REWARDS_VAULT_ADDRESS>`
 - **Total Supply**: 1,000,000,000 CLOUT
-- **Solscan**: [View Token](https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+- **Solscan**: [View Token](https://solscan.io/token/<YOUR_CLOUT_MINT_ADDRESS>)
 
 Users earn CLOUT through: minting NFTs, purchases, referrals, engagement.
 

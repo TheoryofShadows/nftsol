@@ -1,8 +1,8 @@
 #!/bin/bash
 # Fix ATA creation - check balances and use correct fee-payer
 
-OWNER="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
-MINT="62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+OWNER="<YOUR_OWNER_ADDRESS>"
+MINT="<YOUR_CLOUT_MINT_ADDRESS>"
 TEMP_KEYPAIR="/mnt/c/Users/KHK89/NFTSol/temp-keypair.json"
 
 echo "=== Checking All Wallet Balances ==="
@@ -58,7 +58,7 @@ spl-token create-account "$MINT" --owner "$OWNER" \
 if [ $? -eq 0 ]; then
     echo ""
     echo "✓✓✓ SUCCESS! Rewards Vault created!"
-    echo "Address: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    echo "Address: <YOUR_REWARDS_VAULT_ADDRESS>"
     echo ""
     echo "✓ Setup complete! Restart your backend."
 else

@@ -186,8 +186,8 @@ SOLANA_RPC_URL=https://api.devnet.solana.com
 SOLANA_CLUSTER=devnet
 
 # CLOUT Token
-CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+CLOUT_PROGRAM_ID=<YOUR_CLOUT_MINT_ADDRESS>
+REWARDS_VAULT=<YOUR_REWARDS_VAULT_ADDRESS>
 
 # Database
 DATABASE_URL=postgresql://user:password@localhost:5432/nftsol
@@ -259,7 +259,7 @@ GET /api/clout/vault-balance
   "data": {
     "balance": 50000,
     "token": "CLOUT",
-    "vaultAddress": "2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps"
+    "vaultAddress": "<YOUR_REWARDS_VAULT_ADDRESS>"
   }
 }
 ```
@@ -444,7 +444,7 @@ const { nft } = await metaplex.nfts().create({
 
 ### Token Configuration
 
-- **Mint Address**: `62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw` (mainnet)
+- **Mint Address**: `<YOUR_CLOUT_MINT_ADDRESS>` (mainnet)
 - **Decimals**: 9
 - **Total Supply**: 1,000,000,000 CLOUT
 

@@ -2,7 +2,7 @@
 # Withdraw from nonce account - need fee-payer to have SOL first
 
 NONCE_ACCOUNT="K23Cgc3Jxp2RQ189Ki5oiQJKq2XMiFDN33aALLY35AW"
-WALLET="3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o"
+WALLET="<YOUR_OWNER_ADDRESS>"
 FEE_PAYER="/mnt/c/Users/KHK89/NFTSol/temp-keypair.json"
 
 echo "=== Current Situation ==="
