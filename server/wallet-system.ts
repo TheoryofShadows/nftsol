@@ -47,8 +47,8 @@ const PLATFORM_WALLET_LABELS: Record<keyof typeof PLATFORM_WALLETS, string> = {
 
 // CLOUT token configuration
 export const CLOUT_CONFIG = {
-  tokenAddress: process.env.CLOUT_TOKEN_MINT_ADDRESS || "CLOUTtoken123456789",
-  authorityAddress: process.env.CLOUT_TOKEN_AUTHORITY || "CLOUTAuthority123456789",
+  tokenAddress: process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || process.env.CLOUT_TOKEN_MINT_ADDRESS || "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab",
+  authorityAddress: process.env.CLOUT_TOKEN_AUTHORITY || "3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o",
   decimals: 9,
   symbol: "CLOUT",
   name: "Community CLOUT Token",
@@ -532,7 +532,7 @@ export function setupWalletRoutes(app: any) {
         }
       },
       cloutToken: {
-        configured: !!process.env.CLOUT_TOKEN_MINT_ADDRESS,
+        configured: !!(process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || process.env.CLOUT_TOKEN_MINT_ADDRESS),
         totalSupply: CLOUT_CONFIG.totalSupply,
         distributionModel: CLOUT_CONFIG.distribution
       }

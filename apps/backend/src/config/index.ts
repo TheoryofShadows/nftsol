@@ -22,7 +22,7 @@ if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
 }
 
-// CLOUT token mint address (mainnet: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
+// CLOUT token mint address (devnet: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
 if (!process.env.CLOUT_MINT) {
   process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab';
 }
