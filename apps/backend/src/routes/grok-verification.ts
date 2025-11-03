@@ -224,8 +224,24 @@ async function verifyContentWithGrok(
  */
 async function fetchArchiveContent(archiveUrl: string): Promise<any> {
   try {
-    // Extract item identifier from URL
-    const itemId = archiveUrl.split('/').pop() || archiveUrl;
+    // Validate that archiveUrl is a URL pointing to archive.org
+    let urlObj: URL;
+    try {
+      urlObj = new URL(archiveUrl);
+    } catch (e) {
+      throw new Error('Invalid archive URL format');
+    }
+    if (urlObj.hostname !== 'archive.org') {
+      throw new Error('Invalid archive hostname');
+    }
+
+    // Extract item identifier from path
+    const pathnameParts = urlObj.pathname.split('/');
+    let itemId = pathnameParts[pathnameParts.length - 1] || '';
+    // Enforce that the itemId contains only safe characters (letters, digits, hyphens, underscores)
+    if (!/^[a-zA-Z0-9\-_]+$/.test(itemId)) {
+      throw new Error('Invalid or unsafe archive item identifier');
+    }
     
     // Fetch metadata from Internet Archive
     const metadataUrl = `https://archive.org/metadata/${itemId}`;
@@ -250,6 +266,7 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
       text: '',
       timestamp: new Date().toISOString(),
       metadata: {},
+      error: error?.message || 'Archive fetch failed',
     };
   }
 }
