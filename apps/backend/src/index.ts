@@ -33,6 +33,11 @@ import marketplaceRouter from './routes/marketplace';
 import mintRouter from './routes/mint';
 import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
+import { initializeSecrets } from './lib/secrets-loader';
+
+initializeSecrets();
+
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 const app = express();
 const server = createServer(app);

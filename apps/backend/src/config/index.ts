@@ -1,7 +1,11 @@
 import { config } from 'dotenv';
 import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types';
+import { initializeSecrets } from '../lib/secrets-loader';
 
 config();
+
+// Initialize secrets from /etc/secrets/ or environment variables
+initializeSecrets();
 
 const requiredEnvVars = [
   'NODE_ENV',
