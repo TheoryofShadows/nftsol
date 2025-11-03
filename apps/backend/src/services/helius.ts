@@ -131,7 +131,7 @@ export class HeliusService {
 
     console.log(`[Helius] Service initialized`);
     console.log(`[Helius] Cluster: ${cluster}`);
-    console.log(`[Helius] API Key: ${apiKey ? `${apiKey.substring(0, 8)}...` : 'Not configured'}`);
+    console.log(`[Helius] API Key: ${apiKey ? 'Configured' : 'Not configured'}`);
   }
 
   /**
