@@ -1,96 +1,130 @@
 import React from 'react';
+import './styles/ErrorBoundary.css';
 
-export default class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { error?: Error }
-> {
-  constructor(props: any) {
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
+}
+
+interface ErrorBoundaryState {
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
+  hasError: boolean;
+}
+
+export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { error: undefined };
+    this.state = {
+      error: null,
+      errorInfo: null,
+      hasError: false,
+    };
   }
-  static getDerivedStateFromError(error: Error) {
-    return { error };
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return {
+      hasError: true,
+      error,
+    };
   }
-  componentDidCatch(err: Error, errorInfo: React.ErrorInfo) {
-    // Log error details in development only
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
+    // Log error details in development
     if (import.meta.env.DEV) {
       // eslint-disable-next-line no-console
-      console.error('App crash:', err, errorInfo);
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
     }
-    // In production, could send to error tracking service (e.g., Sentry)
+
+    // Store error info in state
+    this.setState({
+      errorInfo,
+    });
+
+    // In production, send to error tracking service
+    if (import.meta.env.PROD) {
+      // TODO: Send to Sentry, LogRocket, or your error tracking service
+      // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } });
+    }
   }
-  render() {
-    if (this.state.error) {
-      // In production, hide technical error details from users
+
+  resetError = (): void => {
+    this.setState({
+      error: null,
+      errorInfo: null,
+      hasError: false,
+    });
+  };
+
+  render(): React.ReactNode {
+    const { hasError, error } = this.state;
+    const { children, fallback: FallbackComponent } = this.props;
+
+    if (hasError && error) {
+      // Use custom fallback if provided
+      if (FallbackComponent) {
+        return <FallbackComponent error={error} resetError={this.resetError} />;
+      }
+
+      // Default fallback UI
       const isDevelopment = import.meta.env.DEV;
 
       return (
-        <div
-          style={{
-            padding: 32,
-            fontFamily: 'system-ui',
-            textAlign: 'center',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              padding: 32,
-              borderRadius: 16,
-              maxWidth: 600,
-              boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-            }}
-          >
-            <h2 style={{ fontSize: 24, marginBottom: 16, color: '#333' }}>
-              ⚠️ Something went wrong
+        <div className="error-boundary-container">
+          <div className="error-boundary-card">
+            <div className="error-boundary-icon">⚠️</div>
+            <h2 className="error-boundary-title">
+              Something went wrong
             </h2>
-            <p style={{ fontSize: 16, color: '#666', marginBottom: 24 }}>
-              We&apos;re sorry, but something unexpected happened. Please try refreshing the page.
+            <p className="error-boundary-message">
+              We&apos;re sorry, but something unexpected happened. Please try again or contact support
+              if the problem persists.
             </p>
-            <button
-              onClick={() => window.location.reload()}
-              style={{
-                background: '#667eea',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: 8,
-                fontSize: 16,
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >
-              Refresh Page
-            </button>
-            {isDevelopment && (
-              <details style={{ marginTop: 24, textAlign: 'left' }}>
-                <summary style={{ cursor: 'pointer', color: '#667eea', marginBottom: 8 }}>
-                  Technical Details (Development Only)
+
+            <div className="error-boundary-actions">
+              <button
+                onClick={this.resetError}
+                className="error-boundary-btn-primary"
+              >
+                Try Again
+              </button>
+
+              <button
+                onClick={() => window.location.reload()}
+                className="error-boundary-btn-secondary"
+              >
+                Reload Page
+              </button>
+            </div>
+
+            {isDevelopment && error && (
+              <details className="error-boundary-details">
+                <summary className="error-boundary-summary">
+                  🔍 Technical Details (Development Only)
                 </summary>
-                <pre
-                  style={{
-                    background: '#f5f5f5',
-                    padding: 16,
-                    borderRadius: 8,
-                    overflow: 'auto',
-                    fontSize: 12,
-                    whiteSpace: 'pre-wrap',
-                  }}
-                >
-                  {String(this.state.error.stack || this.state.error.message || this.state.error)}
-                </pre>
+                <div className="error-boundary-tech-details">
+                  <p className="error-boundary-error-name">
+                    {error.name}: {error.message}
+                  </p>
+                  <pre className="error-boundary-stack">
+                    {error.stack || 'No stack trace available'}
+                  </pre>
+                  {this.state.errorInfo && (
+                    <>
+                      <p className="error-boundary-stack-label">Component Stack:</p>
+                      <pre className="error-boundary-stack">
+                        {this.state.errorInfo.componentStack}
+                      </pre>
+                    </>
+                  )}
+                </div>
               </details>
             )}
           </div>
         </div>
       );
     }
-    return this.props.children;
+
+    return children;
   }
 }
