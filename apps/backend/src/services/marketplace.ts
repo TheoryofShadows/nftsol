@@ -316,7 +316,6 @@ export class MarketplaceService {
       };
     }
   }
-}
 
   /**
    * Get all listings with filters
