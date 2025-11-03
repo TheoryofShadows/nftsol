@@ -149,8 +149,8 @@ export default function FeatureTour() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const handleJoyrideCallback = useCallback(
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     (data: CallBackProps) => {
       const { status, type } = data;
 
