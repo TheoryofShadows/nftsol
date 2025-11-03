@@ -33,6 +33,7 @@ import marketplaceRouter from './routes/marketplace';
 import mintRouter from './routes/mint';
 import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
+import transactionsRouter from './routes/transactions';
 import { initializeSecrets } from './lib/secrets-loader';
 
 initializeSecrets();
@@ -629,6 +630,9 @@ app.use('/api/mint', mintRouter);
 
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
+
+// Transaction history routes (Helius Nov 2025 upgrade)
+app.use('/api/transactions', transactionsRouter);
 
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
