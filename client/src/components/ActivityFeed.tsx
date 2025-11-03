@@ -12,9 +12,9 @@ interface Activity {
 export default function ActivityFeed() {
   // Mock activity data - in production, this would come from your API
   // Use useRef with lazy initialization to avoid purity warnings
-  // eslint-disable-next-line react-hooks/purity
   const mountTimeRef = useRef<number>();
   if (!mountTimeRef.current) {
+    // eslint-disable-next-line react-hooks/purity
     mountTimeRef.current = Date.now();
   }
 
