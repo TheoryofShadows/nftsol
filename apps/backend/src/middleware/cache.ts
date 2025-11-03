@@ -35,7 +35,7 @@ function normalizeETag(etag: string): string {
 function parseIfNoneMatch(
   header: string | readonly string[]
 ): { wildcard: boolean; etags: string[] } {
-  const raw = Array.isArray(header) ? header.join(',') : header;
+  const raw = Array.isArray(header) ? header.join(',') : (header as string);
   if (!raw) {
     return { wildcard: false, etags: [] };
   }
