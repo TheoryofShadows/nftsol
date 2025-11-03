@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 
 interface Activity {
   id: string;
@@ -10,23 +10,12 @@ interface Activity {
 }
 
 export default function ActivityFeed() {
-  // Force re-render every minute to update relative times
-  const [, setUpdateTrigger] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUpdateTrigger((prev) => prev + 1);
-    }, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Mock activity data - in production, this would come from your API
   // Use useState to capture timestamp at mount, avoiding purity warnings
-  const [mountTime] = useState(() => Date.now());
-  
+  const mountTimeRef = useRef(Date.now());
+
   const activities: Activity[] = useMemo(() => {
-    const now = mountTime;
+    const now = mountTimeRef.current;
     return [
       {
         id: '1',
@@ -53,7 +42,7 @@ export default function ActivityFeed() {
         amount: '1.0 SOL',
       },
     ];
-  }, [mountTime]);
+  }, []);
 
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
@@ -87,13 +76,13 @@ export default function ActivityFeed() {
 
   // Use state to track current time for relative timestamps
   const [currentTime, setCurrentTime] = useState(() => Date.now());
-  
+
   // Update current time every minute for fresh relative times
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(Date.now());
     }, 60000); // Update every minute
-    
+
     return () => clearInterval(interval);
   }, []);
   

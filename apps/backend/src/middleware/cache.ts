@@ -8,7 +8,7 @@ import crypto from 'crypto';
 
 interface CachedResponse {
   data: any;
-  headers: Record<string, string>;
+  headers: Record<string, string | number | readonly string[]>;
   statusCode: number;
   etag: string;
 }
@@ -26,6 +26,37 @@ function generateETag(data: any): string {
 /**
  * Cache middleware with ETag support
  */
+function normalizeETag(etag: string): string {
+  const trimmed = etag.trim();
+  const withoutWeakIndicator = trimmed.startsWith('W/') ? trimmed.slice(2) : trimmed;
+  return withoutWeakIndicator.replace(/^"(.*)"$/, '$1');
+}
+
+function parseIfNoneMatch(
+  header: string | readonly string[]
+): { wildcard: boolean; etags: string[] } {
+  const raw = Array.isArray(header) ? header.join(',') : header;
+  if (!raw) {
+    return { wildcard: false, etags: [] };
+  }
+
+  const tokens = raw.split(',').map((token) => token.trim()).filter(Boolean);
+
+  let wildcard = false;
+  const etags: string[] = [];
+
+  for (const token of tokens) {
+    if (token === '*') {
+      wildcard = true;
+      continue;
+    }
+
+    etags.push(normalizeETag(token));
+  }
+
+  return { wildcard, etags };
+}
+
 export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
   return (req: Request, res: Response, next: NextFunction) => {
     // Only cache GET requests
@@ -38,8 +69,19 @@ export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
 
     // Check If-None-Match header (ETag)
     const ifNoneMatch = req.headers['if-none-match'];
-    if (ifNoneMatch && cached && cached.etag === ifNoneMatch) {
-      return res.status(304).end(); // Not Modified
+    if (ifNoneMatch && cached) {
+      const { wildcard, etags } = parseIfNoneMatch(ifNoneMatch);
+
+      if (wildcard || etags.includes(cached.etag)) {
+        Object.entries(cached.headers).forEach(([key, value]) => {
+          if (typeof value !== 'undefined') {
+            res.setHeader(key, value as string | number | readonly string[]);
+          }
+        });
+
+        res.setHeader('ETag', `"${cached.etag}"`);
+        return res.status(304).end(); // Not Modified
+      }
     }
 
     // Store original json method
@@ -52,13 +94,13 @@ export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
       // Store in cache
       responseCache.set(cacheKey, {
         data,
-        headers: res.getHeaders() as Record<string, string>,
+        headers: res.getHeaders() as Record<string, string | number | readonly string[]>,
         statusCode: res.statusCode,
         etag,
       });
 
       // Set ETag header
-      res.setHeader('ETag', etag);
+      res.setHeader('ETag', `"${etag}"`);
       res.setHeader('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`);
 
       // Clean up after TTL
