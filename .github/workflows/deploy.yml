@@ -42,7 +42,7 @@ jobs:
       
       - name: Deploy to Render
         if: github.ref == 'refs/heads/main'
-        uses: johnbeynon/render-deploy-action@v0.0.8
+        uses: johnbeynon/render-deploy-action@v0.0.9
         with:
           # Render service ID and API key are stored as GitHub secrets
           # yamllint disable-line rule:line-length
