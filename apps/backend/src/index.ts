@@ -29,6 +29,7 @@ import nftRouter from './routes/nfts';
 import orbRouter from './routes/orb';
 import echoRouter from './routes/echo';
 import cloutRouter from './routes/clout';
+import marketplaceRouter from './routes/marketplace';
 
 const app = express();
 const server = createServer(app);
@@ -610,6 +611,9 @@ app.use('/api/orb', orbRouter);
 
 // CLOUT routes
 app.use('/api/clout', cloutRouter);
+
+// Marketplace routes
+app.use('/api/marketplace', marketplaceRouter);
 
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {

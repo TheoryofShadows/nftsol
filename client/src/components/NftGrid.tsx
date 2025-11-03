@@ -99,7 +99,10 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
           style={{ animationDelay: `${index * 50}ms` }}
           onMouseEnter={() => setHoveredCard(nft.id)}
           onMouseLeave={() => setHoveredCard(null)}
-          onClick={() => alert(`Viewing NFT: ${nft.name}`)}
+          onClick={() => {
+            // TODO: Implement NFT detail modal
+            console.log('View NFT details:', nft);
+          }}
         >
           {/* Rarity indicator */}
           {nft.rarity && (
