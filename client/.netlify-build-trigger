@@ -1,4 +1,3 @@
 # Netlify Build Trigger
-# This file forces Netlify to rebuild when changed
-# Updated: 2025-01-XX - Force modern design deployment
-
+# This file forces Netlify to rebuild when changes are detected
+# Last updated: 2025-01-XX
