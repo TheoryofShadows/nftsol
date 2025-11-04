@@ -841,18 +841,6 @@ app.get('/api/nfts', async (req, res) => {
   }
 });
 
-// Collections endpoint
-apiV1.get('/collections', (req, res) => {
-  const response: ApiResponse = {
-    success: true,
-    data: {
-      collections: [], // Start with empty - collections will appear as NFTs are minted
-      message: 'No collections found',
-    },
-  };
-  res.json(response);
-});
-
 // Wallet info endpoint
 apiV1.get('/wallet/:address', async (req, res) => {
   try {
