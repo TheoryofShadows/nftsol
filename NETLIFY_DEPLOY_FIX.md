@@ -51,11 +51,15 @@ Netlify will automatically:
 
 #### Site Settings → Environment Variables:
 ```env
+# REQUIRED - These 2 are essential for the app to work
 VITE_API_BASE=https://nftsol.onrender.com
 VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
-VITE_SOLANA_CLUSTER=mainnet-beta
-NODE_ENV=production
+
+# OPTIONAL - Only if you want Google Analytics
+# VITE_GA_TRACKING_ID=G-XXXXXXXXXX
 ```
+
+**Note:** You only need the 2 variables above. `NODE_ENV` is automatically set by Netlify, and `VITE_SOLANA_CLUSTER` is not used in your code.
 
 ---
 
