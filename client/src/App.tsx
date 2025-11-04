@@ -237,7 +237,7 @@ function AppContent() {
 
             {/* Performance indicator - Modern */}
             <div className="hidden md:flex items-center space-x-2 badge-modern">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               <span className="text-xs font-mono">
                 {metrics.loadTime.toFixed(0)}ms
               </span>
@@ -302,7 +302,7 @@ function AppContent() {
                 </div>
               </div>
               {activeTab === tab.id && (
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20 animate-pulse"></div>
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20"></div>
               )}
             </button>
           ))}
@@ -671,7 +671,7 @@ function AppContent() {
               <h3 className="text-white font-semibold mb-4">Connect</h3>
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                   <span className="text-sm text-gray-400">Live on {solanaCluster}</span>
                 </div>
                 <div className="flex space-x-3">

@@ -300,7 +300,7 @@ body {
     opacity: 1;
   }
   50% {
-    opacity: 0.5;
+    opacity: 0.9;
   }
 }
 
@@ -391,7 +391,8 @@ body {
 }
 
 .animate-pulse {
-  animation: pulse 2s infinite;
+  animation: pulse 4s infinite;
+  animation-duration: 4s;
 }
 
 .animate-glow {

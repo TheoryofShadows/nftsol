@@ -51,7 +51,7 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
     return (
       <div className="text-center py-20">
         <div className="card-modern max-w-md mx-auto p-12">
-          <div className="text-6xl mb-6 animate-pulse">🎨</div>
+          <div className="text-6xl mb-6">🎨</div>
           <h3 className="text-heading text-white mb-4">No NFTs Yet</h3>
           <p className="text-body mb-6">
             Be the first to mint an NFT and start the marketplace!

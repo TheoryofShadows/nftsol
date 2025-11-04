@@ -67,7 +67,7 @@ export default function WelcomeOnboarding() {
         {/* Slide Content */}
         <div className="text-center py-8">
           <div
-            className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-5xl shadow-2xl animate-pulse-glow`}
+            className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-5xl shadow-2xl`}
           >
             {slides[currentSlide].icon}
           </div>

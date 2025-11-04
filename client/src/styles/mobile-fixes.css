@@ -225,9 +225,10 @@
     box-sizing: border-box !important;
   }
 
-  /* Animations might be too heavy on mobile - simplify */
+  /* Animations might be too heavy on mobile - simplify or reduce */
   .animate-pulse {
-    animation: none !important;
+    animation-duration: 6s !important;
+    animation-timing-function: ease-in-out !important;
   }
 
   .absolute.inset-0.overflow-hidden .absolute {

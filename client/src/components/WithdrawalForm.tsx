@@ -100,7 +100,7 @@ export default function WithdrawalForm() {
             </div>
             {balance !== null ? (
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-green-400 rounded-full"></div>
                 <span className="text-2xl font-bold text-cyan-400">{balance.toFixed(4)} SOL</span>
               </div>
             ) : (

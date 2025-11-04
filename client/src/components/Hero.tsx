@@ -87,20 +87,7 @@ export default function Hero() {
           style={{ animationDelay: '4s' }}
         ></div>
 
-        {/* Floating particles with modern styling */}
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white/40 rounded-full"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `float ${8 + Math.random() * 4}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              boxShadow: '0 0 10px rgba(255, 255, 255, 0.5)',
-            }}
-          />
-        ))}
+        {/* Floating particles removed - too distracting */}
       </div>
 
       {/* Content */}
@@ -135,7 +122,7 @@ export default function Hero() {
           ) : (
             <div className="glass-modern inline-block px-8 py-4">
               <p className="text-white font-semibold flex items-center gap-3">
-                <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="w-3 h-3 bg-green-400 rounded-full"></span>
                 Connected:{' '}
                 <span className="text-cyan-300 font-mono text-lg">
                   {publicKey
@@ -227,7 +214,7 @@ export default function Hero() {
         <div className="mt-20 animate-bounce opacity-60">
           <div className="text-gray-400 text-xs uppercase tracking-widest mb-3 font-semibold">Explore More</div>
           <div className="w-6 h-10 border-2 border-gray-500/50 rounded-full mx-auto flex items-start justify-center p-2 backdrop-blur-sm">
-            <div className="w-1 h-3 bg-gradient-to-b from-purple-400 to-cyan-400 rounded-full animate-pulse"></div>
+            <div className="w-1 h-3 bg-gradient-to-b from-purple-400 to-cyan-400 rounded-full"></div>
           </div>
         </div>
       </div>

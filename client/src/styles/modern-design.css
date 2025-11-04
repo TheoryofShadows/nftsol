@@ -354,5 +354,11 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  
+  /* Disable all pulse animations */
+  .animate-pulse,
+  [class*="pulse"] {
+    animation: none !important;
+  }
 }
 
