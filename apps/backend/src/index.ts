@@ -25,6 +25,7 @@ import { heliusService } from './services/helius';
 import { ApiResponse, MintRequest } from './types';
 import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
+import migrationRoutes from './routes/migrations';
 import jwt from 'jsonwebtoken';
 import nftRouter from './routes/nfts';
 import orbRouter from './routes/orb';
@@ -238,6 +239,73 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: Date.now(),
   });
+});
+
+// Enhanced health check with detailed diagnostics
+app.get('/api/health/detailed', async (req, res) => {
+  try {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: appConfig.nodeEnv,
+      services: {
+        database: { status: 'unknown', responseTime: 0 },
+        solana: { status: 'unknown', responseTime: 0 },
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+          limit: Math.round(process.memoryUsage().rss / 1024 / 1024),
+        },
+      },
+    };
+
+    // Check database
+    try {
+      const dbStart = Date.now();
+      await pool.query('SELECT NOW()');
+      health.services.database = {
+        status: 'healthy',
+        responseTime: Date.now() - dbStart,
+      };
+    } catch (error) {
+      health.services.database = {
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+      health.status = 'degraded';
+    }
+
+    // Check Solana
+    try {
+      const solanaStart = Date.now();
+      const solanaHealth = await solanaService.healthCheck();
+      health.services.solana = {
+        status: solanaHealth.healthy ? 'healthy' : 'unhealthy',
+        responseTime: Date.now() - solanaStart,
+        details: solanaHealth.details,
+      };
+      if (!solanaHealth.healthy) {
+        health.status = 'degraded';
+      }
+    } catch (error) {
+      health.services.solana = {
+        status: 'unhealthy',
+        error: error instanceof Error ? error.message : 'Unknown error',
+      };
+      health.status = 'degraded';
+    }
+
+    const statusCode = health.status === 'healthy' ? 200 : 503;
+    res.status(statusCode).json(health);
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/health/detailed' });
+    res.status(500).json({
+      status: 'unhealthy',
+      error: 'Health check failed',
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // API router (v1)
@@ -560,6 +628,7 @@ apiV1.use(
   withdrawalRoutes
 );
 apiV1.use('/admin/withdrawals', authenticate, requireAdmin, adminWithdrawalRoutes);
+apiV1.use('/admin/migrations', migrationRoutes);
 
 // Mount NFT routes with caching
 apiV1.use('/nfts', nftRouter);

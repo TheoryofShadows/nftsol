@@ -59,13 +59,22 @@ export const requestLogger = (req: any, res: any, next: any) => {
   next();
 };
 
-// Error logging
+// Error logging with tracking
 export const errorLogger = (error: Error, context?: any) => {
   logger.error('Application Error', {
     message: error.message,
     stack: error.stack,
     context,
   });
+  
+  // Track error if tracking is configured
+  if (process.env.ERROR_TRACKING_URL || process.env.SENTRY_DSN) {
+    import('./error-tracking').then(({ trackErrorSync }) => {
+      trackErrorSync(error, context);
+    }).catch(() => {
+      // Ignore if module not found
+    });
+  }
 };
 
 // Performance logging

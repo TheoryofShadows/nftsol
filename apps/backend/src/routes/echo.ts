@@ -467,6 +467,87 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/echo/:id
+ * Get specific Echo NFT by ID
+ */
+router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        error: 'Echo ID is required',
+      });
+    }
+
+    // Search in-memory store
+    let foundEcho: EchoRow | null = null;
+    for (const echoes of echoStore.values()) {
+      const echo = echoes.find(e => e.id === id || e.ledgerId === id);
+      if (echo) {
+        foundEcho = echo;
+        break;
+      }
+    }
+
+    if (!foundEcho) {
+      // Try database if available
+      if (echoService) {
+        try {
+          const dbEcho = await echoService.getEchoById(id);
+          if (dbEcho) {
+            return res.json({
+              success: true,
+              data: dbEcho,
+            });
+          }
+        } catch (e) {
+          // Database query failed, continue to 404
+        }
+      }
+
+      return res.status(404).json({
+        success: false,
+        error: 'Echo not found',
+      });
+    }
+
+    // Get all layers for this ledger
+    const ledgerEchoes = echoStore.get(foundEcho.ledgerId) || [];
+    
+    res.json({
+      success: true,
+      data: {
+        id: foundEcho.id,
+        ledgerId: foundEcho.ledgerId,
+        echoData: foundEcho.echoData,
+        echoType: foundEcho.echoType,
+        dataHash: foundEcho.dataHash,
+        contributor: foundEcho.contributor,
+        grokVerified: foundEcho.grokVerified,
+        verificationScore: foundEcho.verificationScore,
+        timestamp: foundEcho.timestamp,
+        totalLayers: ledgerEchoes.length,
+        allLayers: ledgerEchoes.map(e => ({
+          id: e.id,
+          echoType: e.echoType,
+          contributor: e.contributor,
+          grokVerified: e.grokVerified,
+          verificationScore: e.verificationScore,
+        })),
+      },
+    });
+  } catch (error) {
+    console.error('[Echo] Get by ID error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get Echo',
+    });
+  }
+});
+
+/**
  * GET /api/echo/stats/:wallet
  * Get user's Echo NFT statistics
  */
