@@ -146,11 +146,27 @@ function AppContent() {
   // Allow programmatic tab changes (used by Echo components)
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as string;
-      if (typeof detail === 'string') setActiveTab(detail);
+      try {
+        const customEvent = e as CustomEvent<string>;
+        const detail = customEvent?.detail;
+        if (typeof detail === 'string') {
+          setActiveTab(detail);
+          trackTabChange(detail);
+        }
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('Error handling tab change:', err);
+        }
+      }
     };
     window.addEventListener('change-tab', handler as EventListener);
-    return () => window.removeEventListener('change-tab', handler as EventListener);
+    return () => {
+      try {
+        window.removeEventListener('change-tab', handler as EventListener);
+      } catch (err) {
+        // Silently fail on cleanup
+      }
+    };
   }, []);
 
   // Error handling with deduplication
@@ -169,12 +185,12 @@ function AppContent() {
           ? 'Server temporarily unavailable. Retrying in background...'
           : error;
         
-        addNotification({
-          type: 'error',
+      addNotification({
+        type: 'error',
           title: 'Connection Issue',
           message: normalizedError,
           duration: 8000,
-        });
+      });
         
         lastErrorRef.current = error;
         lastErrorTimeRef.current = now;
@@ -284,42 +300,42 @@ function AppContent() {
 
           {/* Desktop Navigation - Full buttons */}
           <div className="hidden md:flex flex-wrap justify-center gap-3 mb-12">
-            {[
-              { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
-              { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
-              { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
-              { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
-              { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
-              { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
-              { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
-              { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
-              { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
-              { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
-              { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
-              { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
-              { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25'
-                    : 'glass text-white hover:bg-white/20 hover:shadow-lg'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{tab.icon}</span>
-                  <div className="text-left">
-                    <div className="font-bold">{tab.label}</div>
-                    <div className="text-xs opacity-75">{tab.desc}</div>
-                  </div>
+          {[
+            { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
+            { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
+            { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
+            { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
+            { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
+            { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
+            { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
+            { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
+            { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
+            { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
+            { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
+            { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
+            { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25'
+                  : 'glass text-white hover:bg-white/20 hover:shadow-lg'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">{tab.icon}</span>
+                <div className="text-left">
+                  <div className="font-bold">{tab.label}</div>
+                  <div className="text-xs opacity-75">{tab.desc}</div>
                 </div>
-                {activeTab === tab.id && (
+              </div>
+              {activeTab === tab.id && (
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20"></div>
-                )}
-              </button>
-            ))}
+              )}
+            </button>
+          ))}
           </div>
 
           {/* Mobile Navigation - Compact scrollable */}

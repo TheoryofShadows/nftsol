@@ -92,11 +92,11 @@ function NotificationContainer() {
   const { notifications, removeNotification } = useNotification();
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-3 pointer-events-none">
+    <div className="fixed top-4 left-4 right-4 md:left-auto md:right-4 md:w-auto z-50 space-y-3 pointer-events-none max-w-md md:max-w-sm mx-auto md:mx-0">
       {notifications.map((notification, index) => (
         <div
           key={notification.id}
-          className="pointer-events-auto animate-slide-in-right"
+          className="pointer-events-auto animate-slide-in-right w-full md:w-auto"
           style={{ animationDelay: `${index * 100}ms` }}
         >
           <NotificationItem

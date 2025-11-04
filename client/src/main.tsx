@@ -29,11 +29,26 @@ const startTime = performance.now();
 
 // Error handling for unhandled promises
 window.addEventListener('unhandledrejection', (event) => {
+  const error = event.reason;
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
-    console.error('Unhandled promise rejection:', event.reason);
+    console.error('Unhandled promise rejection:', error);
   }
-  // In production, could send to error tracking service
+  
+  // Log error details for debugging
+  if (error?.message || error?.stack) {
+    // Could send to error tracking service here
+    if (import.meta.env.DEV) {
+      // eslint-disable-next-line no-console
+      console.error('Error details:', {
+        message: error?.message,
+        stack: error?.stack,
+        name: error?.name,
+      });
+    }
+  }
+  
+  // Prevent default error handling
   event.preventDefault();
 });
 
@@ -42,8 +57,14 @@ window.addEventListener('error', (event) => {
   if (import.meta.env.DEV) {
     // eslint-disable-next-line no-console
     console.error('Uncaught error:', event.error);
+    // eslint-disable-next-line no-console
+    console.error('Error message:', event.message);
+    // eslint-disable-next-line no-console
+    console.error('Error source:', event.filename, 'line', event.lineno);
   }
-  // In production, could send to error tracking service
+  
+  // Could send to error tracking service here
+  // In production, might want to show user-friendly error message
 });
 
 // Initialize Google Analytics

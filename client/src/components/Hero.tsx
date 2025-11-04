@@ -76,13 +76,13 @@ export default function Hero() {
     <div className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden gradient-mesh">
       {/* Modern gradient mesh background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Animated gradient orbs */}
-        <div className="absolute -top-1/4 -right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl float-animation"></div>
+        {/* Animated gradient orbs - Responsive sizes */}
+        <div className="absolute -top-1/4 -right-1/4 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-gradient-to-br from-purple-500/30 to-pink-500/30 rounded-full blur-3xl float-animation"></div>
         <div 
-          className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl float-animation delay-2s"
+          className="absolute -bottom-1/4 -left-1/4 w-[300px] h-[300px] md:w-[600px] md:h-[600px] bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl float-animation delay-2s"
         ></div>
         <div 
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-pink-500/20 to-orange-500/20 rounded-full blur-3xl float-animation delay-4s"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] md:w-[500px] md:h-[500px] bg-gradient-to-br from-pink-500/20 to-orange-500/20 rounded-full blur-3xl float-animation delay-4s"
         ></div>
 
         {/* Floating particles removed - too distracting */}
@@ -98,33 +98,33 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Hero Title - Modern Typography */}
-        <h1 className="text-display gradient-text-modern mb-6 animate-fade-in leading-none">
+        {/* Hero Title - Modern Typography - Responsive */}
+        <h1 className="text-display text-3xl md:text-5xl lg:text-6xl gradient-text-modern mb-4 md:mb-6 animate-fade-in leading-tight md:leading-none px-4">
           NFTSol + Eternal Echoes
         </h1>
 
-        <p className="text-body text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
+        <p className="text-body text-base md:text-xl lg:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto animate-fade-in px-4" style={{ animationDelay: '0.1s' }}>
           Create, collect, and immortalize moments on Solana.
-          <span className="block mt-2 text-lg text-gray-400">
+          <span className="block mt-2 text-sm md:text-lg text-gray-400">
             Next-generation NFTs with eternal on-chain memory.
           </span>
         </p>
 
-        {/* Wallet Connect Button - Modern Design */}
-        <div className="mb-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        {/* Wallet Connect Button - Modern Design - Mobile Responsive */}
+        <div className="mb-8 md:mb-16 animate-fade-in px-4" style={{ animationDelay: '0.2s' }}>
           {!connected ? (
             <div className="relative inline-block group">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <WalletMultiButton className="relative !bg-gradient-to-r !from-purple-600 !via-pink-600 !to-cyan-600 !text-white !font-bold !text-lg !px-10 !py-5 !rounded-2xl !shadow-2xl hover:!scale-105 !transition-all !duration-300" />
+              <WalletMultiButton className="relative !bg-gradient-to-r !from-purple-600 !via-pink-600 !to-cyan-600 !text-white !font-bold !text-sm md:!text-lg !px-6 md:!px-10 !py-3 md:!py-5 !rounded-2xl !shadow-2xl hover:!scale-105 !transition-all !duration-300" />
             </div>
           ) : (
-            <div className="glass-modern inline-block px-8 py-4">
-              <p className="text-white font-semibold flex items-center gap-3">
-                <span className="w-3 h-3 bg-green-400 rounded-full"></span>
-                Connected:{' '}
-                <span className="text-cyan-300 font-mono text-lg">
+            <div className="glass-modern inline-block px-4 md:px-8 py-3 md:py-4">
+              <p className="text-white font-semibold flex items-center gap-2 md:gap-3 text-sm md:text-base">
+                <span className="w-2 h-2 md:w-3 md:h-3 bg-green-400 rounded-full"></span>
+                <span className="hidden md:inline">Connected:</span>
+                <span className="text-cyan-300 font-mono text-xs md:text-lg">
                   {publicKey
-                    ? `${publicKey.toBase58().slice(0, 8)}...${publicKey.toBase58().slice(-6)}`
+                    ? `${publicKey.toBase58().slice(0, 6)}...${publicKey.toBase58().slice(-4)}`
                     : 'Unknown'}
                 </span>
               </p>
@@ -132,78 +132,80 @@ export default function Hero() {
           )}
         </div>
 
-        {/* Live Counters - Modern Card Design */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="card-modern text-center p-6 glow-border">
-            <div className="text-5xl mb-2">🖼️</div>
-            <div className="text-4xl font-bold gradient-text-modern mb-2">
-              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : nftCount.toLocaleString()}
+        {/* Live Counters - Modern Card Design - Mobile Responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-8 md:mb-12 animate-fade-in px-4" style={{ animationDelay: '0.3s' }}>
+          <div className="card-modern text-center p-3 md:p-6 glow-border">
+            <div className="text-2xl md:text-5xl mb-1 md:mb-2">🖼️</div>
+            <div className="text-xl md:text-3xl lg:text-4xl font-bold gradient-text-modern mb-1 md:mb-2">
+              {loading ? <div className="skeleton h-6 md:h-10 w-12 md:w-20 mx-auto"></div> : nftCount.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">NFTs Minted</div>
+            <div className="text-xs md:text-sm text-gray-400 font-semibold uppercase tracking-wider">NFTs</div>
           </div>
 
-          <div className="card-modern text-center p-6 glow-border">
-            <div className="text-5xl mb-2">🌌</div>
-            <div className="text-4xl font-bold gradient-text-modern mb-2">
-              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : echoLayers.toLocaleString()}
+          <div className="card-modern text-center p-3 md:p-6 glow-border">
+            <div className="text-2xl md:text-5xl mb-1 md:mb-2">🌌</div>
+            <div className="text-xl md:text-3xl lg:text-4xl font-bold gradient-text-modern mb-1 md:mb-2">
+              {loading ? <div className="skeleton h-6 md:h-10 w-12 md:w-20 mx-auto"></div> : echoLayers.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">Echo Layers</div>
+            <div className="text-xs md:text-sm text-gray-400 font-semibold uppercase tracking-wider">Echoes</div>
           </div>
 
-          <div className="card-modern text-center p-6 glow-border">
-            <div className="text-5xl mb-2">🔥</div>
-            <div className="text-4xl font-bold gradient-text-modern mb-2">
-              {loading ? <div className="skeleton h-10 w-20 mx-auto"></div> : trendingToday.toLocaleString()}
+          <div className="card-modern text-center p-3 md:p-6 glow-border">
+            <div className="text-2xl md:text-5xl mb-1 md:mb-2">🔥</div>
+            <div className="text-xl md:text-3xl lg:text-4xl font-bold gradient-text-modern mb-1 md:mb-2">
+              {loading ? <div className="skeleton h-6 md:h-10 w-12 md:w-20 mx-auto"></div> : trendingToday.toLocaleString()}
             </div>
-            <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">Trending</div>
+            <div className="text-xs md:text-sm text-gray-400 font-semibold uppercase tracking-wider">Trending</div>
           </div>
 
           {connected && (
-            <div className="card-modern text-center p-6 glow-border">
-              <div className="text-5xl mb-2">⭐</div>
-              <div className="text-4xl font-bold text-yellow-400 mb-2">
+            <div className="card-modern text-center p-3 md:p-6 glow-border">
+              <div className="text-2xl md:text-5xl mb-1 md:mb-2">⭐</div>
+              <div className="text-xl md:text-3xl lg:text-4xl font-bold text-yellow-400 mb-1 md:mb-2">
                 {cloutBalance > 0 ? cloutBalance.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
               </div>
-              <div className="text-sm text-gray-400 font-semibold uppercase tracking-wider">CLOUT</div>
+              <div className="text-xs md:text-sm text-gray-400 font-semibold uppercase tracking-wider">CLOUT</div>
             </div>
           )}
         </div>
 
-        {/* Quick Action Buttons - Modern Design */}
-        <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        {/* Quick Action Buttons - Modern Design - Mobile Responsive */}
+        <div className="flex flex-wrap justify-center gap-2 md:gap-4 animate-fade-in px-4" style={{ animationDelay: '0.4s' }}>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
-            className="btn-modern"
+            className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="text-2xl">🏪</span>
-              Browse Marketplace
+            <span className="relative z-10 flex items-center gap-1 md:gap-2">
+              <span className="text-lg md:text-2xl">🏪</span>
+              <span className="hidden sm:inline">Browse</span>
+              <span className="sm:hidden">Market</span>
             </span>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'mint' }))}
-            className="btn-modern"
+            className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
             style={{ 
               background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
               boxShadow: '0 8px 24px rgba(6, 182, 212, 0.3)'
             }}
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="text-2xl">✨</span>
+            <span className="relative z-10 flex items-center gap-1 md:gap-2">
+              <span className="text-lg md:text-2xl">✨</span>
               Mint NFT
             </span>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-mint' }))}
-            className="btn-modern"
+            className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
             style={{ 
               background: 'linear-gradient(135deg, #ec4899, #f97316)',
               boxShadow: '0 8px 24px rgba(236, 72, 153, 0.3)'
             }}
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <span className="text-2xl">🎬</span>
-              Create Echo
+            <span className="relative z-10 flex items-center gap-1 md:gap-2">
+              <span className="text-lg md:text-2xl">🎬</span>
+              <span className="hidden sm:inline">Create Echo</span>
+              <span className="sm:hidden">Echo</span>
             </span>
           </button>
         </div>

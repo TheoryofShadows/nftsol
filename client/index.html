@@ -11,6 +11,9 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta http-equiv="Referrer-Policy" content="no-referrer" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <meta name="theme-color" content="#0a0a0f" />
     
     <!-- Preconnect to Google Fonts for faster loading -->
@@ -19,6 +22,52 @@
     
     <title>NFTSol – Decentralized NFT Marketplace</title>
     <link rel="icon" href="data:," />
+    
+    <!-- Cache busting - force reload on Safari -->
+    <script>
+      (function() {
+        // Force reload if cache is stale
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+              registration.unregister();
+            }
+          }).catch(function(err) {
+            // Silently fail
+          });
+        }
+        
+        // Clear caches
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              caches.delete(name).catch(function() {
+                // Silently fail
+              });
+            }
+          }).catch(function() {
+            // Silently fail
+          });
+        }
+        
+        // Check version and force reload if outdated
+        fetch('/version.txt?v=' + Date.now())
+          .then(function(response) {
+            return response.text();
+          })
+          .then(function(version) {
+            var storedVersion = sessionStorage.getItem('app_version');
+            if (storedVersion && storedVersion !== version.trim()) {
+              sessionStorage.clear();
+              location.reload();
+            }
+            sessionStorage.setItem('app_version', version.trim());
+          })
+          .catch(function() {
+            // Silently fail - version check is optional
+          });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
