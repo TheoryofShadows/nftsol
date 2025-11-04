@@ -66,6 +66,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Load marketplace data
   const loadMarketplace = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
     try {
       const response = await apiService.getMarketplace();
       if (response.success && response.data) {
@@ -86,10 +87,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (response.success && response.data) {
         dispatch({ type: 'SET_COLLECTIONS', payload: response.data });
       } else {
-        dispatch({ type: 'SET_ERROR', payload: response.error || 'Failed to load collections' });
+        // Silently fail - marketplace error already shown
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load collections' });
+      // Silently fail - marketplace error already shown
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 

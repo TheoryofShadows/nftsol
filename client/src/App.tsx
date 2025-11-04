@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import {
@@ -65,6 +65,10 @@ function AppContent() {
   const { metrics, getPerformanceReport } = usePerformance();
   const { connected, publicKey } = useWallet();
   const { startOnboarding, isStepCompleted, completeStep } = useOnboarding();
+  
+  // Error notification deduplication
+  const lastErrorRef = useRef<string | null>(null);
+  const lastErrorTimeRef = useRef<number>(0);
 
   // Dynamically determine cluster based on RPC URL
   const solanaCluster = import.meta.env.VITE_SOLANA_RPC_URL?.includes('mainnet')
@@ -148,14 +152,32 @@ function AppContent() {
     return () => window.removeEventListener('change-tab', handler as EventListener);
   }, []);
 
-  // Error handling
+  // Error handling with deduplication
   useEffect(() => {
     if (error) {
-      addNotification({
-        type: 'error',
-        title: 'Error',
-        message: error,
-      });
+      const now = Date.now();
+      const timeSinceLastError = now - lastErrorTimeRef.current;
+      
+      // Only show error notification if:
+      // 1. It's a different error message, OR
+      // 2. At least 10 seconds have passed since the last error
+      if (error !== lastErrorRef.current || timeSinceLastError > 10000) {
+        // Normalize server unreachable errors to a single message
+        const normalizedError = error.includes('Unable to reach server') || 
+                               error.includes('Failed to load')
+          ? 'Server temporarily unavailable. Retrying in background...'
+          : error;
+        
+        addNotification({
+          type: 'error',
+          title: 'Connection Issue',
+          message: normalizedError,
+          duration: 8000,
+        });
+        
+        lastErrorRef.current = error;
+        lastErrorTimeRef.current = now;
+      }
     }
   }, [error, addNotification]);
 
