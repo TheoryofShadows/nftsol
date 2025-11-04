@@ -1,0 +1,3 @@
+# Git submodules - currently none
+# This file prevents Netlify from trying to checkout non-existent submodules
+
