@@ -8,9 +8,12 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "CommonJS",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": [
     "src/app-production.ts",
     "src/server-production.ts",
