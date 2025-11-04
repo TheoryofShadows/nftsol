@@ -36,7 +36,6 @@ const NftGrid = lazy(() => import('./components/NftGrid'));
 const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
 const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
 const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
-const EchoMint = lazy(() => import('./echo/EchoMint'));
 const EchoViewer = lazy(() => import('./echo/EchoViewer'));
 const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));

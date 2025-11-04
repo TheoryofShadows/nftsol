@@ -38,7 +38,7 @@ interface VerificationResult {
   summary: string;
 }
 
-export function UnifiedDashboard() {
+export default function UnifiedDashboard() {
   const { publicKey, connected } = useWallet();
   const { estimate } = useMintCost();
   const { balance: cloutBalance } = useCloutBalance();
