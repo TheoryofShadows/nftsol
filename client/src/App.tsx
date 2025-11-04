@@ -60,6 +60,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
@@ -268,44 +269,127 @@ function AppContent() {
           </Suspense>
         )}
 
-        {/* Enhanced Navigation */}
-        <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {[
-            { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
-            { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
-            { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
-            { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
-            { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
-            { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
-            { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
-            { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
-            { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
-            { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
-            { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
-            { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
-            { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
-          ].map((tab) => (
+        {/* Enhanced Navigation - Responsive */}
+        <div className="mb-8">
+          {/* Mobile Menu Toggle (only visible on mobile) */}
+          <div className="md:hidden mb-4 flex justify-center">
             <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25'
-                  : 'glass text-white hover:bg-white/20 hover:shadow-lg'
-              }`}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="glass-modern px-6 py-3 rounded-xl font-semibold text-white flex items-center space-x-2"
             >
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">{tab.icon}</span>
-                <div className="text-left">
-                  <div className="font-bold">{tab.label}</div>
-                  <div className="text-xs opacity-75">{tab.desc}</div>
-                </div>
-              </div>
-              {activeTab === tab.id && (
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20"></div>
-              )}
+              <span className="text-xl">{isMobileMenuOpen ? '✕' : '☰'}</span>
+              <span>{isMobileMenuOpen ? 'Close' : 'Menu'}</span>
             </button>
-          ))}
+          </div>
+
+          {/* Desktop Navigation - Full buttons */}
+          <div className="hidden md:flex flex-wrap justify-center gap-3 mb-12">
+            {[
+              { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
+              { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
+              { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
+              { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
+              { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
+              { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
+              { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️', desc: 'Layers' },
+              { id: 'my-nfts', label: 'My NFTs', icon: '👤', desc: 'Your collection' },
+              { id: 'collections', label: 'Collections', icon: '📚', desc: 'Browse by type' },
+              { id: 'clout', label: 'CLOUT Token', icon: '⭐', desc: 'Token Info' },
+              { id: 'referrals', label: 'Referrals', icon: '🎯', desc: 'Earn rewards' },
+              { id: 'withdraw', label: 'Withdraw SOL', icon: '💰', desc: 'Manage funds' },
+              { id: 'admin', label: 'Admin', icon: '🔧', desc: 'Admin tools' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id)}
+                className={`group relative px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-xl shadow-purple-500/25'
+                    : 'glass text-white hover:bg-white/20 hover:shadow-lg'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{tab.icon}</span>
+                  <div className="text-left">
+                    <div className="font-bold">{tab.label}</div>
+                    <div className="text-xs opacity-75">{tab.desc}</div>
+                  </div>
+                </div>
+                {activeTab === tab.id && (
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 opacity-20"></div>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Mobile Navigation - Compact scrollable */}
+          <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
+            <div className="glass-modern p-4 rounded-2xl max-h-[70vh] overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'home', label: 'Home', icon: '🏠' },
+                  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                  { id: 'market', label: 'Market', icon: '🏪' },
+                  { id: 'mint', label: 'Mint', icon: '✨' },
+                  { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭' },
+                  { id: 'echo-mint', label: 'Mint Echo', icon: '🎬' },
+                  { id: 'echo-viewer', label: 'Echo Viewer', icon: '👁️' },
+                  { id: 'my-nfts', label: 'My NFTs', icon: '👤' },
+                  { id: 'collections', label: 'Collections', icon: '📚' },
+                  { id: 'clout', label: 'CLOUT', icon: '⭐' },
+                  { id: 'referrals', label: 'Referrals', icon: '🎯' },
+                  { id: 'withdraw', label: 'Withdraw', icon: '💰' },
+                  { id: 'admin', label: 'Admin', icon: '🔧' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      handleTabChange(tab.id);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className={`relative px-3 py-3 rounded-xl font-semibold text-sm transition-all duration-200 ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white shadow-lg'
+                        : 'bg-white/10 text-white hover:bg-white/20'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center space-y-1">
+                      <span className="text-xl">{tab.icon}</span>
+                      <span className="text-xs font-medium">{tab.label}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Quick Navigation - Always visible compact bar */}
+          {!isMobileMenuOpen && (
+            <div className="md:hidden overflow-x-auto pb-2 -mx-4 px-4">
+              <div className="flex gap-2 min-w-max">
+                {[
+                  { id: 'home', icon: '🏠', label: 'Home' },
+                  { id: 'market', icon: '🏪', label: 'Market' },
+                  { id: 'mint', icon: '✨', label: 'Mint' },
+                  { id: 'echo-marketplace', icon: '🎭', label: 'Echo' },
+                  { id: 'my-nfts', icon: '👤', label: 'My NFTs' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => handleTabChange(tab.id)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-r from-purple-600 to-cyan-500 text-white'
+                        : 'glass text-white'
+                    }`}
+                  >
+                    <span className="mr-1.5">{tab.icon}</span>
+                    <span>{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="min-h-[600px]">
