@@ -11,22 +11,25 @@ services:
     autoDeploy: true
     envVars:
       NODE_ENV: production
-      PORT: 3000
+      # PORT is automatically set by Render - don't override it
       DATABASE_URL:
         fromDatabase:
           name: nftsol-db
           property: connectionString
-      VITE_API_BASE: https://nftsol.onrender.com
-      SOLANA_RPC_URL: https://api.mainnet-beta.solana.com
+      # CRITICAL: Must set ALLOWED_ORIGINS or server will fail to start
+      ALLOWED_ORIGINS: https://nftsol.app,https://www.nftsol.app,https://market.nftsol.app
+      SOLANA_RPC_URL: https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com
       SOLANA_CLUSTER: mainnet-beta
+      # CRITICAL: Must set these or server will fail
       PLATFORM_SECRET_KEY_BASE58: YOUR_PLATFORM_SECRET_KEY_HERE
-      PLATFORM_PUBLIC_KEY: 7boWRDfn3aPE88jt5qpiryPLw56EneXhEMUdfbd5TR9f
-      NFT_STORAGE_KEY: <YOUR_REAL_NFT_STORAGE_KEY>
+      JWT_SECRET: YOUR_JWT_SECRET_HERE
+      ADMIN_WALLETS: YOUR_ADMIN_WALLET_ADDRESS
+      # CLOUT Configuration
       CLOUT_PROGRAM_ID: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
       CLOUT_MINT: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
-      CLOUT_TOKEN_AUTHORITY: 3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o
       REWARDS_OWNER: 3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o
+      # Program IDs
       MARKET_PROGRAM_ID: HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7
       LOYALTY_PROGRAM_ID: 2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9
       # REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT (deterministic ATA)

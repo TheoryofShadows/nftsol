@@ -40,6 +40,8 @@ import { initializeSecrets } from './lib/secrets-loader';
 
 initializeSecrets();
 
+// PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
+// This is just for reference - actual port used is from appConfig.port or Render's PORT
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
 const app = express();
@@ -1287,24 +1289,30 @@ process.on('SIGINT', () => {
 })();
 
 // Start server
-server.listen(appConfig.port, '0.0.0.0', async () => {
-  console.log(`NFTSol Backend Server`);
-  console.log(`Port: ${appConfig.port}`);
-  console.log(`Environment: ${appConfig.nodeEnv}`);
-  console.log(`CORS Origins: ${appConfig.cors.origin.join(', ')}`);
-  console.log(`Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
-  console.log(`File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  console.log(`Solana RPC: ${solanaConfig.rpcUrl}`);
-  console.log(`Cluster: ${solanaConfig.cluster}`);
+const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;
+server.listen(serverPort, '0.0.0.0', async () => {
+  console.log(`🚀 NFTSol Backend Server Started`);
+  console.log(`📍 Port: ${serverPort} (from ${process.env.PORT ? 'PORT env var' : 'config'})`);
+  console.log(`🌍 Environment: ${appConfig.nodeEnv}`);
+  console.log(`🌐 CORS Origins: ${appConfig.cors.origin.join(', ')}`);
+  console.log(`⚡ Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
+  console.log(`📤 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
+  console.log(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
+  console.log(`🌐 Cluster: ${solanaConfig.cluster}`);
+  console.log(`✅ Server ready at http://0.0.0.0:${serverPort}`);
 
   if (programConfig.cloutProgramId) {
-    console.log(`CLOUT Token: ${programConfig.cloutProgramId}`);
+    console.log(`💰 CLOUT Token: ${programConfig.cloutProgramId}`);
     // Calculate rewards vault dynamically
-    const rewardsVault = await getRewardsVaultAddress();
-    if (rewardsVault) {
-      console.log(`Rewards Vault: ${rewardsVault.toBase58()} (auto-calculated from REWARDS_OWNER + CLOUT_MINT)`);
-    } else {
-      console.log(`Rewards Vault: Will be created on first use (auto-calculated)`);
+    try {
+      const rewardsVault = await getRewardsVaultAddress();
+      if (rewardsVault) {
+        console.log(`🏦 Rewards Vault: ${rewardsVault.toBase58()} (auto-calculated from REWARDS_OWNER + CLOUT_MINT)`);
+      } else {
+        console.log(`🏦 Rewards Vault: Will be created on first use (auto-calculated)`);
+      }
+    } catch (error) {
+      console.warn('⚠️ Could not calculate rewards vault:', error instanceof Error ? error.message : error);
     }
   }
 });

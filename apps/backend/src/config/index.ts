@@ -9,11 +9,12 @@ initializeSecrets();
 
 const requiredEnvVars = [
   'NODE_ENV',
-  'PORT',
+  'PORT', // Render automatically sets this
   'SOLANA_RPC_URL',
-  'CLOUT_PROGRAM_ID',
-  'MARKET_PROGRAM_ID',
-  'LOYALTY_PROGRAM_ID',
+  'ALLOWED_ORIGINS', // Required in production - server will throw error if missing
+  // CLOUT_PROGRAM_ID has defaults, so it's optional
+  // MARKET_PROGRAM_ID has defaults, so it's optional
+  // LOYALTY_PROGRAM_ID has defaults, so it's optional
   // REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT, so it's optional
 ];
 
@@ -44,6 +45,10 @@ if (!process.env.LOYALTY_PROGRAM_ID) {
 if (process.env.NODE_ENV === 'production') {
   for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
+      // ALLOWED_ORIGINS is checked separately in index.ts with better error message
+      if (envVar === 'ALLOWED_ORIGINS') {
+        continue; // Let index.ts handle this with clearer error
+      }
       throw new Error(`Missing required environment variable: ${envVar}`);
     }
   }
