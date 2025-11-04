@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  /* Body background removed - gradient-mesh class handles it */
   body {
-    @apply bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900;
+    background: transparent;
   }
 }
 
