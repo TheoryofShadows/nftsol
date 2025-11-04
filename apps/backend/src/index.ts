@@ -637,6 +637,71 @@ app.use('/api/grok', grokVerificationRouter);
 // Transaction history routes (Helius Nov 2025 upgrade)
 app.use('/api/transactions', transactionsRouter);
 
+// Waitlist subscription endpoint
+app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
+  try {
+    const { email, walletAddress, referralCode, source } = req.body;
+    
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Valid email address is required',
+        code: 'INVALID_EMAIL',
+      };
+      return res.status(400).json(response);
+    }
+    
+    // Store in database (will auto-create table if doesn't exist)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS waitlist (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        wallet_address VARCHAR(44),
+        referral_code VARCHAR(50),
+        source VARCHAR(20) DEFAULT 'landing',
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    
+    await pool.query(`
+      INSERT INTO waitlist (email, wallet_address, referral_code, source)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (email) DO UPDATE SET
+        wallet_address = EXCLUDED.wallet_address,
+        referral_code = EXCLUDED.referral_code
+      RETURNING id
+    `, [email, walletAddress || null, referralCode || null, source || 'landing']);
+    
+    // Log successful signup
+    auditLogger(
+      'WAITLIST_SIGNUP',
+      `New waitlist signup: ${email}`,
+      { email, hasWallet: !!walletAddress, hasReferral: !!referralCode }
+    );
+    
+    const response: ApiResponse = {
+      success: true,
+      message: 'Successfully joined waitlist! Check your email for updates.',
+      data: {
+        email,
+        position: 'early', // Could query actual position
+      },
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error('Waitlist subscription error:', error);
+    
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to join waitlist. Please try again.',
+      code: 'WAITLIST_ERROR',
+    };
+    
+    res.status(500).json(response);
+  }
+});
+
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
   const response: ApiResponse = {
@@ -835,6 +900,41 @@ apiV1.get('/', (req, res) => {
     },
   };
   res.json(response);
+});
+
+// Collections endpoint
+apiV1.get('/collections', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        COALESCE(collection_name, 'Unknown') as id,
+        COALESCE(collection_name, 'Unknown Collection') as name,
+        COUNT(*) as "nftCount",
+        MIN(image_url) as image,
+        COALESCE(AVG(CAST(price AS DECIMAL)), 0) as "floorPrice"
+      FROM nfts
+      WHERE status = 'active'
+      GROUP BY collection_name
+      ORDER BY COUNT(*) DESC
+      LIMIT 50
+    `);
+    
+    const response: ApiResponse = {
+      success: true,
+      data: result.rows || [],
+      message: `Found ${result.rows?.length || 0} collections`,
+    };
+    
+    res.json(response);
+  } catch (error) {
+    console.error('Collections endpoint error:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to fetch collections',
+      code: 'COLLECTIONS_ERROR',
+    };
+    res.status(500).json(response);
+  }
 });
 
 // Mount versioned API

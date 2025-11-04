@@ -330,7 +330,7 @@ function AppContent() {
                             alt={nft.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/placeholder-nft.png';
+                              (e.target as HTMLImageElement).src = '/placeholder-nft.svg';
                             }}
                           />
                           {nft.price && (
