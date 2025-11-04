@@ -12,6 +12,29 @@ import {
 import { programConfig, solanaConfig } from '../config/index';
 
 /**
+ * Calculate the rewards vault ATA address (deterministic)
+ * This is a synchronous helper that returns the address without needing a connection
+ * @returns PublicKey of the rewards vault ATA, or null if configuration is missing
+ */
+export async function getRewardsVaultAddress(): Promise<PublicKey | null> {
+  const mintAddress = programConfig.cloutProgramId;
+  const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
+
+  if (!mintAddress || !ownerAddress) {
+    return null;
+  }
+
+  try {
+    const mint = new PublicKey(mintAddress);
+    const owner = new PublicKey(ownerAddress);
+    return await getAssociatedTokenAddress(mint, owner);
+  } catch (error) {
+    console.warn('Could not calculate rewards vault address:', error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+/**
  * Get or create the CLOUT rewards vault ATA
  * @param connection - Solana connection
  * @param payer - Keypair to pay for creation if needed

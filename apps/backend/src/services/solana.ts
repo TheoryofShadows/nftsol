@@ -6,6 +6,7 @@ import {
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
+import { getRewardsVaultAddress } from '../utils/clout-vault';
 import logger from '../utils/logger';
 import { ApiResponse, MintResponse } from '../types';
 
@@ -82,10 +83,15 @@ class SolanaService {
         errors.push('Loyalty program not found on chain');
       }
 
-      // Check Rewards Vault
-      const vaultAccount = await this.getProgramAccount(programConfig.rewardsVault);
-      if (!vaultAccount) {
-        errors.push('Rewards vault not found on chain');
+      // Check Rewards Vault (auto-calculated from REWARDS_OWNER + CLOUT_MINT)
+      const rewardsVault = await getRewardsVaultAddress();
+      if (rewardsVault) {
+        const vaultAccount = await this.getProgramAccount(rewardsVault.toBase58());
+        if (!vaultAccount) {
+          errors.push('Rewards vault not found on chain (it will be created on first use)');
+        }
+      } else {
+        errors.push('Rewards vault address could not be calculated (missing REWARDS_OWNER or CLOUT_MINT)');
       }
 
       return {

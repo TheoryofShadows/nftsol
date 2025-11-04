@@ -9,7 +9,7 @@ import { nanoid } from 'nanoid';
 import { createServer } from 'http';
 import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
-import { verifyCloutVault } from './utils/clout-vault';
+import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
 import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
@@ -244,14 +244,17 @@ import expressPkg from 'express';
 const apiV1 = expressPkg.Router();
 
 // Program configuration endpoint
-apiV1.get('/programs', (req, res) => {
+apiV1.get('/programs', async (req, res) => {
+  // Calculate rewards vault dynamically
+  const rewardsVault = await getRewardsVaultAddress();
+  
   const response: ApiResponse = {
     success: true,
     data: {
       programs: {
         CLOUT_PROGRAM_ID: programConfig.cloutProgramId,
         CLOUT_MINT: programConfig.cloutProgramId, // Same as program ID for CLOUT
-        REWARDS_VAULT: programConfig.rewardsVault,
+        REWARDS_VAULT: rewardsVault?.toBase58() || 'Auto-calculated from REWARDS_OWNER + CLOUT_MINT',
         MARKET_PROGRAM_ID: programConfig.marketProgramId,
         LOYALTY_PROGRAM_ID: programConfig.loyaltyProgramId,
       },
@@ -954,7 +957,7 @@ process.on('SIGINT', () => {
 })();
 
 // Start server
-server.listen(appConfig.port, '0.0.0.0', () => {
+server.listen(appConfig.port, '0.0.0.0', async () => {
   console.log(`NFTSol Backend Server`);
   console.log(`Port: ${appConfig.port}`);
   console.log(`Environment: ${appConfig.nodeEnv}`);
@@ -966,7 +969,13 @@ server.listen(appConfig.port, '0.0.0.0', () => {
 
   if (programConfig.cloutProgramId) {
     console.log(`CLOUT Token: ${programConfig.cloutProgramId}`);
-    console.log(`Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`);
+    // Calculate rewards vault dynamically
+    const rewardsVault = await getRewardsVaultAddress();
+    if (rewardsVault) {
+      console.log(`Rewards Vault: ${rewardsVault.toBase58()} (auto-calculated from REWARDS_OWNER + CLOUT_MINT)`);
+    } else {
+      console.log(`Rewards Vault: Will be created on first use (auto-calculated)`);
+    }
   }
 });
 
