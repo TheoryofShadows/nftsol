@@ -67,6 +67,13 @@ function AppContent() {
   const { connected, publicKey } = useWallet();
   const { startOnboarding, isStepCompleted, completeStep } = useOnboarding();
 
+  // Dynamically determine cluster based on RPC URL
+  const solanaCluster = import.meta.env.VITE_SOLANA_RPC_URL?.includes('mainnet')
+    ? 'Solana Mainnet'
+    : import.meta.env.VITE_SOLANA_RPC_URL?.includes('testnet')
+    ? 'Solana Testnet'
+    : 'Solana Devnet';
+
   // Load NFTs on mount
   useEffect(() => {
     loadMarketplace();
@@ -370,7 +377,7 @@ function AppContent() {
                 </h2>
                 <div className="flex items-center space-x-4">
                   <div className="glass px-4 py-2 rounded-lg">
-                    <span className="text-sm text-gray-300">Live on Solana Devnet</span>
+                    <span className="text-sm text-gray-300">Live on {solanaCluster}</span>
                   </div>
                 </div>
               </div>
@@ -644,7 +651,7 @@ function AppContent() {
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-gray-400">Live on Solana Devnet</span>
+                  <span className="text-sm text-gray-400">Live on {solanaCluster}</span>
                 </div>
                 <div className="flex space-x-3">
                   <a href="#" className="text-gray-400 hover:text-cyan-400 transition-colors">
