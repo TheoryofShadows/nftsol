@@ -1,4 +1,4 @@
-// src/lib/db.ts
+﻿// src/lib/db.ts
 import { Pool } from 'pg';
 
 // Mock database for testing
@@ -61,7 +61,7 @@ if (isTestMode) {
     // Connection pool configuration
     max: 20, // Maximum number of clients in the pool
     idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-    connectionTimeoutMillis: 2000, // Return error after 2 seconds if connection cannot be established
+    connectionTimeoutMillis: 10000, // Return error after 10 seconds if connection cannot be established`n    ssl: {`n      rejectUnauthorized: false // Accept Render's SSL certificate`n    },
   });
 
   // Handle connection errors
