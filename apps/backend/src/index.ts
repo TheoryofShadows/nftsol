@@ -632,6 +632,69 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 // Ultra-cheap minting routes
 app.use('/api/mint', mintRouter);
 
+// NFT verification and balance endpoints (for frontend compatibility)
+app.get('/api/nfts/verify/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const exists = await solanaService.accountExists(address);
+    res.json({ success: true, data: { exists, address } });
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/nfts/verify/:address' });
+    res.status(500).json({ success: false, error: 'Verification failed' });
+  }
+});
+
+app.get('/api/nfts/balance/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+    const balance = await solanaService.getBalance(address);
+    res.json({ success: true, data: { balance, address, solBalance: `${balance.toFixed(4)} SOL` } });
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/nfts/balance/:address' });
+    res.status(500).json({ success: false, error: 'Failed to get balance' });
+  }
+});
+
+// Redirect /api/nfts/mint to /api/v1/simple-mint for compatibility
+app.post('/api/nfts/mint', async (req, res, next) => {
+  req.url = '/api/v1/simple-mint';
+  next();
+});
+
+// Redirect /api/mint/nft to /api/v1/simple-mint for compatibility
+app.post('/api/mint/nft', async (req, res, next) => {
+  req.url = '/api/v1/simple-mint';
+  next();
+});
+
+// API path redirect middleware (for frontend compatibility)
+app.use('/api', (req, res, next) => {
+  // Don't redirect if already /api/v1
+  if (req.path.startsWith('/v1/')) {
+    return next();
+  }
+  
+  // Redirect /api/auth/admin to /api/v1/auth/admin
+  if (req.path === '/auth/admin' && req.method === 'POST') {
+    req.url = '/api/v1/auth/admin';
+    return next();
+  }
+  
+  // Redirect /api/admin/withdrawals to /api/v1/admin/withdrawals
+  if (req.path.startsWith('/admin/withdrawals')) {
+    req.url = '/api/v1' + req.path;
+    return next();
+  }
+  
+  // Redirect /api/wallets/withdraw to /api/v1/wallets/withdraw
+  if (req.path === '/wallets/withdraw' && req.method === 'POST') {
+    req.url = '/api/v1/wallets/withdraw';
+    return next();
+  }
+  
+  next();
+});
+
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
 
