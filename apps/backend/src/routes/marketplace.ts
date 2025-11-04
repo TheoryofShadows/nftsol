@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { marketplaceService } from '../services/marketplace';
+import { crossPlatformMarketplace } from '../services/cross-platform-marketplace';
 import { validateWallet, sanitizeInput } from '../utils/validation';
 import { ApiResponse } from '../types';
 
@@ -302,6 +303,109 @@ router.get('/sales', async (req: Request, res: Response) => {
         success: false,
         error: result.error || 'Failed to get sales history',
         code: 'GET_SALES_FAILED',
+      };
+      return res.status(500).json(response);
+    }
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
+ * GET /api/marketplace/all
+ * Get listings from ALL platforms (local + Magic Eden + Tensor)
+ * 🌐 Cross-Platform Marketplace - Shows NFTs from entire Solana ecosystem!
+ */
+router.get('/all', async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string) || 100;
+    const minPrice = req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined;
+    const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
+    const collection = req.query.collection as string | undefined;
+
+    console.log('[Marketplace] Fetching cross-platform listings...');
+
+    const result = await crossPlatformMarketplace.getAllListings({
+      limit,
+      minPrice,
+      maxPrice,
+      collection,
+    });
+
+    if (result.success) {
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          listings: result.listings || [],
+          total: result.total || 0,
+          platforms: ['local', 'magic-eden', 'tensor'],
+        },
+        message: `Found ${result.total || 0} listings across all platforms`,
+      };
+      return res.json(response);
+    } else {
+      const response: ApiResponse = {
+        success: false,
+        error: result.error || 'Failed to fetch cross-platform listings',
+        code: 'CROSS_PLATFORM_FETCH_FAILED',
+      };
+      return res.status(500).json(response);
+    }
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
+ * GET /api/marketplace/search
+ * Search NFTs across ALL platforms
+ * 🔍 Universal NFT Search!
+ */
+router.get('/search', async (req: Request, res: Response) => {
+  try {
+    const query = req.query.q as string;
+
+    if (!query || query.trim().length === 0) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Search query is required',
+        code: 'MISSING_QUERY',
+      };
+      return res.status(400).json(response);
+    }
+
+    const limit = parseInt(req.query.limit as string) || 50;
+
+    console.log(`[Marketplace] Searching for: "${query}"`);
+
+    const result = await crossPlatformMarketplace.searchNFTs(query, { limit });
+
+    if (result.success) {
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          results: result.results || [],
+          total: result.results?.length || 0,
+          query,
+        },
+        message: `Found ${result.results?.length || 0} results for "${query}"`,
+      };
+      return res.json(response);
+    } else {
+      const response: ApiResponse = {
+        success: false,
+        error: result.error || 'Search failed',
+        code: 'SEARCH_FAILED',
       };
       return res.status(500).json(response);
     }
