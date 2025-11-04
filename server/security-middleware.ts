@@ -68,11 +68,21 @@ export const helmetConfig = helmet({
   referrerPolicy: { policy: "same-origin" }
 });
 
-// CORS configuration
+// CORS configuration - use ALLOWED_ORIGINS env var or fallback to defaults
+const getAllowedOrigins = () => {
+  const envOrigins = process.env.ALLOWED_ORIGINS;
+  if (envOrigins) {
+    return envOrigins.split(',').map(s => s.trim()).filter(Boolean);
+  }
+  
+  // Fallback to defaults
+  return process.env.NODE_ENV === 'production' 
+    ? ['https://nftsol.app', 'https://www.nftsol.app'] 
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5000'];
+};
+
 export const corsConfig = cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-domain.com', 'https://nftsol.app'] 
-    : ['http://localhost:5173', 'http://localhost:5000'],
+  origin: getAllowedOrigins(),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
