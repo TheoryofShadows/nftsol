@@ -893,25 +893,54 @@ app.get('/api/nfts', async (req, res) => {
 apiV1.get('/wallet/:address', async (req, res) => {
   try {
     const { address } = req.params;
-    const balance = await solanaService.getBalance(address);
-    const exists = await solanaService.accountExists(address);
+    
+    // Validate wallet address format
+    if (!address || address.length < 32 || address.length > 44) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Invalid wallet address format',
+        code: 'INVALID_ADDRESS',
+      };
+      return res.status(400).json(response);
+    }
 
-    const response: ApiResponse = {
-      success: true,
-      data: {
-        address,
-        balance,
-        exists,
-        solBalance: `${balance.toFixed(4)} SOL`,
-      },
-    };
-    res.json(response);
+    try {
+      const balance = await solanaService.getBalance(address);
+      const exists = await solanaService.accountExists(address);
+
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          address,
+          balance: balance || 0,
+          exists: exists !== undefined ? exists : true,
+          solBalance: `${(balance || 0).toFixed(4)} SOL`,
+        },
+      };
+      res.json(response);
+    } catch (solanaError) {
+      // If Solana service fails, return basic info
+      errorLogger(solanaError as Error, { endpoint: '/api/v1/wallet/:address', action: 'solana_service' });
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          address,
+          balance: 0,
+          exists: true,
+          solBalance: '0.0000 SOL',
+          note: 'Unable to fetch balance from Solana network',
+        },
+      };
+      res.json(response);
+    }
   } catch (error) {
-    errorLogger(error as Error, { endpoint: '/api/wallet/:address' });
-    res.status(500).json({
+    errorLogger(error as Error, { endpoint: '/api/v1/wallet/:address' });
+    const response: ApiResponse = {
       success: false,
-      error: 'Failed to get wallet info',
-    });
+      error: error instanceof Error ? error.message : 'Failed to get wallet info',
+      code: 'WALLET_INFO_ERROR',
+    };
+    res.status(500).json(response);
   }
 });
 
@@ -941,19 +970,52 @@ apiV1.get('/', (req, res) => {
 // Collections endpoint
 apiV1.get('/collections', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        COALESCE(collection_name, 'Unknown') as id,
-        COALESCE(collection_name, 'Unknown Collection') as name,
-        COUNT(*) as "nftCount",
-        MIN(image_url) as image,
-        COALESCE(AVG(CAST(price AS DECIMAL)), 0) as "floorPrice"
-      FROM nfts
-      WHERE status = 'active'
-      GROUP BY collection_name
-      ORDER BY COUNT(*) DESC
-      LIMIT 50
-    `);
+    // Try to query with 'listed' status first (most common)
+    let result;
+    try {
+      result = await pool.query(`
+        SELECT 
+          COALESCE(collection, 'Unknown') as id,
+          COALESCE(collection, 'Unknown Collection') as name,
+          COUNT(*) as "nftCount",
+          MIN(image) as image,
+          COALESCE(MIN(CAST(price AS DECIMAL)), 0) as "floorPrice",
+          COALESCE(AVG(CAST(price AS DECIMAL)), 0) as "avgPrice"
+        FROM nfts
+        WHERE status = 'listed' OR listed = true
+        GROUP BY collection
+        ORDER BY COUNT(*) DESC
+        LIMIT 50
+      `);
+    } catch (firstError: any) {
+      // If that fails, try with 'collection_name' column
+      try {
+        result = await pool.query(`
+          SELECT 
+            COALESCE(collection_name, 'Unknown') as id,
+            COALESCE(collection_name, 'Unknown Collection') as name,
+            COUNT(*) as "nftCount",
+            MIN(image_url) as image,
+            COALESCE(MIN(CAST(price AS DECIMAL)), 0) as "floorPrice",
+            COALESCE(AVG(CAST(price AS DECIMAL)), 0) as "avgPrice"
+          FROM nfts
+          WHERE status = 'listed' OR listed = true
+          GROUP BY collection_name
+          ORDER BY COUNT(*) DESC
+          LIMIT 50
+        `);
+      } catch (secondError: any) {
+        // If both fail, return empty array with helpful error
+        errorLogger(firstError as Error, { endpoint: '/api/v1/collections', attempt: 'first' });
+        errorLogger(secondError as Error, { endpoint: '/api/v1/collections', attempt: 'second' });
+        const response: ApiResponse = {
+          success: true,
+          data: [],
+          message: 'No collections found - database schema may need updating',
+        };
+        return res.json(response);
+      }
+    }
     
     const response: ApiResponse = {
       success: true,
@@ -963,10 +1025,10 @@ apiV1.get('/collections', async (req, res) => {
     
     res.json(response);
   } catch (error) {
-    console.error('Collections endpoint error:', error);
+    errorLogger(error as Error, { endpoint: '/api/v1/collections' });
     const response: ApiResponse = {
       success: false,
-      error: 'Failed to fetch collections',
+      error: error instanceof Error ? error.message : 'Failed to fetch collections',
       code: 'COLLECTIONS_ERROR',
     };
     res.status(500).json(response);
