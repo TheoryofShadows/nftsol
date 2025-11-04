@@ -14,7 +14,7 @@ const requiredEnvVars = [
   'CLOUT_PROGRAM_ID',
   'MARKET_PROGRAM_ID',
   'LOYALTY_PROGRAM_ID',
-  'REWARDS_VAULT',
+  // REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT, so it's optional
 ];
 
 if (process.env.NODE_ENV !== 'production') {
@@ -38,9 +38,8 @@ if (!process.env.MARKET_PROGRAM_ID) {
 if (!process.env.LOYALTY_PROGRAM_ID) {
   process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
 }
-if (!process.env.REWARDS_VAULT) {
-  process.env.REWARDS_VAULT = '7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v';
-}
+// REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT
+// No need for hardcoded default - it will be calculated dynamically when needed
 
 if (process.env.NODE_ENV === 'production') {
   for (const envVar of requiredEnvVars) {

@@ -68,35 +68,39 @@ export async function getOrCreateCloutVault(
  * Returns true if it exists or was created successfully
  */
 export async function verifyCloutVault(connection: Connection): Promise<boolean> {
-  const rewardsVault = programConfig.rewardsVault;
   const mintAddress = programConfig.cloutProgramId;
-
-  if (!rewardsVault) {
-    console.warn('REWARDS_VAULT not set in config');
-    return false;
-  }
+  const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
 
   if (!mintAddress) {
     console.warn('CLOUT_PROGRAM_ID not set in config');
     return false;
   }
 
+  if (!ownerAddress) {
+    console.warn('REWARDS_OWNER or PLATFORM_WALLET not configured');
+    return false;
+  }
+
   try {
-    const vaultPubkey = new PublicKey(rewardsVault);
     const mint = new PublicKey(mintAddress);
+    const owner = new PublicKey(ownerAddress);
+    
+    // Auto-calculate the vault ATA (deterministic)
+    const rewardsVault = await getAssociatedTokenAddress(mint, owner);
+    const vaultPubkey = rewardsVault;
 
     // Try to get the token account (better check than getAccountInfo)
     try {
       const tokenAccount = await getAccount(connection, vaultPubkey);
       if (tokenAccount.mint.equals(mint)) {
-        console.log(`Rewards vault verified and active: ${rewardsVault}`);
+        console.log(`Rewards vault verified and active: ${rewardsVault.toBase58()}`);
         console.log(`Balance: ${tokenAccount.amount.toString()}`);
         return true;
       }
     } catch (err: any) {
       // Token account doesn't exist
       if (err.name === 'TokenAccountNotFoundError' || err.message?.includes('not found')) {
-        console.warn(`Rewards vault does not exist yet: ${rewardsVault}`);
+        console.warn(`Rewards vault does not exist yet: ${rewardsVault.toBase58()}`);
         console.warn('This is OK - it will be created automatically when first CLOUT reward is sent');
         return false;
       }

@@ -6,10 +6,13 @@
  */
 
 import express from 'express';
+import { PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { CloutTokenService } from '../services/cloutToken';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types/index';
 import { sanitizeInput } from '../utils/validation';
+import { programConfig } from '../config/index';
 
 const router = express.Router();
 const cloutService = new CloutTokenService();
@@ -149,12 +152,28 @@ router.get('/vault-balance', async (req, res) => {
   try {
     const balance = await cloutService.getVaultBalance();
 
+    // Calculate vault address dynamically (deterministic ATA)
+    let vaultAddress = 'Not configured';
+    try {
+      const mintAddress = programConfig.cloutProgramId;
+      const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
+      
+      if (mintAddress && ownerAddress) {
+        const mint = new PublicKey(mintAddress);
+        const owner = new PublicKey(ownerAddress);
+        const vault = await getAssociatedTokenAddress(mint, owner);
+        vaultAddress = vault.toBase58();
+      }
+    } catch (err) {
+      console.warn('Could not calculate vault address:', err);
+    }
+
     const response: ApiResponse = {
       success: true,
       data: {
         balance,
         token: 'CLOUT',
-        vaultAddress: process.env.REWARDS_VAULT || 'Not configured',
+        vaultAddress,
       },
     };
     res.json(response);
