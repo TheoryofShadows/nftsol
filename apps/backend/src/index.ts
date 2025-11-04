@@ -21,6 +21,7 @@ import {
 } from './utils/validation';
 import { solanaService } from './services/solana';
 import { nftService } from './services/nft';
+import { heliusService } from './services/helius';
 import { ApiResponse, MintRequest } from './types';
 import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
@@ -802,14 +803,61 @@ app.get('/api/nfts', async (req, res) => {
         nfts = [];
       }
     } else if (owner) {
-      // Get NFTs by owner
+      // Get ALL NFTs from blockchain using Helius DAS API
       try {
-        const result = await nftService.getNFTsByOwner(owner);
-        if (result.success && result.data) {
-          nfts = Array.isArray(result.data) ? result.data : [result.data];
-        }
+        console.log(`[NFTs] Fetching ALL Solana NFTs for owner: ${owner}`);
+        
+        // Get ALL NFTs from blockchain
+        const heliusNFTs = await heliusService.getAssetsByOwner(owner, { limit: 1000 });
+        
+        // Also fetch local listing status
+        const localListings = await pool.query(`
+          SELECT "mintAddress", status, price, "listedAt"
+          FROM nfts
+          WHERE owner = $1 AND (status = 'listed' OR status = 'active')
+        `, [owner]);
+        
+        const localListingsMap = new Map(
+          localListings.rows.map(row => [row.mintAddress, row])
+        );
+        
+        // Merge: Show ALL blockchain NFTs with listing status
+        nfts = heliusNFTs.items.map((nft: any) => {
+          const localData = localListingsMap.get(nft.id);
+          return {
+            id: nft.id,
+            mintAddress: nft.id,
+            name: nft.content?.metadata?.name || 'Unnamed NFT',
+            description: nft.content?.metadata?.description || '',
+            image: nft.content?.links?.image || nft.content?.files?.[0]?.uri || '',
+            owner: owner,
+            collection: nft.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+            // Local listing data if available
+            isListed: localData?.status === 'listed',
+            price: localData?.price || null,
+            listedAt: localData?.listedAt || null,
+            status: localData?.status || 'owned',
+            // Blockchain data
+            compressed: nft.compression?.compressed || false,
+            source: 'blockchain',
+            canList: true, // User owns it, can list it
+            onChain: true, // Real blockchain NFT
+            royalty: nft.royalty?.percent || 0,
+          };
+        });
+        
+        console.log(`[NFTs] Found ${nfts.length} NFTs on blockchain for ${owner}`);
       } catch (e) {
-        nfts = [];
+        console.error('[NFTs] Helius error, falling back to local database:', e);
+        // Fallback to local database
+        try {
+          const result = await nftService.getNFTsByOwner(owner);
+          if (result.success && result.data) {
+            nfts = Array.isArray(result.data) ? result.data : [result.data];
+          }
+        } catch (e2) {
+          nfts = [];
+        }
       }
     } else {
       // Get all NFTs from marketplace

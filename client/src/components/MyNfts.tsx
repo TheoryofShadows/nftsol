@@ -32,8 +32,13 @@ export default function MyNfts() {
         }
 
         const data = await response.json();
-        if (data.success && Array.isArray(data.data)) {
-          setNfts(data.data);
+        
+        // Handle both old format (data.nfts) and new format (data.data)
+        const nftList = data.nfts || data.data || [];
+        
+        if (Array.isArray(nftList)) {
+          setNfts(nftList);
+          console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
         } else {
           setNfts([]);
         }
