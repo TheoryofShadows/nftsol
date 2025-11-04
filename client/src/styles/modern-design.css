@@ -112,6 +112,14 @@
   animation: float 6s ease-in-out infinite;
 }
 
+.float-animation.delay-2s {
+  animation-delay: 2s;
+}
+
+.float-animation.delay-4s {
+  animation-delay: 4s;
+}
+
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
