@@ -11,6 +11,8 @@ export default function MyNfts() {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listingNft, setListingNft] = useState<string | null>(null);
+  const [listPrice, setListPrice] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     const fetchMyNfts = async () => {
@@ -52,6 +54,74 @@ export default function MyNfts() {
 
     fetchMyNfts();
   }, [connected, publicKey]);
+
+  const handleListNFT = async (nft: NFT) => {
+    if (!publicKey) return;
+    
+    const price = listPrice[nft.mintAddress || ''];
+    if (!price || parseFloat(price) <= 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+
+    setListingNft(nft.mintAddress || '');
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/marketplace/list`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintAddress: nft.mintAddress,
+          seller: publicKey.toBase58(),
+          price: parseFloat(price),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert(`✅ NFT listed for ${price} SOL!`);
+        // Refresh NFTs
+        window.location.reload();
+      } else {
+        alert(`❌ Failed to list: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to list NFT'}`);
+    } finally {
+      setListingNft(null);
+    }
+  };
+
+  const handleDelistNFT = async (nft: NFT) => {
+    if (!publicKey) return;
+
+    setListingNft(nft.mintAddress || '');
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/marketplace/delist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintAddress: nft.mintAddress,
+          seller: publicKey.toBase58(),
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ NFT delisted successfully!');
+        window.location.reload();
+      } else {
+        alert(`❌ Failed to delist: ${data.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to delist NFT'}`);
+    } finally {
+      setListingNft(null);
+    }
+  };
 
   if (!connected) {
     return (
@@ -157,7 +227,7 @@ export default function MyNfts() {
               </div>
             </div>
 
-            <div className="p-4 space-y-2">
+            <div className="p-4 space-y-3">
               <h3 className="font-bold text-white text-lg truncate">
                 {nft.name || `NFT #${index + 1}`}
               </h3>
@@ -170,12 +240,52 @@ export default function MyNfts() {
                   {nft.mintAddress?.slice(0, 8)}...
                 </span>
               </div>
-              {nft.price && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Current Price:</span>
-                  <span className="text-lg font-bold gradient-text-primary">
-                    {nft.price} SOL
-                  </span>
+              
+              {/* Listing Status */}
+              {(nft as any).isListed ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-lg p-2">
+                    <span className="text-sm text-green-400">Listed for:</span>
+                    <span className="text-lg font-bold text-green-400">
+                      {nft.price} SOL
+                    </span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelistNFT(nft);
+                    }}
+                    disabled={listingNft === nft.mintAddress}
+                    className="w-full btn-secondary text-sm py-2"
+                  >
+                    {listingNft === nft.mintAddress ? 'Delisting...' : '🔻 Delist'}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="Price in SOL"
+                    value={listPrice[nft.mintAddress || ''] || ''}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      setListPrice({ ...listPrice, [nft.mintAddress || '']: e.target.value });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:border-cyan-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleListNFT(nft);
+                    }}
+                    disabled={listingNft === nft.mintAddress}
+                    className="w-full btn-primary-modern text-sm py-2"
+                  >
+                    {listingNft === nft.mintAddress ? 'Listing...' : '🏷️ List for Sale'}
+                  </button>
                 </div>
               )}
             </div>
