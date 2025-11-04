@@ -7,8 +7,10 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { marketplaceService } from '../services/marketplace';
 import { crossPlatformMarketplace } from '../services/cross-platform-marketplace';
+import { onChainTransactions } from '../services/on-chain-transactions';
 import { validateWallet, sanitizeInput } from '../utils/validation';
 import { ApiResponse } from '../types';
+import { solanaConfig } from '../config';
 
 const router = Router();
 
@@ -410,6 +412,183 @@ router.get('/search', async (req: Request, res: Response) => {
       return res.status(500).json(response);
     }
   } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
+ * POST /api/marketplace/create-buy-transaction
+ * Create an unsigned transaction for buying an NFT
+ * ⛓️ Real Blockchain Transaction!
+ * Returns unsigned transaction for wallet to sign
+ */
+router.post('/create-buy-transaction', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+  try {
+    const { buyer, seller, mintAddress, price, royaltyPercent, creatorAddress } = req.body;
+
+    if (!buyer || !seller || !mintAddress || !price) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Missing required fields: buyer, seller, mintAddress, price',
+        code: 'MISSING_FIELDS',
+      };
+      return res.status(400).json(response);
+    }
+
+    if (price <= 0) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Price must be greater than 0',
+        code: 'INVALID_PRICE',
+      };
+      return res.status(400).json(response);
+    }
+
+    console.log('[Marketplace] Creating on-chain buy transaction...');
+
+    // Verify seller owns the NFT
+    const ownershipCheck = await onChainTransactions.verifyOwnership(mintAddress, seller);
+    if (!ownershipCheck.success) {
+      const response: ApiResponse = {
+        success: false,
+        error: ownershipCheck.error || 'Seller does not own this NFT',
+        code: 'OWNERSHIP_VERIFICATION_FAILED',
+      };
+      return res.status(400).json(response);
+    }
+
+    // Create unsigned transaction
+    const result = await onChainTransactions.createBuyTransaction({
+      buyer,
+      seller,
+      mintAddress,
+      price,
+      royaltyPercent: royaltyPercent || 0,
+      creatorAddress,
+    });
+
+    if (result.success && result.transaction) {
+      // Serialize transaction to base64
+      const serialized = result.transaction.serialize({
+        requireAllSignatures: false,
+        verifySignatures: false,
+      }).toString('base64');
+
+      const response: ApiResponse = {
+        success: true,
+        data: {
+          transaction: serialized,
+          message: 'Please sign this transaction in your wallet to complete the purchase',
+          details: {
+            buyer,
+            seller,
+            mintAddress,
+            price,
+            platformFee: price * 0.025, // 2.5%
+            royaltyFee: royaltyPercent ? price * (royaltyPercent / 100) : 0,
+            totalCost: price,
+          },
+        },
+      };
+      return res.json(response);
+    } else {
+      const response: ApiResponse = {
+        success: false,
+        error: result.error || 'Failed to create transaction',
+        code: 'TRANSACTION_CREATE_FAILED',
+      };
+      return res.status(500).json(response);
+    }
+  } catch (error) {
+    console.error('[Marketplace] Create buy transaction error:', error);
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Internal server error',
+      code: 'INTERNAL_ERROR',
+    };
+    return res.status(500).json(response);
+  }
+});
+
+/**
+ * POST /api/marketplace/confirm-sale
+ * Confirm and record a completed NFT sale after transaction is signed
+ * 📝 Records sale in database after blockchain confirmation
+ */
+router.post('/confirm-sale', sanitizeInput, async (req: Request, res: Response) => {
+  try {
+    const { mintAddress, buyer, seller, price, signature } = req.body;
+
+    if (!mintAddress || !buyer || !seller || !price || !signature) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Missing required fields: mintAddress, buyer, seller, price, signature',
+        code: 'MISSING_FIELDS',
+      };
+      return res.status(400).json(response);
+    }
+
+    console.log(`[Marketplace] Confirming sale for NFT ${mintAddress}`);
+
+    // Check transaction status
+    const statusCheck = await onChainTransactions.getTransactionStatus(signature);
+    
+    if (!statusCheck.success) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Failed to verify transaction status',
+        code: 'STATUS_CHECK_FAILED',
+      };
+      return res.status(500).json(response);
+    }
+
+    if (!statusCheck.confirmed) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Transaction not yet confirmed on blockchain',
+        code: 'NOT_CONFIRMED',
+      };
+      return res.status(400).json(response);
+    }
+
+    // Record sale in database
+    const result = await onChainTransactions.recordSale({
+      mintAddress,
+      buyer,
+      seller,
+      price,
+      signature,
+    });
+
+    if (result.success) {
+      const response: ApiResponse = {
+        success: true,
+        message: 'Sale recorded successfully!',
+        data: {
+          mintAddress,
+          buyer,
+          seller,
+          price,
+          signature,
+          explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=${solanaConfig.cluster}`,
+        },
+      };
+      return res.json(response);
+    } else {
+      const response: ApiResponse = {
+        success: false,
+        error: result.error || 'Failed to record sale',
+        code: 'RECORD_SALE_FAILED',
+      };
+      return res.status(500).json(response);
+    }
+  } catch (error) {
+    console.error('[Marketplace] Confirm sale error:', error);
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',
