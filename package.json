@@ -20,11 +20,7 @@
     "@commitlint/config-conventional": "^19.5.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
-<<<<<<< HEAD
     "eslint": "^8.57.0",
-=======
-    "eslint": "^9.39.0",
->>>>>>> origin/develop
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "^3.6.2"

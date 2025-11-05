@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc -p .",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev --transpile-only src/index.ts",
+    "dev": "ts-node-dev src/index.ts",
     "lint": "eslint . --ext .ts,.js --config .eslintrc.cjs",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
