@@ -793,8 +793,6 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-=======
->>>>>>> origin/develop
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
 
@@ -1140,21 +1138,6 @@ app.get('/api/nfts', async (req, res) => {
       nfts: [],
     });
   }
-<<<<<<< HEAD
-=======
-});
-
-// Collections endpoint
-apiV1.get('/collections', (req, res) => {
-  const response: ApiResponse = {
-    success: true,
-    data: {
-      collections: [], // Start with empty - collections will appear as NFTs are minted
-      message: 'No collections found',
-    },
-  };
-  res.json(response);
->>>>>>> origin/develop
 });
 
 // Wallet info endpoint
@@ -1449,7 +1432,6 @@ process.on('SIGINT', () => {
 })();
 
 // Start server
-<<<<<<< HEAD
 const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;
 server.listen(serverPort, '0.0.0.0', async () => {
   console.log(`🚀 NFTSol Backend Server Started`);
@@ -1475,21 +1457,6 @@ server.listen(serverPort, '0.0.0.0', async () => {
     } catch (error) {
       console.warn('⚠️ Could not calculate rewards vault:', error instanceof Error ? error.message : error);
     }
-=======
-server.listen(appConfig.port, '0.0.0.0', () => {
-  console.log(`NFTSol Backend Server`);
-  console.log(`Port: ${appConfig.port}`);
-  console.log(`Environment: ${appConfig.nodeEnv}`);
-  console.log(`CORS Origins: ${appConfig.cors.origin.join(', ')}`);
-  console.log(`Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
-  console.log(`File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  console.log(`Solana RPC: ${solanaConfig.rpcUrl}`);
-  console.log(`Cluster: ${solanaConfig.cluster}`);
-
-  if (programConfig.cloutProgramId) {
-    console.log(`CLOUT Token: ${programConfig.cloutProgramId}`);
-    console.log(`Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`);
->>>>>>> origin/develop
   }
 });
 
