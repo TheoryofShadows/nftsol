@@ -270,8 +270,10 @@ export class MetaplexMintingService {
       const costEstimate = await this.estimateMintCost();
       const requiredBalance = costEstimate.costSOL || 0.01;
 
-      console.log(`[Metaplex] Platform wallet balance: ${balanceSOL} SOL`);
-      console.log(`[Metaplex] Required for mint: ${requiredBalance} SOL`);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[Metaplex] Platform wallet balance: ${balanceSOL} SOL`);
+        console.log(`[Metaplex] Required for mint: ${requiredBalance} SOL`);
+      }
 
       return {
         success: true,

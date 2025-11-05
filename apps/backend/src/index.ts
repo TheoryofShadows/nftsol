@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
+// morgan removed - using requestLogger instead
 import compression from 'compression';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
@@ -14,7 +14,6 @@ import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
   validateWallet,
-  validateFileUpload,
   sanitizeInput,
   csrfProtection,
   generateCSRFToken,
@@ -42,7 +41,7 @@ initializeSecrets();
 
 // PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
 // This is just for reference - actual port used is from appConfig.port or Render's PORT
-const PORT = parseInt(process.env.PORT || '3001', 10);
+// const PORT = parseInt(process.env.PORT || '3001', 10); // Not used, commented out
 
 const app = express();
 const server = createServer(app);
@@ -243,10 +242,31 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Enhanced health check with detailed diagnostics
+    // Enhanced health check with detailed diagnostics
 app.get('/api/health/detailed', async (req, res) => {
   try {
-    const health = {
+    interface HealthService {
+      status: string;
+      responseTime: number;
+      error?: string;
+      details?: any;
+    }
+
+    const health: {
+      status: string;
+      timestamp: string;
+      uptime: number;
+      environment: string;
+      services: {
+        database: HealthService;
+        solana: HealthService;
+        memory: {
+          used: number;
+          total: number;
+          limit: number;
+        };
+      };
+    } = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
@@ -273,6 +293,7 @@ app.get('/api/health/detailed', async (req, res) => {
     } catch (error) {
       health.services.database = {
         status: 'unhealthy',
+        responseTime: 0,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
       health.status = 'degraded';
@@ -293,6 +314,7 @@ app.get('/api/health/detailed', async (req, res) => {
     } catch (error) {
       health.services.solana = {
         status: 'unhealthy',
+        responseTime: 0,
         error: error instanceof Error ? error.message : 'Unknown error',
       };
       health.status = 'degraded';
@@ -856,7 +878,10 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   const { paused, reason } = req.body;
 
   // In production, this would update a database or config service
-  console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
+  }
+  auditLogger('EMERGENCY_WITHDRAWAL_TOGGLE', { paused, reason, adminId: (req as any).user.id }, req);
 
   const response: ApiResponse = {
     success: true,
@@ -871,29 +896,60 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   res.json(response);
 });
 
-// Marketplace endpoints - Get all NFTs for marketplace
+// Marketplace endpoints - Get all NFTs for marketplace (real data fallbacks)
 apiV1.get('/market', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const collection = req.query.collection as string;
-    const status = req.query.status as string;
+    const _status = req.query.status as string; // Reserved for future filtering
+    const owner = (req.query.owner as string) || process.env.PLATFORM_PUBLIC_KEY;
 
     // Query NFTs from service
     let nfts: any[] = [];
-    
-    // If collection filter, use Echo route logic
-    if (collection === 'eternal-echoes') {
-      // Will be handled by echo marketplace route
-      nfts = [];
-    } else {
-      // Get NFTs from NFT service
-      // For now, try to get from any available NFTs
-      // In production, this would query database
+
+    // 1) Preferred: specific collection via Helius
+    if (collection && collection !== 'eternal-echoes') {
       try {
-        // This is a placeholder - in production would query database
+        const result = await heliusService.getAssetsByCollection(collection, { page, limit });
+        nfts = result.items.map((item: any) => ({
+          id: item.id,
+          mintAddress: item.id,
+          name: item.content?.metadata?.name || 'Unnamed NFT',
+          description: item.content?.metadata?.description || '',
+          image: item.content?.links?.image || '',
+          owner: item.ownership?.owner,
+          collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+          isListed: false,
+          price: null,
+          status: 'owned',
+          compressed: item.compression?.compressed || false,
+          source: 'blockchain',
+        }));
+      } catch (_e) {
         nfts = [];
-      } catch (e) {
+      }
+    }
+
+    // 2) Fallback: show owner (platform) NFTs from blockchain
+    if (!nfts.length && owner) {
+      try {
+        const result = await heliusService.getAssetsByOwner(owner, { page, limit });
+        nfts = result.items.map((item: any) => ({
+          id: item.id,
+          mintAddress: item.id,
+          name: item.content?.metadata?.name || 'Unnamed NFT',
+          description: item.content?.metadata?.description || '',
+          image: item.content?.links?.image || '',
+          owner: owner,
+          collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+          isListed: false,
+          price: null,
+          status: 'owned',
+          compressed: item.compression?.compressed || false,
+          source: 'blockchain',
+        }));
+      } catch (_e) {
         nfts = [];
       }
     }
@@ -905,7 +961,9 @@ apiV1.get('/market', async (req, res) => {
         total: nfts.length,
         page,
         limit,
-        message: nfts.length > 0 ? 'Marketplace data loaded' : 'Marketplace is empty - start minting to populate it',
+        message: nfts.length > 0
+          ? 'Marketplace data loaded'
+          : 'No marketplace data yet. Set DEFAULT collection or PLATFORM_PUBLIC_KEY to populate.',
       },
     };
     res.json(response);
@@ -933,7 +991,7 @@ app.get('/api/nfts', async (req, res) => {
       try {
         // For now, return empty - Echo NFTs are stored separately
         nfts = [];
-      } catch (e) {
+      } catch (_e) {
         nfts = [];
       }
     } else if (owner) {
@@ -963,7 +1021,7 @@ app.get('/api/nfts', async (req, res) => {
             mintAddress: nft.id,
             name: nft.content?.metadata?.name || 'Unnamed NFT',
             description: nft.content?.metadata?.description || '',
-            image: nft.content?.links?.image || nft.content?.files?.[0]?.uri || '',
+            image: nft.content?.links?.image || '',
             owner: owner,
             collection: nft.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
             // Local listing data if available
@@ -989,7 +1047,7 @@ app.get('/api/nfts', async (req, res) => {
           if (result.success && result.data) {
             nfts = Array.isArray(result.data) ? result.data : [result.data];
           }
-        } catch (e2) {
+        } catch (_e2) {
           nfts = [];
         }
       }
@@ -998,7 +1056,7 @@ app.get('/api/nfts', async (req, res) => {
       try {
         // Query database or in-memory store
         nfts = [];
-      } catch (e) {
+      } catch (_e) {
         nfts = [];
       }
     }
@@ -1101,7 +1159,7 @@ apiV1.get('/', (req, res) => {
   res.json(response);
 });
 
-// Collections endpoint
+// Collections endpoint (DB -> Helius fallback)
 apiV1.get('/collections', async (req, res) => {
   try {
     // Try to query with 'listed' status first (most common)
@@ -1151,12 +1209,38 @@ apiV1.get('/collections', async (req, res) => {
       }
     }
     
+    let rows = result.rows || [];
+
+    // Fallback to Helius-derived collections if DB is empty
+    if (!rows.length) {
+      try {
+        const owner = process.env.PLATFORM_PUBLIC_KEY;
+        if (owner) {
+          const owned = await heliusService.getAssetsByOwner(owner, { limit: 500 });
+          const counts = new Map<string, { id: string; name: string; nftCount: number; image?: string; floorPrice: number; avgPrice: number }>();
+          for (const item of owned.items) {
+            const col = item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value;
+            if (!col) continue;
+            const entry = counts.get(col) || { id: col, name: col, nftCount: 0, image: item.content?.links?.image, floorPrice: 0, avgPrice: 0 };
+            entry.nftCount += 1;
+            if (!entry.image && (item.content?.links?.image || (item.content as any)?.files?.[0]?.uri)) {
+              entry.image = item.content?.links?.image || (item.content as any)?.files?.[0]?.uri;
+            }
+            counts.set(col, entry);
+          }
+          rows = Array.from(counts.values()).sort((a, b) => b.nftCount - a.nftCount).slice(0, 50) as any;
+        }
+      } catch (_e) {
+        // ignore fallback errors
+      }
+    }
+
     const response: ApiResponse = {
       success: true,
-      data: result.rows || [],
-      message: `Found ${result.rows?.length || 0} collections`,
+      data: rows,
+      message: `Found ${rows.length} collections`,
     };
-    
+
     res.json(response);
   } catch (error) {
     errorLogger(error as Error, { endpoint: '/api/v1/collections' });
@@ -1173,7 +1257,7 @@ apiV1.get('/collections', async (req, res) => {
 app.use('/api/v1', apiV1);
 
 // Enhanced error handling middleware
-app.use((err: any, req: any, res: any, next: any) => {
+app.use((err: any, req: any, res: any, _next: any) => {
   const requestId = req.id;
   const userId = req.user?.id;
 

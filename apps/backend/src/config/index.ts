@@ -21,6 +21,8 @@ const requiredEnvVars = [
 if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
   process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
+  // Provide a safe default JWT secret in development to avoid 500s on auth routes
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-not-for-production';
 }
 
 // CLOUT token mint address (devnet: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)

@@ -6,6 +6,7 @@
 import { Router, Request, Response } from 'express';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import jwt from 'jsonwebtoken';
 import { pool } from '../lib/db';
 import { ApiResponse } from '../types';
 // Authentication middleware (inline to avoid circular dependency)
@@ -30,11 +31,10 @@ const authenticate = (req: any, res: any, next: any) => {
       };
       return res.status(500).json(response);
     }
-    const jwt = require('jsonwebtoken');
     const decoded: any = jwt.verify(token, secret);
     req.user = decoded;
     next();
-  } catch (err) {
+  } catch (_err) {
     const response: ApiResponse = {
       success: false,
       error: 'Invalid or expired token',
@@ -152,7 +152,7 @@ router.post('/:name', authenticate, requireAdmin, async (req: Request, res: Resp
     let sql: string;
     try {
       sql = readFileSync(migrationPath, 'utf-8');
-    } catch (error) {
+    } catch (_error) {
       const response: ApiResponse = {
         success: false,
         error: `Failed to read migration file: ${migration.file}`,
@@ -223,7 +223,8 @@ router.post('/run-all', authenticate, requireAdmin, async (_req: Request, res: R
       return res.json(response);
     }
 
-    const results = [];
+    type MigrationResult = { migration: string; status: 'success' | 'failed'; error?: string };
+    const results: MigrationResult[] = [];
     for (const migration of pendingMigrations) {
       try {
         const migrationPath = join(process.cwd(), 'migrations', migration.file);

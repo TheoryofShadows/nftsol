@@ -1,5 +1,4 @@
-import { solanaService } from './solana';
-import { programConfig } from '../config';
+import { heliusService } from './helius';
 import logger from '../utils/logger';
 import { MintRequest, MintResponse, NFTMetadata } from '../types';
 import { ApiResponse } from '../types';
@@ -177,60 +176,47 @@ class NFTService {
     };
   }
 
-  // Get NFT metadata by mint address
+  // Get NFT metadata by mint address (via Helius DAS)
   async getNFTMetadata(mintAddress: string): Promise<ApiResponse<NFTMetadata>> {
     try {
-      // This would typically fetch from IPFS or on-chain metadata
-      // For now, return mock data
+      const asset = await heliusService.getAsset(mintAddress);
+      if (!asset) {
+        return { success: false, error: 'NFT not found' };
+      }
       const metadata: NFTMetadata = {
-        name: 'Sample NFT',
-        description: 'This is a sample NFT metadata',
-        image: 'https://via.placeholder.com/300x300/667eea/ffffff?text=Sample+NFT',
-        attributes: [
-          {
-            trait_type: 'Type',
-            value: 'Sample',
-          },
-        ],
+        name: asset.content?.metadata?.name || 'Unnamed NFT',
+        description: asset.content?.metadata?.description || '',
+        image: asset.content?.links?.image || '',
+        attributes: [],
       };
-
-      return {
-        success: true,
-        data: metadata,
-      };
+      return { success: true, data: metadata };
     } catch (error) {
       logger.error('Error getting NFT metadata', { mintAddress, error });
-      return {
-        success: false,
-        error: 'Failed to get NFT metadata',
-      };
+      return { success: false, error: 'Failed to get NFT metadata' };
     }
   }
 
-  // List NFTs by owner
+  // List NFTs by owner (via Helius DAS)
   async getNFTsByOwner(owner: string): Promise<ApiResponse<any[]>> {
     try {
-      // This would typically query the Solana blockchain
-      // For now, return mock data
-      const nfts = [
-        {
-          mint: 'MOCK_MINT_1',
-          owner,
-          name: 'Sample NFT 1',
-          image: 'https://via.placeholder.com/300x300/667eea/ffffff?text=NFT+1',
-        },
-      ];
-
-      return {
-        success: true,
-        data: nfts,
-      };
+      const { items } = await heliusService.getAssetsByOwner(owner, { limit: 200 });
+      const mapped = items.map((nft: any) => ({
+        id: nft.id,
+        mint: nft.id,
+        mintAddress: nft.id,
+        owner,
+        name: nft.content?.metadata?.name || 'Unnamed NFT',
+        description: nft.content?.metadata?.description || '',
+        image: nft.content?.links?.image || '',
+        collection: nft.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+        compressed: nft.compression?.compressed || false,
+        onChain: true,
+        source: 'blockchain',
+      }));
+      return { success: true, data: mapped };
     } catch (error) {
       logger.error('Error getting NFTs by owner', { owner, error });
-      return {
-        success: false,
-        error: 'Failed to get NFTs by owner',
-      };
+      return { success: false, error: 'Failed to get NFTs by owner' };
     }
   }
 }

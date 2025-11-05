@@ -12,6 +12,14 @@ if (isTestMode) {
     query: async (text: string, params?: any[]) => {
       console.log('Mock DB Query:', text, params);
 
+        // Basic health checks
+        if (text.includes('SELECT 1') || text.includes('SELECT NOW()')) {
+          return {
+            rowCount: 1,
+            rows: [{ now: new Date().toISOString(), health_check: 1 }],
+          } as any;
+        }
+
       // Mock responses for withdrawal testing
       if (text.includes('SELECT available_lamports')) {
         return {
@@ -40,6 +48,19 @@ if (isTestMode) {
       if (text.includes('UPDATE wallets SET available_lamports')) {
         return { rowCount: 1, rows: [] };
       }
+
+        // Public stats queries
+        if (text.includes('SELECT COUNT(*) as count FROM nfts')) {
+          return { rowCount: 1, rows: [{ count: '0' }] } as any;
+        }
+        if (text.includes('SELECT COALESCE(SUM(CAST(price AS NUMERIC))')) {
+          return { rowCount: 1, rows: [{ total_volume: '0' }] } as any;
+        }
+
+        // Collections queries
+        if (text.includes('FROM nfts') && text.includes('GROUP BY')) {
+          return { rowCount: 0, rows: [] } as any;
+        }
 
       return { rowCount: 0, rows: [] };
     },
