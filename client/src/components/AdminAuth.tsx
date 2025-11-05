@@ -33,7 +33,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthSuccess }) => {
 
       // Send to backend for verification
       const response = await fetch(
-        `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/auth/admin`,
+        (await import('../config/api')).API_ENDPOINTS.admin.auth,
         {
           method: 'POST',
           headers: {

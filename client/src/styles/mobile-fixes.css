@@ -69,6 +69,41 @@
   .card-modern {
     padding: 0.75rem !important;
   }
+  
+  /* Hero section - prevent text cutoff */
+  .min-h-screen {
+    min-height: auto !important;
+    padding-bottom: 2rem !important;
+  }
+  
+  /* Ensure hero content fits on mobile */
+  .relative.z-10.text-center {
+    padding-top: 1rem !important;
+    padding-bottom: 2rem !important;
+  }
+  
+  /* Prevent text overflow in hero */
+  h1, h2, h3, p {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+  
+  /* Ensure no horizontal overflow */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Fix header overflow */
+  header {
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix main content overflow */
+  main {
+    overflow-x: hidden !important;
+  }
 
   /* Reduce large emoji sizes on mobile */
   .text-6xl {
@@ -369,6 +404,51 @@
 .wallet-adapter-modal-list-item {
   padding: 1rem !important;
   margin-bottom: 0.5rem !important;
+}
+
+/* Hide wallet adapter warning messages on mobile */
+.wallet-adapter-button[aria-label*="No"] {
+  display: none !important;
+}
+
+/* Custom wallet button styling - hide default warning */
+button.wallet-adapter-button-trigger {
+  display: none !important;
+}
+
+/* Hide the "No Solana wallets detected" alert/message - More aggressive selectors */
+.wallet-adapter-modal-title[data-state*="no-wallet"],
+div[class*="wallet-adapter"][class*="no-wallet"],
+div[class*="wallet-adapter"][class*="warning"],
+/* Hide any div with yellow background (warning style) */
+div[style*="background"][style*="yellow"],
+div[style*="background"][style*="#FF"],
+div[style*="background"][style*="rgb(255, 193"],
+/* Hide wallet adapter button when showing "No wallets" */
+button[class*="wallet-adapter-button"]:not([class*="connect"]):not([class*="select"]) {
+  display: none !important;
+}
+
+/* Better mobile wallet button */
+@media (max-width: 768px) {
+  .wallet-adapter-button {
+    font-size: 0.875rem !important;
+    padding: 0.5rem 1rem !important;
+    min-width: 140px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Hide any wallet adapter warning cards */
+  div[class*="wallet-adapter"] {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Ensure wallet modal doesn't show warnings prominently */
+  .wallet-adapter-modal-list li {
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.5rem !important;
+  }
 }
 
 /* Smooth scrolling */

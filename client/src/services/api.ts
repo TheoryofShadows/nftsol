@@ -9,11 +9,19 @@ import {
   MarketData,
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+import { API_BASE, API_ENDPOINTS } from '../config/api';
 
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-    const url = `${API_BASE}${endpoint}`;
+    // Endpoint might already be a full URL from API_ENDPOINTS, or a relative path
+    let url: string;
+    if (endpoint.startsWith('http')) {
+      // Already a full URL
+      url = endpoint;
+    } else {
+      // Relative path - prepend API_BASE
+      url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+    }
 
     const defaultOptions: RequestInit = {
       headers: {
@@ -58,17 +66,17 @@ class ApiService {
 
   // Health check
   async healthCheck(): Promise<ApiResponse<any>> {
-    return this.request('/healthz');
+    return this.request(API_ENDPOINTS.health);
   }
 
   // Get program configuration
   async getPrograms(): Promise<ApiResponse<ProgramConfig>> {
-    return this.request('/api/v1/programs');
+    return this.request(API_ENDPOINTS.programs);
   }
 
   // Get Solana status
   async getSolanaStatus(): Promise<ApiResponse<any>> {
-    return this.request('/api/v1/solana/status');
+    return this.request(API_ENDPOINTS.solanaStatus);
   }
 
   // Mint NFT
@@ -84,7 +92,7 @@ class ApiService {
       formData.append('imageUrl', request.imageUrl);
     }
 
-    return this.request('/api/v1/simple-mint', {
+    return this.request(API_ENDPOINTS.mint, {
       method: 'POST',
       headers: {}, // Let browser set Content-Type for FormData
       body: formData,
@@ -93,27 +101,27 @@ class ApiService {
 
   // Get NFT metadata
   async getNFTMetadata(mintAddress: string): Promise<ApiResponse<NFT>> {
-    return this.request(`/api/v1/nft/${mintAddress}`);
+    return this.request(API_ENDPOINTS.nft(mintAddress));
   }
 
   // Get NFTs by owner
   async getNFTsByOwner(owner: string): Promise<ApiResponse<NFT[]>> {
-    return this.request(`/api/v1/nfts/${owner}`);
+    return this.request(API_ENDPOINTS.nfts(owner));
   }
 
   // Get marketplace data
   async getMarketplace(): Promise<ApiResponse<MarketData>> {
-    return this.request('/api/v1/market');
+    return this.request(API_ENDPOINTS.marketplace);
   }
 
   // Get collections
   async getCollections(): Promise<ApiResponse<Collection[]>> {
-    return this.request('/api/v1/collections');
+    return this.request(API_ENDPOINTS.collections);
   }
 
   // Get wallet info
   async getWalletInfo(address: string): Promise<ApiResponse<WalletInfo>> {
-    return this.request(`/api/v1/wallet/${address}`);
+    return this.request(API_ENDPOINTS.wallet(address));
   }
 
   // Batch API calls

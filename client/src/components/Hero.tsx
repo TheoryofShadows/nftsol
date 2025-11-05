@@ -89,42 +89,43 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto">
+      <div className="relative z-10 text-center px-4 max-w-6xl mx-auto py-8 md:py-0">
         {/* Badge */}
-        <div className="mb-8 animate-fade-in">
-          <div className="badge-modern inline-flex">
-            <span className="text-2xl">⚡</span>
-            <span>Powered by Solana & Helius</span>
+        <div className="mb-4 md:mb-8 animate-fade-in">
+          <div className="badge-modern inline-flex text-xs md:text-sm">
+            <span className="text-lg md:text-2xl">⚡</span>
+            <span className="hidden sm:inline">Powered by Solana & Helius</span>
+            <span className="sm:hidden">Solana & Helius</span>
           </div>
         </div>
 
         {/* Hero Title - Modern Typography - Responsive */}
-        <h1 className="text-display text-3xl md:text-5xl lg:text-6xl gradient-text-modern mb-4 md:mb-6 animate-fade-in leading-tight md:leading-none px-4">
+        <h1 className="text-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl gradient-text-modern mb-3 md:mb-6 animate-fade-in leading-tight md:leading-none px-2 md:px-4">
           NFTSol + Eternal Echoes
         </h1>
 
-        <p className="text-body text-base md:text-xl lg:text-2xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto animate-fade-in px-4" style={{ animationDelay: '0.1s' }}>
+        <p className="text-body text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 mb-6 md:mb-12 max-w-3xl mx-auto animate-fade-in px-2 md:px-4" style={{ animationDelay: '0.1s' }}>
           Create, collect, and immortalize moments on Solana.
-          <span className="block mt-2 text-sm md:text-lg text-gray-400">
+          <span className="block mt-2 text-xs sm:text-sm md:text-lg text-gray-400">
             Next-generation NFTs with eternal on-chain memory.
           </span>
         </p>
 
         {/* Wallet Connect Button - Modern Design - Mobile Responsive */}
-        <div className="mb-8 md:mb-16 animate-fade-in px-4" style={{ animationDelay: '0.2s' }}>
+        <div className="mb-6 md:mb-16 animate-fade-in px-2 md:px-4" style={{ animationDelay: '0.2s' }}>
           {!connected ? (
             <div className="relative inline-block group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <WalletMultiButton className="relative !bg-gradient-to-r !from-purple-600 !via-pink-600 !to-cyan-600 !text-white !font-bold !text-sm md:!text-lg !px-6 md:!px-10 !py-3 md:!py-5 !rounded-2xl !shadow-2xl hover:!scale-105 !transition-all !duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 rounded-xl md:rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+              <WalletMultiButton className="relative !bg-gradient-to-r !from-purple-600 !via-pink-600 !to-cyan-600 !text-white !font-bold !text-sm md:!text-lg !px-4 md:!px-10 !py-2.5 md:!py-5 !rounded-xl md:!rounded-2xl !shadow-2xl hover:!scale-105 !transition-all !duration-300 !min-w-[140px] md:!min-w-[200px]" />
             </div>
           ) : (
-            <div className="glass-modern inline-block px-4 md:px-8 py-3 md:py-4">
-              <p className="text-white font-semibold flex items-center gap-2 md:gap-3 text-sm md:text-base">
+            <div className="glass-modern inline-block px-3 md:px-8 py-2 md:py-4">
+              <p className="text-white font-semibold flex items-center gap-2 md:gap-3 text-xs md:text-base">
                 <span className="w-2 h-2 md:w-3 md:h-3 bg-green-400 rounded-full"></span>
                 <span className="hidden md:inline">Connected:</span>
                 <span className="text-cyan-300 font-mono text-xs md:text-lg">
                   {publicKey
-                    ? `${publicKey.toBase58().slice(0, 6)}...${publicKey.toBase58().slice(-4)}`
+                    ? `${publicKey.toBase58().slice(0, 4)}...${publicKey.toBase58().slice(-4)}`
                     : 'Unknown'}
                 </span>
               </p>
@@ -210,8 +211,8 @@ export default function Hero() {
           </button>
         </div>
 
-        {/* Scroll indicator - Modern */}
-        <div className="mt-20 animate-bounce opacity-60">
+        {/* Scroll indicator - Modern - Hidden on mobile */}
+        <div className="hidden md:block mt-8 md:mt-20 animate-bounce opacity-60">
           <div className="text-gray-400 text-xs uppercase tracking-widest mb-3 font-semibold">Explore More</div>
           <div className="w-6 h-10 border-2 border-gray-500/50 rounded-full mx-auto flex items-start justify-center p-2 backdrop-blur-sm">
             <div className="w-1 h-3 bg-gradient-to-b from-purple-400 to-cyan-400 rounded-full"></div>

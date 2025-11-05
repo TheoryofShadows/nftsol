@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMintCost } from '../hooks/useMintCost';
 import { useCloutBalance } from '../hooks/useCloutBalance';
+import { useNotification } from './NotificationSystem';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
@@ -42,6 +43,7 @@ export default function UnifiedDashboard() {
   const { publicKey, connected } = useWallet();
   const { estimate } = useMintCost();
   const { balance: cloutBalance } = useCloutBalance();
+  const { addNotification } = useNotification();
 
   const [activeTab, setActiveTab] = useState<'create' | 'browse' | 'echoes' | 'marketplace'>('echoes');
   const [liveFeed, setLiveFeed] = useState<ArchiveItem[]>([]);
@@ -65,7 +67,9 @@ export default function UnifiedDashboard() {
         setLiveFeed(data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch live feed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Failed to fetch live feed:', error);
+      }
     }
   };
 
@@ -87,7 +91,9 @@ export default function UnifiedDashboard() {
         setVerification(data.data.verification);
       }
     } catch (error) {
-      console.error('Verification failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('Verification failed:', error);
+      }
     } finally {
       setIsVerifying(false);
     }
@@ -119,13 +125,25 @@ export default function UnifiedDashboard() {
 
       const data = await response.json();
       if (data.success) {
-        alert(`✅ Eternal Echo minted! Cost: $${data.costUSD?.toFixed(4) || '0.001'}`);
+        addNotification({
+          type: 'success',
+          title: '✅ Eternal Echo Minted!',
+          message: `Cost: $${data.costUSD?.toFixed(4) || '0.001'}`,
+          duration: 6000,
+        });
         setSelectedItem(null);
         setVerification(null);
       }
     } catch (error) {
-      console.error('Minting failed:', error);
-      alert('❌ Minting failed. Please try again.');
+      if (import.meta.env.DEV) {
+        console.error('Minting failed:', error);
+      }
+      addNotification({
+        type: 'error',
+        title: '❌ Minting Failed',
+        message: 'Please try again',
+        duration: 5000,
+      });
     } finally {
       setIsMinting(false);
     }

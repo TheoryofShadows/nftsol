@@ -85,7 +85,19 @@ export default function PhantomConnect() {
 
   return (
     <div className="relative">
-      <WalletMultiButton className="!bg-gradient-to-r !from-purple-600 !to-cyan-500 !text-white !font-semibold !px-6 !py-3 !rounded-xl !shadow-lg hover:!shadow-xl hover:!scale-105 !transition-all !duration-300" />
+      <button
+        onClick={handleConnectClick}
+        className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold px-4 md:px-6 py-2 md:py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 text-sm md:text-base"
+      >
+        <span className="flex items-center gap-2">
+          <span>Connect Wallet</span>
+          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </span>
+      </button>
+      {/* Hidden WalletMultiButton - we use custom button but need this for modal */}
+      <WalletMultiButton className="!hidden" />
     </div>
   );
 }

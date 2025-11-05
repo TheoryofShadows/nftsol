@@ -18,8 +18,9 @@ export default function MintForm() {
 
     try {
       // First, verify wallet exists
+      const { API_ENDPOINTS } = await import('../config/api');
       const verifyRes = await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/nfts/verify/${publicKey!.toBase58()}`
+        API_ENDPOINTS.withdrawals.verify(publicKey!.toBase58())
       );
       const verifyData = await verifyRes.json();
 
@@ -39,7 +40,7 @@ export default function MintForm() {
       const imageUrl = URL.createObjectURL(file);
 
       // Mint NFT using real Solana blockchain
-      const mintRes = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/mint`, {
+      const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

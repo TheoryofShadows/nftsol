@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { NFT } from '../types';
+import { useNotification } from './NotificationSystem';
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string) ||
@@ -8,6 +9,7 @@ const API_BASE =
 
 export default function MyNfts() {
   const { connected, publicKey } = useWallet();
+  const { addNotification } = useNotification();
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,9 @@ export default function MyNfts() {
         
         if (Array.isArray(nftList)) {
           setNfts(nftList);
-          console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
+          if (import.meta.env.DEV) {
+            console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
+          }
         } else {
           setNfts([]);
         }
@@ -60,7 +64,12 @@ export default function MyNfts() {
     
     const price = listPrice[nft.mintAddress || ''];
     if (!price || parseFloat(price) <= 0) {
-      alert('Please enter a valid price');
+      addNotification({
+        type: 'error',
+        title: 'Invalid Price',
+        message: 'Please enter a valid price greater than 0',
+        duration: 4000,
+      });
       return;
     }
 
@@ -80,14 +89,29 @@ export default function MyNfts() {
       const data = await response.json();
       
       if (data.success) {
-        alert(`✅ NFT listed for ${price} SOL!`);
+        addNotification({
+          type: 'success',
+          title: '✅ NFT Listed!',
+          message: `NFT listed for ${price} SOL successfully`,
+          duration: 5000,
+        });
         // Refresh NFTs
         window.location.reload();
       } else {
-        alert(`❌ Failed to list: ${data.error || 'Unknown error'}`);
+        addNotification({
+          type: 'error',
+          title: '❌ Listing Failed',
+          message: data.error || 'Unknown error occurred',
+          duration: 5000,
+        });
       }
     } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to list NFT'}`);
+      addNotification({
+        type: 'error',
+        title: '❌ Listing Error',
+        message: err instanceof Error ? err.message : 'Failed to list NFT',
+        duration: 5000,
+      });
     } finally {
       setListingNft(null);
     }
@@ -111,13 +135,28 @@ export default function MyNfts() {
       const data = await response.json();
       
       if (data.success) {
-        alert('✅ NFT delisted successfully!');
+        addNotification({
+          type: 'success',
+          title: '✅ NFT Delisted!',
+          message: 'NFT delisted successfully',
+          duration: 4000,
+        });
         window.location.reload();
       } else {
-        alert(`❌ Failed to delist: ${data.error || 'Unknown error'}`);
+        addNotification({
+          type: 'error',
+          title: '❌ Delisting Failed',
+          message: data.error || 'Unknown error occurred',
+          duration: 5000,
+        });
       }
     } catch (err) {
-      alert(`❌ Error: ${err instanceof Error ? err.message : 'Failed to delist NFT'}`);
+      addNotification({
+        type: 'error',
+        title: '❌ Delisting Error',
+        message: err instanceof Error ? err.message : 'Failed to delist NFT',
+        duration: 5000,
+      });
     } finally {
       setListingNft(null);
     }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { NFTCardSkeleton } from './SkeletonLoader';
+import NftDetailModal from './NftDetailModal';
+import { useNotification } from './NotificationSystem';
 
 interface NFT {
   id: string;
@@ -27,6 +29,9 @@ interface NftGridProps {
 
 export default function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { addNotification } = useNotification();
 
   if (loading) {
     return <NFTCardSkeleton count={8} />;
@@ -100,8 +105,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
           onMouseEnter={() => setHoveredCard(nft.id)}
           onMouseLeave={() => setHoveredCard(null)}
           onClick={() => {
-            // TODO: Implement NFT detail modal
-            console.log('View NFT details:', nft);
+            setSelectedNft(nft);
+            setIsModalOpen(true);
           }}
         >
           {/* Rarity indicator */}
@@ -131,7 +136,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-                    alert(`Viewing ${nft.name} details`);
+                    setSelectedNft(nft);
+                    setIsModalOpen(true);
                   }}
                   className="w-full glass-modern px-4 py-2.5 text-white font-semibold hover:bg-white/20 transition-all text-sm flex items-center justify-center gap-2"
                 >
@@ -141,7 +147,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert(`Buying ${nft.name} for ${nft.price} SOL`);
+                      setSelectedNft(nft);
+                      setIsModalOpen(true);
                     }}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
                   >
@@ -151,7 +158,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      alert(`Listing ${nft.name} for sale`);
+                      setSelectedNft(nft);
+                      setIsModalOpen(true);
                     }}
                     className="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
                   >
@@ -204,6 +212,32 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
           <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-cyan-400/50 transition-colors duration-300 pointer-events-none"></div>
         </div>
       ))}
+
+      {/* NFT Detail Modal */}
+      <NftDetailModal
+        nft={selectedNft}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedNft(null);
+        }}
+        onBuy={(nft) => {
+          addNotification({
+            type: 'info',
+            title: 'Purchase NFT',
+            message: `Buy functionality for "${nft.name}" will be implemented soon.`,
+            duration: 4000,
+          });
+        }}
+        onList={(nft) => {
+          addNotification({
+            type: 'info',
+            title: 'List NFT',
+            message: `Listing functionality for "${nft.name}" will be implemented soon.`,
+            duration: 4000,
+          });
+        }}
+      />
     </div>
   );
 }

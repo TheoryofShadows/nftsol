@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { useNotification } from './NotificationSystem';
 
 export default function WithdrawalForm() {
   const { publicKey, connected } = useWallet();
+  const { addNotification } = useNotification();
   const [amount, setAmount] = useState('');
   const [toAddress, setToAddress] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,7 +16,7 @@ export default function WithdrawalForm() {
 
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_BASE}/api/nfts/balance/${publicKey.toBase58()}`
+        (await import('../config/api')).API_ENDPOINTS.withdrawals.balance(publicKey.toBase58())
       );
       const data = await res.json();
 
@@ -32,7 +34,8 @@ export default function WithdrawalForm() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/wallets/withdraw`, {
+      const { API_ENDPOINTS } = await import('../config/api');
+      const res = await fetch(API_ENDPOINTS.withdrawals.create, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,16 +50,29 @@ export default function WithdrawalForm() {
       const data = await res.json();
 
       if (data.success) {
-        alert(
-          `✅ Withdrawal Request Created!\n\nAmount: ${amount} SOL\nTo: ${toAddress}\nStatus: ${data.data.status}\n\nYour withdrawal is pending admin approval.`
-        );
+        addNotification({
+          type: 'success',
+          title: '✅ Withdrawal Request Created!',
+          message: `Amount: ${amount} SOL\nTo: ${toAddress}\nStatus: ${data.data.status}\n\nYour withdrawal is pending admin approval.`,
+          duration: 6000,
+        });
         setAmount('');
         setToAddress('');
       } else {
-        alert(`Withdrawal failed: ${data.error}`);
+        addNotification({
+          type: 'error',
+          title: 'Withdrawal Failed',
+          message: data.error || 'Unknown error occurred',
+          duration: 5000,
+        });
       }
     } catch (e: any) {
-      alert('Withdrawal failed: ' + e.message);
+      addNotification({
+        type: 'error',
+        title: 'Withdrawal Failed',
+        message: e.message || 'An unexpected error occurred',
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -67,16 +83,32 @@ export default function WithdrawalForm() {
     if (!toAddress) return;
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/api/nfts/verify/${toAddress}`);
+      const { API_ENDPOINTS } = await import('../config/api');
+      const res = await fetch(API_ENDPOINTS.withdrawals.verify(toAddress));
       const data = await res.json();
 
       if (data.success && data.data.exists) {
-        alert('✅ Wallet address is valid and exists on Solana network');
+        addNotification({
+          type: 'success',
+          title: '✅ Wallet Verified',
+          message: 'Wallet address is valid and exists on Solana network',
+          duration: 3000,
+        });
       } else {
-        alert('❌ Invalid wallet address or wallet does not exist');
+        addNotification({
+          type: 'error',
+          title: '❌ Invalid Wallet',
+          message: 'Invalid wallet address or wallet does not exist',
+          duration: 4000,
+        });
       }
     } catch (e) {
-      alert('Failed to verify wallet address');
+      addNotification({
+        type: 'error',
+        title: 'Verification Failed',
+        message: 'Failed to verify wallet address',
+        duration: 4000,
+      });
     }
   };
 

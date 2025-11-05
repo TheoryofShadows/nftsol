@@ -8,6 +8,7 @@ import './styles/design-system.css';
 import './styles/mobile-fixes.css';
 import './styles/modern-design.css';
 import './styles/onboarding.css';
+import './styles/wallet-adapter-fixes.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
 import { QueryProvider } from './lib/react-query.tsx';
@@ -70,6 +71,49 @@ window.addEventListener('error', (event) => {
 // Initialize Google Analytics
 if (import.meta.env.VITE_GA_TRACKING_ID) {
   initAnalytics(import.meta.env.VITE_GA_TRACKING_ID);
+}
+
+// Hide wallet adapter warning messages on mobile
+if (typeof window !== 'undefined') {
+  const hideWalletWarnings = () => {
+    // Find and hide any elements containing wallet warning text
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach((el) => {
+      const text = el.textContent || '';
+      if (
+        text.includes('No Solana wallets detected') ||
+        text.includes('Please install Phantom') ||
+        text.includes('Please install Solflare') ||
+        (text.includes('No Solana') && text.includes('wallet'))
+      ) {
+        // Check if it's a warning/alert element (not the actual wallet button)
+        const isWarning = el.classList.toString().includes('alert') ||
+                         el.classList.toString().includes('warning') ||
+                         el.getAttribute('role') === 'alert' ||
+                         (el as HTMLElement).style.backgroundColor?.includes('yellow') ||
+                         (el as HTMLElement).style.backgroundColor?.includes('#FF');
+        
+        if (isWarning || el.tagName === 'DIV' || el.tagName === 'P') {
+          (el as HTMLElement).style.display = 'none';
+        }
+      }
+    });
+  };
+
+  // Run on load and after a short delay (for dynamic content)
+  hideWalletWarnings();
+  setTimeout(hideWalletWarnings, 500);
+  setTimeout(hideWalletWarnings, 2000);
+
+  // Watch for dynamically added elements
+  const observer = new MutationObserver(() => {
+    hideWalletWarnings();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
 }
 
 // Create root and render

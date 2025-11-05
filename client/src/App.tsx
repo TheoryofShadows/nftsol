@@ -29,23 +29,50 @@ import './styles/mobile-fixes.css';
 import './styles/modern-design.css';
 
 // Lazy load components for better performance
-const Hero = lazy(() => import('./components/Hero'));
-const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
-const MintForm = lazy(() => import('./components/MintForm'));
-const NftGrid = lazy(() => import('./components/NftGrid'));
-const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
-const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
-const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
-const EchoViewer = lazy(() => import('./echo/EchoViewer'));
-const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const WelcomeOnboarding = lazy(() => import('./components/WelcomeOnboarding'));
-const FeatureTour = lazy(() => import('./components/FeatureTour'));
-const OnboardingProgress = lazy(() => import('./components/OnboardingProgress'));
-const MyNfts = lazy(() => import('./components/MyNfts'));
-const Collections = lazy(() => import('./components/Collections'));
-const UnifiedDashboard = lazy(() => import('./components/UnifiedDashboard'));
+// Wrap in error-handling lazy loaders
+const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
+  importFn: () => Promise<{ default: T }>
+) => {
+  return lazy(() =>
+    importFn().catch((error) => {
+      console.error('Failed to load component:', error);
+      // Return a fallback component
+      return {
+        default: () => (
+          <div className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <p className="text-red-400 mb-4">Failed to load component</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700"
+              >
+                Reload Page
+              </button>
+            </div>
+          </div>
+        ),
+      } as { default: T };
+    })
+  );
+};
+
+const Hero = lazyWithErrorBoundary(() => import('./components/Hero'));
+const PhantomConnect = lazyWithErrorBoundary(() => import('./components/PhantomConnect'));
+const MintForm = lazyWithErrorBoundary(() => import('./components/MintForm'));
+const NftGrid = lazyWithErrorBoundary(() => import('./components/NftGrid'));
+const WithdrawalForm = lazyWithErrorBoundary(() => import('./components/WithdrawalForm'));
+const ReferralSystem = lazyWithErrorBoundary(() => import('./components/ReferralSystem'));
+const WaitlistSignup = lazyWithErrorBoundary(() => import('./components/WaitlistSignup'));
+const EchoViewer = lazyWithErrorBoundary(() => import('./echo/EchoViewer'));
+const EchoMarketplace = lazyWithErrorBoundary(() => import('./echo/EchoMarketplace'));
+const AdminDashboard = lazyWithErrorBoundary(() => import('./components/AdminDashboard'));
+const Dashboard = lazyWithErrorBoundary(() => import('./components/Dashboard'));
+const WelcomeOnboarding = lazyWithErrorBoundary(() => import('./components/WelcomeOnboarding'));
+const FeatureTour = lazyWithErrorBoundary(() => import('./components/FeatureTour'));
+const OnboardingProgress = lazyWithErrorBoundary(() => import('./components/OnboardingProgress'));
+const MyNfts = lazyWithErrorBoundary(() => import('./components/MyNfts'));
+const Collections = lazyWithErrorBoundary(() => import('./components/Collections'));
+const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -232,23 +259,23 @@ function AppContent() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl float-animation delay-4s"></div>
       </div>
 
-      <header className="relative z-10 p-6 glass-modern border-b border-white/5 sticky top-0">
+      <header className="relative z-10 p-3 md:p-6 glass-modern border-b border-white/5 sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-3 md:space-x-6">
             {/* Modern logo */}
-            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleTabChange('home')}>
+            <div className="flex items-center space-x-2 md:space-x-3 cursor-pointer group" onClick={() => handleTabChange('home')}>
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
-                <div className="absolute top-1.5 left-1.5 w-9 h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-xl"></div>
-                <div className="absolute top-3 left-3 w-6 h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded-lg flex items-center justify-center text-xs font-bold text-white">
+                <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-xl md:rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
+                <div className="absolute top-1 left-1 md:top-1.5 md:left-1.5 w-6 h-6 md:w-9 md:h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg md:rounded-xl"></div>
+                <div className="absolute top-2 left-2 md:top-3 md:left-3 w-4 h-4 md:w-6 md:h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded md:rounded-lg flex items-center justify-center text-[8px] md:text-xs font-bold text-white">
                   NS
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
+                <h1 className="text-xl md:text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
                   NFTSol
                 </h1>
-                <p className="text-xs text-gray-400 font-mono">Solana NFT Platform</p>
+                <p className="text-[10px] md:text-xs text-gray-400 font-mono hidden sm:block">Solana NFT Platform</p>
               </div>
             </div>
 
@@ -271,7 +298,7 @@ function AppContent() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto p-6">
+      <main className="relative z-10 max-w-7xl mx-auto p-3 md:p-6">
         {/* Hero Section - Full Screen Animated Landing (Only on home) */}
         {activeTab === 'home' && (
           <Suspense

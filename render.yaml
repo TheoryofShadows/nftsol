@@ -18,13 +18,16 @@ services:
           property: connectionString
       # CRITICAL: Must set ALLOWED_ORIGINS or server will fail to start
       ALLOWED_ORIGINS: https://nftsol.app,https://www.nftsol.app,https://market.nftsol.app
-      SOLANA_RPC_URL: https://mainnet.helius-rpc.com/?api-key=ea0ed024-cd7c-4338-8b9b-b6be4d004d36
+      SOLANA_RPC_URL: https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}
+      # IMPORTANT: Set HELIUS_API_KEY in Render dashboard environment variables
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com
       SOLANA_CLUSTER: mainnet-beta
       # CRITICAL: Must set these or server will fail
-      PLATFORM_SECRET_KEY_BASE58: YOUR_PLATFORM_SECRET_KEY_HERE
-      JWT_SECRET: YOUR_JWT_SECRET_HERE
-      ADMIN_WALLETS: YOUR_ADMIN_WALLET_ADDRESS
+      # Set these in Render dashboard as environment variables - DO NOT put real values here
+      PLATFORM_SECRET_KEY_BASE58: ${PLATFORM_SECRET_KEY_BASE58}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_WALLETS: ${ADMIN_WALLETS}
+      HELIUS_API_KEY: ${HELIUS_API_KEY}
       # CLOUT Configuration
       CLOUT_PROGRAM_ID: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
       CLOUT_MINT: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
