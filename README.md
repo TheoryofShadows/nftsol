@@ -18,11 +18,7 @@
 - 🎨 **Full NFT Marketplace** - Mint, buy, sell NFTs on Solana
 - 📊 **Modern Dashboard** - 2026-style UI with portfolio, stats, activity feed
 - 🎓 **Smart Onboarding** - Interactive tours and welcome experience
-<<<<<<< HEAD
 - ⭐ **CLOUT Token** - Native reward token (`26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`)
-=======
-- ⭐ **CLOUT Token** - Native reward token (`62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`)
->>>>>>> origin/develop
 - 🎬 **Eternal Echoes** - Collaborative, layered NFT creation
 - 🌳 **Compressed NFTs** - Low-cost minting via Metaplex Bubblegum
 - 💰 **Fee System** - 2.5% platform fee on all mints
@@ -191,11 +187,7 @@ Full API docs: **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)**
 - **Token Address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`
 - **Rewards Vault**: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
 - **Total Supply**: 1,000,000,000 CLOUT
-<<<<<<< HEAD
 - **Solscan**: [View Token](https://solscan.io/token/26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
-=======
-- **Solscan**: [View Token](https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
->>>>>>> origin/develop
 
 Users earn CLOUT through: minting NFTs, purchases, referrals, engagement.
 
