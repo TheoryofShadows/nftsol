@@ -490,14 +490,11 @@ class OptimizedSolanaService {
       })
     );
 
-<<<<<<< HEAD
     // Add error if vault address couldn't be calculated
     if (!rewardsVault) {
       errors.push('Rewards vault address could not be calculated (missing REWARDS_OWNER or CLOUT_MINT)');
     }
 
-=======
->>>>>>> origin/develop
     return {
       valid: errors.length === 0,
       errors,
