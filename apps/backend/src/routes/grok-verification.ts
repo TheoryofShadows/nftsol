@@ -266,11 +266,7 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
       text: '',
       timestamp: new Date().toISOString(),
       metadata: {},
-<<<<<<< HEAD
       error: error instanceof Error ? error.message : 'Archive fetch failed',
-=======
-      error: error?.message || 'Archive fetch failed',
->>>>>>> origin/develop
     };
   }
 }
