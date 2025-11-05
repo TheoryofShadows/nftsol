@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { useNotification } from '../components/NotificationSystem';
 import TruthBadge from '../components/TruthBadge';
+
+// Lazy load video upload component
+const VideoUpload = lazy(() => import('./VideoUpload'));
 
 type IASearchResult = {
   identifier: string;
@@ -41,6 +44,9 @@ export default function EchoMint() {
   const [loading, setLoading] = useState(false);
   const [minting, setMinting] = useState(false);
   const [prefetchedThumbnails, setPrefetchedThumbnails] = useState<Map<string, string>>(new Map());
+  const [uploadMode, setUploadMode] = useState<'archive' | 'upload'>('archive');
+  const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
+  const [uploadedMetadataUri, setUploadedMetadataUri] = useState<string | null>(null);
   const { publicKey } = useWallet();
   const { addNotification } = useNotification();
 
@@ -179,6 +185,40 @@ export default function EchoMint() {
         <WalletMultiButton className="btn-glass" />
       </div>
 
+      {/* Mode Toggle */}
+      <div className="flex gap-2 mb-4 glass p-2 rounded-lg" data-tour="video-upload-toggle">
+        <button
+          onClick={() => {
+            setUploadMode('archive');
+            setUploadedVideoUrl(null);
+            setUploadedMetadataUri(null);
+            setMintData(null);
+          }}
+          className={`flex-1 py-2 px-4 rounded transition-all ${
+            uploadMode === 'archive'
+              ? 'bg-purple-500 text-white font-semibold'
+              : 'text-gray-300 hover:text-white'
+          }`}
+        >
+          📚 Internet Archive
+        </button>
+        <button
+          onClick={() => {
+            setUploadMode('upload');
+            setSelected(null);
+            setMintData(null);
+          }}
+          className={`flex-1 py-2 px-4 rounded transition-all ${
+            uploadMode === 'upload'
+              ? 'bg-purple-500 text-white font-semibold'
+              : 'text-gray-300 hover:text-white'
+          }`}
+        >
+          📹 Upload Video
+        </button>
+      </div>
+
+      {uploadMode === 'archive' ? (
       <div className="glass p-3 rounded mb-4">
         <input
           value={query}
@@ -187,6 +227,29 @@ export default function EchoMint() {
           className="w-full bg-transparent outline-none text-white placeholder-gray-400"
         />
       </div>
+      ) : (
+        <div className="mb-4" data-tour="video-upload-area">
+          <Suspense fallback={<div className="p-4 text-center text-gray-400">Loading uploader...</div>}>
+            <VideoUpload
+              onSuccess={(videoUrl, metadataUri, verification) => {
+                setUploadedVideoUrl(videoUrl);
+                setUploadedMetadataUri(metadataUri);
+                // Create mint data from uploaded video with verification
+                setMintData({
+                  iaId: `upload-${Date.now()}`,
+                  title: 'Uploaded Video NFT',
+                  description: 'Your uploaded video',
+                  videoUri: videoUrl,
+                  grokTruthHash: [],
+                  truthScore: verification?.score || 0,
+                  teaser: verification?.summary || 'Video uploaded successfully',
+                  verified: verification?.verified || false,
+                });
+              }}
+            />
+          </Suspense>
+        </div>
+      )}
 
       {loading && <div className="text-gray-300 mb-2">Searching…</div>}
 

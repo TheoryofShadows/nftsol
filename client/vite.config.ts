@@ -63,6 +63,7 @@ export default defineConfig({
             '@solana/wallet-adapter-react-ui',
           ],
           'query-vendor': ['@tanstack/react-query'],
+          'video-vendor': ['react-dropzone'],
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',

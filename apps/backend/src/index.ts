@@ -35,6 +35,7 @@ import mintRouter from './routes/mint';
 import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
 import transactionsRouter from './routes/transactions';
+import videoRouter from './routes/video';
 import { initializeSecrets } from './lib/secrets-loader';
 
 initializeSecrets();
@@ -790,6 +791,9 @@ app.use('/api', (req, res, next) => {
 
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
+
+// Video upload routes
+app.use('/api/video', videoRouter);
 
 // Transaction history routes (Helius Nov 2025 upgrade)
 app.use('/api/transactions', transactionsRouter);

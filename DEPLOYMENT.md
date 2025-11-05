@@ -89,9 +89,24 @@ SESSION_SECRET=<generate_random_64_char_string>
 ```bash
 HELIUS_API_KEY=your_helius_api_key
 PINATA_JWT=your_pinata_jwt
+XAI_API_KEY=your_xai_grok_api_key
 ALLOWED_ORIGINS=https://nftsol.app,https://www.nftsol.app
 LOG_LEVEL=info
 ```
+
+#### Video & Grok API Setup
+
+**Pinata (Free 1GB tier for video storage)**:
+1. Sign up at https://pinata.cloud
+2. Navigate to API Keys → Create New Key
+3. Copy the JWT token
+4. Add to `PINATA_JWT` environment variable
+
+**xAI Grok API (Free tier available)**:
+1. Sign up at https://x.ai/api
+2. Create API key from dashboard
+3. Add to `XAI_API_KEY` environment variable
+4. Note: Falls back to Cloudflare AI if unavailable
 
 **⚠️ Security Note**: Use Render's "Secrets" feature for sensitive values like `PLATFORM_SECRET_KEY_BASE58`, `JWT_SECRET`, and `SESSION_SECRET`. Do NOT use regular environment variables for these.
 

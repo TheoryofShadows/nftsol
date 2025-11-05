@@ -8,7 +8,8 @@ import TruthBadge from '../components/TruthBadge';
 type Echo = {
   id: string;
   echoData: string;
-  echoType: 'Text' | 'Audio' | 'Annotation';
+  echoType: 'Text' | 'Audio' | 'Annotation' | 'Video';
+  videoUri?: string; // For video echoes
   contributor: string;
   grokVerified: boolean;
   verificationScore: number;
@@ -26,7 +27,8 @@ export default function EchoViewer() {
   const [previousAvgScore, setPreviousAvgScore] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [newEcho, setNewEcho] = useState('');
-  const [echoType, setEchoType] = useState<'Text' | 'Audio' | 'Annotation'>('Text');
+  const [echoType, setEchoType] = useState<'Text' | 'Audio' | 'Annotation' | 'Video'>('Text');
+  const [newVideoUri, setNewVideoUri] = useState<string>('');
   const { addNotification } = useNotification();
 
   useEffect(() => {
@@ -93,15 +95,22 @@ export default function EchoViewer() {
     if (!ledgerId || !publicKey || !newEcho.trim()) return;
 
     try {
+      const body: any = {
+        ledgerId,
+        echoData: newEcho,
+        echoType,
+        contributorWallet: publicKey.toBase58(),
+      };
+
+      // Add videoUri if echoType is Video
+      if (echoType === 'Video' && newVideoUri) {
+        body.videoUri = newVideoUri;
+      }
+
       const res = await fetch(`${API_BASE}/api/echo/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ledgerId,
-          echoData: newEcho,
-          echoType,
-          contributorWallet: publicKey.toBase58(),
-        }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
@@ -225,7 +234,7 @@ export default function EchoViewer() {
                         </div>
 
                         {/* Verification Badge */}
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0" data-tour="echo-verification">
                           <TruthBadge
                             score={e.verificationScore}
                             verified={e.grokVerified}
@@ -238,6 +247,19 @@ export default function EchoViewer() {
                       <div className={`text-white mb-2 ${isLowTrust ? 'text-red-200' : ''}`}>
                         {e.echoData}
                       </div>
+
+                      {/* Video display for Video echoes */}
+                      {e.echoType === 'Video' && e.videoUri && (
+                        <div className="mb-2 rounded-lg overflow-hidden">
+                          <video
+                            src={e.videoUri}
+                            controls
+                            className="w-full rounded-lg"
+                            loading="lazy"
+                            preload="metadata"
+                          />
+                        </div>
+                      )}
 
                       <div className="flex items-center gap-2 text-sm">
                         <span className="glass px-2 py-1 rounded text-gray-300">{e.echoType}</span>
@@ -256,28 +278,70 @@ export default function EchoViewer() {
         </div>
       )}
 
-      <div className="glass p-3 rounded">
-        <div className="mb-2 text-white font-semibold">Add Echo</div>
-        <div className="flex gap-2 mb-2">
+      {/* Prominent "Echo It" section */}
+      <div className="glass p-4 rounded-xl mb-4 border-2 border-purple-400/50 bg-gradient-to-r from-purple-500/10 to-cyan-500/10" data-tour="echo-it-button">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-white font-bold text-lg mb-1">🎯 Echo This NFT</div>
+            <div className="text-gray-400 text-sm">Add your layer to this collaborative NFT</div>
+          </div>
+          <WalletMultiButton className="btn-glass" />
+        </div>
+
+        <div className="space-y-3">
           <select
-            className="glass px-2 py-1 rounded"
+            className="w-full glass px-3 py-2 rounded text-white bg-transparent"
             value={echoType}
-            onChange={(e) => setEchoType(e.target.value as any)}
+            onChange={(e) => {
+              setEchoType(e.target.value as any);
+              if (e.target.value !== 'Video') {
+                setNewVideoUri('');
+              }
+            }}
           >
-            <option value="Text">Text</option>
-            <option value="Audio">Audio</option>
-            <option value="Annotation">Annotation</option>
+            <option value="Text">📝 Text Echo</option>
+            <option value="Audio">🎵 Audio Echo</option>
+            <option value="Annotation">📌 Annotation</option>
+            <option value="Video">📹 Video Echo</option>
           </select>
-          <input
-            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 glass px-2 py-1 rounded"
-            placeholder="Add your layer…"
-            value={newEcho}
-            onChange={(e) => setNewEcho(e.target.value)}
-          />
-          <button className="btn-glass" onClick={addEcho} disabled={!publicKey || !newEcho.trim()}>
-            Add
+
+          {echoType === 'Video' ? (
+            <div className="space-y-2">
+              <input
+                className="w-full bg-transparent outline-none text-white placeholder-gray-400 glass px-3 py-2 rounded"
+                placeholder="Video URL (Pinata IPFS link)"
+                value={newVideoUri}
+                onChange={(e) => setNewVideoUri(e.target.value)}
+              />
+              <input
+                className="w-full bg-transparent outline-none text-white placeholder-gray-400 glass px-3 py-2 rounded"
+                placeholder="Video description or caption"
+                value={newEcho}
+                onChange={(e) => setNewEcho(e.target.value)}
+              />
+            </div>
+          ) : (
+            <input
+              className="w-full bg-transparent outline-none text-white placeholder-gray-400 glass px-3 py-2 rounded"
+              placeholder="Add your layer…"
+              value={newEcho}
+              onChange={(e) => setNewEcho(e.target.value)}
+            />
+          )}
+
+          <button
+            className="w-full btn-primary py-3 font-bold text-lg"
+            onClick={addEcho}
+            disabled={!publicKey || !newEcho.trim() || (echoType === 'Video' && !newVideoUri)}
+          >
+            {echoType === 'Video' ? '📹 Add Video Echo' : '✨ Add Echo'}
           </button>
         </div>
+      </div>
+
+      {/* Legacy add echo section (kept for compatibility) */}
+      <div className="glass p-3 rounded">
+        <div className="mb-2 text-white font-semibold text-sm">Quick Add</div>
         {!publicKey && <div className="text-gray-400 text-sm">Connect wallet to add echo.</div>}
       </div>
     </div>

@@ -24,7 +24,8 @@ type EchoRow = {
   id: string;
   ledgerId: string;
   echoData: string;
-  echoType: 'Text' | 'Audio' | 'Annotation';
+  echoType: 'Text' | 'Audio' | 'Annotation' | 'Video';
+  videoUri?: string; // For video echoes
   dataHash: number[];
   contributor: string;
   grokVerified: boolean;
@@ -83,7 +84,8 @@ const mintSchema = z.object({
 const addEchoSchema = z.object({
   ledgerId: z.string().min(1),
   echoData: z.string().min(1).max(5000),
-  echoType: z.enum(['Text', 'Audio', 'Annotation']),
+  echoType: z.enum(['Text', 'Audio', 'Annotation', 'Video']),
+  videoUri: z.string().url().optional(), // For video echoes
   contributorWallet: z.string().refine((val) => {
     try {
       new PublicKey(val);
@@ -286,7 +288,7 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
  */
 router.post('/add', echoLimiter, async (req: Request, res: Response) => {
   try {
-    const { ledgerId, echoData, echoType, contributorWallet } = addEchoSchema.parse(req.body);
+    const { ledgerId, echoData, echoType, contributorWallet, videoUri } = addEchoSchema.parse(req.body);
 
     // Verify the echo content
     const verification = await grokVerify(echoData);
@@ -297,6 +299,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       ledgerId,
       echoData,
       echoType,
+      videoUri: echoType === 'Video' ? videoUri : undefined,
       dataHash: Array.from(generateTruthHash(echoData)),
       contributor: contributorWallet,
       grokVerified: verified,

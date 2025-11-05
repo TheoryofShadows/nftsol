@@ -116,6 +116,66 @@ export default function FeatureTour() {
     },
   ];
 
+  // Video Upload Tour Steps
+  const videoUploadSteps: Step[] = [
+    {
+      target: '[data-tour="video-upload-toggle"]',
+      content: (
+        <div>
+          <h3 className="text-xl font-bold gradient-text-primary mb-2">📹 Upload Video</h3>
+          <p className="text-gray-300">
+            Switch to "Upload Video" mode to mint video NFTs. Drag and drop your video file (up to 100MB).
+          </p>
+        </div>
+      ),
+      disableBeacon: true,
+      placement: 'bottom',
+    },
+    {
+      target: '[data-tour="video-upload-area"]',
+      content: (
+        <div>
+          <h3 className="text-xl font-bold gradient-text-primary mb-2">Drop Your Video</h3>
+          <p className="text-gray-300">
+            Upload your video file. It will be automatically verified by Grok AI for authenticity before minting.
+          </p>
+        </div>
+      ),
+      disableBeacon: true,
+      placement: 'top',
+    },
+  ];
+
+  // Echo Tour Steps
+  const echoTourSteps: Step[] = [
+    {
+      target: '[data-tour="echo-it-button"]',
+      content: (
+        <div>
+          <h3 className="text-xl font-bold gradient-text-primary mb-2">🎯 Echo This NFT</h3>
+          <p className="text-gray-300">
+            Add your layer to this collaborative NFT! Choose Text, Audio, Annotation, or Video to remix this Eternal Echo.
+          </p>
+        </div>
+      ),
+      disableBeacon: true,
+      placement: 'top',
+    },
+    {
+      target: '[data-tour="echo-verification"]',
+      content: (
+        <div>
+          <h3 className="text-xl font-bold gradient-text-primary mb-2">✓ Verify with Grok</h3>
+          <p className="text-gray-300">
+            Your echo will be verified by Grok AI. Verified echoes earn CLOUT rewards and boost the NFT's truth score!
+          </p>
+        </div>
+      ),
+      disableBeacon: true,
+      placement: 'bottom',
+    },
+  ];
+
   // Portfolio Tour Steps
   const portfolioSteps: Step[] = [
     {
@@ -144,6 +204,10 @@ export default function FeatureTour() {
         return mintSteps;
       case 'portfolio-tour':
         return portfolioSteps;
+      case 'video-upload-tour':
+        return videoUploadSteps;
+      case 'echo-tour':
+        return echoTourSteps;
       default:
         return [];
     }

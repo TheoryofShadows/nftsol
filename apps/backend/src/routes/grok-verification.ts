@@ -5,6 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
+import { verifyWithGrok } from '../utils/grokpedia-production';
 
 const router = Router();
 
@@ -65,6 +66,40 @@ router.post('/verify', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Verification failed',
+    });
+  }
+});
+
+/**
+ * POST /api/grok/verify-video
+ * Verify video NFT using production Grok API
+ */
+router.post('/verify-video', async (req: Request, res: Response) => {
+  try {
+    const { videoUri, nftId } = req.body;
+
+    if (!videoUri) {
+      return res.status(400).json({
+        success: false,
+        error: 'Video URI is required for verification',
+      });
+    }
+
+    // Use production Grok verification
+    const verificationResult = await verifyWithGrok(
+      videoUri,
+      nftId || `video-${Date.now()}`
+    );
+
+    res.json({
+      success: true,
+      data: verificationResult,
+    });
+  } catch (error) {
+    console.error('[Grok] Video verification error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Video verification failed',
     });
   }
 });

@@ -16,10 +16,12 @@
 ## ✨ Core Features
 
 - 🎨 **Full NFT Marketplace** - Mint, buy, sell NFTs on Solana
+- 📹 **Video NFT Minting** - Upload and mint video NFTs with Grok AI verification
+- 🤖 **Grok AI Verification** - AI-powered authenticity verification for video NFTs
 - 📊 **Modern Dashboard** - 2026-style UI with portfolio, stats, activity feed
 - 🎓 **Smart Onboarding** - Interactive tours and welcome experience
 - ⭐ **CLOUT Token** - Native reward token (`26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`)
-- 🎬 **Eternal Echoes** - Collaborative, layered NFT creation
+- 🎬 **Eternal Echoes** - Collaborative, layered NFT creation with video support
 - 🌳 **Compressed NFTs** - Low-cost minting via Metaplex Bubblegum
 - 💰 **Fee System** - 2.5% platform fee on all mints
 - 🔒 **Enterprise Security** - Bank-grade security with audit trails
@@ -129,6 +131,23 @@ NODE_ENV=development
 VITE_API_BASE=http://localhost:3001
 VITE_SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 ```
+
+#### Video & Grok Features
+
+For video NFT minting and Grok AI verification, add these to backend `.env`:
+
+```env
+# Pinata (free 1GB tier for video storage)
+PINATA_JWT=your_pinata_jwt_token
+
+# xAI Grok API (free tier available)
+XAI_API_KEY=your_xai_api_key
+```
+
+**Setup Instructions:**
+- **Pinata**: Sign up at https://pinata.cloud → API Keys → Create JWT
+- **xAI Grok**: Sign up at https://x.ai/api → Create API key
+- If Grok API unavailable, automatically falls back to Cloudflare AI
 
 ⚠️ **Never commit `.env` files or secrets to Git!**
 

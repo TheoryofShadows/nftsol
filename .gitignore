@@ -126,3 +126,6 @@ nftsol-frontend-deploy.zip
 # All other .md files can be removed or archived
 # Archived/unused directories
 .archive/
+
+# Local Netlify folder
+.netlify

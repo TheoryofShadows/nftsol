@@ -107,6 +107,30 @@ export async function uploadMetadata(
 }
 
 /**
+ * Uploads metadata to Irys (metadata only, not videos)
+ * DO NOT use this for videos - Irys has 100KB limit
+ * @param metadata - Metadata object to upload
+ * @param options - Irys configuration options
+ * @returns Arweave URI
+ */
+export async function uploadMetadataToIrys(
+  metadata: Record<string, any>,
+  options: IrysUploadOptions
+): Promise<IrysUploadResult> {
+  const jsonString = JSON.stringify(metadata);
+  const jsonSize = Buffer.byteLength(jsonString, 'utf8');
+
+  // Irys free tier has 100KB limit - check before upload
+  if (jsonSize > 90_000) {
+    throw new Error(
+      `Metadata too large for Irys (100KB limit). Size: ${jsonSize} bytes. Use Pinata for larger files.`
+    );
+  }
+
+  return uploadToIrys(jsonString, options);
+}
+
+/**
  * Checks if Irys node is funded (has sufficient balance)
  * @param irys - Irys instance
  * @param requiredBytes - Required bytes for upload (optional)

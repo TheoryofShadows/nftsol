@@ -57,7 +57,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export const appConfig: AppConfig = {
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
   cors: {
     origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [
