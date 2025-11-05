@@ -29,7 +29,6 @@ import './styles/mobile-fixes.css';
 import './styles/modern-design.css';
 
 // Lazy load components for better performance
-<<<<<<< HEAD
 // Wrap in error-handling lazy loaders
 const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
   importFn: () => Promise<{ default: T }>
@@ -74,26 +73,6 @@ const OnboardingProgress = lazyWithErrorBoundary(() => import('./components/Onbo
 const MyNfts = lazyWithErrorBoundary(() => import('./components/MyNfts'));
 const Collections = lazyWithErrorBoundary(() => import('./components/Collections'));
 const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
-=======
-const Hero = lazy(() => import('./components/Hero'));
-const PhantomConnect = lazy(() => import('./components/PhantomConnect'));
-const MintForm = lazy(() => import('./components/MintForm'));
-const NftGrid = lazy(() => import('./components/NftGrid'));
-const WithdrawalForm = lazy(() => import('./components/WithdrawalForm'));
-const ReferralSystem = lazy(() => import('./components/ReferralSystem'));
-const WaitlistSignup = lazy(() => import('./components/WaitlistSignup'));
-const EchoMint = lazy(() => import('./echo/EchoMint'));
-const EchoViewer = lazy(() => import('./echo/EchoViewer'));
-const EchoMarketplace = lazy(() => import('./echo/EchoMarketplace'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const WelcomeOnboarding = lazy(() => import('./components/WelcomeOnboarding'));
-const FeatureTour = lazy(() => import('./components/FeatureTour'));
-const OnboardingProgress = lazy(() => import('./components/OnboardingProgress'));
-const MyNfts = lazy(() => import('./components/MyNfts'));
-const Collections = lazy(() => import('./components/Collections'));
-const UnifiedDashboard = lazy(() => import('./components/UnifiedDashboard'));
->>>>>>> origin/develop
 
 // Loading component
 const LoadingSpinner = () => (
@@ -108,10 +87,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('home');
-<<<<<<< HEAD
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-=======
->>>>>>> origin/develop
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics, getPerformanceReport } = usePerformance();
@@ -279,7 +255,6 @@ function AppContent() {
       {/* Modern background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/4 -right-1/4 w-96 h-96 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-full blur-3xl float-animation"></div>
-<<<<<<< HEAD
         <div className="absolute -bottom-1/4 -left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl float-animation delay-2s"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl float-animation delay-4s"></div>
       </div>
@@ -293,46 +268,20 @@ function AppContent() {
                 <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-xl md:rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
                 <div className="absolute top-1 left-1 md:top-1.5 md:left-1.5 w-6 h-6 md:w-9 md:h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg md:rounded-xl"></div>
                 <div className="absolute top-2 left-2 md:top-3 md:left-3 w-4 h-4 md:w-6 md:h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded md:rounded-lg flex items-center justify-center text-[8px] md:text-xs font-bold text-white">
-=======
-        <div className="absolute -bottom-1/4 -left-1/4 w-96 h-96 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl float-animation" style={{ animationDelay: '2s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl float-animation" style={{ animationDelay: '4s' }}></div>
-      </div>
-
-      <header className="relative z-10 p-6 glass-modern border-b border-white/5 sticky top-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-6">
-            {/* Modern logo */}
-            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleTabChange('home')}>
-              <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
-                <div className="absolute top-1.5 left-1.5 w-9 h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-xl"></div>
-                <div className="absolute top-3 left-3 w-6 h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded-lg flex items-center justify-center text-xs font-bold text-white">
->>>>>>> origin/develop
                   NS
                 </div>
               </div>
               <div>
-<<<<<<< HEAD
                 <h1 className="text-xl md:text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
                   NFTSol
                 </h1>
                 <p className="text-[10px] md:text-xs text-gray-400 font-mono hidden sm:block">Solana NFT Platform</p>
-=======
-                <h1 className="text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
-                  NFTSol
-                </h1>
-                <p className="text-xs text-gray-400 font-mono">Solana NFT Platform</p>
->>>>>>> origin/develop
               </div>
             </div>
 
             {/* Performance indicator - Modern */}
             <div className="hidden md:flex items-center space-x-2 badge-modern">
-<<<<<<< HEAD
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-=======
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
->>>>>>> origin/develop
               <span className="text-xs font-mono">
                 {metrics.loadTime.toFixed(0)}ms
               </span>
@@ -349,11 +298,7 @@ function AppContent() {
         </div>
       </header>
 
-<<<<<<< HEAD
       <main className="relative z-10 max-w-7xl mx-auto p-3 md:p-6">
-=======
-      <main className="relative z-10 max-w-7xl mx-auto p-6">
->>>>>>> origin/develop
         {/* Hero Section - Full Screen Animated Landing (Only on home) */}
         {activeTab === 'home' && (
           <Suspense
@@ -540,11 +485,7 @@ function AppContent() {
                             alt={nft.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {
-<<<<<<< HEAD
                               (e.target as HTMLImageElement).src = '/placeholder-nft.svg';
-=======
-                              (e.target as HTMLImageElement).src = '/placeholder-nft.png';
->>>>>>> origin/develop
                             }}
                           />
                           {nft.price && (

@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { NFTCardSkeleton } from './SkeletonLoader';
-<<<<<<< HEAD
 import NftDetailModal from './NftDetailModal';
 import { useNotification } from './NotificationSystem';
-=======
->>>>>>> origin/develop
 
 interface NFT {
   id: string;
@@ -55,34 +52,11 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
     );
   }
 
-  if (loading) {
-    return <NFTCardSkeleton count={8} />;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-20">
-        <div className="card-modern max-w-md mx-auto p-12">
-          <div className="text-6xl mb-6">❌</div>
-          <h3 className="text-heading text-white mb-4">Error Loading NFTs</h3>
-          <p className="text-body mb-6">{error}</p>
-          <button className="btn-modern" onClick={() => window.location.reload()}>
-            <span className="relative z-10">Try Again</span>
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   if (!nfts?.length) {
     return (
       <div className="text-center py-20">
         <div className="card-modern max-w-md mx-auto p-12">
-<<<<<<< HEAD
           <div className="text-6xl mb-6">🎨</div>
-=======
-          <div className="text-6xl mb-6 animate-pulse">🎨</div>
->>>>>>> origin/develop
           <h3 className="text-heading text-white mb-4">No NFTs Yet</h3>
           <p className="text-body mb-6">
             Be the first to mint an NFT and start the marketplace!
@@ -131,13 +105,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
           onMouseEnter={() => setHoveredCard(nft.id)}
           onMouseLeave={() => setHoveredCard(null)}
           onClick={() => {
-<<<<<<< HEAD
             setSelectedNft(nft);
             setIsModalOpen(true);
-=======
-            // TODO: Implement NFT detail modal
-            console.log('View NFT details:', nft);
->>>>>>> origin/develop
           }}
         >
           {/* Rarity indicator */}
@@ -167,12 +136,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
-<<<<<<< HEAD
                     setSelectedNft(nft);
                     setIsModalOpen(true);
-=======
-                    alert(`Viewing ${nft.name} details`);
->>>>>>> origin/develop
                   }}
                   className="w-full glass-modern px-4 py-2.5 text-white font-semibold hover:bg-white/20 transition-all text-sm flex items-center justify-center gap-2"
                 >
@@ -182,12 +147,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-<<<<<<< HEAD
                       setSelectedNft(nft);
                       setIsModalOpen(true);
-=======
-                      alert(`Buying ${nft.name} for ${nft.price} SOL`);
->>>>>>> origin/develop
                     }}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
                   >
@@ -197,12 +158,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-<<<<<<< HEAD
                       setSelectedNft(nft);
                       setIsModalOpen(true);
-=======
-                      alert(`Listing ${nft.name} for sale`);
->>>>>>> origin/develop
                     }}
                     className="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
                   >

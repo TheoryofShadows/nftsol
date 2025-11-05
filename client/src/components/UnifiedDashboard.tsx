@@ -11,10 +11,7 @@ import { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMintCost } from '../hooks/useMintCost';
 import { useCloutBalance } from '../hooks/useCloutBalance';
-<<<<<<< HEAD
 import { useNotification } from './NotificationSystem';
-=======
->>>>>>> origin/develop
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
@@ -42,18 +39,11 @@ interface VerificationResult {
   summary: string;
 }
 
-<<<<<<< HEAD
 export default function UnifiedDashboard() {
   const { publicKey, connected } = useWallet();
   const { estimate } = useMintCost();
   const { balance: cloutBalance } = useCloutBalance();
   const { addNotification } = useNotification();
-=======
-export function UnifiedDashboard() {
-  const { publicKey, connected } = useWallet();
-  const { estimate } = useMintCost();
-  const { balance: cloutBalance } = useCloutBalance();
->>>>>>> origin/develop
 
   const [activeTab, setActiveTab] = useState<'create' | 'browse' | 'echoes' | 'marketplace'>('echoes');
   const [liveFeed, setLiveFeed] = useState<ArchiveItem[]>([]);
@@ -77,13 +67,9 @@ export function UnifiedDashboard() {
         setLiveFeed(data.data);
       }
     } catch (error) {
-<<<<<<< HEAD
       if (import.meta.env.DEV) {
         console.error('Failed to fetch live feed:', error);
       }
-=======
-      console.error('Failed to fetch live feed:', error);
->>>>>>> origin/develop
     }
   };
 
@@ -105,13 +91,9 @@ export function UnifiedDashboard() {
         setVerification(data.data.verification);
       }
     } catch (error) {
-<<<<<<< HEAD
       if (import.meta.env.DEV) {
         console.error('Verification failed:', error);
       }
-=======
-      console.error('Verification failed:', error);
->>>>>>> origin/develop
     } finally {
       setIsVerifying(false);
     }
@@ -143,21 +125,16 @@ export function UnifiedDashboard() {
 
       const data = await response.json();
       if (data.success) {
-<<<<<<< HEAD
         addNotification({
           type: 'success',
           title: '✅ Eternal Echo Minted!',
           message: `Cost: $${data.costUSD?.toFixed(4) || '0.001'}`,
           duration: 6000,
         });
-=======
-        alert(`✅ Eternal Echo minted! Cost: $${data.costUSD?.toFixed(4) || '0.001'}`);
->>>>>>> origin/develop
         setSelectedItem(null);
         setVerification(null);
       }
     } catch (error) {
-<<<<<<< HEAD
       if (import.meta.env.DEV) {
         console.error('Minting failed:', error);
       }
@@ -167,10 +144,6 @@ export function UnifiedDashboard() {
         message: 'Please try again',
         duration: 5000,
       });
-=======
-      console.error('Minting failed:', error);
-      alert('❌ Minting failed. Please try again.');
->>>>>>> origin/develop
     } finally {
       setIsMinting(false);
     }

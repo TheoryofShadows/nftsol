@@ -110,11 +110,7 @@ export default function MintForm() {
           
           {/* Ultra-Cheap Badge */}
           {!costLoading && estimate && (
-<<<<<<< HEAD
             <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/50 rounded-full px-6 py-3">
-=======
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/50 rounded-full px-6 py-3 animate-pulse-slow">
->>>>>>> origin/develop
               <span className="text-2xl">💰</span>
               <div className="text-left">
                 <div className="text-xs text-green-300 font-semibold uppercase tracking-wider">Ultra-Cheap</div>

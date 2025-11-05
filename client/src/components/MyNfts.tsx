@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { NFT } from '../types';
-<<<<<<< HEAD
 import { useNotification } from './NotificationSystem';
-=======
->>>>>>> origin/develop
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string) ||
@@ -12,18 +9,12 @@ const API_BASE =
 
 export default function MyNfts() {
   const { connected, publicKey } = useWallet();
-<<<<<<< HEAD
   const { addNotification } = useNotification();
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [listingNft, setListingNft] = useState<string | null>(null);
   const [listPrice, setListPrice] = useState<{ [key: string]: string }>({});
-=======
-  const [nfts, setNfts] = useState<NFT[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
->>>>>>> origin/develop
 
   useEffect(() => {
     const fetchMyNfts = async () => {
@@ -45,7 +36,6 @@ export default function MyNfts() {
         }
 
         const data = await response.json();
-<<<<<<< HEAD
         
         // Handle both old format (data.nfts) and new format (data.data)
         const nftList = data.nfts || data.data || [];
@@ -55,10 +45,6 @@ export default function MyNfts() {
           if (import.meta.env.DEV) {
             console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
           }
-=======
-        if (data.success && Array.isArray(data.data)) {
-          setNfts(data.data);
->>>>>>> origin/develop
         } else {
           setNfts([]);
         }
@@ -73,7 +59,6 @@ export default function MyNfts() {
     fetchMyNfts();
   }, [connected, publicKey]);
 
-<<<<<<< HEAD
   const handleListNFT = async (nft: NFT) => {
     if (!publicKey) return;
     
@@ -177,8 +162,6 @@ export default function MyNfts() {
     }
   };
 
-=======
->>>>>>> origin/develop
   if (!connected) {
     return (
       <div className="glass-card p-12 text-center">
@@ -283,11 +266,7 @@ export default function MyNfts() {
               </div>
             </div>
 
-<<<<<<< HEAD
             <div className="p-4 space-y-3">
-=======
-            <div className="p-4 space-y-2">
->>>>>>> origin/develop
               <h3 className="font-bold text-white text-lg truncate">
                 {nft.name || `NFT #${index + 1}`}
               </h3>
@@ -300,7 +279,6 @@ export default function MyNfts() {
                   {nft.mintAddress?.slice(0, 8)}...
                 </span>
               </div>
-<<<<<<< HEAD
               
               {/* Listing Status */}
               {(nft as any).isListed ? (
@@ -347,14 +325,6 @@ export default function MyNfts() {
                   >
                     {listingNft === nft.mintAddress ? 'Listing...' : '🏷️ List for Sale'}
                   </button>
-=======
-              {nft.price && (
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Current Price:</span>
-                  <span className="text-lg font-bold gradient-text-primary">
-                    {nft.price} SOL
-                  </span>
->>>>>>> origin/develop
                 </div>
               )}
             </div>

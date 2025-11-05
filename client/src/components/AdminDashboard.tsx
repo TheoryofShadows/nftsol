@@ -27,14 +27,8 @@ const AdminDashboard: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('admin_token');
-<<<<<<< HEAD
       const { API_ENDPOINTS } = await import('../config/api');
       const url = API_ENDPOINTS.admin.withdrawals(status);
-=======
-      const url = status
-        ? `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals?status=${status}`
-        : `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals`;
->>>>>>> origin/develop
 
       const response = await fetch(url, {
         headers: {
@@ -75,11 +69,7 @@ const AdminDashboard: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token');
       const response = await fetch(
-<<<<<<< HEAD
         (await import('../config/api')).API_ENDPOINTS.admin.withdrawalAction(withdrawalId, action),
-=======
-        `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/admin/withdrawals/${withdrawalId}/${action}`,
->>>>>>> origin/develop
         {
           method: 'POST',
           headers: {

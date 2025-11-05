@@ -39,13 +39,9 @@ import { initializeSecrets } from './lib/secrets-loader';
 
 initializeSecrets();
 
-<<<<<<< HEAD
 // PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
 // This is just for reference - actual port used is from appConfig.port or Render's PORT
 // const PORT = parseInt(process.env.PORT || '3001', 10); // Not used, commented out
-=======
-const PORT = parseInt(process.env.PORT || '3001', 10);
->>>>>>> origin/develop
 
 const app = express();
 const server = createServer(app);
@@ -729,7 +725,6 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 // Ultra-cheap minting routes
 app.use('/api/mint', mintRouter);
 
-<<<<<<< HEAD
 // NFT verification and balance endpoints (for frontend compatibility)
 app.get('/api/nfts/verify/:address', async (req, res) => {
   try {
@@ -793,15 +788,12 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-=======
->>>>>>> origin/develop
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
 
 // Transaction history routes (Helius Nov 2025 upgrade)
 app.use('/api/transactions', transactionsRouter);
 
-<<<<<<< HEAD
 // Waitlist subscription endpoint
 app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
   try {
@@ -867,8 +859,6 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
   }
 });
 
-=======
->>>>>>> origin/develop
 // Emergency controls endpoint
 apiV1.get('/admin/emergency/status', authenticate, requireAdmin, (req, res) => {
   const response: ApiResponse = {
@@ -888,14 +878,10 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   const { paused, reason } = req.body;
 
   // In production, this would update a database or config service
-<<<<<<< HEAD
   if (process.env.NODE_ENV !== 'production') {
     console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
   }
   auditLogger('EMERGENCY_WITHDRAWAL_TOGGLE', { paused, reason, adminId: (req as any).user.id }, req);
-=======
-  console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
->>>>>>> origin/develop
 
   const response: ApiResponse = {
     success: true,
@@ -910,17 +896,12 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
   res.json(response);
 });
 
-<<<<<<< HEAD
 // Marketplace endpoints - Get all NFTs for marketplace (real data fallbacks)
-=======
-// Marketplace endpoints - Get all NFTs for marketplace
->>>>>>> origin/develop
 apiV1.get('/market', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
     const collection = req.query.collection as string;
-<<<<<<< HEAD
     const _status = req.query.status as string; // Reserved for future filtering
     const owner = (req.query.owner as string) || process.env.PLATFORM_PUBLIC_KEY;
 
@@ -969,25 +950,6 @@ apiV1.get('/market', async (req, res) => {
           source: 'blockchain',
         }));
       } catch (_e) {
-=======
-    const status = req.query.status as string;
-
-    // Query NFTs from service
-    let nfts: any[] = [];
-    
-    // If collection filter, use Echo route logic
-    if (collection === 'eternal-echoes') {
-      // Will be handled by echo marketplace route
-      nfts = [];
-    } else {
-      // Get NFTs from NFT service
-      // For now, try to get from any available NFTs
-      // In production, this would query database
-      try {
-        // This is a placeholder - in production would query database
-        nfts = [];
-      } catch (e) {
->>>>>>> origin/develop
         nfts = [];
       }
     }
@@ -999,13 +961,9 @@ apiV1.get('/market', async (req, res) => {
         total: nfts.length,
         page,
         limit,
-<<<<<<< HEAD
         message: nfts.length > 0
           ? 'Marketplace data loaded'
           : 'No marketplace data yet. Set DEFAULT collection or PLATFORM_PUBLIC_KEY to populate.',
-=======
-        message: nfts.length > 0 ? 'Marketplace data loaded' : 'Marketplace is empty - start minting to populate it',
->>>>>>> origin/develop
       },
     };
     res.json(response);
@@ -1033,7 +991,6 @@ app.get('/api/nfts', async (req, res) => {
       try {
         // For now, return empty - Echo NFTs are stored separately
         nfts = [];
-<<<<<<< HEAD
       } catch (_e) {
         nfts = [];
       }
@@ -1093,31 +1050,13 @@ app.get('/api/nfts', async (req, res) => {
         } catch (_e2) {
           nfts = [];
         }
-=======
-      } catch (e) {
-        nfts = [];
-      }
-    } else if (owner) {
-      // Get NFTs by owner
-      try {
-        const result = await nftService.getNFTsByOwner(owner);
-        if (result.success && result.data) {
-          nfts = Array.isArray(result.data) ? result.data : [result.data];
-        }
-      } catch (e) {
-        nfts = [];
->>>>>>> origin/develop
       }
     } else {
       // Get all NFTs from marketplace
       try {
         // Query database or in-memory store
         nfts = [];
-<<<<<<< HEAD
       } catch (_e) {
-=======
-      } catch (e) {
->>>>>>> origin/develop
         nfts = [];
       }
     }
@@ -1140,21 +1079,6 @@ app.get('/api/nfts', async (req, res) => {
       nfts: [],
     });
   }
-<<<<<<< HEAD
-=======
-});
-
-// Collections endpoint
-apiV1.get('/collections', (req, res) => {
-  const response: ApiResponse = {
-    success: true,
-    data: {
-      collections: [], // Start with empty - collections will appear as NFTs are minted
-      message: 'No collections found',
-    },
-  };
-  res.json(response);
->>>>>>> origin/develop
 });
 
 // Wallet info endpoint
@@ -1449,7 +1373,6 @@ process.on('SIGINT', () => {
 })();
 
 // Start server
-<<<<<<< HEAD
 const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;
 server.listen(serverPort, '0.0.0.0', async () => {
   console.log(`🚀 NFTSol Backend Server Started`);
@@ -1475,21 +1398,6 @@ server.listen(serverPort, '0.0.0.0', async () => {
     } catch (error) {
       console.warn('⚠️ Could not calculate rewards vault:', error instanceof Error ? error.message : error);
     }
-=======
-server.listen(appConfig.port, '0.0.0.0', () => {
-  console.log(`NFTSol Backend Server`);
-  console.log(`Port: ${appConfig.port}`);
-  console.log(`Environment: ${appConfig.nodeEnv}`);
-  console.log(`CORS Origins: ${appConfig.cors.origin.join(', ')}`);
-  console.log(`Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
-  console.log(`File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  console.log(`Solana RPC: ${solanaConfig.rpcUrl}`);
-  console.log(`Cluster: ${solanaConfig.cluster}`);
-
-  if (programConfig.cloutProgramId) {
-    console.log(`CLOUT Token: ${programConfig.cloutProgramId}`);
-    console.log(`Rewards Vault: ${programConfig.rewardsVault || 'Will be created on first use'}`);
->>>>>>> origin/develop
   }
 });
 
