@@ -33,18 +33,31 @@ import './styles/modern-design.css';
 const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
   importFn: () => Promise<{ default: T }>
 ) => {
-  return lazy(() =>
-    importFn().catch((error) => {
+  return lazy(async () => {
+    try {
+      return await importFn();
+    } catch (error: any) {
       console.error('Failed to load component:', error);
-      // Return a fallback component
+      // Log additional details for debugging
+      if (import.meta.env.DEV) {
+        console.error('Import error details:', {
+          message: error?.message,
+          stack: error?.stack,
+          name: error?.name,
+        });
+      }
+      // Return a fallback component that still allows the app to function
       return {
         default: () => (
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
               <p className="text-red-400 mb-4">Failed to load component</p>
+              <p className="text-gray-400 text-sm mb-4">
+                {import.meta.env.DEV ? error?.message : 'Please try refreshing the page'}
+              </p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700"
+                className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
               >
                 Reload Page
               </button>
@@ -52,8 +65,8 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
           </div>
         ),
       } as { default: T };
-    })
-  );
+    }
+  });
 };
 
 const Hero = lazyWithErrorBoundary(() => import('./components/Hero'));

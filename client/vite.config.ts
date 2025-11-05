@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  base: '/',
   plugins: [
     react({
       jsxRuntime: 'automatic',
@@ -71,6 +72,11 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     reportCompressedSize: true,
     cssCodeSplit: true,
+    // Ensure proper module resolution
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true,
+    },
   },
   esbuild: {
     drop: process.env.NODE_ENV === 'production' ? ['console', 'debugger'] : [],
