@@ -112,7 +112,6 @@
   animation: float 6s ease-in-out infinite;
 }
 
-<<<<<<< HEAD
 .float-animation.delay-2s {
   animation-delay: 2s;
 }
@@ -121,8 +120,6 @@
   animation-delay: 4s;
 }
 
-=======
->>>>>>> origin/develop
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
@@ -365,14 +362,11 @@ html {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-<<<<<<< HEAD
   
   /* Disable all pulse animations */
   .animate-pulse,
   [class*="pulse"] {
     animation: none !important;
   }
-=======
->>>>>>> origin/develop
 }
 
