@@ -453,18 +453,12 @@ class OptimizedSolanaService {
     // Calculate rewards vault dynamically
     const rewardsVault = await getRewardsVaultAddress();
 
-=======
->>>>>>> origin/develop
     const checks = [
       { id: programConfig.cloutProgramId, name: 'Clout Program' },
       { id: programConfig.marketProgramId, name: 'Market Program' },
       { id: programConfig.loyaltyProgramId, name: 'Loyalty Program' },
-<<<<<<< HEAD
       // Only include rewards vault if it can be calculated
       ...(rewardsVault ? [{ id: rewardsVault.toBase58(), name: 'Rewards Vault' }] : []),
-=======
-      { id: programConfig.rewardsVault, name: 'Rewards Vault' },
->>>>>>> origin/develop
     ];
 
     await Promise.all(
