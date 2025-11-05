@@ -6,16 +6,11 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { marketplaceService } from '../services/marketplace';
-<<<<<<< HEAD
 import { crossPlatformMarketplace } from '../services/cross-platform-marketplace';
 import { onChainTransactions } from '../services/on-chain-transactions';
 import { validateWallet, sanitizeInput } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { solanaConfig } from '../config';
-=======
-import { validateWallet, sanitizeInput } from '../utils/validation';
-import { ApiResponse } from '../types';
->>>>>>> origin/develop
 
 const router = Router();
 
@@ -323,7 +318,6 @@ router.get('/sales', async (req: Request, res: Response) => {
   }
 });
 
-<<<<<<< HEAD
 /**
  * GET /api/marketplace/all
  * Get listings from ALL platforms (local + Magic Eden + Tensor)
@@ -604,7 +598,5 @@ router.post('/confirm-sale', sanitizeInput, async (req: Request, res: Response) 
   }
 });
 
-=======
->>>>>>> origin/develop
 export default router;
 
