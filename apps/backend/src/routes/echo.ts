@@ -14,6 +14,10 @@ import {
   batchGrokVerify,
   getVerificationTeaser,
 } from '../utils/grokpedia';
+import { uploadMetadataToIrys } from '../utils/irysUpload';
+import { Connection, Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
+import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
 // Optional service (not required for dev/in-memory mode). Avoid importing to reduce build surface.
 
@@ -341,6 +345,147 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: 'Failed to add echo',
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * POST /api/echo/remix
+ * Create a remix (layered video) from an existing Echo
+ */
+const remixSchema = z.object({
+  parentLedgerId: z.string().min(1),
+  remixMetadata: z.object({
+    layers: z.array(
+      z.object({
+        videoUri: z.string().url(),
+        startTime: z.number().min(0),
+        endTime: z.number().min(0),
+        opacity: z.number().min(0).max(1),
+        position: z.enum(['top', 'bottom', 'left', 'right', 'center']),
+        scale: z.number().min(0.5).max(2),
+        textOverlay: z
+          .object({
+            text: z.string(),
+            position: z.enum(['top', 'bottom', 'center']),
+            fontSize: z.number(),
+            color: z.string(),
+          })
+          .optional(),
+      })
+    ),
+    createdAt: z.string(),
+    creator: z.string(),
+  }),
+  creatorWallet: z.string().refine((val) => {
+    try {
+      new PublicKey(val);
+      return true;
+    } catch {
+      return false;
+    }
+  }),
+});
+
+router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
+  try {
+    const { parentLedgerId, remixMetadata, creatorWallet } = remixSchema.parse(req.body);
+
+    // Verify parent ledger exists
+    const parentEchoes = echoStore.get(parentLedgerId);
+    if (!parentEchoes || parentEchoes.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Parent Echo ledger not found',
+      });
+    }
+
+    // Get base video URI from parent
+    const baseVideo = parentEchoes.find((e) => e.echoType === 'Video' || e.videoUri);
+    if (!baseVideo?.videoUri && remixMetadata.layers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'No base video found in parent Echo',
+      });
+    }
+
+    // Create new ledger ID for remix
+    const remixLedgerId = `remix-${parentLedgerId}-${Date.now()}`;
+
+    // Upload remix metadata to Irys
+    const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
+    const platformSecretKey = process.env.PLATFORM_SECRET_KEY_BASE58;
+    if (!platformSecretKey) {
+      throw new Error('PLATFORM_SECRET_KEY_BASE58 not configured');
+    }
+    const secretKeyBytes = bs58.decode(platformSecretKey);
+    const keypair = Keypair.fromSecretKey(secretKeyBytes);
+
+    const metadataResult = await uploadMetadataToIrys(
+      {
+        name: `Echo Remix #${Date.now()}`,
+        symbol: 'ECHO',
+        description: 'Layered video remix of Eternal Echo',
+        animation_url: remixMetadata.layers[0]?.videoUri || baseVideo?.videoUri,
+        attributes: [
+          { trait_type: 'Type', value: 'Remix' },
+          { trait_type: 'Parent Ledger', value: parentLedgerId },
+          { trait_type: 'Layers', value: remixMetadata.layers.length.toString() },
+        ],
+        properties: {
+          remix: {
+            parentLedgerId,
+            layers: remixMetadata.layers,
+            createdAt: remixMetadata.createdAt,
+            creator: remixMetadata.creator,
+          },
+        },
+      },
+      {
+        connection,
+        keypair,
+        network: solanaConfig.cluster as 'mainnet-beta' | 'devnet',
+      }
+    );
+
+    // Create initial remix echo entry
+    const remixEcho: EchoRow = {
+      id: `${remixLedgerId}:${Date.now()}`,
+      ledgerId: remixLedgerId,
+      echoData: `Remix of ${parentLedgerId} with ${remixMetadata.layers.length} layers`,
+      echoType: 'Video',
+      videoUri: remixMetadata.layers[0]?.videoUri || baseVideo?.videoUri,
+      dataHash: Array.from(generateTruthHash(remixLedgerId)),
+      contributor: creatorWallet,
+      grokVerified: true, // Remix metadata is considered verified
+      verificationScore: 85, // High score for remixes
+      timestamp: new Date(),
+    };
+
+    // Store remix
+    echoStore.set(remixLedgerId, [remixEcho]);
+
+    res.json({
+      success: true,
+      ledgerId: remixLedgerId,
+      metadataUri: metadataResult.uri,
+      message: 'Remix created successfully',
+    });
+  } catch (error: any) {
+    console.error('[Echo] Remix creation error:', error);
+
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid remix parameters',
+        details: error.issues,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create remix',
       message: error.message,
     });
   }

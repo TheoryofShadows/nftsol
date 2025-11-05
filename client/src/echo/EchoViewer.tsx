@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { useNotification } from '../components/NotificationSystem';
 import TruthBadge from '../components/TruthBadge';
+
+const EchoRemix = lazy(() => import('./EchoRemix'));
 
 type Echo = {
   id: string;
@@ -29,6 +31,7 @@ export default function EchoViewer() {
   const [newEcho, setNewEcho] = useState('');
   const [echoType, setEchoType] = useState<'Text' | 'Audio' | 'Annotation' | 'Video'>('Text');
   const [newVideoUri, setNewVideoUri] = useState<string>('');
+  const [showRemix, setShowRemix] = useState(false);
   const { addNotification } = useNotification();
 
   useEffect(() => {
@@ -158,6 +161,33 @@ export default function EchoViewer() {
     );
   }
 
+  // Get base video URI for remix
+  const baseVideoUri = echoes.find((e) => e.echoType === 'Video' || e.videoUri)?.videoUri || '';
+
+  // Show remix interface if enabled
+  if (showRemix && baseVideoUri) {
+    return (
+      <Suspense fallback={<div className="p-4 text-center text-gray-400">Loading remix editor...</div>}>
+        <EchoRemix
+          parentLedgerId={ledgerId}
+          parentVideoUri={baseVideoUri}
+          onRemixComplete={(newLedgerId) => {
+            setShowRemix(false);
+            addNotification({
+              type: 'success',
+              title: '🎉 Remix Created!',
+              message: 'Your remix has been created. View it in the marketplace.',
+              duration: 5000,
+            });
+            // Optionally navigate to the new remix
+            localStorage.setItem('currentEchoLedger', newLedgerId);
+            window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
+          }}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="p-4">
       <div className="flex items-center justify-between mb-4">
@@ -165,7 +195,17 @@ export default function EchoViewer() {
           <div className="text-2xl font-bold text-white">🎬 Eternal Echo</div>
           <div className="text-gray-400 text-sm">Ledger: {ledgerId.slice(0, 8)}…</div>
         </div>
+        <div className="flex items-center gap-2">
+          {baseVideoUri && (
+            <button
+              onClick={() => setShowRemix(true)}
+              className="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 rounded-lg hover:from-purple-600 hover:to-cyan-600 transition-all text-white font-semibold text-sm"
+            >
+              🎨 Remix
+            </button>
+          )}
         <WalletMultiButton className="btn-glass" />
+        </div>
       </div>
 
       <div className="glass p-3 rounded mb-4 grid grid-cols-3 gap-4 text-center">
@@ -321,12 +361,12 @@ export default function EchoViewer() {
               />
             </div>
           ) : (
-            <input
+          <input
               className="w-full bg-transparent outline-none text-white placeholder-gray-400 glass px-3 py-2 rounded"
-              placeholder="Add your layer…"
-              value={newEcho}
-              onChange={(e) => setNewEcho(e.target.value)}
-            />
+            placeholder="Add your layer…"
+            value={newEcho}
+            onChange={(e) => setNewEcho(e.target.value)}
+          />
           )}
 
           <button

@@ -77,6 +77,7 @@ const WithdrawalForm = lazyWithErrorBoundary(() => import('./components/Withdraw
 const ReferralSystem = lazyWithErrorBoundary(() => import('./components/ReferralSystem'));
 const WaitlistSignup = lazyWithErrorBoundary(() => import('./components/WaitlistSignup'));
 const EchoViewer = lazyWithErrorBoundary(() => import('./echo/EchoViewer'));
+const EchoRemix = lazyWithErrorBoundary(() => import('./echo/EchoRemix'));
 const EchoMarketplace = lazyWithErrorBoundary(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazyWithErrorBoundary(() => import('./components/AdminDashboard'));
 const Dashboard = lazyWithErrorBoundary(() => import('./components/Dashboard'));
