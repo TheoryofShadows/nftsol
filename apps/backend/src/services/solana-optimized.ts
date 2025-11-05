@@ -21,10 +21,7 @@ import {
   SendOptions,
 } from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
-<<<<<<< HEAD
 import { getRewardsVaultAddress } from '../utils/clout-vault';
-=======
->>>>>>> origin/develop
 import { cache, cached, cacheKeys } from '../utils/cache';
 import { withRetry, requestDeduplicator } from '../utils/retry';
 import logger from '../utils/logger';
@@ -449,7 +446,6 @@ class OptimizedSolanaService {
     const errors: string[] = [];
     const connection = await this.getConnection();
 
-<<<<<<< HEAD
     // Calculate rewards vault dynamically
     const rewardsVault = await getRewardsVaultAddress();
 
