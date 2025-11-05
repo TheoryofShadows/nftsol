@@ -473,16 +473,12 @@ class OptimizedSolanaService {
           const pubKey = new PublicKey(id);
           const accountInfo = await connection.getAccountInfo(pubKey);
           if (!accountInfo) {
-<<<<<<< HEAD
             // For rewards vault, it's OK if it doesn't exist yet (will be created on first use)
             if (name === 'Rewards Vault') {
               logger.warn('Rewards vault not found on chain (will be created on first use)');
             } else {
               errors.push(`${name} not found on chain`);
             }
-=======
-            errors.push(`${name} not found on chain`);
->>>>>>> origin/develop
           }
         } catch (error) {
           errors.push(`${name} validation failed`);
