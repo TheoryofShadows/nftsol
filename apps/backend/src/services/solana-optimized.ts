@@ -21,7 +21,10 @@ import {
   SendOptions,
 } from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
+<<<<<<< HEAD
 import { getRewardsVaultAddress } from '../utils/clout-vault';
+=======
+>>>>>>> origin/develop
 import { cache, cached, cacheKeys } from '../utils/cache';
 import { withRetry, requestDeduplicator } from '../utils/retry';
 import logger from '../utils/logger';
@@ -446,15 +449,22 @@ class OptimizedSolanaService {
     const errors: string[] = [];
     const connection = await this.getConnection();
 
+<<<<<<< HEAD
     // Calculate rewards vault dynamically
     const rewardsVault = await getRewardsVaultAddress();
 
+=======
+>>>>>>> origin/develop
     const checks = [
       { id: programConfig.cloutProgramId, name: 'Clout Program' },
       { id: programConfig.marketProgramId, name: 'Market Program' },
       { id: programConfig.loyaltyProgramId, name: 'Loyalty Program' },
+<<<<<<< HEAD
       // Only include rewards vault if it can be calculated
       ...(rewardsVault ? [{ id: rewardsVault.toBase58(), name: 'Rewards Vault' }] : []),
+=======
+      { id: programConfig.rewardsVault, name: 'Rewards Vault' },
+>>>>>>> origin/develop
     ];
 
     await Promise.all(
@@ -463,12 +473,16 @@ class OptimizedSolanaService {
           const pubKey = new PublicKey(id);
           const accountInfo = await connection.getAccountInfo(pubKey);
           if (!accountInfo) {
+<<<<<<< HEAD
             // For rewards vault, it's OK if it doesn't exist yet (will be created on first use)
             if (name === 'Rewards Vault') {
               logger.warn('Rewards vault not found on chain (will be created on first use)');
             } else {
               errors.push(`${name} not found on chain`);
             }
+=======
+            errors.push(`${name} not found on chain`);
+>>>>>>> origin/develop
           }
         } catch (error) {
           errors.push(`${name} validation failed`);
@@ -476,11 +490,14 @@ class OptimizedSolanaService {
       })
     );
 
+<<<<<<< HEAD
     // Add error if vault address couldn't be calculated
     if (!rewardsVault) {
       errors.push('Rewards vault address could not be calculated (missing REWARDS_OWNER or CLOUT_MINT)');
     }
 
+=======
+>>>>>>> origin/develop
     return {
       valid: errors.length === 0,
       errors,

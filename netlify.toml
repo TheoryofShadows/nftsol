@@ -7,8 +7,11 @@
   NODE_VERSION = "20"
   CI = "false"
   NPM_CONFIG_PRODUCTION = "false"
+<<<<<<< HEAD
   # Disable submodule checkout to prevent build errors
   GIT_SUBMODULE_CHECKOUT = "false"
+=======
+>>>>>>> origin/develop
 
 # Frontend redirects for SPA
 [[redirects]]

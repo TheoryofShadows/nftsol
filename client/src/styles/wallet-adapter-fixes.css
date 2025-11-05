@@ -1,0 +1,92 @@
+/* Wallet Adapter Mobile Fixes - Hide unwanted warnings and improve UX */
+
+/* Hide the default "No Solana wallets detected" warning message */
+.wallet-adapter-modal-wrapper .wallet-adapter-modal-title:has-text("No Solana"),
+div[class*="wallet-adapter"][class*="no-wallet"],
+.wallet-adapter-button[aria-label*="No Solana wallets"],
+button[aria-label*="No Solana wallets"] {
+  display: none !important;
+}
+
+/* Hide warning messages in wallet adapter - Use attribute selectors */
+.wallet-adapter-modal-wrapper [class*="alert"],
+.wallet-adapter-modal-wrapper [class*="warning"],
+.wallet-adapter-modal-wrapper [class*="notice"],
+/* Hide any element with warning-like styling */
+[style*="background"][style*="yellow"][style*="rgb"],
+[style*="background"][style*="#FF"][style*="rgb"],
+/* Hide wallet adapter button when showing warning state */
+button[class*="wallet-adapter"][aria-label*="No"],
+button[class*="wallet-adapter"][aria-label*="Install"] {
+  display: none !important;
+}
+
+/* Better mobile wallet button styling */
+@media (max-width: 768px) {
+  /* Make wallet button more compact on mobile */
+  .wallet-adapter-button {
+    font-size: 0.875rem !important;
+    padding: 0.625rem 1rem !important;
+    min-width: 140px !important;
+    max-width: calc(100vw - 2rem) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Hide any large warning cards - target common warning patterns */
+  div[class*="wallet-adapter"] > div[class*="card"][style*="background"],
+  div[class*="wallet-adapter"] > div[style*="yellow"],
+  div[class*="wallet-adapter"] > div[style*="#FF"],
+  /* Hide alert/warning styled divs */
+  div[class*="wallet-adapter"] > div[role="alert"],
+  div[class*="wallet-adapter"] > div[class*="alert"],
+  div[class*="wallet-adapter"] > div[class*="warning"],
+  /* Hide any button showing "No wallets" state */
+  button[class*="wallet-adapter"][aria-label*="No"],
+  button[class*="wallet-adapter"][aria-label*="Install"] {
+    display: none !important;
+  }
+  
+  /* Ensure modal is full width on mobile */
+  .wallet-adapter-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    height: 100% !important;
+  }
+  
+  .wallet-adapter-modal-wrapper {
+    width: 100% !important;
+    padding: 1rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  /* Make wallet list items touch-friendly */
+  .wallet-adapter-modal-list-item {
+    padding: 1rem !important;
+    margin-bottom: 0.75rem !important;
+    min-height: 60px !important;
+    border-radius: 0.75rem !important;
+  }
+  
+  /* Hide any alert/notification boxes in wallet modal */
+  .wallet-adapter-modal-wrapper > div[class*="alert"],
+  .wallet-adapter-modal-wrapper > div[class*="warning"],
+  .wallet-adapter-modal-wrapper > div[class*="notice"] {
+    display: none !important;
+  }
+}
+
+/* Desktop: Still show warnings but styled better */
+@media (min-width: 769px) {
+  .wallet-adapter-modal-wrapper > div:has-text("No Solana wallets") {
+    padding: 1rem !important;
+    margin: 1rem !important;
+    border-radius: 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+

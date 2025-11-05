@@ -51,13 +51,21 @@ These are already hardcoded in the backend config, but you can add
 them to the frontend if needed for client-side validation:
 
 Key: VITE_CLOUT_MINT
+<<<<<<< HEAD
 Value: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+=======
+Value: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+>>>>>>> origin/develop
 (Optional - CLOUT token mint address)
 
 ───────────────────────────────────────────────────────────
 
 Key: VITE_REWARDS_VAULT
+<<<<<<< HEAD
 Value: 7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v
+=======
+Value: 2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+>>>>>>> origin/develop
 (Optional - Rewards vault address)
 
 ═══════════════════════════════════════════════════════════

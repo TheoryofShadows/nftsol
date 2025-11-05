@@ -152,8 +152,13 @@ DATABASE_URL=postgresql://user:password@localhost:5432/nftsol
 SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 SOLANA_CLUSTER=mainnet-beta
 HELIUS_API_KEY=YOUR_HELIUS_API_KEY
+<<<<<<< HEAD
 CLOUT_MINT=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
 REWARDS_VAULT=7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v
+=======
+CLOUT_MINT=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+>>>>>>> origin/develop
 JWT_SECRET=your-secret-key-here
 ```
 
@@ -518,7 +523,11 @@ Get CLOUT token balance for address.
   "data": {
     "address": "wallet_address",
     "balance": 1000,
+<<<<<<< HEAD
     "token": "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab"
+=======
+    "token": "62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw"
+>>>>>>> origin/develop
   }
 }
 ```

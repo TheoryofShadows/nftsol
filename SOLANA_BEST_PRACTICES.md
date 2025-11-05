@@ -104,8 +104,13 @@ SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 SOLANA_CLUSTER=mainnet-beta
 
 # Token Configuration
+<<<<<<< HEAD
 CLOUT_MINT=<YOUR_CLOUT_MINT_ADDRESS>
 REWARDS_VAULT=<YOUR_REWARDS_VAULT_ADDRESS>
+=======
+CLOUT_MINT=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+>>>>>>> origin/develop
 
 # Platform Wallet
 PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key

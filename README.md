@@ -18,7 +18,11 @@
 - 🎨 **Full NFT Marketplace** - Mint, buy, sell NFTs on Solana
 - 📊 **Modern Dashboard** - 2026-style UI with portfolio, stats, activity feed
 - 🎓 **Smart Onboarding** - Interactive tours and welcome experience
+<<<<<<< HEAD
 - ⭐ **CLOUT Token** - Native reward token (`26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`)
+=======
+- ⭐ **CLOUT Token** - Native reward token (`62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw`)
+>>>>>>> origin/develop
 - 🎬 **Eternal Echoes** - Collaborative, layered NFT creation
 - 🌳 **Compressed NFTs** - Low-cost minting via Metaplex Bubblegum
 - 💰 **Fee System** - 2.5% platform fee on all mints
@@ -112,8 +116,13 @@ SOLANA_CLUSTER=mainnet-beta
 HELIUS_API_KEY=your_helius_key
 
 # CLOUT Token
+<<<<<<< HEAD
 CLOUT_PROGRAM_ID=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
 REWARDS_VAULT=7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v
+=======
+CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+>>>>>>> origin/develop
 
 # Platform Wallet
 PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key
@@ -182,7 +191,11 @@ Full API docs: **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)**
 - **Token Address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`
 - **Rewards Vault**: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
 - **Total Supply**: 1,000,000,000 CLOUT
+<<<<<<< HEAD
 - **Solscan**: [View Token](https://solscan.io/token/26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
+=======
+- **Solscan**: [View Token](https://solscan.io/token/62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+>>>>>>> origin/develop
 
 Users earn CLOUT through: minting NFTs, purchases, referrals, engagement.
 

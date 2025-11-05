@@ -130,12 +130,20 @@ mainnet-beta
 
 **CLOUT Token Mint (optional, for reference):**
 ```
+<<<<<<< HEAD
 <YOUR_CLOUT_MINT_ADDRESS>
+=======
+62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
+>>>>>>> origin/develop
 ```
 
 **Rewards Vault (optional, for reference):**
 ```
+<<<<<<< HEAD
 <YOUR_REWARDS_VAULT_ADDRESS>
+=======
+2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
+>>>>>>> origin/develop
 ```
 
 ---

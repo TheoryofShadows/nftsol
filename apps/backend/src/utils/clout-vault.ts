@@ -94,6 +94,7 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
   const mintAddress = programConfig.cloutProgramId;
   const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
 
+<<<<<<< HEAD
   if (!mintAddress) {
     console.warn('CLOUT_PROGRAM_ID not set in config');
     return false;
@@ -101,6 +102,15 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
 
   if (!ownerAddress) {
     console.warn('REWARDS_OWNER or PLATFORM_WALLET not configured');
+=======
+  if (!rewardsVault) {
+    console.warn('REWARDS_VAULT not set in config');
+    return false;
+  }
+
+  if (!mintAddress) {
+    console.warn('CLOUT_PROGRAM_ID not set in config');
+>>>>>>> origin/develop
     return false;
   }
 
@@ -116,14 +126,22 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
     try {
       const tokenAccount = await getAccount(connection, vaultPubkey);
       if (tokenAccount.mint.equals(mint)) {
+<<<<<<< HEAD
         console.log(`Rewards vault verified and active: ${rewardsVault.toBase58()}`);
+=======
+        console.log(`Rewards vault verified and active: ${rewardsVault}`);
+>>>>>>> origin/develop
         console.log(`Balance: ${tokenAccount.amount.toString()}`);
         return true;
       }
     } catch (err: any) {
       // Token account doesn't exist
       if (err.name === 'TokenAccountNotFoundError' || err.message?.includes('not found')) {
+<<<<<<< HEAD
         console.warn(`Rewards vault does not exist yet: ${rewardsVault.toBase58()}`);
+=======
+        console.warn(`Rewards vault does not exist yet: ${rewardsVault}`);
+>>>>>>> origin/develop
         console.warn('This is OK - it will be created automatically when first CLOUT reward is sent');
         return false;
       }
