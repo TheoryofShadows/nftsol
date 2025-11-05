@@ -112,13 +112,8 @@ SOLANA_CLUSTER=mainnet-beta
 HELIUS_API_KEY=your_helius_key
 
 # CLOUT Token
-<<<<<<< HEAD
 CLOUT_PROGRAM_ID=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
 REWARDS_VAULT=7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v
-=======
-CLOUT_PROGRAM_ID=62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw
-REWARDS_VAULT=2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps
->>>>>>> origin/develop
 
 # Platform Wallet
 PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key
