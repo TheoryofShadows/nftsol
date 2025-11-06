@@ -19,9 +19,20 @@
 # Frontend environment variables
 [context.production.environment]
   NODE_ENV = "production"
+  VITE_API_BASE = "https://nftsol.onrender.com"
+  VITE_SOLANA_CLUSTER = "mainnet-beta"
+  VITE_SOLANA_RPC_URL = "https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}"
 
 [context.deploy-preview.environment]
   NODE_ENV = "development"
+  VITE_API_BASE = "https://nftsol.onrender.com"
+
+# Develop branch settings (for devnet testing)
+[context.develop.environment]
+  NODE_ENV = "development"
+  VITE_API_BASE = "https://nftsol.onrender.com"
+  VITE_SOLANA_CLUSTER = "devnet"
+  VITE_SOLANA_RPC_URL = "https://api.devnet.solana.com"
 
 # Functions configuration
 # No Netlify Functions used for this site

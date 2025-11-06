@@ -5,7 +5,8 @@
 
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
-import { verifyWithGrok } from '../utils/grokpedia-production';
+// Note: grokpedia-production doesn't exist, using placeholder
+// import { verifyWithGrok } from '../utils/grokpedia-production';
 
 const router = Router();
 
@@ -86,7 +87,8 @@ router.post('/verify-video', async (req: Request, res: Response) => {
     }
 
     // Use production Grok verification
-    const verificationResult = await verifyWithGrok(
+    // Using mock implementation - replace with actual Grok API when available
+    const verificationResult = await verifyContentWithGrok(
       videoUri,
       nftId || `video-${Date.now()}`
     );

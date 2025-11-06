@@ -110,3 +110,26 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
     return false;
   }
 }
+
+/**
+ * Get the rewards vault address (ATA) without creating it
+ * This is a deterministic address based on REWARDS_OWNER + CLOUT_MINT
+ */
+export async function getRewardsVaultAddress(): Promise<PublicKey | null> {
+  const mintAddress = programConfig.cloutProgramId;
+  const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
+
+  if (!mintAddress || !ownerAddress) {
+    return null;
+  }
+
+  try {
+    const mint = new PublicKey(mintAddress);
+    const owner = new PublicKey(ownerAddress);
+    const ata = await getAssociatedTokenAddress(mint, owner);
+    return ata;
+  } catch (error) {
+    console.warn('Could not calculate rewards vault address:', error instanceof Error ? error.message : error);
+    return null;
+  }
+}
