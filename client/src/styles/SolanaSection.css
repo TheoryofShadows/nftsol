@@ -1,0 +1,18 @@
+/* SolanaSection Component Styles */
+
+.solana-section {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 16px;
+}
+
+.solana-section-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.solana-section-card {
+  padding: 16px;
+}
+

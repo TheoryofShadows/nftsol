@@ -3,7 +3,7 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import securityMiddleware from './middleware/security';
 import echoRouter from './routes/echo';
-import { db } from './db';
+// import { db } from './db'; // Unused for now
 import Redis from 'ioredis';
 import { createAdapter } from '@socket.io/redis-adapter';
 

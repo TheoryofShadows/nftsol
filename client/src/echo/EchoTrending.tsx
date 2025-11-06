@@ -99,7 +99,7 @@ export default function EchoTrending() {
 
           setTrending(sorted);
         }
-      } catch (_e) {
+      } catch {
         if (!cancelled) setTrending([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -150,7 +150,7 @@ export default function EchoTrending() {
           <div
             key={ledger.ledgerId}
             className="glass p-4 rounded-lg cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-purple-400/50 border border-white/10"
-            style={{ animationDelay: `${index * 100}ms` }}
+            data-animation-delay={Math.round((index * 100) / 50) * 50}
             onClick={() => handleViewLedger(ledger.ledgerId)}
           >
             <div className="flex items-start justify-between mb-2">

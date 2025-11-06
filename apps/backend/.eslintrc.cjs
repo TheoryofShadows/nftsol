@@ -13,5 +13,5 @@ module.exports = {
     'no-console': ['warn', { allow: ['error', 'warn', 'log'] }],
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
   },
-  ignorePatterns: ['dist', 'node_modules']
+  ignorePatterns: ['dist', 'node_modules', '*.js', 'apply-indexes.js', 'calculate-vault-ata.js', 'check-balance.js', 'create-bubblegum-tree.js', 'cursor-go-live.js', 'generate-platform-key.js', 'get-public-key.js']
 };

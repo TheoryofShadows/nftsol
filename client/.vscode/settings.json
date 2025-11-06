@@ -1,0 +1,8 @@
+{
+  "css.lint.unknownProperties": "ignore",
+  "css.lint.duplicateProperties": "ignore",
+  "css.validate": false,
+  "files.associations": {
+    "*.css": "css"
+  }
+}

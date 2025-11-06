@@ -59,8 +59,8 @@ export default function WelcomeOnboarding() {
         {/* Progress Indicator */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
           <div
-            className="h-full bg-gradient-primary transition-all duration-500"
-            style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
+            className="h-full bg-gradient-primary transition-all duration-500 progress-bar"
+            data-width={Math.round(((currentSlide + 1) / slides.length) * 100 / 5) * 5}
           />
         </div>
 

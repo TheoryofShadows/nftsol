@@ -69,7 +69,7 @@ export default function WaitlistSignup() {
       } else {
         throw new Error('Failed to subscribe');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to join waitlist. Please try again.');
     } finally {
       setLoading(false);
@@ -160,9 +160,13 @@ export default function WaitlistSignup() {
         {/* Referral Code (Auto-filled if from referral link) */}
         {referralCode && (
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">Referral Code</label>
+            <label htmlFor="referral-code-input" className="block text-sm font-semibold text-white mb-3">Referral Code</label>
             <input
+              id="referral-code-input"
               type="text"
+              aria-label="Referral code"
+              title="Referral code"
+              placeholder="Optional referral code"
               value={referralCode}
               onChange={(e) => setReferralCode(e.target.value)}
               className="input bg-green-500/20 border-green-400/50"

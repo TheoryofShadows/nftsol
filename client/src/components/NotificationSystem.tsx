@@ -97,7 +97,7 @@ function NotificationContainer() {
         <div
           key={notification.id}
           className="pointer-events-auto animate-slide-in-right w-full md:w-auto"
-          style={{ animationDelay: `${index * 100}ms` }}
+          data-animation-delay={Math.round((index * 100) / 50) * 50}
         >
           <NotificationItem
             notification={notification}

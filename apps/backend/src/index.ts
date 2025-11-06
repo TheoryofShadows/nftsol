@@ -55,7 +55,9 @@ app.use(
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'ipfs:', 'ipfs.io', 'gateway.pinata.cloud'],
+        connectSrc: ["'self'", 'https:', 'wss:', 'ws:'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       },
     },
   })
@@ -1144,7 +1146,7 @@ app.get('/api/nfts', async (req, res) => {
       try {
         // For now, return empty - Echo NFTs are stored separately
         nfts = [];
-      } catch (_e) {
+      } catch {
         nfts = [];
       }
     } else if (owner) {
@@ -1200,7 +1202,7 @@ app.get('/api/nfts', async (req, res) => {
           if (result.success && result.data) {
             nfts = Array.isArray(result.data) ? result.data : [result.data];
           }
-        } catch (_e2) {
+        } catch {
           nfts = [];
         }
       }
@@ -1209,7 +1211,7 @@ app.get('/api/nfts', async (req, res) => {
       try {
         // Query database or in-memory store
         nfts = [];
-      } catch (_e) {
+      } catch {
         nfts = [];
       }
     }
@@ -1383,7 +1385,7 @@ apiV1.get('/collections', async (req, res) => {
           }
           rows = Array.from(counts.values()).sort((a, b) => b.nftCount - a.nftCount).slice(0, 50) as any;
         }
-      } catch (_e) {
+      } catch {
         // ignore fallback errors
       }
     }

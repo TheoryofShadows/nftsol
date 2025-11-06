@@ -126,8 +126,8 @@ export default function VideoUpload({ onSuccess, onError }: VideoUploadProps) {
             <div className="text-white font-semibold">Uploading video...</div>
             <div className="w-full bg-gray-700 rounded-full h-2">
               <div
-                className="bg-gradient-to-r from-purple-500 to-cyan-500 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
+                className="bg-gradient-to-r from-purple-500 to-cyan-500 h-2 rounded-full transition-all duration-300 progress-bar"
+                data-width={Math.round(progress / 5) * 5}
               ></div>
             </div>
             <div className="text-gray-400 text-sm">{Math.round(progress)}%</div>

@@ -36,8 +36,11 @@ export const API_BASE = getApiBase();
 
 // Log API base in development
 if (import.meta.env.DEV) {
+  // eslint-disable-next-line no-console
   console.log('🔗 API Base URL:', API_BASE);
+  // eslint-disable-next-line no-console
   console.log('🌍 Environment:', import.meta.env.MODE);
+  // eslint-disable-next-line no-console
   console.log('📦 Production Mode:', import.meta.env.PROD);
 }
 

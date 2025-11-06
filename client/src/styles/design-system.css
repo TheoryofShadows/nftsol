@@ -107,6 +107,7 @@ body {
 /* Glass Morphism Effects */
 .glass {
   background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--shadow-lg);
@@ -114,6 +115,7 @@ body {
 
 .glass-strong {
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(30px);
   backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--shadow-xl);
@@ -185,6 +187,7 @@ body {
 
 .btn-glass {
   background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
@@ -225,6 +228,7 @@ body {
 
 .card-glass {
   background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
@@ -368,6 +372,60 @@ body {
     transform: scale(1.05);
     box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
   }
+}
+
+/* Animation delay utilities for staggered animations */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+.animate-delay-300 {
+  animation-delay: 0.3s;
+}
+.animate-delay-400 {
+  animation-delay: 0.4s;
+}
+.animate-delay-500 {
+  animation-delay: 0.5s;
+}
+.animate-delay-50 {
+  animation-delay: 50ms;
+}
+.animate-delay-100ms {
+  animation-delay: 100ms;
+}
+
+/* Button gradient utilities */
+.btn-gradient-cyan {
+  background: linear-gradient(135deg, #06b6d4, #3b82f6) !important;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3) !important;
+}
+
+.btn-gradient-pink {
+  background: linear-gradient(135deg, #ec4899, #f97316) !important;
+  box-shadow: 0 8px 24px rgba(236, 72, 153, 0.3) !important;
+}
+
+/* Dynamic animation delay using CSS custom properties */
+.scroll-reveal[style*="--animation-delay"],
+button[style*="--animation-delay"],
+div[style*="--animation-delay"],
+canvas[style*="--animation-delay"],
+div[style*="maxHeight"],
+div[style*="width"] {
+  animation-delay: var(--animation-delay) !important;
+}
+
+/* Utility classes for common dynamic styles */
+.canvas-preview {
+  max-height: 400px;
+}
+
+.layer-indicator {
+  /* Width will be set via CSS custom property */
+  transition: width 0.3s ease;
 }
 
 .animate-fade-in {

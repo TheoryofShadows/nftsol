@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { AppState, NFT, Collection, WalletInfo, ProgramConfig } from '../types';
 import { apiService } from '../services/api';
@@ -64,7 +64,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [theme] = useLocalStorage('theme', 'dark');
 
   // Load marketplace data
-  const loadMarketplace = async () => {
+  const loadMarketplace = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
     try {
@@ -74,13 +74,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       } else {
         dispatch({ type: 'SET_ERROR', payload: response.error || 'Failed to load marketplace' });
       }
-    } catch (error) {
+    } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load marketplace' });
     }
-  };
+  }, []);
 
   // Load collections
-  const loadCollections = async () => {
+  const loadCollections = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await apiService.getCollections();
@@ -90,41 +90,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Silently fail - marketplace error already shown
         dispatch({ type: 'SET_LOADING', payload: false });
       }
-    } catch (error) {
+    } catch {
       // Silently fail - marketplace error already shown
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  };
+  }, []);
 
   // Load wallet info
-  const loadWalletInfo = async (address: string) => {
+  const loadWalletInfo = useCallback(async (address: string) => {
     try {
       const response = await apiService.getWalletInfo(address);
       if (response.success && response.data) {
         dispatch({ type: 'SET_WALLET_INFO', payload: response.data });
       }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to load wallet info:', error);
+    } catch {
+      // Silently fail - wallet info is optional
       }
-    }
-  };
+  }, []);
 
   // Load program configuration
-  const loadPrograms = async () => {
+  const loadPrograms = useCallback(async () => {
     try {
       const response = await apiService.getPrograms();
       if (response.success && response.data) {
         dispatch({ type: 'SET_PROGRAMS', payload: response.data });
       }
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to load programs:', error);
+    } catch {
+      // Silently fail - programs are optional
       }
-    }
-  };
+  }, []);
 
   // Add NFT to state
   const addNFT = (nft: NFT) => {
@@ -141,7 +135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     loadMarketplace();
     loadCollections();
     loadPrograms();
-  }, []);
+  }, [loadMarketplace, loadCollections, loadPrograms]);
 
   // Load wallet info when connected
   useEffect(() => {
@@ -150,7 +144,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       dispatch({ type: 'SET_WALLET_INFO', payload: null });
     }
-  }, [connected, publicKey]);
+  }, [connected, publicKey, loadWalletInfo]);
 
   // Apply theme
   useEffect(() => {

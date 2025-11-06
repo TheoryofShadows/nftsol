@@ -3,8 +3,9 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
+// import { waitFor } from '@testing-library/react'; // Reserved for future use
+// import userEvent from '@testing-library/user-event'; // Reserved for future use
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationProvider } from '../../components/NotificationSystem';
 import VideoUpload from '../../echo/VideoUpload';
@@ -100,7 +101,7 @@ describe('VideoUpload Component', () => {
 
   it('should call onError when upload fails', async () => {
     // Mock XHR to trigger error
-    let errorHandler: (() => void) | null = null;
+    // let errorHandler: (() => void) | null = null; // Reserved for future use
     const mockXHR = {
       open: vi.fn(),
       send: vi.fn(),

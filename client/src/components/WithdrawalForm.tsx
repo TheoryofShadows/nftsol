@@ -102,7 +102,7 @@ export default function WithdrawalForm() {
           duration: 4000,
         });
       }
-    } catch (e) {
+    } catch {
       addNotification({
         type: 'error',
         title: 'Verification Failed',

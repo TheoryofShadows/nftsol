@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useCloutBalance } from '../hooks/useCloutBalance';
+import '../styles/CloutBadge.css';
 
 /**
  * CloutBadge Component
@@ -19,8 +20,7 @@ export default function CloutBadge() {
 
   return (
     <div
-      className="glass fixed right-4 bottom-4 px-4 py-3 rounded-xl border border-white/10 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25"
-      style={{ minWidth: '200px' }}
+      className="glass fixed right-4 bottom-4 px-4 py-3 rounded-xl border border-white/10 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 clout-badge"
       title={`CLOUT Token Balance${error ? ` - Error: ${error}` : ''}`}
       role="status"
       aria-live="polite"

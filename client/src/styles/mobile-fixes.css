@@ -51,8 +51,8 @@
 
   /* Mobile navigation menu */
   .glass-modern {
-    backdrop-filter: blur(15px) !important;
     -webkit-backdrop-filter: blur(15px) !important;
+    backdrop-filter: blur(15px) !important;
   }
 
   /* Ensure gradient-mesh shows on mobile */
@@ -72,7 +72,8 @@
   
   /* Hero section - prevent text cutoff */
   .min-h-screen {
-    min-height: auto !important;
+    min-height: -webkit-fill-available !important; /* iOS Safari fix */
+    min-height: 100vh !important;
     padding-bottom: 2rem !important;
   }
   
@@ -198,10 +199,12 @@
 
   /* Glass effect adjustments for mobile performance */
   .glass {
+    -webkit-backdrop-filter: blur(10px) !important;
     backdrop-filter: blur(10px) !important;
   }
 
   .glass-strong {
+    -webkit-backdrop-filter: blur(15px) !important;
     backdrop-filter: blur(15px) !important;
   }
 
@@ -333,8 +336,11 @@
   }
 
   /* Hide hero section in landscape on small screens */
+  /* stylelint-disable-next-line order/properties-order */
   .min-h-screen {
-    min-height: auto !important;
+    /* stylelint-disable-next-line order/properties-order */
+    min-height: -webkit-fill-available !important; /* iOS Safari fix - must come first for iOS */
+    min-height: 100vh !important;
   }
 }
 
@@ -454,7 +460,6 @@ button[class*="wallet-adapter-button"]:not([class*="connect"]):not([class*="sele
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Fix for iOS bounce scroll - commented out as it may cause issues */
@@ -464,12 +469,11 @@ html {
   overflow: hidden;
 }
 
-body > div#root {
+/* body > div#root {
   position: fixed;
   width: 100%;
   height: 100%;
   overflow: auto;
-  -webkit-overflow-scrolling: touch;
 } */
 
 /* Fix backdrop blur performance on mobile */
@@ -477,8 +481,8 @@ body > div#root {
   .glass,
   .glass-strong,
   [class*='backdrop-blur'] {
-    backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
   }
 }
 
@@ -498,7 +502,7 @@ body > div#root {
 a,
 button {
   -webkit-tap-highlight-color: rgba(153, 69, 255, 0.3);
-  tap-highlight-color: rgba(153, 69, 255, 0.3);
+  -webkit-tap-highlight-color: rgba(153, 69, 255, 0.3);
 }
 
 /* Safe area insets for iPhone X+ */

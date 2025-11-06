@@ -9,6 +9,7 @@ import './styles/mobile-fixes.css';
 import './styles/modern-design.css';
 import './styles/onboarding.css';
 import './styles/wallet-adapter-fixes.css';
+import './styles/shared-utilities.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
 import { QueryProvider } from './lib/react-query.tsx';
@@ -25,8 +26,8 @@ if (typeof window !== 'undefined') {
   windowWithBuffer.global = window;
 }
 
-// Performance monitoring
-const startTime = performance.now();
+// Performance monitoring (reserved for future use)
+// const startTime = performance.now();
 
 // Error handling for unhandled promises
 window.addEventListener('unhandledrejection', (event) => {

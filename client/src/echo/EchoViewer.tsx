@@ -1,9 +1,12 @@
-import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
+/* eslint-disable react/forbid-dom-props */
+// Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoViewer.css)
+import React, { useEffect, useMemo, useState, lazy, Suspense, useRef } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { useNotification } from '../components/NotificationSystem';
 import TruthBadge from '../components/TruthBadge';
+import '../styles/EchoViewer.css';
 
 const EchoRemix = lazy(() => import('./EchoRemix'));
 
@@ -52,7 +55,7 @@ export default function EchoViewer() {
         : 0;
       setPreviousAvgScore(currentAvg);
       setEchoes(newEchoes);
-    } catch (_e) {
+    } catch {
       setEchoes([]);
     } finally {
       setLoading(false);
@@ -62,8 +65,36 @@ export default function EchoViewer() {
   useEffect(() => {
     if (!ledgerId) return;
     fetchEchoes(ledgerId);
-    const t = setInterval(() => fetchEchoes(ledgerId), 10000);
-    return () => clearInterval(t);
+    let interval: NodeJS.Timeout | null = null;
+    
+    const startPolling = () => {
+      if (interval) clearInterval(interval);
+      interval = setInterval(() => {
+        if (!document.hidden && ledgerId) {
+          fetchEchoes(ledgerId);
+        }
+      }, 60000); // 1 minute (optimized from 10 seconds)
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      } else if (ledgerId) {
+        fetchEchoes(ledgerId);
+        startPolling();
+      }
+    };
+    
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ledgerId]);
 
@@ -75,6 +106,44 @@ export default function EchoViewer() {
         : 0,
     [echoes]
   );
+
+  // Create style elements for dynamic contributor avatar colors
+  useEffect(() => {
+    const uniqueContributors = new Set(echoes.map((e) => e.contributor));
+    const styleId = 'echo-viewer-contributor-styles';
+    
+    // Remove existing style element
+    const existingStyle = document.getElementById(styleId);
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    if (uniqueContributors.size === 0) return;
+
+    // Create style element with CSS rules for each contributor
+    const styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    const cssRules: string[] = [];
+    
+    uniqueContributors.forEach((contributor) => {
+      const hue = getContributorHue(contributor);
+      // Create a unique class name based on contributor address hash
+      const classHash = contributor.slice(0, 8).replace(/[^a-zA-Z0-9]/g, '');
+      cssRules.push(
+        `.echo-viewer-contributor-avatar[data-hue="${hue}"] { background-color: hsl(${hue}, 70%, 50%); }`
+      );
+    });
+
+    styleElement.textContent = cssRules.join('\n');
+    document.head.appendChild(styleElement);
+
+    return () => {
+      const styleToRemove = document.getElementById(styleId);
+      if (styleToRemove) {
+        styleToRemove.remove();
+      }
+    };
+  }, [echoes]);
 
   // Check for score improvement and trigger confetti
   useEffect(() => {
@@ -151,6 +220,12 @@ export default function EchoViewer() {
     const hash = address.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
     const hue = hash % 360;
     return `hsl(${hue}, 70%, 50%)`;
+  };
+
+  const getContributorHue = (address: string) => {
+    // Generate hue value for CSS
+    const hash = address.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+    return hash % 360;
   };
 
   if (!ledgerId) {
@@ -245,19 +320,19 @@ export default function EchoViewer() {
                 <div
                   key={e.id}
                   className={`
-                    glass p-4 rounded-xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl
+                    glass p-4 rounded-xl transform transition-all duration-500 hover:scale-[1.02] hover:shadow-xl echo-viewer-echo-card
                     ${isLeft ? 'animate-slide-in-left' : 'animate-slide-in-right'}
                     ${e.grokVerified ? 'border-2 border-green-400/50 bg-green-500/5' : ''}
                     ${isLowTrust ? 'border-2 border-red-400/30 bg-red-500/5' : ''}
                     border border-white/10
                   `}
-                  style={{ animationDelay: `${index * 150}ms` }}
+                  data-animation-delay={Math.round((index * 150) / 50) * 50}
                 >
                   <div className="flex items-start gap-3">
                     {/* Contributor Avatar */}
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                      style={{ backgroundColor: getContributorColor(e.contributor) }}
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 echo-viewer-contributor-avatar"
+                      data-hue={getContributorHue(e.contributor)}
                     >
                       {getContributorInitial(e.contributor)}
                     </div>
@@ -295,7 +370,6 @@ export default function EchoViewer() {
                             src={e.videoUri}
                             controls
                             className="w-full rounded-lg"
-                            loading="lazy"
                             preload="metadata"
                           />
                         </div>
@@ -329,7 +403,13 @@ export default function EchoViewer() {
         </div>
 
         <div className="space-y-3">
+          <label htmlFor="echo-type-select" className="sr-only">
+            Echo Type
+          </label>
           <select
+            id="echo-type-select"
+            aria-label="Echo type selector"
+            title="Echo type selector"
             className="w-full glass px-3 py-2 rounded text-white bg-transparent"
             value={echoType}
             onChange={(e) => {

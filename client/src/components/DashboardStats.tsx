@@ -55,7 +55,7 @@ export default function DashboardStats({
         <div
           key={stat.label}
           className="stat-card group cursor-pointer"
-          style={{ animationDelay: `${index * 100}ms` }}
+          data-animation-delay={Math.round((index * 100) / 50) * 50}
         >
           <div className="flex items-start justify-between mb-4">
             <div
@@ -83,8 +83,8 @@ export default function DashboardStats({
 
           <div className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden">
             <div
-              className={`h-full bg-gradient-to-r ${stat.gradient} rounded-full transition-all duration-1000 group-hover:scale-x-110`}
-              style={{ width: stat.changePositive !== null ? '75%' : '50%' }}
+              className={`h-full bg-gradient-to-r ${stat.gradient} rounded-full transition-all duration-1000 group-hover:scale-x-110 progress-bar`}
+              data-width={stat.changePositive !== null ? 75 : 50}
             />
           </div>
         </div>

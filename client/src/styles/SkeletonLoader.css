@@ -1,0 +1,6 @@
+/* SkeletonLoader Component Styles */
+
+.skeleton-text-item {
+  width: var(--skeleton-width, 80%);
+}
+

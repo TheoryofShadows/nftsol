@@ -9,6 +9,7 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
 import '@solana/wallet-adapter-react-ui/styles.css';
+import '../styles/WalletSetup.css';
 
 export default function WalletSetup({ children }: { children: React.ReactNode }) {
   const cluster = (import.meta as any).env?.VITE_SOLANA_CLUSTER || 'devnet';
@@ -28,11 +29,11 @@ export default function WalletSetup({ children }: { children: React.ReactNode })
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="wallet-setup-container">
             <WalletMultiButton />
-            <span style={{ fontSize: 12, opacity: 0.7 }}>Network: {cluster}</span>
+            <span className="wallet-setup-network">Network: {cluster}</span>
           </div>
-          <div style={{ marginTop: 12 }}>{children}</div>
+          <div className="wallet-setup-content">{children}</div>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

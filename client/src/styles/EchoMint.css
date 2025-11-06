@@ -1,0 +1,25 @@
+/* EchoMint Component Styles */
+
+/* Animation delay classes - rounded to nearest 50ms */
+.echo-mint-result-card[data-animation-delay="0"] { animation-delay: 0ms; }
+.echo-mint-result-card[data-animation-delay="50"] { animation-delay: 50ms; }
+.echo-mint-result-card[data-animation-delay="100"] { animation-delay: 100ms; }
+.echo-mint-result-card[data-animation-delay="150"] { animation-delay: 150ms; }
+.echo-mint-result-card[data-animation-delay="200"] { animation-delay: 200ms; }
+.echo-mint-result-card[data-animation-delay="250"] { animation-delay: 250ms; }
+.echo-mint-result-card[data-animation-delay="300"] { animation-delay: 300ms; }
+.echo-mint-result-card[data-animation-delay="350"] { animation-delay: 350ms; }
+.echo-mint-result-card[data-animation-delay="400"] { animation-delay: 400ms; }
+.echo-mint-result-card[data-animation-delay="450"] { animation-delay: 450ms; }
+.echo-mint-result-card[data-animation-delay="500"] { animation-delay: 500ms; }
+.echo-mint-result-card[data-animation-delay="550"] { animation-delay: 550ms; }
+.echo-mint-result-card[data-animation-delay="600"] { animation-delay: 600ms; }
+.echo-mint-result-card[data-animation-delay="650"] { animation-delay: 650ms; }
+.echo-mint-result-card[data-animation-delay="700"] { animation-delay: 700ms; }
+.echo-mint-result-card[data-animation-delay="750"] { animation-delay: 750ms; }
+.echo-mint-result-card[data-animation-delay="800"] { animation-delay: 800ms; }
+.echo-mint-result-card[data-animation-delay="850"] { animation-delay: 850ms; }
+.echo-mint-result-card[data-animation-delay="900"] { animation-delay: 900ms; }
+.echo-mint-result-card[data-animation-delay="950"] { animation-delay: 950ms; }
+.echo-mint-result-card[data-animation-delay="1000"] { animation-delay: 1000ms; }
+

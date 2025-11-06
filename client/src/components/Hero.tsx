@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useCloutBalance } from '../hooks/useCloutBalance';
-import { useMintCost } from '../hooks/useMintCost';
+// import { useMintCost } from '../hooks/useMintCost'; // Unused for now
 
 type PlatformStats = {
   totalNFTs?: number;
@@ -25,7 +25,7 @@ const API_BASE =
 export default function Hero() {
   const { connected, publicKey } = useWallet();
   const { balance: cloutBalance } = useCloutBalance();
-  const { estimate: mintCost, comparison: mintComparison } = useMintCost();
+  // const { estimate: mintCost, comparison: mintComparison } = useMintCost(); // Unused for now
   const [platformStats, setPlatformStats] = useState<PlatformStats>({});
   const [echoStats, setEchoStats] = useState<EchoStats>({});
   const [loading, setLoading] = useState(true);
@@ -37,22 +37,22 @@ export default function Hero() {
       try {
         // Fetch platform stats
         const platformRes = await fetch(`${API_BASE}/api/public/stats`);
-        if (platformRes.ok) {
-          const platformData = await platformRes.json();
-          if (!cancelled && platformData.platform) {
-            setPlatformStats(platformData.platform);
+          if (platformRes.ok) {
+            const platformData = await platformRes.json();
+            if (!cancelled && platformData.platform) {
+              setPlatformStats(platformData.platform);
+            }
           }
-        }
 
         // Fetch Echo stats
         const echoRes = await fetch(`${API_BASE}/api/echo/stats`);
-        if (echoRes.ok) {
-          const echoData = await echoRes.json();
-          if (!cancelled && echoData.success) {
-            setEchoStats(echoData);
+          if (echoRes.ok) {
+            const echoData = await echoRes.json();
+            if (!cancelled && echoData.success) {
+              setEchoStats(echoData);
+            }
           }
-        }
-      } catch (_e) {
+      } catch {
         // Silently fail - stats are nice-to-have
       } finally {
         if (!cancelled) setLoading(false);
@@ -60,11 +60,36 @@ export default function Hero() {
     };
 
     fetchStats();
-    const interval = setInterval(fetchStats, 60000); // Refresh every minute
+    let interval: NodeJS.Timeout | null = null;
+    
+    const startPolling = () => {
+      if (interval) clearInterval(interval);
+      interval = setInterval(() => {
+        if (!document.hidden && !cancelled) {
+          fetchStats();
+        }
+      }, 300000); // 5 minutes (optimized from 1 minute)
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
+      } else if (!cancelled) {
+        fetchStats();
+        startPolling();
+      }
+    };
+    
+    startPolling();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -104,7 +129,7 @@ export default function Hero() {
           NFTSol + Eternal Echoes
         </h1>
 
-        <p className="text-body text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 mb-6 md:mb-12 max-w-3xl mx-auto animate-fade-in px-2 md:px-4" style={{ animationDelay: '0.1s' }}>
+        <p className="text-body text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 mb-6 md:mb-12 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">
           Create, collect, and immortalize moments on Solana.
           <span className="block mt-2 text-xs sm:text-sm md:text-lg text-gray-400">
             Next-generation NFTs with eternal on-chain memory.
@@ -112,7 +137,7 @@ export default function Hero() {
         </p>
 
         {/* Wallet Connect Button - Modern Design - Mobile Responsive */}
-        <div className="mb-6 md:mb-16 animate-fade-in px-2 md:px-4" style={{ animationDelay: '0.2s' }}>
+        <div className="mb-6 md:mb-16 animate-fade-in animate-delay-200 px-2 md:px-4">
           {!connected ? (
             <div className="relative inline-block group">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 rounded-xl md:rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
@@ -134,7 +159,7 @@ export default function Hero() {
         </div>
 
         {/* Live Counters - Modern Card Design - Mobile Responsive */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-8 md:mb-12 animate-fade-in px-4" style={{ animationDelay: '0.3s' }}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 lg:gap-6 mb-8 md:mb-12 animate-fade-in animate-delay-300 px-4">
           <div className="card-modern text-center p-3 md:p-6 glow-border">
             <div className="text-2xl md:text-5xl mb-1 md:mb-2">🖼️</div>
             <div className="text-xl md:text-3xl lg:text-4xl font-bold gradient-text-modern mb-1 md:mb-2">
@@ -171,7 +196,7 @@ export default function Hero() {
         </div>
 
         {/* Quick Action Buttons - Modern Design - Mobile Responsive */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-4 animate-fade-in px-4" style={{ animationDelay: '0.4s' }}>
+        <div className="flex flex-wrap justify-center gap-2 md:gap-4 animate-fade-in animate-delay-400 px-4">
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
             className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
@@ -184,11 +209,7 @@ export default function Hero() {
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'mint' }))}
-            className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
-            style={{ 
-              background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
-              boxShadow: '0 8px 24px rgba(6, 182, 212, 0.3)'
-            }}
+            className="btn-modern btn-gradient-cyan text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             <span className="relative z-10 flex items-center gap-1 md:gap-2">
               <span className="text-lg md:text-2xl">✨</span>
@@ -197,11 +218,7 @@ export default function Hero() {
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-mint' }))}
-            className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
-            style={{ 
-              background: 'linear-gradient(135deg, #ec4899, #f97316)',
-              boxShadow: '0 8px 24px rgba(236, 72, 153, 0.3)'
-            }}
+            className="btn-modern btn-gradient-pink text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             <span className="relative z-10 flex items-center gap-1 md:gap-2">
               <span className="text-lg md:text-2xl">🎬</span>

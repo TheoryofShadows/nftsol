@@ -1,0 +1,44 @@
+/* EchoViewer Component Styles */
+
+/* Animation delay classes - rounded to nearest 50ms */
+.echo-viewer-echo-card[data-animation-delay="0"] { animation-delay: 0ms; }
+.echo-viewer-echo-card[data-animation-delay="50"] { animation-delay: 50ms; }
+.echo-viewer-echo-card[data-animation-delay="100"] { animation-delay: 100ms; }
+.echo-viewer-echo-card[data-animation-delay="150"] { animation-delay: 150ms; }
+.echo-viewer-echo-card[data-animation-delay="200"] { animation-delay: 200ms; }
+.echo-viewer-echo-card[data-animation-delay="250"] { animation-delay: 250ms; }
+.echo-viewer-echo-card[data-animation-delay="300"] { animation-delay: 300ms; }
+.echo-viewer-echo-card[data-animation-delay="350"] { animation-delay: 350ms; }
+.echo-viewer-echo-card[data-animation-delay="400"] { animation-delay: 400ms; }
+.echo-viewer-echo-card[data-animation-delay="450"] { animation-delay: 450ms; }
+.echo-viewer-echo-card[data-animation-delay="500"] { animation-delay: 500ms; }
+.echo-viewer-echo-card[data-animation-delay="550"] { animation-delay: 550ms; }
+.echo-viewer-echo-card[data-animation-delay="600"] { animation-delay: 600ms; }
+.echo-viewer-echo-card[data-animation-delay="650"] { animation-delay: 650ms; }
+.echo-viewer-echo-card[data-animation-delay="700"] { animation-delay: 700ms; }
+.echo-viewer-echo-card[data-animation-delay="750"] { animation-delay: 750ms; }
+.echo-viewer-echo-card[data-animation-delay="800"] { animation-delay: 800ms; }
+.echo-viewer-echo-card[data-animation-delay="850"] { animation-delay: 850ms; }
+.echo-viewer-echo-card[data-animation-delay="900"] { animation-delay: 900ms; }
+.echo-viewer-echo-card[data-animation-delay="950"] { animation-delay: 950ms; }
+.echo-viewer-echo-card[data-animation-delay="1000"] { animation-delay: 1000ms; }
+.echo-viewer-echo-card[data-animation-delay="1050"] { animation-delay: 1050ms; }
+.echo-viewer-echo-card[data-animation-delay="1100"] { animation-delay: 1100ms; }
+.echo-viewer-echo-card[data-animation-delay="1150"] { animation-delay: 1150ms; }
+.echo-viewer-echo-card[data-animation-delay="1200"] { animation-delay: 1200ms; }
+.echo-viewer-echo-card[data-animation-delay="1250"] { animation-delay: 1250ms; }
+.echo-viewer-echo-card[data-animation-delay="1300"] { animation-delay: 1300ms; }
+.echo-viewer-echo-card[data-animation-delay="1350"] { animation-delay: 1350ms; }
+.echo-viewer-echo-card[data-animation-delay="1400"] { animation-delay: 1400ms; }
+.echo-viewer-echo-card[data-animation-delay="1450"] { animation-delay: 1450ms; }
+.echo-viewer-echo-card[data-animation-delay="1500"] { animation-delay: 1500ms; }
+
+/* Contributor avatar with dynamic hue */
+.echo-viewer-contributor-avatar[data-hue] {
+  background-color: hsl(var(--contributor-hue, 270), 70%, 50%);
+}
+
+/* Generate styles for common hue values (0-360) */
+/* Since we can't use calc() with attr() reliably, we'll use a style element approach */
+/* For now, we'll use a fallback and set the hue via a style element in the component */
+

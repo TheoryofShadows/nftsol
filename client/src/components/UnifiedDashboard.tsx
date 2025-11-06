@@ -315,8 +315,8 @@ export default function UnifiedDashboard() {
                         </div>
                         <div className="w-full bg-gray-700 rounded-full h-3">
                           <div
-                            className="bg-gradient-to-r from-green-400 to-cyan-400 h-3 rounded-full transition-all"
-                            style={{ width: `${verification.score}%` }}
+                            className="bg-gradient-to-r from-green-400 to-cyan-400 h-3 rounded-full transition-all progress-bar"
+                            data-width={Math.round(verification.score / 5) * 5}
                           />
                         </div>
                       </div>

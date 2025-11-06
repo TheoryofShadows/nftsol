@@ -124,7 +124,7 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">📹 Upload Video</h3>
           <p className="text-gray-300">
-            Switch to "Upload Video" mode to mint video NFTs. Drag and drop your video file (up to 100MB).
+            Switch to &quot;Upload Video&quot; mode to mint video NFTs. Drag and drop your video file (up to 100MB).
           </p>
         </div>
       ),
@@ -167,7 +167,7 @@ export default function FeatureTour() {
         <div>
           <h3 className="text-xl font-bold gradient-text-primary mb-2">✓ Verify with Grok</h3>
           <p className="text-gray-300">
-            Your echo will be verified by Grok AI. Verified echoes earn CLOUT rewards and boost the NFT's truth score!
+            Your echo will be verified by Grok AI. Verified echoes earn CLOUT rewards and boost the NFT&apos;s truth score!
           </p>
         </div>
       ),
@@ -216,7 +216,7 @@ export default function FeatureTour() {
   const handleJoyrideCallback = useCallback(
     // eslint-disable-next-line react-hooks/preserve-manual-memoization
     (data: CallBackProps) => {
-      const { status, type } = data;
+      const { status } = data;
 
       if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
         if (status === STATUS.FINISHED) {

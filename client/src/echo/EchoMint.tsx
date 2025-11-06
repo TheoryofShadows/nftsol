@@ -1,9 +1,12 @@
+/* eslint-disable react/forbid-dom-props */
+// Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoMint.css)
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { useNotification } from '../components/NotificationSystem';
 import TruthBadge from '../components/TruthBadge';
+import '../styles/EchoMint.css';
 
 // Lazy load video upload component
 const VideoUpload = lazy(() => import('./VideoUpload'));
@@ -45,8 +48,8 @@ export default function EchoMint() {
   const [minting, setMinting] = useState(false);
   const [prefetchedThumbnails, setPrefetchedThumbnails] = useState<Map<string, string>>(new Map());
   const [uploadMode, setUploadMode] = useState<'archive' | 'upload'>('archive');
-  const [uploadedVideoUrl, setUploadedVideoUrl] = useState<string | null>(null);
-  const [uploadedMetadataUri, setUploadedMetadataUri] = useState<string | null>(null);
+  const [, setUploadedVideoUrl] = useState<string | null>(null); // Reserved for future use
+  const [, setUploadedMetadataUri] = useState<string | null>(null);
   const { publicKey } = useWallet();
   const { addNotification } = useNotification();
 
@@ -67,7 +70,7 @@ export default function EchoMint() {
               img.src = result.thumbnail!;
             });
             thumbnailMap.set(result.identifier, result.thumbnail);
-          } catch (_e) {
+          } catch {
             // Thumbnail failed to load, skip
           }
         }
@@ -98,7 +101,7 @@ export default function EchoMint() {
         );
         const data = await res.json();
         if (!cancelled) setResults(data.results || []);
-      } catch (_e) {
+      } catch {
         if (!cancelled) setResults([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -125,7 +128,7 @@ export default function EchoMint() {
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         if (!cancelled) setMintData(data as MintData);
-      } catch (_e) {
+      } catch {
         if (!cancelled) setMintData(null);
       }
     })();
@@ -260,13 +263,13 @@ export default function EchoMint() {
             return (
               <button
                 key={r.identifier}
-                className={`w-full text-left glass p-3 rounded transform transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                className={`w-full text-left glass p-3 rounded transform transition-all duration-300 hover:scale-105 hover:shadow-lg echo-mint-result-card ${
                   selected === r.identifier
                     ? 'bg-white/10 border-2 border-purple-400/50'
                     : 'border border-white/10'
                 }`}
                 onClick={() => setSelected(r.identifier)}
-                style={{ animationDelay: `${index * 50}ms` }}
+                data-animation-delay={Math.round((index * 50) / 50) * 50}
               >
                 <div className="flex items-start gap-3">
                   {thumbnail ? (

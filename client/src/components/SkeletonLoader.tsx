@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import '../styles/SkeletonLoader.css';
 
 interface SkeletonLoaderProps {
   variant?: 'card' | 'text' | 'circle' | 'grid';
@@ -22,7 +23,14 @@ export default function SkeletonLoader({
         {Array.from({ length: count }).map((_, i) => {
           // Use index-based width to avoid Math.random() purity issues
           const width = 80 + ((i * 7) % 20);
-          return <div key={i} className="skeleton h-4 w-full" style={{ width: `${width}%` }} />;
+          const roundedWidth = Math.round(width / 5) * 5;
+          return (
+            <div 
+              key={i} 
+              className="skeleton h-4 w-full skeleton-text-item" 
+              data-width={roundedWidth}
+            />
+          );
         })}
       </div>
     );

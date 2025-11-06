@@ -1,8 +1,11 @@
+/* eslint-disable react/forbid-dom-props */
+// Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoRemix.css)
 import React, { useState, useRef, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useNotification } from '../components/NotificationSystem';
-import TruthBadge from '../components/TruthBadge';
+import '../styles/EchoRemix.css';
+// import TruthBadge from '../components/TruthBadge'; // Reserved for future use
 
 interface VideoLayer {
   id: string;
@@ -60,20 +63,28 @@ export default function EchoRemix({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Load video duration on mount
+  const baseVideoUri = layers[0]?.videoUri;
   useEffect(() => {
-    if (videoRef.current && layers[0]) {
-      videoRef.current.addEventListener('loadedmetadata', () => {
-        if (videoRef.current) {
-          const duration = videoRef.current.duration;
+    const videoElement = videoRef.current;
+    if (videoElement && baseVideoUri) {
+      const handleLoadedMetadata = () => {
+        if (videoElement) {
+          const duration = videoElement.duration;
           setLayers((prev) =>
             prev.map((layer) =>
               layer.id === 'base' ? { ...layer, endTime: duration || 30 } : layer
             )
           );
         }
-      });
+      };
+      videoElement.addEventListener('loadedmetadata', handleLoadedMetadata);
+      return () => {
+        if (videoElement) {
+          videoElement.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        }
+      };
     }
-  }, [layers[0]?.videoUri]);
+  }, [baseVideoUri]);
 
   const addVideoLayer = () => {
     if (!newVideoUrl.trim()) {
@@ -345,8 +356,7 @@ export default function EchoRemix({
         {previewMode ? (
           <canvas
             ref={canvasRef}
-            className="w-full rounded-lg bg-black"
-            style={{ maxHeight: '400px' }}
+            className="w-full rounded-lg bg-black echo-remix-canvas"
           />
         ) : (
           <div className="relative">
@@ -358,21 +368,21 @@ export default function EchoRemix({
               onTimeUpdate={renderPreview}
             />
             {/* Overlay indicators */}
-            {layers.slice(1).map((layer) => (
-              <div
-                key={layer.id}
-                className="absolute border-2 border-purple-400 border-dashed pointer-events-none"
-                style={{
-                  width: `${layer.scale * 100}%`,
-                  height: `${layer.scale * 100}%`,
-                  ...getPositionStyles(layer.position),
-                }}
-              >
-                <div className="absolute -top-6 left-0 text-xs text-purple-400 bg-black/50 px-2 py-1 rounded">
-                  Layer {layers.indexOf(layer)}
+            {layers.slice(1).map((layer) => {
+              // Round scale to 1 decimal for CSS class matching
+              const roundedScale = Math.round(layer.scale * 10) / 10;
+              return (
+                <div
+                  key={layer.id}
+                  className={`absolute border-2 border-purple-400 border-dashed pointer-events-none echo-remix-overlay-indicator echo-remix-scale-${roundedScale.toString().replace('.', '-')}`}
+                  data-position={layer.position}
+                >
+                  <div className="absolute -top-6 left-0 text-xs text-purple-400 bg-black/50 px-2 py-1 rounded">
+                    Layer {layers.indexOf(layer)}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -424,8 +434,9 @@ export default function EchoRemix({
                 <div className="mt-3 space-y-2 pt-3 border-t border-white/10">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Opacity</label>
+                      <label htmlFor={`opacity-${layer.id}`} className="text-xs text-gray-400 mb-1 block">Opacity</label>
                       <input
+                        id={`opacity-${layer.id}`}
                         type="range"
                         min="0"
                         max="1"
@@ -435,13 +446,16 @@ export default function EchoRemix({
                           updateLayer(layer.id, { opacity: parseFloat(e.target.value) })
                         }
                         className="w-full"
+                        aria-label="Layer opacity"
+                        title="Layer opacity"
                       />
                       <span className="text-xs text-gray-500">{Math.round(layer.opacity * 100)}%</span>
                     </div>
 
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Scale</label>
+                      <label htmlFor={`scale-${layer.id}`} className="text-xs text-gray-400 mb-1 block">Scale</label>
                       <input
+                        id={`scale-${layer.id}`}
                         type="range"
                         min="0.5"
                         max="2"
@@ -451,14 +465,19 @@ export default function EchoRemix({
                           updateLayer(layer.id, { scale: parseFloat(e.target.value) })
                         }
                         className="w-full"
+                        aria-label="Layer scale"
+                        title="Layer scale"
                       />
                       <span className="text-xs text-gray-500">{layer.scale}x</span>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-400 mb-1 block">Position</label>
+                    <label htmlFor={`position-${layer.id}`} className="text-xs text-gray-400 mb-1 block">Position</label>
                     <select
+                      id={`position-${layer.id}`}
+                      aria-label="Layer position"
+                      title="Layer position"
                       value={layer.position}
                       onChange={(e) =>
                         updateLayer(layer.id, { position: e.target.value as any })
@@ -475,8 +494,9 @@ export default function EchoRemix({
 
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Start (s)</label>
+                      <label htmlFor={`start-${layer.id}`} className="text-xs text-gray-400 mb-1 block">Start (s)</label>
                       <input
+                        id={`start-${layer.id}`}
                         type="number"
                         min="0"
                         value={layer.startTime}
@@ -484,14 +504,21 @@ export default function EchoRemix({
                           updateLayer(layer.id, { startTime: parseFloat(e.target.value) })
                         }
                         className="w-full glass px-2 py-1 rounded text-white text-sm bg-transparent"
+                        aria-label="Start time in seconds"
+                        title="Start time in seconds"
+                        placeholder="0"
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-400 mb-1 block">End (s)</label>
+                      <label htmlFor={`end-${layer.id}`} className="text-xs text-gray-400 mb-1 block">End (s)</label>
                       <input
+                        id={`end-${layer.id}`}
                         type="number"
                         min="0"
                         value={layer.endTime}
+                        aria-label="End time in seconds"
+                        title="End time in seconds"
+                        placeholder="30"
                         onChange={(e) =>
                           updateLayer(layer.id, { endTime: parseFloat(e.target.value) })
                         }
@@ -539,7 +566,7 @@ export default function EchoRemix({
             />
             {selectedLayer.textOverlay && (
               <div className="p-2 bg-purple-500/10 rounded text-sm text-gray-300">
-                Current: "{selectedLayer.textOverlay.text}"
+                Current: &quot;{selectedLayer.textOverlay.text}&quot;
               </div>
             )}
             <button
@@ -578,20 +605,5 @@ export default function EchoRemix({
   );
 }
 
-function getPositionStyles(position: VideoLayer['position']): React.CSSProperties {
-  switch (position) {
-    case 'top':
-      return { top: 0, left: '50%', transform: 'translateX(-50%)' };
-    case 'bottom':
-      return { bottom: 0, left: '50%', transform: 'translateX(-50%)' };
-    case 'left':
-      return { top: '50%', left: 0, transform: 'translateY(-50%)' };
-    case 'right':
-      return { top: '50%', right: 0, transform: 'translateY(-50%)' };
-    case 'center':
-      return { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' };
-    default:
-      return {};
-  }
-}
+// Position styles are now handled by CSS classes in EchoRemix.css
 

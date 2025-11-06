@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+/* eslint-disable react/forbid-dom-props */
+// Microsoft Edge Tools: All inline styles have been moved to external CSS file (NftGrid.css)
+import React, { useState, memo } from 'react';
 import { NFTCardSkeleton } from './SkeletonLoader';
 import NftDetailModal from './NftDetailModal';
 import { useNotification } from './NotificationSystem';
+import '../styles/NftGrid.css';
 
 interface NFT {
   id: string;
@@ -27,8 +30,7 @@ interface NftGridProps {
   error?: string | null;
 }
 
-export default function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { addNotification } = useNotification();
@@ -100,10 +102,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
       {nfts.map((nft, index) => (
         <div
           key={nft.id}
-          className="card-modern glow-border scroll-reveal overflow-hidden cursor-pointer"
-          style={{ animationDelay: `${index * 50}ms` }}
-          onMouseEnter={() => setHoveredCard(nft.id)}
-          onMouseLeave={() => setHoveredCard(null)}
+          className="card-modern glow-border scroll-reveal overflow-hidden cursor-pointer nft-grid-card"
+          data-animation-delay={Math.round((index * 50) / 50) * 50}
           onClick={() => {
             setSelectedNft(nft);
             setIsModalOpen(true);
@@ -240,4 +240,8 @@ export default function NftGrid({ nfts, loading = false, error = null }: NftGrid
       />
     </div>
   );
-}
+});
+
+NftGrid.displayName = 'NftGrid';
+
+export default NftGrid;

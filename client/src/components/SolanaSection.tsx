@@ -1,4 +1,6 @@
 import React from 'react';
+import '../styles/SolanaSection.css';
+
 export default function SolanaSection({
   title,
   children,
@@ -7,11 +9,11 @@ export default function SolanaSection({
   children: React.ReactNode;
 }) {
   return (
-    <section style={{ maxWidth: 1200, margin: '24px auto', padding: 16 }}>
-      <h2 className="sla-text-gradient" style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>
+    <section className="solana-section">
+      <h2 className="sla-text-gradient solana-section-title">
         {title}
       </h2>
-      <div className="sla-card" style={{ padding: 16 }}>
+      <div className="sla-card solana-section-card">
         {children}
       </div>
     </section>

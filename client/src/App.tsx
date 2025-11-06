@@ -49,20 +49,20 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
       // Return a fallback component that still allows the app to function
       return {
         default: () => (
-          <div className="flex items-center justify-center p-8">
-            <div className="text-center">
-              <p className="text-red-400 mb-4">Failed to load component</p>
-              <p className="text-gray-400 text-sm mb-4">
-                {import.meta.env.DEV ? error?.message : 'Please try refreshing the page'}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Reload Page
-              </button>
-            </div>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <p className="text-red-400 mb-4">Failed to load component</p>
+            <p className="text-gray-400 text-sm mb-4">
+              {import.meta.env.DEV ? error?.message : 'Please try refreshing the page'}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Reload Page
+            </button>
           </div>
+        </div>
         ),
       } as { default: T };
     }
@@ -77,7 +77,7 @@ const WithdrawalForm = lazyWithErrorBoundary(() => import('./components/Withdraw
 const ReferralSystem = lazyWithErrorBoundary(() => import('./components/ReferralSystem'));
 const WaitlistSignup = lazyWithErrorBoundary(() => import('./components/WaitlistSignup'));
 const EchoViewer = lazyWithErrorBoundary(() => import('./echo/EchoViewer'));
-const EchoRemix = lazyWithErrorBoundary(() => import('./echo/EchoRemix'));
+// const EchoRemix = lazyWithErrorBoundary(() => import('./echo/EchoRemix')); // Unused for now
 const EchoMarketplace = lazyWithErrorBoundary(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazyWithErrorBoundary(() => import('./components/AdminDashboard'));
 const Dashboard = lazyWithErrorBoundary(() => import('./components/Dashboard'));
@@ -132,7 +132,7 @@ function AppContent() {
 
   // Track page views
   useEffect(() => {
-    trackPageView(window.location.pathname);
+      trackPageView(window.location.pathname);
   }, []);
 
   // Track wallet connections and trigger onboarding
@@ -140,7 +140,7 @@ function AppContent() {
     if (connected && publicKey) {
       // Try to detect wallet type from available adapters
       const walletType = 'Solana Wallet'; // Default, could be enhanced
-      trackWalletConnect(walletType);
+        trackWalletConnect(walletType);
 
       // Complete wallet connection step
       if (!isStepCompleted('wallet-connect')) {
@@ -158,7 +158,7 @@ function AppContent() {
 
   // Track tab changes and trigger relevant tours
   useEffect(() => {
-    trackTabChange(activeTab);
+      trackTabChange(activeTab);
 
     // Trigger tours based on tab selection if not completed
     if (activeTab === 'market' && !isStepCompleted('marketplace-tour')) {
@@ -179,7 +179,7 @@ function AppContent() {
   // Performance monitoring
   useEffect(() => {
     if (import.meta.env.DEV) {
-      getPerformanceReport();
+        getPerformanceReport();
       // Performance metrics available for development
     }
   }, [getPerformanceReport]);
@@ -204,7 +204,7 @@ function AppContent() {
     return () => {
       try {
         window.removeEventListener('change-tab', handler as EventListener);
-      } catch (err) {
+      } catch {
         // Silently fail on cleanup
       }
     };
@@ -226,12 +226,12 @@ function AppContent() {
           ? 'Server temporarily unavailable. Retrying in background...'
           : error;
         
-      addNotification({
+        addNotification({
         type: 'error',
           title: 'Connection Issue',
           message: normalizedError,
           duration: 8000,
-      });
+        });
         
         lastErrorRef.current = error;
         lastErrorTimeRef.current = now;
@@ -307,7 +307,7 @@ function AppContent() {
               <div className="skeleton h-10 w-40 rounded-2xl"></div>
             }
           >
-            <PhantomConnect />
+              <PhantomConnect />
           </Suspense>
         </div>
       </header>
@@ -878,21 +878,21 @@ function App() {
   ];
 
   return (
-    <ErrorBoundary>
-      <ConnectionProvider endpoint={endpoint}>
-        <WalletProvider wallets={wallets} autoConnect>
-          <WalletModalProvider>
-            <AppProvider>
-              <OnboardingProvider>
-                <NotificationProvider>
-                  <AppContent />
-                </NotificationProvider>
-              </OnboardingProvider>
-            </AppProvider>
-          </WalletModalProvider>
-        </WalletProvider>
-      </ConnectionProvider>
-    </ErrorBoundary>
+      <ErrorBoundary>
+        <ConnectionProvider endpoint={endpoint}>
+          <WalletProvider wallets={wallets} autoConnect>
+            <WalletModalProvider>
+              <AppProvider>
+                <OnboardingProvider>
+                  <NotificationProvider>
+                    <AppContent />
+                  </NotificationProvider>
+                </OnboardingProvider>
+              </AppProvider>
+            </WalletModalProvider>
+          </WalletProvider>
+        </ConnectionProvider>
+      </ErrorBoundary>
   );
 }
 

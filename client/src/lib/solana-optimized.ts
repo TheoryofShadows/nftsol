@@ -11,11 +11,8 @@ import {
   PublicKey,
   Transaction,
   TransactionInstruction,
-  SystemProgram,
   LAMPORTS_PER_SOL,
   Commitment,
-  clusterApiUrl,
-  Keypair,
 } from '@solana/web3.js';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useQuery } from '@tanstack/react-query';
@@ -94,7 +91,7 @@ export async function simulateTransaction(
       err: simulation.value.err,
       logs: simulation.value.logs || null,
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       err: error,
@@ -111,7 +108,7 @@ export async function buildTransaction(
   const transaction = new Transaction();
 
   // Get recent blockhash
-  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('finalized');
+  const { blockhash } = await connection.getLatestBlockhash('finalized');
 
   transaction.recentBlockhash = blockhash;
   transaction.feePayer = feePayer;
@@ -191,7 +188,7 @@ export async function estimateTransactionFee(
   try {
     const feeForMessage = await connection.getFeeForMessage(transaction.compileMessage());
     return feeForMessage?.value || 5000; // Default 5000 lamports
-  } catch (error) {
+  } catch {
     return 5000; // Default fallback
   }
 }

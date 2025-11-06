@@ -1,6 +1,9 @@
+/* eslint-disable react/forbid-dom-props */
+// Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoMarketplace.css)
 import React, { useEffect, useMemo, useState } from 'react';
 import { lazy, Suspense } from 'react';
 import TruthBadge from '../components/TruthBadge';
+import '../styles/EchoMarketplace.css';
 
 const EchoTrending = lazy(() => import('./EchoTrending'));
 
@@ -39,7 +42,7 @@ export default function EchoMarketplace() {
         if (!res.ok) throw new Error('Failed to fetch Echo NFTs');
         const data = await res.json();
         if (!cancelled) setItems(Array.isArray(data.nfts) ? data.nfts : []);
-      } catch (_err) {
+      } catch {
         if (!cancelled) setItems([]);
       } finally {
         if (!cancelled) setLoading(false);
@@ -85,8 +88,8 @@ export default function EchoMarketplace() {
               {visible.map((e, index) => (
                 <div
                   key={e.id}
-                  className="glass p-4 rounded-xl transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:border-purple-400/50 border border-white/10"
-                  style={{ animationDelay: `${index * 100}ms` }}
+                  className="glass p-4 rounded-xl transform transition-all duration-500 hover:scale-105 hover:-translate-y-2 hover:shadow-xl hover:border-purple-400/50 border border-white/10 echo-marketplace-card"
+                  data-animation-delay={Math.round((index * 100) / 50) * 50}
                 >
                   <div className="relative">
                     <img

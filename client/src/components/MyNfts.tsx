@@ -43,6 +43,7 @@ export default function MyNfts() {
         if (Array.isArray(nftList)) {
           setNfts(nftList);
           if (import.meta.env.DEV) {
+            // eslint-disable-next-line no-console
             console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
           }
         } else {

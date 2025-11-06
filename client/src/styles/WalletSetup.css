@@ -1,0 +1,17 @@
+/* WalletSetup Component Styles */
+
+.wallet-setup-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wallet-setup-network {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.wallet-setup-content {
+  margin-top: 12px;
+}
+

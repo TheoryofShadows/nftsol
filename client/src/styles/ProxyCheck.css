@@ -1,0 +1,29 @@
+/* ProxyCheck Component Styles */
+
+.proxy-check-container {
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.proxy-check-content {
+  display: flex;
+  gap: 16px;
+}
+
+.proxy-check-image {
+  max-width: 220px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.proxy-check-text {
+  word-break: break-all;
+}
+
+.proxy-check-input {
+  width: 520px;
+  margin-top: 8px;
+}
+

@@ -1,0 +1,15 @@
+/* NftGrid Component Styles */
+
+/* Animation delay classes - rounded to nearest 50ms */
+.nft-grid-card[data-animation-delay="0"] { animation-delay: 0ms; }
+.nft-grid-card[data-animation-delay="50"] { animation-delay: 50ms; }
+.nft-grid-card[data-animation-delay="100"] { animation-delay: 100ms; }
+.nft-grid-card[data-animation-delay="150"] { animation-delay: 150ms; }
+.nft-grid-card[data-animation-delay="200"] { animation-delay: 200ms; }
+.nft-grid-card[data-animation-delay="250"] { animation-delay: 250ms; }
+.nft-grid-card[data-animation-delay="300"] { animation-delay: 300ms; }
+.nft-grid-card[data-animation-delay="350"] { animation-delay: 350ms; }
+.nft-grid-card[data-animation-delay="400"] { animation-delay: 400ms; }
+.nft-grid-card[data-animation-delay="450"] { animation-delay: 450ms; }
+.nft-grid-card[data-animation-delay="500"] { animation-delay: 500ms; }
+

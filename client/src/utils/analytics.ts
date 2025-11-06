@@ -17,7 +17,8 @@ export const initAnalytics = (trackingId: string) => {
 
   // Check if already initialized
   if (window.gtag && window.dataLayer) {
-    console.log('Google Analytics already initialized');
+    // eslint-disable-next-line no-console
+    if (import.meta.env.DEV) console.log('Google Analytics already initialized');
     return;
   }
 
@@ -42,7 +43,8 @@ export const initAnalytics = (trackingId: string) => {
     anonymize_ip: true, // Privacy-friendly
   });
 
-  console.log('Google Analytics initialized:', trackingId);
+  // eslint-disable-next-line no-console
+  if (import.meta.env.DEV) console.log('Google Analytics initialized:', trackingId);
 };
 
 // Track page views

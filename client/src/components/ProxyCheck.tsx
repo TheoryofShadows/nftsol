@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { proxify } from '../lib/imgProxy';
+import '../styles/ProxyCheck.css';
 
 export default function ProxyCheck() {
   const [srcRaw, setSrcRaw] = useState(
@@ -8,15 +9,15 @@ export default function ProxyCheck() {
   const src = useMemo(() => proxify(srcRaw), [srcRaw]);
 
   return (
-    <div style={{ padding: 16, border: '1px solid #e5e7eb', borderRadius: 8, marginTop: 16 }}>
+    <div className="proxy-check-container">
       <h4>Proxy Image Test</h4>
-      <div style={{ display: 'flex', gap: 16 }}>
+      <div className="proxy-check-content">
         <img
           src={src}
           alt="proxy test"
-          style={{ maxWidth: 220, border: '1px solid #eee', borderRadius: 8 }}
+          className="proxy-check-image"
         />
-        <div style={{ wordBreak: 'break-all' }}>
+        <div className="proxy-check-text">
           <div>
             Image URL: <code>{src}</code>
           </div>
@@ -24,7 +25,7 @@ export default function ProxyCheck() {
             value={srcRaw}
             onChange={(e) => setSrcRaw(e.target.value)}
             placeholder="https://... or ipfs://..."
-            style={{ width: 520, marginTop: 8 }}
+            className="proxy-check-input"
           />
         </div>
       </div>

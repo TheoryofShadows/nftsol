@@ -30,6 +30,14 @@ export default function IpfsImage({ src, proxy = true, ...rest }: Props) {
   }, [src, proxy, source]);
 
   // eslint-disable-next-line no-console
-  // Using source for IPFS image
-  return <img src={source} onError={handleError} {...rest} />;
+  // Using source for IPFS image with optimization
+  return (
+    <img
+      src={source}
+      onError={handleError}
+      loading="lazy"
+      decoding="async"
+      {...rest}
+    />
+  );
 }
