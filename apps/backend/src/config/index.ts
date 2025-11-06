@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types';
-import { initializeSecrets } from '../lib/secrets-loader';
+import { initializeSecrets } from '../lib/secrets-loader.js';
 
 config();
 
@@ -9,22 +9,25 @@ initializeSecrets();
 
 const requiredEnvVars = [
   'NODE_ENV',
-  'PORT',
+  'PORT', // Render automatically sets this
   'SOLANA_RPC_URL',
-  'CLOUT_PROGRAM_ID',
-  'MARKET_PROGRAM_ID',
-  'LOYALTY_PROGRAM_ID',
-  'REWARDS_VAULT',
+  'ALLOWED_ORIGINS', // Required in production - server will throw error if missing
+  // CLOUT_PROGRAM_ID has defaults, so it's optional
+  // MARKET_PROGRAM_ID has defaults, so it's optional
+  // LOYALTY_PROGRAM_ID has defaults, so it's optional
+  // REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT, so it's optional
 ];
 
 if (process.env.NODE_ENV !== 'production') {
   process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
   process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
+  // Provide a safe default JWT secret in development to avoid 500s on auth routes
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-not-for-production';
 }
 
-// CLOUT token mint address (mainnet: 62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw)
+// CLOUT token mint address (devnet: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
 if (!process.env.CLOUT_MINT) {
-  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '62hWQAgAV4jugHSuZsMqzxZNVXaVLrbRpz3Sw58Z64Mw';
+  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab';
 }
 // CLOUT_PROGRAM_ID is kept for backward compatibility, but CLOUT_MINT is the actual token mint
 if (!process.env.CLOUT_PROGRAM_ID) {
@@ -38,20 +41,23 @@ if (!process.env.MARKET_PROGRAM_ID) {
 if (!process.env.LOYALTY_PROGRAM_ID) {
   process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
 }
-if (!process.env.REWARDS_VAULT) {
-  process.env.REWARDS_VAULT = '2KkNwFZbznAtYX1xjVS6e5BBqQnfaBuTjn42G4zJXAps';
-}
+// REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT
+// No need for hardcoded default - it will be calculated dynamically when needed
 
 if (process.env.NODE_ENV === 'production') {
   for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
+      // ALLOWED_ORIGINS is checked separately in index.ts with better error message
+      if (envVar === 'ALLOWED_ORIGINS') {
+        continue; // Let index.ts handle this with clearer error
+      }
       throw new Error(`Missing required environment variable: ${envVar}`);
     }
   }
 }
 
 export const appConfig: AppConfig = {
-  port: parseInt(process.env.PORT || '3000', 10),
+  port: parseInt(process.env.PORT || '3001', 10),
   nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
   cors: {
     origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [
