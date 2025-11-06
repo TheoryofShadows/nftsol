@@ -34,7 +34,7 @@ jobs:
           PLATFORM_SECRET_KEY_BASE58: test-secret
       
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./apps/backend/coverage/lcov.info
           flags: backend
@@ -63,7 +63,7 @@ jobs:
           VITE_API_BASE: http://localhost:3001
       
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           file: ./client/coverage/lcov.info
           flags: frontend
