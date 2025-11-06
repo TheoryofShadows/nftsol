@@ -862,9 +862,9 @@ function AppContent() {
 }
 
 function App() {
-  // Use environment variable for RPC URL or fallback to mainnet
+  // Use environment variable for RPC URL or fallback to devnet for local development
   // Note: In Vite, use import.meta.env, not process.env
-  const endpoint = (import.meta.env.VITE_SOLANA_RPC_URL as string) || clusterApiUrl('mainnet-beta');
+  const endpoint = (import.meta.env.VITE_SOLANA_RPC_URL as string) || clusterApiUrl('devnet');
 
   // Initialize all wallet adapters
   const wallets = [

@@ -36,7 +36,7 @@ import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
 import transactionsRouter from './routes/transactions';
 import videoRouter from './routes/video';
-import { initializeSecrets } from './lib/secrets-loader.js';
+import { initializeSecrets } from './lib/secrets-loader';
 
 initializeSecrets();
 

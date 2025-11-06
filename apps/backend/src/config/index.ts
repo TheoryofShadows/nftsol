@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
 import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types';
-import { initializeSecrets } from '../lib/secrets-loader.js';
+import { initializeSecrets } from '../lib/secrets-loader';
 
 config();
 
