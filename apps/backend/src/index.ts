@@ -36,7 +36,7 @@ import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
 import transactionsRouter from './routes/transactions';
 import videoRouter from './routes/video';
-import { initializeSecrets } from './lib/secrets-loader';
+import { initializeSecrets } from './lib/secrets-loader.js';
 
 initializeSecrets();
 
@@ -69,10 +69,29 @@ if (
   throw new Error('ALLOWED_ORIGINS must be set in production');
 }
 
-// CORS configuration
+// CORS configuration with dynamic origin support for Netlify
 app.use(
   cors({
-    origin: appConfig.cors.origin,
+    origin: (origin, callback) => {
+      const allowedOrigins = appConfig.cors.origin;
+      
+      // Allow requests with no origin (mobile apps, Postman, etc.)
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      // Allow Netlify preview deployments (*.netlify.app)
+      if (origin.endsWith('.netlify.app')) {
+        return callback(null, true);
+      }
+      
+      // Check if origin is in allowed list
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: appConfig.cors.credentials,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID'],
@@ -904,15 +923,14 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
 apiV1.get('/market', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
-    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const collection = req.query.collection as string;
-    const _status = req.query.status as string; // Reserved for future filtering
-    const owner = (req.query.owner as string) || process.env.PLATFORM_PUBLIC_KEY;
+    const owner = req.query.owner as string;
 
-    // Query NFTs from service
     let nfts: any[] = [];
+    let total = 0;
 
-    // 1) Preferred: specific collection via Helius
+    // 1) If specific collection requested, fetch from that collection
     if (collection && collection !== 'eternal-echoes') {
       try {
         const result = await heliusService.getAssetsByCollection(collection, { page, limit });
@@ -922,6 +940,7 @@ apiV1.get('/market', async (req, res) => {
           name: item.content?.metadata?.name || 'Unnamed NFT',
           description: item.content?.metadata?.description || '',
           image: item.content?.links?.image || '',
+          imageUrl: item.content?.links?.image || '',
           owner: item.ownership?.owner,
           collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
           isListed: false,
@@ -929,32 +948,162 @@ apiV1.get('/market', async (req, res) => {
           status: 'owned',
           compressed: item.compression?.compressed || false,
           source: 'blockchain',
+          creator: item.ownership?.owner || '',
         }));
-      } catch (_e) {
+        total = result.total;
+      } catch (error) {
+        console.error('[Market] Error fetching collection:', error);
+        nfts = [];
+      }
+    }
+    // 2) If owner specified, fetch NFTs for that owner
+    else if (owner) {
+      try {
+        const result = await heliusService.getAssetsByOwner(owner, { limit: limit * page });
+        nfts = result.items
+          .slice((page - 1) * limit, page * limit)
+          .map((item: any) => ({
+            id: item.id,
+            mintAddress: item.id,
+            name: item.content?.metadata?.name || 'Unnamed NFT',
+            description: item.content?.metadata?.description || '',
+            image: item.content?.links?.image || '',
+            imageUrl: item.content?.links?.image || '',
+            owner: owner,
+            collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+            isListed: false,
+            price: null,
+            status: 'owned',
+            compressed: item.compression?.compressed || false,
+            source: 'blockchain',
+            creator: item.ownership?.owner || '',
+          }));
+        total = result.total;
+      } catch (error) {
+        console.error('[Market] Error fetching owner NFTs:', error);
+        nfts = [];
+      }
+    }
+    // 3) DEFAULT: Fetch featured/popular NFTs from mainnet (with smart fallbacks)
+    else {
+      try {
+        console.log(`[Market] Fetching marketplace NFTs (page ${page}, limit ${limit})...`);
+        
+        // Strategy: Try to get NFTs from platform wallet first (fastest)
+        // Then fallback to popular collections if available
+        const platformOwner = process.env.PLATFORM_PUBLIC_KEY;
+        
+        if (platformOwner) {
+          try {
+            const result = await heliusService.getAssetsByOwner(platformOwner, { 
+              page, 
+              limit,
+            });
+            nfts = result.items.map((item: any) => ({
+              id: item.id,
+              mintAddress: item.id,
+              name: item.content?.metadata?.name || 'Unnamed NFT',
+              description: item.content?.metadata?.description || '',
+              image: item.content?.links?.image || '',
+              imageUrl: item.content?.links?.image || '',
+              owner: platformOwner,
+              collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
+              isListed: false,
+              price: null,
+              status: 'owned',
+              compressed: item.compression?.compressed || false,
+              source: 'blockchain',
+              creator: item.ownership?.owner || '',
+            }));
+            total = result.total;
+            console.log(`[Market] Found ${nfts.length} NFTs from platform wallet`);
+          } catch (ownerError) {
+            console.error('[Market] Error fetching from platform wallet:', ownerError);
+            nfts = [];
+          }
+        }
+        
+        // If no NFTs from platform wallet, try database listings
+        if (nfts.length === 0) {
+          try {
+            const listingsResult = await pool.query(
+              `SELECT "mintAddress", name, description, image, "imageUrl", owner, collection, price, status, "listedAt"
+               FROM nfts 
+               WHERE (status = 'listed' OR status = 'active' OR listed = true)
+               ORDER BY "listedAt" DESC NULLS LAST, "createdAt" DESC
+               LIMIT $1 OFFSET $2`,
+              [limit, (page - 1) * limit]
+            );
+            
+            if (listingsResult.rows.length > 0) {
+              nfts = listingsResult.rows.map((row: any) => ({
+                id: row.mintAddress,
+                mintAddress: row.mintAddress,
+                name: row.name || 'Unnamed NFT',
+                description: row.description || '',
+                image: row.imageUrl || row.image || '',
+                imageUrl: row.imageUrl || row.image || '',
+                owner: row.owner || '',
+                collection: row.collection || 'Unknown',
+                isListed: true,
+                price: row.price || null,
+                status: row.status || 'listed',
+                listedAt: row.listedAt,
+                source: 'database',
+                creator: row.owner || '',
+              }));
+              
+              // Get total count
+              const countResult = await pool.query(
+                `SELECT COUNT(*) as count FROM nfts 
+                 WHERE (status = 'listed' OR status = 'active' OR listed = true)`
+              );
+              total = parseInt(countResult.rows[0]?.count || '0', 10);
+              console.log(`[Market] Found ${nfts.length} NFTs from database listings`);
+            }
+          } catch (dbError) {
+            console.error('[Market] Error fetching from database:', dbError);
+            nfts = [];
+          }
+        }
+        
+        // Final fallback: Return empty array with helpful message
+        if (nfts.length === 0) {
+          console.log('[Market] No NFTs found - marketplace is empty. Users can mint NFTs to populate it.');
+        }
+      } catch (error) {
+        console.error('[Market] Error fetching marketplace NFTs:', error);
         nfts = [];
       }
     }
 
-    // 2) Fallback: show owner (platform) NFTs from blockchain
-    if (!nfts.length && owner) {
+    // Also check for listings in our database
+    if (nfts.length > 0) {
       try {
-        const result = await heliusService.getAssetsByOwner(owner, { page, limit });
-        nfts = result.items.map((item: any) => ({
-          id: item.id,
-          mintAddress: item.id,
-          name: item.content?.metadata?.name || 'Unnamed NFT',
-          description: item.content?.metadata?.description || '',
-          image: item.content?.links?.image || '',
-          owner: owner,
-          collection: item.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
-          isListed: false,
-          price: null,
-          status: 'owned',
-          compressed: item.compression?.compressed || false,
-          source: 'blockchain',
-        }));
-      } catch (_e) {
-        nfts = [];
+        const mintAddresses = nfts.map((nft) => nft.mintAddress);
+        const listingsResult = await pool.query(
+          `SELECT "mintAddress", price, status, "listedAt" FROM nfts 
+           WHERE "mintAddress" = ANY($1) AND (status = 'listed' OR status = 'active')`,
+          [mintAddresses]
+        );
+        const listingsMap = new Map(
+          listingsResult.rows.map((row: any) => [row.mintAddress, row])
+        );
+        
+        // Merge listing data
+        nfts = nfts.map((nft) => {
+          const listing = listingsMap.get(nft.mintAddress);
+          return {
+            ...nft,
+            isListed: !!listing,
+            price: listing?.price || null,
+            listedAt: listing?.listedAt || null,
+            status: listing?.status || nft.status,
+          };
+        });
+      } catch (error) {
+        console.error('[Market] Error fetching listings:', error);
+        // Continue without listing data
       }
     }
 
@@ -962,17 +1111,17 @@ apiV1.get('/market', async (req, res) => {
       success: true,
       data: {
         nfts,
-        total: nfts.length,
+        total: total || nfts.length,
         page,
         limit,
         message: nfts.length > 0
-          ? 'Marketplace data loaded'
-          : 'No marketplace data yet. Set DEFAULT collection or PLATFORM_PUBLIC_KEY to populate.',
+          ? `Loaded ${nfts.length} NFTs from Solana mainnet`
+          : 'No NFTs found',
       },
     };
     res.json(response);
   } catch (error) {
-    errorLogger(error as Error, { endpoint: '/api/market' });
+    errorLogger(error as Error, { endpoint: '/api/v1/market' });
     res.status(500).json({
       success: false,
       error: 'Failed to get marketplace data',

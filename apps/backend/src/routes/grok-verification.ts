@@ -263,7 +263,7 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
     let urlObj: URL;
     try {
       urlObj = new URL(archiveUrl);
-    } catch (e) {
+    } catch (e: unknown) {
       throw new Error('Invalid archive URL format');
     }
     if (urlObj.hostname !== 'archive.org') {
