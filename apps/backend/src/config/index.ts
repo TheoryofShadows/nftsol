@@ -71,8 +71,16 @@ export const appConfig: AppConfig = {
     credentials: true,
   },
   rateLimit: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: parseInt(
+      process.env.RATE_LIMIT_WINDOW_MS ||
+        (process.env.NODE_ENV === 'production' ? `${15 * 60 * 1000}` : `${60 * 1000}`),
+      10
+    ),
+    max: parseInt(
+      process.env.RATE_LIMIT_MAX ||
+        (process.env.NODE_ENV === 'production' ? '100' : '2000'),
+      10
+    ),
   },
   fileUpload: {
     maxSize: 10 * 1024 * 1024, // 10MB

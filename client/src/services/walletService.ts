@@ -5,6 +5,7 @@
 
 import { WalletInfo } from '@shared/types';
 import { apiService } from './api';
+import { API_ENDPOINTS } from '../config/api';
 import { logger } from '@shared/utils/logger';
 import { NetworkError } from '@shared/utils/errors';
 
@@ -21,7 +22,7 @@ export class WalletService {
   async getWalletInfo(address: string): Promise<WalletInfo | null> {
     try {
       const response = await apiService.getWalletInfo(address);
-      
+
       if (!response.success || !response.data) {
         if (response.error?.includes('not found')) {
           return null;
@@ -42,11 +43,11 @@ export class WalletService {
    */
   async createWithdrawal(request: WithdrawalRequest): Promise<any> {
     try {
-      logger.info('Creating withdrawal request', { 
+      logger.info('Creating withdrawal request', {
         amount: request.amount,
         destination: request.destinationAddress,
       });
-      
+
       const response = await fetch(`${apiService['API_BASE'] || ''}/api/wallets/withdraw`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -59,7 +60,7 @@ export class WalletService {
       }
 
       const data = await response.json();
-      logger.info('Withdrawal request created', { 
+      logger.info('Withdrawal request created', {
         amount: request.amount,
       });
       return data;
@@ -75,7 +76,7 @@ export class WalletService {
   async getBalance(address: string): Promise<number> {
     try {
       const response = await fetch(`${apiService['API_BASE'] || ''}/api/nfts/balance/${address}`);
-      
+
       if (!response.ok) {
         throw new NetworkError(`Failed to fetch balance: ${response.statusText}`);
       }
@@ -93,14 +94,22 @@ export class WalletService {
    */
   async verifyAddress(address: string): Promise<boolean> {
     try {
-      const response = await fetch(`${apiService['API_BASE'] || ''}/api/nfts/verify/${address}`);
-      
-      if (!response.ok) {
+      const endpoint = API_ENDPOINTS.withdrawals.verify(address);
+      const response = await fetch(endpoint);
+      const data = await response.json();
+
+      if (!response.ok || data?.success === false) {
         return false;
       }
 
-      const data = await response.json();
-      return data.valid || false;
+      const isValid =
+        data?.valid ??
+        data?.data?.valid ??
+        data?.data?.exists ??
+        data?.exists ??
+        false;
+
+      return Boolean(isValid);
     } catch (error) {
       logger.error('Failed to verify wallet address', error, { address });
       return false;

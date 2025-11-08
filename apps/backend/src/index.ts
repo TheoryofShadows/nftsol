@@ -76,17 +76,17 @@ app.use(
   cors({
     origin: (origin, callback) => {
       const allowedOrigins = appConfig.cors.origin;
-      
+
       // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) {
         return callback(null, true);
       }
-      
+
       // Allow Netlify preview deployments (*.netlify.app)
       if (origin.endsWith('.netlify.app')) {
         return callback(null, true);
       }
-      
+
       // Check if origin is in allowed list
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -132,13 +132,13 @@ const limiter = rateLimit({
     if (path === '/healthz' || path === '/health' || path?.endsWith('/healthz') || path?.endsWith('/health')) {
       return true;
     }
-    
+
     // Skip rate limiting for Render's health check system
     const userAgent = req.get('User-Agent') || req.headers['user-agent'] || '';
     if (userAgent.includes('Render') || userAgent.includes('render.com')) {
       return true;
     }
-    
+
     // Skip rate limiting for internal IPs (Render's internal network)
     const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || '';
     if (ip.startsWith('10.') || ip.startsWith('172.16.') || ip.startsWith('192.168.') || ip === '::1' || ip === '127.0.0.1') {
@@ -147,7 +147,7 @@ const limiter = rateLimit({
         return true;
       }
     }
-    
+
     return false;
   },
 });
@@ -362,7 +362,7 @@ const apiV1 = expressPkg.Router();
 apiV1.get('/programs', async (req, res) => {
   // Calculate rewards vault dynamically
   const rewardsVault = await getRewardsVaultAddress();
-  
+
   const response: ApiResponse = {
     success: true,
     data: {
@@ -703,8 +703,8 @@ app.get('/api/public/stats', async (req, res) => {
 
     // Calculate total volume from sales (if price column exists)
     const volumeResult = await pool.query(`
-      SELECT COALESCE(SUM(CAST(price AS NUMERIC)), 0) as total_volume 
-      FROM nfts 
+      SELECT COALESCE(SUM(CAST(price AS NUMERIC)), 0) as total_volume
+      FROM nfts
       WHERE (status = 'sold' OR sold = true) AND price IS NOT NULL
     `);
     const totalVolume = parseFloat(volumeResult.rows[0]?.total_volume || '0');
@@ -751,11 +751,35 @@ app.use('/api/mint', mintRouter);
 app.get('/api/nfts/verify/:address', async (req, res) => {
   try {
     const { address } = req.params;
+    if (!address) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing wallet address',
+        code: 'MISSING_ADDRESS',
+      });
+    }
+
     const exists = await solanaService.accountExists(address);
-    res.json({ success: true, data: { exists, address } });
+
+    res.json({
+      success: true,
+      data: {
+        address,
+        exists,
+        valid: exists,
+      },
+      valid: exists,
+      message: exists
+        ? 'Wallet verified on Solana network'
+        : 'Wallet not found on Solana network',
+    });
   } catch (error) {
     errorLogger(error as Error, { endpoint: '/api/nfts/verify/:address' });
-    res.status(500).json({ success: false, error: 'Verification failed' });
+    res.status(500).json({
+      success: false,
+      error: 'Verification failed',
+      code: 'VERIFICATION_FAILED',
+    });
   }
 });
 
@@ -788,25 +812,25 @@ app.use('/api', (req, res, next) => {
   if (req.path.startsWith('/v1/')) {
     return next();
   }
-  
+
   // Redirect /api/auth/admin to /api/v1/auth/admin
   if (req.path === '/auth/admin' && req.method === 'POST') {
     req.url = '/api/v1/auth/admin';
     return next();
   }
-  
+
   // Redirect /api/admin/withdrawals to /api/v1/admin/withdrawals
   if (req.path.startsWith('/admin/withdrawals')) {
     req.url = '/api/v1' + req.path;
     return next();
   }
-  
+
   // Redirect /api/wallets/withdraw to /api/v1/wallets/withdraw
   if (req.path === '/wallets/withdraw' && req.method === 'POST') {
     req.url = '/api/v1/wallets/withdraw';
     return next();
   }
-  
+
   next();
 });
 
@@ -823,7 +847,7 @@ app.use('/api/transactions', transactionsRouter);
 app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
   try {
     const { email, walletAddress, referralCode, source } = req.body;
-    
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       const response: ApiResponse = {
         success: false,
@@ -832,7 +856,7 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
       };
       return res.status(400).json(response);
     }
-    
+
     // Store in database (will auto-create table if doesn't exist)
     await pool.query(`
       CREATE TABLE IF NOT EXISTS waitlist (
@@ -844,7 +868,7 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    
+
     await pool.query(`
       INSERT INTO waitlist (email, wallet_address, referral_code, source)
       VALUES ($1, $2, $3, $4)
@@ -853,14 +877,14 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
         referral_code = EXCLUDED.referral_code
       RETURNING id
     `, [email, walletAddress || null, referralCode || null, source || 'landing']);
-    
+
     // Log successful signup
     auditLogger(
       'WAITLIST_SIGNUP',
       `New waitlist signup: ${email}`,
       { email, hasWallet: !!walletAddress, hasReferral: !!referralCode }
     );
-    
+
     const response: ApiResponse = {
       success: true,
       message: 'Successfully joined waitlist! Check your email for updates.',
@@ -869,17 +893,17 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
         position: 'early', // Could query actual position
       },
     };
-    
+
     res.json(response);
   } catch (error) {
     console.error('Waitlist subscription error:', error);
-    
+
     const response: ApiResponse = {
       success: false,
       error: 'Failed to join waitlist. Please try again.',
       code: 'WAITLIST_ERROR',
     };
-    
+
     res.status(500).json(response);
   }
 });
@@ -990,15 +1014,15 @@ apiV1.get('/market', async (req, res) => {
     else {
       try {
         console.log(`[Market] Fetching marketplace NFTs (page ${page}, limit ${limit})...`);
-        
+
         // Strategy: Try to get NFTs from platform wallet first (fastest)
         // Then fallback to popular collections if available
         const platformOwner = process.env.PLATFORM_PUBLIC_KEY;
-        
+
         if (platformOwner) {
           try {
-            const result = await heliusService.getAssetsByOwner(platformOwner, { 
-              page, 
+            const result = await heliusService.getAssetsByOwner(platformOwner, {
+              page,
               limit,
             });
             nfts = result.items.map((item: any) => ({
@@ -1024,19 +1048,19 @@ apiV1.get('/market', async (req, res) => {
             nfts = [];
           }
         }
-        
+
         // If no NFTs from platform wallet, try database listings
         if (nfts.length === 0) {
           try {
             const listingsResult = await pool.query(
               `SELECT "mintAddress", name, description, image, "imageUrl", owner, collection, price, status, "listedAt"
-               FROM nfts 
+               FROM nfts
                WHERE (status = 'listed' OR status = 'active' OR listed = true)
                ORDER BY "listedAt" DESC NULLS LAST, "createdAt" DESC
                LIMIT $1 OFFSET $2`,
               [limit, (page - 1) * limit]
             );
-            
+
             if (listingsResult.rows.length > 0) {
               nfts = listingsResult.rows.map((row: any) => ({
                 id: row.mintAddress,
@@ -1054,10 +1078,10 @@ apiV1.get('/market', async (req, res) => {
                 source: 'database',
                 creator: row.owner || '',
               }));
-              
+
               // Get total count
               const countResult = await pool.query(
-                `SELECT COUNT(*) as count FROM nfts 
+                `SELECT COUNT(*) as count FROM nfts
                  WHERE (status = 'listed' OR status = 'active' OR listed = true)`
               );
               total = parseInt(countResult.rows[0]?.count || '0', 10);
@@ -1068,7 +1092,7 @@ apiV1.get('/market', async (req, res) => {
             nfts = [];
           }
         }
-        
+
         // Final fallback: Return empty array with helpful message
         if (nfts.length === 0) {
           console.log('[Market] No NFTs found - marketplace is empty. Users can mint NFTs to populate it.');
@@ -1084,14 +1108,14 @@ apiV1.get('/market', async (req, res) => {
       try {
         const mintAddresses = nfts.map((nft) => nft.mintAddress);
         const listingsResult = await pool.query(
-          `SELECT "mintAddress", price, status, "listedAt" FROM nfts 
+          `SELECT "mintAddress", price, status, "listedAt" FROM nfts
            WHERE "mintAddress" = ANY($1) AND (status = 'listed' OR status = 'active')`,
           [mintAddresses]
         );
         const listingsMap = new Map(
           listingsResult.rows.map((row: any) => [row.mintAddress, row])
         );
-        
+
         // Merge listing data
         nfts = nfts.map((nft) => {
           const listing = listingsMap.get(nft.mintAddress);
@@ -1137,7 +1161,7 @@ app.get('/api/nfts', async (req, res) => {
     const collection = req.query.collection as string;
     const status = req.query.status as string;
     const owner = req.query.owner as string;
-    
+
     let nfts: any[] = [];
 
     // If Echo collection, use Echo router logic
@@ -1153,21 +1177,21 @@ app.get('/api/nfts', async (req, res) => {
       // Get ALL NFTs from blockchain using Helius DAS API
       try {
         console.log(`[NFTs] Fetching ALL Solana NFTs for owner: ${owner}`);
-        
+
         // Get ALL NFTs from blockchain
         const heliusNFTs = await heliusService.getAssetsByOwner(owner, { limit: 1000 });
-        
+
         // Also fetch local listing status
         const localListings = await pool.query(`
           SELECT "mintAddress", status, price, "listedAt"
           FROM nfts
           WHERE owner = $1 AND (status = 'listed' OR status = 'active')
         `, [owner]);
-        
+
         const localListingsMap = new Map(
           localListings.rows.map(row => [row.mintAddress, row])
         );
-        
+
         // Merge: Show ALL blockchain NFTs with listing status
         nfts = heliusNFTs.items.map((nft: any) => {
           const localData = localListingsMap.get(nft.id);
@@ -1192,7 +1216,7 @@ app.get('/api/nfts', async (req, res) => {
             royalty: nft.royalty?.percent || 0,
           };
         });
-        
+
         console.log(`[NFTs] Found ${nfts.length} NFTs on blockchain for ${owner}`);
       } catch (e) {
         console.error('[NFTs] Helius error, falling back to local database:', e);
@@ -1240,7 +1264,7 @@ app.get('/api/nfts', async (req, res) => {
 apiV1.get('/wallet/:address', async (req, res) => {
   try {
     const { address } = req.params;
-    
+
     // Validate wallet address format
     if (!address || address.length < 32 || address.length > 44) {
       const response: ApiResponse = {
@@ -1321,7 +1345,7 @@ apiV1.get('/collections', async (req, res) => {
     let result;
     try {
       result = await pool.query(`
-        SELECT 
+        SELECT
           COALESCE(collection, 'Unknown') as id,
           COALESCE(collection, 'Unknown Collection') as name,
           COUNT(*) as "nftCount",
@@ -1338,7 +1362,7 @@ apiV1.get('/collections', async (req, res) => {
       // If that fails, try with 'collection_name' column
       try {
         result = await pool.query(`
-          SELECT 
+          SELECT
             COALESCE(collection_name, 'Unknown') as id,
             COALESCE(collection_name, 'Unknown Collection') as name,
             COUNT(*) as "nftCount",
@@ -1363,7 +1387,7 @@ apiV1.get('/collections', async (req, res) => {
         return res.json(response);
       }
     }
-    
+
     let rows = result.rows || [];
 
     // Fallback to Helius-derived collections if DB is empty
@@ -1430,7 +1454,7 @@ app.use((err: any, req: any, res: any, _next: any) => {
   // Log security-relevant errors (skip 429s for health checks)
   const isHealthCheck = req.path === '/healthz' || req.path === '/health' || req.url?.includes('/healthz') || req.url?.includes('/health');
   const isRenderHealthCheck = (req.get('User-Agent') || '').includes('Render');
-  
+
   if ((err.status === 401 || err.status === 403 || (err.status === 429 && !isHealthCheck && !isRenderHealthCheck))) {
     securityLogger(
       'ERROR_RESPONSE',
