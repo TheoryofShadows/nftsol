@@ -1,6 +1,6 @@
 /* eslint-disable react/forbid-dom-props */
 // Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoViewer.css)
-import React, { useEffect, useMemo, useState, lazy, Suspense, useRef } from 'react';
+import React, { useEffect, useMemo, useState, lazy, Suspense } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
@@ -127,8 +127,6 @@ export default function EchoViewer() {
     
     uniqueContributors.forEach((contributor) => {
       const hue = getContributorHue(contributor);
-      // Create a unique class name based on contributor address hash
-      const classHash = contributor.slice(0, 8).replace(/[^a-zA-Z0-9]/g, '');
       cssRules.push(
         `.echo-viewer-contributor-avatar[data-hue="${hue}"] { background-color: hsl(${hue}, 70%, 50%); }`
       );
@@ -213,13 +211,6 @@ export default function EchoViewer() {
 
   const getContributorInitial = (address: string) => {
     return address.slice(0, 2).toUpperCase();
-  };
-
-  const getContributorColor = (address: string) => {
-    // Generate a color based on address
-    const hash = address.split('').reduce((acc, char) => char.charCodeAt(0) + acc, 0);
-    const hue = hash % 360;
-    return `hsl(${hue}, 70%, 50%)`;
   };
 
   const getContributorHue = (address: string) => {

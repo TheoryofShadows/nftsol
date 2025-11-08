@@ -848,7 +848,7 @@ app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
   try {
     const { email, walletAddress, referralCode, source } = req.body;
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !/^[-.\w]+@([-\w]+\.)+[-\w]{2,}$/.test(email)) {
       const response: ApiResponse = {
         success: false,
         error: 'Valid email address is required',

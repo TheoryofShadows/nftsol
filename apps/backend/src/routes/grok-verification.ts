@@ -272,7 +272,7 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
 
     // Extract item identifier from path
     const pathnameParts = urlObj.pathname.split('/');
-    let itemId = pathnameParts[pathnameParts.length - 1] || '';
+    const itemId = pathnameParts[pathnameParts.length - 1] || '';
     // Enforce that the itemId contains only safe characters (letters, digits, hyphens, underscores)
     if (!/^[a-zA-Z0-9\-_]+$/.test(itemId)) {
       throw new Error('Invalid or unsafe archive item identifier');

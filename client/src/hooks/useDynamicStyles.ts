@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 /**
  * Hook to set CSS custom properties dynamically without using inline styles
@@ -8,8 +8,6 @@ export function useDynamicStyles(
   elementId: string,
   properties: Record<string, string | number>
 ) {
-  const styleRef = useRef<HTMLStyleElement | null>(null);
-
   useEffect(() => {
     // Create or get style element
     let styleElement = document.getElementById(
@@ -20,7 +18,6 @@ export function useDynamicStyles(
       styleElement = document.createElement('style');
       styleElement.id = `dynamic-styles-${elementId}`;
       document.head.appendChild(styleElement);
-      styleRef.current = styleElement;
     }
 
     // Build CSS rules
@@ -41,7 +38,6 @@ export function useDynamicStyles(
     };
   }, [elementId, properties]);
 
-  return styleRef.current;
 }
 
 /**

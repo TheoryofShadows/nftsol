@@ -1,12 +1,12 @@
 [allowlist]
   description = "Allowed patterns to reduce false positives"
   paths = [
-    "client/dist/",
-    "**/*.svg",
-    "**/*.png",
-    "**/*.jpg",
-    "**/*.webp",
-    "**/*.gif"
+    "^client/dist/",
+    "\\.svg$",
+    "\\.png$",
+    "\\.jpg$",
+    "\\.webp$",
+    "\\.gif$"
   ]
 
 [[rules]]
