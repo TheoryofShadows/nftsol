@@ -56,7 +56,7 @@ export const buildApiUrl = (endpoint: string): string => {
 };
 
 // Health check endpoint
-export const HEALTH_ENDPOINT = buildApiUrl('healthz');
+export const HEALTH_ENDPOINT = buildApiUrl('health');
 
 // API version prefix
 export const API_VERSION = 'v1';
@@ -64,7 +64,8 @@ export const API_PREFIX = `/api/${API_VERSION}`;
 
 // Common API endpoints
 export const API_ENDPOINTS = {
-  health: buildApiUrl('healthz'),
+  health: buildApiUrl('health'),
+  csrf: buildApiUrl(`${API_PREFIX}/csrf-token`),
   programs: buildApiUrl(`${API_PREFIX}/programs`),
   solanaStatus: buildApiUrl(`${API_PREFIX}/solana/status`),
   mint: buildApiUrl(`${API_PREFIX}/simple-mint`),

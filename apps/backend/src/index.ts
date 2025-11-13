@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-// morgan removed - using requestLogger instead
+import { sessionMiddleware } from './config/session';
 import compression from 'compression';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
@@ -10,7 +10,10 @@ import { createServer } from 'http';
 import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
 import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
-import { pool } from './lib/db';
+// Use mock database in development, real database in production
+const { pool } = process.env.NODE_ENV === 'development'
+  ? require('./lib/db-mock') 
+  : require('./lib/db');
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
   validateWallet,
@@ -26,6 +29,8 @@ import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
 import migrationRoutes from './routes/migrations';
 import jwt from 'jsonwebtoken';
+import nacl from 'tweetnacl';
+import bs58 from 'bs58';
 import nftRouter from './routes/nfts';
 import orbRouter from './routes/orb';
 import echoRouter from './routes/echo';
@@ -46,6 +51,9 @@ initializeSecrets();
 
 const app = express();
 const server = createServer(app);
+
+// Session middleware
+app.use(sessionMiddleware);
 
 // Security middleware
 app.use(
@@ -169,10 +177,11 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(sanitizeInput);
 
 // CSRF token endpoint
-app.get('/api/csrf-token', (req, res) => {
-  const token = generateCSRFToken();
-  // In a real app, store this in session
-  res.json({ csrfToken: token });
+app.get('/api/csrf-token', (req, res, next) => {
+  generateCSRFToken(req, res, () => {
+    // The token is now available in res.locals.csrfToken
+    res.json({ csrfToken: res.locals.csrfToken || '' });
+  });
 });
 
 // Configure multer for file uploads
@@ -218,7 +227,27 @@ async function checkDatabase(): Promise<{ healthy: boolean; details: any }> {
   }
 }
 
-// Health check endpoints
+// Simple health check endpoints
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'nftsol-backend'
+  });
+});
+
+// API health check endpoint (for frontend)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'nftsol-backend',
+    api: 'v1',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Detailed health check endpoint
 app.get('/healthz', async (req, res) => {
   try {
     // Use Promise.allSettled to prevent one failure from breaking the check
@@ -357,6 +386,29 @@ app.get('/api/health/detailed', async (req, res) => {
 // API router (v1)
 import expressPkg from 'express';
 const apiV1 = expressPkg.Router();
+
+// CSRF token endpoint
+apiV1.get('/csrf-token', (req, res) => {
+  // Generate CSRF token
+  const csrfToken = require('crypto').randomBytes(32).toString('hex');
+  
+  if (req.session) {
+    req.session.csrfToken = csrfToken;
+  }
+
+  // Set token in cookie
+  res.cookie('csrf-token', csrfToken, {
+    httpOnly: false, // Allow JavaScript to read
+    secure: false, // Allow HTTP in development
+    sameSite: 'lax',
+    maxAge: 3600000, // 1 hour
+  });
+  
+  res.json({
+    success: true,
+    csrfToken: csrfToken,
+  });
+});
 
 // Program configuration endpoint
 apiV1.get('/programs', async (req, res) => {
@@ -600,7 +652,21 @@ apiV1.post('/auth/admin', async (req, res) => {
       return res.status(403).json(response);
     }
 
-    // Signature verification would go here - wallet address check is sufficient for now
+    // Verify Ed25519 signature over the provided message
+    try {
+      const { PublicKey } = await import('@solana/web3.js');
+      const publicKeyBytes = new PublicKey(walletAddress).toBytes();
+      const signatureBytes = bs58.decode(signature);
+      const messageBytes = new TextEncoder().encode(message);
+      const ok = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+      if (!ok) {
+        securityLogger('ADMIN_AUTH_FAILED', { walletAddress, reason: 'Invalid signature' }, req);
+        return res.status(403).json({ success: false, error: 'Invalid signature', code: 'INVALID_SIGNATURE' });
+      }
+    } catch (e) {
+      securityLogger('ADMIN_AUTH_FAILED', { walletAddress, reason: 'Signature verification error', e: (e as Error).message }, req);
+      return res.status(400).json({ success: false, error: 'Signature verification error', code: 'VERIFY_ERROR' });
+    }
 
     // Generate admin JWT token
     const secret = process.env.JWT_SECRET;

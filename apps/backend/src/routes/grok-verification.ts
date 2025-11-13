@@ -121,7 +121,7 @@ router.post('/analyze-eternal-echo', async (req: Request, res: Response) => {
 
     // Fetch content from Internet Archive
     const archiveContent = await fetchArchiveContent(archiveUrl);
-    
+
     // Verify with Grok
     const verification = await verifyContentWithGrok(
       archiveContent.text || description,
@@ -189,27 +189,27 @@ async function verifyContentWithGrok(
 ): Promise<GrokVerificationResult> {
   // Mock implementation for now
   // In production, replace with actual Grok API calls
-  
+
   // Simulate AI processing
   const baseScore = Math.floor(Math.random() * 30) + 70; // 70-100
   const noise = Math.random() * 10 - 5;
-  
+
   // Analyze content characteristics
   const hasLinks = content.includes('http');
   const hasTimestamp = metadata?.timestamp !== undefined;
   const hasSource = metadata?.source !== undefined;
-  
+
   // Calculate sub-scores
   const factualAccuracy = Math.min(100, baseScore + (hasLinks ? 10 : 0));
   const sourceReliability = hasSource ? Math.min(100, baseScore + 15) : baseScore - 10;
   const contentAuthenticity = hasTimestamp ? Math.min(100, baseScore + 5) : baseScore;
   const biasDetection = Math.max(0, 100 - Math.abs(noise));
-  
+
   // Overall score is weighted average
   const score = Math.round(
-    (factualAccuracy * 0.4 + 
-     sourceReliability * 0.3 + 
-     contentAuthenticity * 0.2 + 
+    (factualAccuracy * 0.4 +
+     sourceReliability * 0.3 +
+     contentAuthenticity * 0.2 +
      biasDetection * 0.1)
   );
 
@@ -277,13 +277,13 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
     if (!/^[a-zA-Z0-9\-_]+$/.test(itemId)) {
       throw new Error('Invalid or unsafe archive item identifier');
     }
-    
+
     // Fetch metadata from Internet Archive
     const metadataUrl = `https://archive.org/metadata/${itemId}`;
     const response = await axios.get(metadataUrl, { timeout: 10000 });
-    
+
     const metadata = response.data;
-    
+
     return {
       text: metadata.metadata?.description || '',
       timestamp: metadata.metadata?.date || new Date().toISOString(),
@@ -360,7 +360,7 @@ function calculateEstimatedValue(score: number): number {
  */
 function generateSummary(score: number, flags: string[], recommendations: string[]): string {
   let summary = `Content verification score: ${score}/100. `;
-  
+
   if (score >= 90) {
     summary += 'This content demonstrates high authenticity and factual accuracy. ';
   } else if (score >= 75) {

@@ -3,19 +3,36 @@ import helmet from 'helmet';
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
-// Allowed origins for CORS (comma-separated)
-const allowedOrigins = (process.env.CORS_ORIGINS || '')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-
+// CORS configuration
 export const corsConfig = cors({
   origin: (origin, cb) => {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return cb(null, true);
-    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return cb(null, true);
-    return cb(new Error('CORS blocked'));
+    
+    // Allow all origins in development
+    if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === undefined) {
+      return cb(null, true);
+    }
+
+    // In production, only allow specific origins
+    const allowedOrigins = [
+      'https://nftsol.app',
+      'https://www.nftsol.app',
+      'https://nftsol.onrender.com'
+    ];
+
+    if (allowedOrigins.includes(origin)) {
+      return cb(null, true);
+    }
+
+    // Block the request
+    return cb(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
+  exposedHeaders: ['X-CSRF-Token'],
+  maxAge: 600 // 10 minutes
 });
 
 export const helmetConfig = helmet({ contentSecurityPolicy: false });

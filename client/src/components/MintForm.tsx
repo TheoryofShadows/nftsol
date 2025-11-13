@@ -20,7 +20,8 @@ export default function MintForm() {
       // First, verify wallet exists
       const { API_ENDPOINTS } = await import('../config/api');
       const verifyRes = await fetch(
-        API_ENDPOINTS.withdrawals.verify(publicKey!.toBase58())
+        API_ENDPOINTS.withdrawals.verify(publicKey!.toBase58()),
+        { credentials: 'include' }
       );
       const verifyData = await verifyRes.json();
 
@@ -36,21 +37,29 @@ export default function MintForm() {
         return;
       }
 
-      // Create image URL (in production, upload to IPFS first)
-      const imageUrl = URL.createObjectURL(file);
+      // Fetch CSRF token
+      const csrfRes = await fetch(API_ENDPOINTS.csrf, {
+        credentials: 'include',
+      });
+      const csrfData = await csrfRes.json();
+      if (!csrfData?.success || !csrfData?.csrfToken) {
+        throw new Error('Unable to obtain CSRF token');
+      }
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('description', `Minted NFT: ${name}`);
+      formData.append('creatorWallet', publicKey!.toBase58());
+      formData.append('file', file, file.name);
 
       // Mint NFT using real Solana blockchain
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          'x-csrf-token': csrfData.csrfToken,
         },
-        body: JSON.stringify({
-          toAddress: publicKey!.toBase58(),
-          name: name,
-          description: `Minted NFT: ${name}`,
-          imageUrl: imageUrl,
-        }),
+        body: formData,
       });
 
       const mintData = await mintRes.json();
@@ -65,10 +74,13 @@ export default function MintForm() {
         });
 
         // Show success notification
+        const mintAddress = mintData.data?.mintAddress || mintData.data?.mint;
         addNotification({
           type: 'success',
           title: '🎉 NFT Minted Successfully!',
-          message: `Your NFT "${name}" has been minted on Solana. Mint Address: ${mintData.data.mintAddress.slice(0, 8)}...`,
+          message: mintAddress
+            ? `Your NFT "${name}" has been minted on Solana. Mint Address: ${mintAddress.slice(0, 8)}...`
+            : `Your NFT "${name}" has been minted on Solana.`,
           duration: 6000,
         });
 

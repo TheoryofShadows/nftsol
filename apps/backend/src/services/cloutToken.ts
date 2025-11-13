@@ -20,7 +20,7 @@ import {
   getAccount,
   createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
-import { getPlatformKeypair } from '../lib/solana';
+import { getPlatformKeypair } from '../lib/platformKeypair';
 import { programConfig, solanaConfig } from '../config/index';
 import { getOrCreateCloutVault } from '../utils/clout-vault';
 

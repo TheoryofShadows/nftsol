@@ -1,0 +1,8 @@
+{
+    "schema": "./src/db/schema.ts",
+    "out": "./drizzle",
+    "driver": "pg",
+    "dbCredentials": {
+        "connectionString": "postgresql://postgres:newpassword@localhost:5433/nftsol"
+    }
+}

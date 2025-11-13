@@ -3,6 +3,7 @@ import logger from '../utils/logger';
 import { MintRequest, MintResponse, NFTMetadata } from '../types';
 import { ApiResponse } from '../types';
 import { mintNFT, accountExists } from '../lib/solana';
+import { ensurePlatformBalance } from '../lib/checkBalance';
 
 class NFTService {
   // Generate unique NFT metadata
@@ -91,6 +92,9 @@ class NFTService {
           error: 'Invalid wallet address or wallet does not exist',
         };
       }
+
+      // Ensure platform wallet is funded before attempting to mint
+      await ensurePlatformBalance();
 
       // Calculate fees (2.5% of mint cost)
       const MINT_COST_SOL = 0.01; // Base mint cost

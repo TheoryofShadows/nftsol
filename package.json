@@ -6,6 +6,11 @@
     "install:all": "npm ci --ignore-scripts && cd client && npm ci && cd ../apps/backend && npm ci && cd ../..",
     "build": "cd apps/backend && npm run build && cd ../../client && npm run build",
     "start": "cd apps/backend && npm start",
+    "start:prod": "cd apps/backend && npm run start:prod",
+    "dev": "cd apps/backend && npm run dev",
+    "test": "cd apps/backend && npm test",
+    "test:watch": "cd apps/backend && npm run test:watch",
+    "test:coverage": "cd apps/backend && npm run test:coverage",
     "lint": "npm run lint:root && npm run lint:client && npm run lint:backend",
     "lint:root": "echo \"Linting root files...\"",
     "lint:client": "cd client && npm run lint",
@@ -13,11 +18,19 @@
     "format": "prettier -w .",
     "format:check": "prettier -c .",
     "prepare": "husky install",
-    "scan:secrets": "node scripts/scan-secrets.js"
+    "scan:secrets": "node scripts/scan-secrets.js",
+    "audit": "cd apps/backend && npm audit",
+    "audit:fix": "cd apps/backend && npm audit fix",
+    "snyk-test": "cd apps/backend && npx snyk test",
+    "snyk-monitor": "cd apps/backend && npx snyk monitor",
+    "check-vulnerabilities": "cd apps/backend && npm run check-vulnerabilities",
+    "check-dependencies": "cd apps/backend && npm run check-dependencies",
+    "check-licenses": "cd apps/backend && npm run check-licenses"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^8.57.0",
@@ -32,5 +45,17 @@
     "{client,apps/backend}/**/*.{ts,tsx,js}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@solana/wallet-adapter-base": "^0.9.27",
+    "@solana/wallet-adapter-react": "^0.15.39",
+    "@solana/wallet-adapter-react-ui": "^0.9.39",
+    "@solana/wallet-adapter-walletconnect": "^0.1.21",
+    "@solana/wallet-adapter-wallets": "^0.19.37",
+    "@solana/web3.js": "^1.98.4",
+    "bs58": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2"
   }
 }

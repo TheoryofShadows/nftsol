@@ -66,7 +66,7 @@ export default function EchoViewer() {
     if (!ledgerId) return;
     fetchEchoes(ledgerId);
     let interval: NodeJS.Timeout | null = null;
-    
+
     const startPolling = () => {
       if (interval) clearInterval(interval);
       interval = setInterval(() => {
@@ -75,7 +75,7 @@ export default function EchoViewer() {
         }
       }, 60000); // 1 minute (optimized from 10 seconds)
     };
-    
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         if (interval) {
@@ -87,10 +87,10 @@ export default function EchoViewer() {
         startPolling();
       }
     };
-    
+
     startPolling();
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    
+
     return () => {
       if (interval) clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -111,7 +111,7 @@ export default function EchoViewer() {
   useEffect(() => {
     const uniqueContributors = new Set(echoes.map((e) => e.contributor));
     const styleId = 'echo-viewer-contributor-styles';
-    
+
     // Remove existing style element
     const existingStyle = document.getElementById(styleId);
     if (existingStyle) {
@@ -124,7 +124,7 @@ export default function EchoViewer() {
     const styleElement = document.createElement('style');
     styleElement.id = styleId;
     const cssRules: string[] = [];
-    
+
     uniqueContributors.forEach((contributor) => {
       const hue = getContributorHue(contributor);
       cssRules.push(

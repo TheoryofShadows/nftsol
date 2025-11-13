@@ -1,86 +1,65 @@
 import { config } from 'dotenv';
+import path from 'path';
 import { AppConfig, SolanaConfig, DatabaseConfig, ProgramConfig } from '../types';
 import { initializeSecrets } from '../lib/secrets-loader';
 
-config();
+// Load environment variables from .env file
+config({ path: path.resolve(__dirname, '../../.env') });
 
-// Initialize secrets from /etc/secrets/ or environment variables
+// Initialize any secrets if needed
 initializeSecrets();
 
-const requiredEnvVars = [
-  'NODE_ENV',
-  'PORT', // Render automatically sets this
-  'SOLANA_RPC_URL',
-  'ALLOWED_ORIGINS', // Required in production - server will throw error if missing
-  // CLOUT_PROGRAM_ID has defaults, so it's optional
-  // MARKET_PROGRAM_ID has defaults, so it's optional
-  // LOYALTY_PROGRAM_ID has defaults, so it's optional
-  // REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT, so it's optional
-];
+// Helper to safely parse environment variables
+const getEnv = (key: string, defaultValue: string): string => 
+  process.env[key] !== undefined ? process.env[key]! : defaultValue;
 
-if (process.env.NODE_ENV !== 'production') {
-  process.env.SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
-  process.env.SOLANA_CLUSTER = process.env.SOLANA_CLUSTER || 'devnet';
-  // Provide a safe default JWT secret in development to avoid 500s on auth routes
-  process.env.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-not-for-production';
-}
+// Environment configuration
+export const env = {
+  // Server
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: parseInt(process.env.PORT || '3001', 10),
+  
+  // Database
+  DATABASE_URL: process.env.DATABASE_URL || '',
+  
+  // Solana
+  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  SOLANA_WS_URL: process.env.SOLANA_WS_URL,
+  SOLANA_COMMITMENT: (process.env.SOLANA_COMMITMENT || 'confirmed') as 'confirmed' | 'processed' | 'finalized',
+  
+  // JWT
+  JWT_SECRET: process.env.JWT_SECRET || 'your-jwt-secret-minimum-32-characters',
+  
+  // CORS
+  ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ],
+  
+  // Helius
+  HELIUS_API_KEY: process.env.HELIUS_API_KEY || '',
+  
+  // Other environment variables
+  IS_PRODUCTION: process.env.NODE_ENV === 'production',
+  IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
+  IS_TEST: process.env.NODE_ENV === 'test',
+};
 
-// CLOUT token mint address (devnet: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
-if (!process.env.CLOUT_MINT) {
-  process.env.CLOUT_MINT = process.env.CLOUT_PROGRAM_ID || '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab';
-}
-// CLOUT_PROGRAM_ID is kept for backward compatibility, but CLOUT_MINT is the actual token mint
-if (!process.env.CLOUT_PROGRAM_ID) {
-  process.env.CLOUT_PROGRAM_ID = process.env.CLOUT_MINT;
-}
-
-// Default program IDs (only if not set)
-if (!process.env.MARKET_PROGRAM_ID) {
-  process.env.MARKET_PROGRAM_ID = 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7';
-}
-if (!process.env.LOYALTY_PROGRAM_ID) {
-  process.env.LOYALTY_PROGRAM_ID = '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9';
-}
-// REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT
-// No need for hardcoded default - it will be calculated dynamically when needed
-
-if (process.env.NODE_ENV === 'production') {
-  for (const envVar of requiredEnvVars) {
-    if (!process.env[envVar]) {
-      // ALLOWED_ORIGINS is checked separately in index.ts with better error message
-      if (envVar === 'ALLOWED_ORIGINS') {
-        continue; // Let index.ts handle this with clearer error
-      }
-      throw new Error(`Missing required environment variable: ${envVar}`);
-    }
-  }
-}
+export default env;
 
 export const appConfig: AppConfig = {
-  port: parseInt(process.env.PORT || '3001', 10),
-  nodeEnv: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',
+  port: parseInt(getEnv('PORT', '3001'), 10),
+  nodeEnv: (getEnv('NODE_ENV', 'development') as 'development' | 'production' | 'test'),
   cors: {
-    origin: process.env.ALLOWED_ORIGINS?.split(',').map((o) => o.trim()) || [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'https://nftsol.app',
-      'https://www.nftsol.app',
-      'https://market.nftsol.app',
-      'https://nftsolmarket.netlify.app',
-    ],
+    origin: getEnv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000')
+      .split(',')
+      .map(o => o.trim()),
     credentials: true,
   },
   rateLimit: {
-    windowMs: parseInt(
-      process.env.RATE_LIMIT_WINDOW_MS ||
-        (process.env.NODE_ENV === 'production' ? `${15 * 60 * 1000}` : `${60 * 1000}`),
-      10
-    ),
-    max: parseInt(
-      process.env.RATE_LIMIT_MAX ||
-        (process.env.NODE_ENV === 'production' ? '100' : '2000'),
-      10
-    ),
+    windowMs: parseInt(getEnv('RATE_LIMIT_WINDOW_MS', '60000'), 10),
+    max: parseInt(getEnv('RATE_LIMIT_MAX', '2000'), 10),
   },
   fileUpload: {
     maxSize: 10 * 1024 * 1024, // 10MB
@@ -89,14 +68,19 @@ export const appConfig: AppConfig = {
 };
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
+  rpcUrl: getEnv('SOLANA_RPC_URL', 'https://api.devnet.solana.com'),
   commitment: 'confirmed',
-  cluster: (process.env.SOLANA_CLUSTER as 'mainnet-beta' | 'devnet' | 'testnet') || 'devnet',
+  cluster: (getEnv('SOLANA_CLUSTER', 'devnet') as 'devnet' | 'testnet' | 'mainnet-beta'),
 };
 
+// Database configuration with proper SSL handling
+type SslConfig = boolean | { rejectUnauthorized?: boolean };
+
 export const databaseConfig: DatabaseConfig = {
-  url: process.env.DATABASE_URL || '',
-  ssl: process.env.NODE_ENV === 'production',
+  url: process.env.NODE_ENV === 'development' 
+    ? 'mock://localhost/nftsol' 
+    : getEnv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/nftsol'),
+  ssl: (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false) as SslConfig,
   pool: {
     min: 2,
     max: 10,
@@ -104,32 +88,8 @@ export const databaseConfig: DatabaseConfig = {
 };
 
 export const programConfig: ProgramConfig = {
-  // Use CLOUT_MINT if available (actual token mint), otherwise CLOUT_PROGRAM_ID
-  cloutProgramId: process.env.CLOUT_MINT || process.env.CLOUT_PROGRAM_ID || '',
-  marketProgramId: process.env.MARKET_PROGRAM_ID || '',
-  loyaltyProgramId: process.env.LOYALTY_PROGRAM_ID || '',
-  rewardsVault: process.env.REWARDS_VAULT || '',
-};
-
-export const withdrawalConfig = {
-  solanaRpcUrl: process.env.SOLANA_RPC_URL || process.env.SOLANA_RPC_DEVNET || 'https://api.devnet.solana.com',
-  platformSecretKeyBase58: process.env.PLATFORM_SECRET_KEY_BASE58 || '',
-  platformSecretKeyJson: process.env.PLATFORM_SECRET_KEY_JSON || '',
-  autoApproveLamports: parseInt(process.env.WITHDRAWAL_AUTO_APPROVE_LAMPORTS || '100000000', 10), // 0.1 SOL
-  dailyLimitLamports: parseInt(process.env.WITHDRAWAL_DAILY_LIMIT_LAMPORTS || '5000000000', 10), // 5 SOL
-  rateLimitWindowMs: parseInt(process.env.WITHDRAWAL_RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes
-  rateLimitMax: parseInt(process.env.WITHDRAWAL_RATE_LIMIT_MAX || '5', 10), // 5 requests per window
-};
-
-// Validation helpers
-export const validateWalletAddress = (address: string): boolean => {
-  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
-};
-
-export const validateFileType = (mimetype: string): boolean => {
-  return appConfig.fileUpload.allowedTypes.includes(mimetype);
-};
-
-export const validateFileSize = (size: number): boolean => {
-  return size <= appConfig.fileUpload.maxSize;
+  cloutProgramId: getEnv('CLOUT_MINT', getEnv('CLOUT_PROGRAM_ID', '')),
+  marketProgramId: getEnv('MARKET_PROGRAM_ID', ''),
+  loyaltyProgramId: getEnv('LOYALTY_PROGRAM_ID', ''),
+  rewardsVault: getEnv('REWARDS_VAULT', ''),
 };

@@ -1,0 +1,7 @@
+[Secrets] ⚠️ Could not find PINATA_SECRET_KEY (env: PINATA_SECRET_KEY)
+[Secrets] ⚠️ Could not find IRYS_WALLET_PRIVATE_KEY (env: IRYS_WALLET_PRIVATE_KEY)
+[Secrets] ⚠️ Could not find BUBBLEGUM_TREE_ADDRESS (env: BUBBLEGUM_TREE_ADDRESS)
+[Secrets] ⚠️ Could not find PINATA_SECRET_KEY (env: PINATA_SECRET_KEY)
+[Secrets] ⚠️ Could not find IRYS_WALLET_PRIVATE_KEY (env: IRYS_WALLET_PRIVATE_KEY)
+[Secrets] ⚠️ Could not find BUBBLEGUM_TREE_ADDRESS (env: BUBBLEGUM_TREE_ADDRESS)
+REWARDS_OWNER or PLATFORM_WALLET not configured

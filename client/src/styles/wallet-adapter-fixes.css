@@ -15,11 +15,12 @@ button[aria-label*="No Solana wallets"] {
 /* Hide any element with warning-like styling */
 [style*="background"][style*="yellow"][style*="rgb"],
 [style*="background"][style*="#FF"][style*="rgb"],
-/* Hide wallet adapter button when showing warning state */
-button[class*="wallet-adapter"][aria-label*="No"],
-button[class*="wallet-adapter"][aria-label*="Install"] {
+/* Hide wallet adapter button ONLY when showing "No wallets detected" warning - be specific */
+button[class*="wallet-adapter"][aria-label*="No wallets detected"],
+button[class*="wallet-adapter"][aria-label="Install wallet"] {
   display: none !important;
 }
+/* DO NOT hide the connect/select wallet buttons */
 
 /* Better mobile wallet button styling */
 @media (max-width: 768px) {
@@ -42,11 +43,12 @@ button[class*="wallet-adapter"][aria-label*="Install"] {
   div[class*="wallet-adapter"] > div[role="alert"],
   div[class*="wallet-adapter"] > div[class*="alert"],
   div[class*="wallet-adapter"] > div[class*="warning"],
-  /* Hide any button showing "No wallets" state */
-  button[class*="wallet-adapter"][aria-label*="No"],
-  button[class*="wallet-adapter"][aria-label*="Install"] {
+  /* Hide only "No wallets detected" warnings on mobile - be specific */
+  button[class*="wallet-adapter"][aria-label*="No wallets detected"],
+  button[class*="wallet-adapter"][aria-label="Install wallet"] {
     display: none !important;
   }
+  /* Keep the actual wallet select buttons visible */
   
   /* Ensure modal is full width on mobile */
   .wallet-adapter-modal {

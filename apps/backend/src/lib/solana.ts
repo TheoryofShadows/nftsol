@@ -1,7 +1,6 @@
 // src/lib/solana.ts
 import {
   Connection,
-  Keypair,
   PublicKey,
   Transaction,
   SystemProgram,
@@ -9,66 +8,27 @@ import {
   Commitment,
 } from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
-import bs58 from 'bs58';
+import { getPlatformKeypair } from './platformKeypair';
 
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
 export const SOLANA_COMMITMENT: Commitment = 'confirmed';
 export const connection = new Connection(RPC_URL, SOLANA_COMMITMENT);
 
-
-export function loadPlatformKeypair(): Keypair {
-  const base58 = process.env.PLATFORM_SECRET_KEY_BASE58;
-  const json = process.env.PLATFORM_SECRET_KEY_JSON;
-  if (base58) {
-    const secret = bs58.decode(base58);
-    return Keypair.fromSecretKey(Uint8Array.from(secret));
-  }
-  if (json) {
-    const arr = JSON.parse(json);
-    return Keypair.fromSecretKey(Uint8Array.from(arr));
-  }
-  throw new Error(
-    'Missing PLATFORM secret key env (PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON)'
-  );
-}
-
-// Lazy load platform keypair to prevent startup failures
-let _platformKeypair: Keypair | null = null;
 let _metaplex: any = null;
-
-export function getPlatformKeypair(): Keypair | null {
-  // Only load if env vars are set (development mode may not need it)
-  if (!process.env.PLATFORM_SECRET_KEY_BASE58 && !process.env.PLATFORM_SECRET_KEY_JSON) {
-    return null;
-  }
-
-  if (!_platformKeypair) {
-    try {
-      _platformKeypair = loadPlatformKeypair();
-    } catch (error) {
-      console.warn(
-        '[Solana] Platform keypair not available:',
-        error instanceof Error ? error.message : error
-      );
-      return null;
-    }
-  }
-  return _platformKeypair;
-}
 
 export function getMetaplex() {
   const keypair = getPlatformKeypair();
-  if (!keypair) {
-    throw new Error(
-      'Platform keypair not configured. Set PLATFORM_SECRET_KEY_BASE58 or PLATFORM_SECRET_KEY_JSON'
-    );
-  }
-
   if (!_metaplex) {
     _metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
   }
   return _metaplex;
 }
+
+// Legacy export for backward compatibility
+/**
+ * @deprecated Use getPlatformKeypair() instead
+ */
+export const loadPlatformKeypair = getPlatformKeypair;
 
 // Legacy exports removed - use getPlatformKeypair() and getMetaplex() directly
 // This prevents startup failures when platform keypair is not configured
@@ -122,13 +82,6 @@ export async function sendSOL(toAddress: string, amountSol: number) {
   try {
     const toPublicKey = new PublicKey(toAddress);
     const keypair = getPlatformKeypair();
-
-    if (!keypair) {
-      return {
-        success: false,
-        error: 'Platform keypair not available',
-      };
-    }
 
     // Validate amount
     if (amountSol <= 0 || !Number.isFinite(amountSol)) {

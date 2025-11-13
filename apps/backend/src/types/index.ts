@@ -50,7 +50,7 @@ export interface SolanaConfig {
 
 export interface DatabaseConfig {
   url: string;
-  ssl: boolean;
+  ssl: boolean | { rejectUnauthorized?: boolean };
   pool: {
     min: number;
     max: number;

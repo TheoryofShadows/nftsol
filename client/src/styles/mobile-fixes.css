@@ -412,26 +412,22 @@
   margin-bottom: 0.5rem !important;
 }
 
-/* Hide wallet adapter warning messages on mobile */
-.wallet-adapter-button[aria-label*="No"] {
+/* Hide wallet adapter warning messages on mobile - ONLY warnings, not buttons */
+.wallet-adapter-button[aria-label*="No wallets detected"] {
   display: none !important;
 }
 
-/* Custom wallet button styling - hide default warning */
-button.wallet-adapter-button-trigger {
-  display: none !important;
-}
+/* DO NOT hide the wallet button trigger - users need this to connect! */
+/* button.wallet-adapter-button-trigger - REMOVED - was preventing wallet connection */
 
-/* Hide the "No Solana wallets detected" alert/message - More aggressive selectors */
+/* Hide the "No Solana wallets detected" alert/message - More targeted selectors */
 .wallet-adapter-modal-title[data-state*="no-wallet"],
 div[class*="wallet-adapter"][class*="no-wallet"],
-div[class*="wallet-adapter"][class*="warning"],
-/* Hide any div with yellow background (warning style) */
-div[style*="background"][style*="yellow"],
-div[style*="background"][style*="#FF"],
-div[style*="background"][style*="rgb(255, 193"],
-/* Hide wallet adapter button when showing "No wallets" */
-button[class*="wallet-adapter-button"]:not([class*="connect"]):not([class*="select"]) {
+/* Hide yellow warning banners but not buttons */
+div[class*="wallet-adapter"][class*="warning"]:not(button),
+div[style*="background"][style*="yellow"]:not(button),
+div[style*="background"][style*="#FF"]:not(button),
+div[style*="background"][style*="rgb(255, 193"]:not(button) {
   display: none !important;
 }
 

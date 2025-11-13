@@ -1,15 +1,7 @@
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
-import {
-  PhantomWalletAdapter,
-  SolflareWalletAdapter,
-  TorusWalletAdapter,
-  LedgerWalletAdapter,
-  MathWalletAdapter,
-  TokenPocketWalletAdapter,
-  TrustWalletAdapter,
-} from '@solana/wallet-adapter-wallets';
+import { getRpcUrl, getWalletAdapters } from './config/wallet';
 import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
 import { OnboardingProvider } from './context/OnboardingContext';
@@ -35,7 +27,8 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
 ) => {
   return lazy(async () => {
     try {
-      return await importFn();
+      const module = await importFn();
+      return { default: module.default } as { default: T };
     } catch (error: any) {
       console.error('Failed to load component:', error);
       // Log additional details for debugging
@@ -47,24 +40,18 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
         });
       }
       // Return a fallback component that still allows the app to function
-      return {
-        default: () => (
-        <div className="flex items-center justify-center p-8">
-          <div className="text-center">
-            <p className="text-red-400 mb-4">Failed to load component</p>
-            <p className="text-gray-400 text-sm mb-4">
-              {import.meta.env.DEV ? error?.message : 'Please try refreshing the page'}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              Reload Page
-            </button>
-          </div>
+      const FallbackComponent = () => (
+        <div className="p-4 text-red-500">
+          <div>Component failed to load. Please try refreshing the page.</div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors text-white mt-2"
+          >
+            Reload Page
+          </button>
         </div>
-        ),
-      } as { default: T };
+      );
+      return { default: FallbackComponent as unknown as T };
     }
   });
 };
@@ -862,20 +849,9 @@ function AppContent() {
 }
 
 function App() {
-  // Use environment variable for RPC URL or fallback to devnet for local development
-  // Note: In Vite, use import.meta.env, not process.env
-  const endpoint = (import.meta.env.VITE_SOLANA_RPC_URL as string) || clusterApiUrl('devnet');
-
-  // Initialize all wallet adapters
-  const wallets = [
-    new PhantomWalletAdapter(),
-    new SolflareWalletAdapter(),
-    new TrustWalletAdapter(),
-    new TokenPocketWalletAdapter(),
-    new LedgerWalletAdapter(),
-    new MathWalletAdapter(),
-    new TorusWalletAdapter(),
-  ];
+  // Get RPC URL and wallet adapters from config
+  const endpoint = getRpcUrl();
+  const wallets = getWalletAdapters();
 
   return (
       <ErrorBoundary>

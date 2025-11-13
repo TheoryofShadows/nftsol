@@ -51,6 +51,14 @@ router.get('/:address', async (req: Request, res: Response) => {
     if (beforeTime) options.beforeTime = parseInt(beforeTime as string, 10);
     if (afterTime) options.afterTime = parseInt(afterTime as string, 10);
 
+    // Ensure Helius is configured
+    if (!heliusService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Helius API key not configured',
+      });
+    }
+
     // Fetch transactions using Helius' new API
     const result = await heliusService.getTransactionsForAddress(address, options);
 
@@ -95,6 +103,14 @@ router.get('/:address/all', async (req: Request, res: Response) => {
 
     const maxTransactions = Math.min(parseInt(max as string, 10) || 10000, 50000);
 
+    // Ensure Helius is configured
+    if (!heliusService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Helius API key not configured',
+      });
+    }
+
     // Fetch ALL transactions (auto-paginated)
     const transactions = await heliusService.getAllTransactionsForAddress(
       address,
@@ -133,6 +149,14 @@ router.get('/:address/summary', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: 'Invalid address',
+      });
+    }
+
+    // Ensure Helius is configured
+    if (!heliusService.isConfigured()) {
+      return res.status(503).json({
+        success: false,
+        error: 'Helius API key not configured',
       });
     }
 

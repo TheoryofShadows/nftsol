@@ -14,6 +14,15 @@
 import { Connection, Keypair, PublicKey } from '@solana/web3.js';
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { keypairIdentity, generateSigner, publicKey as toPublicKey } from '@metaplex-foundation/umi';
+import { Umi, PublicKey as UmiPublicKey, KeypairSigner, TransactionBuilder } from '@metaplex-foundation/umi';
+
+type UmiInstance = Umi & {
+  rpc: any;
+  uploader: {
+    uploadJson: (json: any) => Promise<string>;
+  };
+};
+
 import { 
   createTree, 
   mintV1, 
@@ -21,8 +30,17 @@ import {
 } from '@metaplex-foundation/mpl-bubblegum';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { solanaConfig } from '../config';
-import { getPlatformKeypair } from '../lib/solana';
+import { BUBBLEGUM_PROGRAM_ID } from '../config/programs';
+import { getPlatformKeypair } from '../lib/platformKeypair';
 import bs58 from 'bs58';
+import { publicKey } from '@metaplex-foundation/umi';
+
+// Merkle tree configuration
+const MERKLE_TREE_CONFIG = {
+  maxDepth: 14, // Supports up to 16,384 NFTs (2^14)
+  maxBufferSize: 64,
+  canopyDepth: 0, // No canopy for maximum compression
+};
 
 interface UltraCheapMintParams {
   toAddress: string;
@@ -52,18 +70,20 @@ export class UltraCheapMintService {
 
   constructor() {
     this.connection = new Connection(solanaConfig.rpcUrl, 'confirmed');
-    this.initializeUmi();
+    // Don't initialize UMI yet, wait for first use
+    this.umi = null;
   }
 
   /**
    * Initialize UMI with platform keypair
    */
   private async initializeUmi() {
+    if (this.umi) return this.umi;
+    
     try {
       const platformKeypair = getPlatformKeypair();
       if (!platformKeypair) {
-        console.error('[UltraCheapMint] Platform keypair not found');
-        return;
+        throw new Error('Platform keypair not found');
       }
 
       // Create UMI instance
@@ -72,18 +92,66 @@ export class UltraCheapMintService {
       // Convert Solana keypair to UMI keypair format
       const umiKeypair = this.umi.eddsa.createKeypairFromSecretKey(platformKeypair.secretKey);
       
-      // Set identity
-      this.umi.use(keypairIdentity(umiKeypair));
-      
-      // Add Bubblegum program
-      this.umi.use(mplBubblegum());
-      
-      // Add Irys uploader for metadata
-      this.umi.use(irysUploader());
+      // Set identity and programs
+      this.umi
+        .use(keypairIdentity(umiKeypair))
+        .use(mplBubblegum()) // Add Bubblegum program
+        .use(irysUploader()); // Add Irys uploader for metadata
 
       console.log('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
+      
+      return this.umi;
+      
     } catch (error) {
-      console.error('[UltraCheapMint] UMI initialization failed:', error);
+      console.error('[UltraCheapMint] Initialization failed:', error);
+      throw error; // Re-throw to prevent silent failures
+    }
+  }
+
+  /**
+   * Ensure merkle tree exists and is funded
+   */
+  private async ensureMerkleTree(attempt = 1, maxAttempts = 3) {
+    if (this.merkleTree) return this.merkleTree;
+
+    try {
+      console.log(`[UltraCheapMint] Attempting to create merkle tree (attempt ${attempt}/${maxAttempts})...`);
+      
+      // In a real app, you'd want to store and load the tree address
+      const merkleTree = generateSigner(this.umi);
+      
+      const builder = await createTree(this.umi, {
+        merkleTree,
+        maxDepth: MERKLE_TREE_CONFIG.maxDepth,
+        maxBufferSize: MERKLE_TREE_CONFIG.maxBufferSize,
+        public: false,
+      });
+      
+      const result = await builder.sendAndConfirm(this.umi);
+      
+      if (!result.signature) {
+        throw new Error('No signature in transaction result');
+      }
+      
+      this.merkleTree = merkleTree;
+      console.log(`[UltraCheapMint] Successfully created merkle tree: ${merkleTree.publicKey}`);
+      
+      return merkleTree;
+      
+    } catch (error) {
+      console.error(`[UltraCheapMint] Attempt ${attempt} failed to create merkle tree:`, error instanceof Error ? error.message : 'Unknown error');
+      
+      if (attempt >= maxAttempts) {
+        console.warn(`[UltraCheapMint] Max attempts (${maxAttempts}) reached. Will retry on next mint.`);
+        throw new Error(`Failed to create merkle tree after ${maxAttempts} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+      
+      // Wait before retrying (exponential backoff)
+      const delayMs = Math.min(1000 * Math.pow(2, attempt), 10000); // Max 10s delay
+      console.log(`[UltraCheapMint] Retrying in ${delayMs}ms...`);
+      
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+      return this.ensureMerkleTree(attempt + 1, maxAttempts);
     }
   }
 
@@ -124,12 +192,16 @@ export class UltraCheapMintService {
         maxBufferSize: 64,
       });
 
-      await builder.sendAndConfirm(this.umi);
+      await builder.sendAndConfirm(this.umi).catch(error => {
+        console.error('Failed to create tree:', error);
+        throw error;
+      });
 
       this.merkleTree = merkleTreeSigner.publicKey;
       
-      console.log('[UltraCheapMint] ✅ New Merkle tree created:', merkleTreeSigner.publicKey);
-      console.log('[UltraCheapMint] 💡 Store this address to reuse: BUBBLEGUM_TREE_ADDRESS=', merkleTreeSigner.publicKey);
+      console.log(`[UltraCheapMint] Merkle tree created at: ${this.merkleTree}`);
+      console.log(`[UltraCheapMint] Merkle tree address: ${this.merkleTree.toBase58()}`);
+      console.log(`[UltraCheapMint] Store this address to reuse: BUBBLEGUM_TREE_ADDRESS=${this.merkleTree}`);
 
       return this.merkleTree;
     } catch (error) {
@@ -220,54 +292,58 @@ export class UltraCheapMintService {
    * Speed: ~5-10 seconds
    * Standard: Metaplex Bubblegum (latest 2024+ standard)
    */
-  async mintNFT(params: UltraCheapMintParams): Promise<MintResult> {
+  async mint(params: UltraCheapMintParams): Promise<MintResult> {
     try {
-      if (!this.umi) {
-        await this.initializeUmi();
-        if (!this.umi) {
-          return { success: false, error: 'UMI not initialized' };
-        }
+      // Initialize UMI if not already done
+      await this.initializeUmi();
+      
+      // Ensure merkle tree exists
+      await this.ensureMerkleTree();
+      
+      if (!this.merkleTree) {
+        throw new Error('Failed to initialize merkle tree');
       }
 
       console.log('[UltraCheapMint] Starting compressed NFT mint...');
-
-      // 1. Get or create Merkle tree
-      const merkleTree = await this.getOrCreateMerkleTree();
-      if (!merkleTree) {
-        return { success: false, error: 'Merkle tree unavailable' };
-      }
-
-      // 2. Upload metadata to Arweave
+      // Upload metadata to Irys
       const metadataUri = await this.uploadMetadata(params);
-
-      // 3. Convert owner address to UMI PublicKey format
-      const leafOwner = toPublicKey(params.toAddress);
-
-      // 4. Mint compressed NFT
-      console.log('[UltraCheapMint] Minting to tree:', merkleTree);
       
-      const builder = await mintV1(this.umi, {
-        leafOwner,
-        merkleTree,
+      // Mint the cNFT
+      const merkleTreePublicKey = new PublicKey(this.merkleTree);
+      const [treeAuthority] = PublicKey.findProgramAddressSync(
+        [merkleTreePublicKey.toBuffer()],
+        BUBBLEGUM_PROGRAM_ID
+      );
+      const mintBuilder = await mintV1(this.umi, {
+        leafOwner: publicKey(params.toAddress),
+        merkleTree: merkleTreePublicKey,
         metadata: {
           name: params.name,
-          symbol: params.symbol || 'NFTSOL',
+          symbol: params.symbol || 'NFT',
           uri: metadataUri,
-          sellerFeeBasisPoints: 0, // 0% royalties
-          collection: null,
-          creators: [],
+          sellerFeeBasisPoints: 0,
+          collection: {
+            key: this.umi.identity.publicKey,
+            verified: false
+          },
+          creators: [{
+            address: this.umi.identity.publicKey,
+            verified: true,
+            share: 100,
+          }],
         },
       });
-
-      const result = await builder.sendAndConfirm(this.umi);
-
-      console.log('[UltraCheapMint] ✅ Mint transaction confirmed');
-
-      // 5. Get the asset ID (deterministic based on tree + leaf index)
-      // In Bubblegum, the asset ID is derived from the tree and leaf index
-      // For now, we'll return the tree address and signature
-      const assetId = `${merkleTree}`;
-      const signature = result.signature ? bs58.encode(result.signature) : 'pending';
+      
+      const mintResult = await mintBuilder.sendAndConfirm(this.umi).catch(error => {
+        console.error('Mint transaction failed:', error);
+        throw error;
+      });
+      
+      console.log('[UltraCheapMint] Mint transaction confirmed');
+      
+      // Get the asset ID from the transaction result
+      const signature = mintResult.signature ? bs58.encode(mintResult.signature) : 'pending';
+      const assetId = merkleTree.publicKey.toString();
 
       // Calculate actual cost
       const { solCost, usdCost } = await this.estimateCost();

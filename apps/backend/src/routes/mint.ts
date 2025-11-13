@@ -80,7 +80,7 @@ router.post('/ultra-cheap', sanitizeInput, validateWallet, async (req: Request, 
       return res.status(400).json(response);
     }
 
-    const result = await ultraCheapMintService.mintNFT({
+    const result = await ultraCheapMintService.mint({
       toAddress,
       name,
       symbol,

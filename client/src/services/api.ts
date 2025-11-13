@@ -11,6 +11,26 @@ import {
 
 import { API_BASE, API_ENDPOINTS } from '../config/api';
 
+// CSRF token management
+let csrfToken: string | null = null;
+
+// Get CSRF token from cookies
+const getCSRFToken = (): string | null => {
+  if (csrfToken) return csrfToken;
+  
+  // Extract from cookies
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=');
+    if (name === 'csrf-token') {
+      csrfToken = decodeURIComponent(value);
+      return csrfToken;
+    }
+  }
+  
+  return null;
+};
+
 class ApiService {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     // Endpoint might already be a full URL from API_ENDPOINTS, or a relative path
@@ -23,11 +43,21 @@ class ApiService {
       url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     }
 
+    // Add CSRF token for POST/PUT/DELETE requests
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options.headers as Record<string, string>,
+    };
+    
+    if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
+      const token = getCSRFToken();
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+    }
+    
     const defaultOptions: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     };
 
@@ -78,6 +108,28 @@ class ApiService {
     return this.request(API_ENDPOINTS.health);
   }
 
+  // Get CSRF token from server
+  async getCSRFToken(): Promise<string> {
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/csrf-token`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.csrfToken) {
+          csrfToken = data.csrfToken;
+          return csrfToken;
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to get CSRF token:', error);
+    }
+    
+    return '';
+  }
+
   // Get program configuration
   async getPrograms(): Promise<ApiResponse<ProgramConfig>> {
     return this.request(API_ENDPOINTS.programs);
@@ -90,6 +142,9 @@ class ApiService {
 
   // Mint NFT
   async mintNFT(request: MintRequest): Promise<ApiResponse<MintResponse>> {
+    // Ensure we have a CSRF token
+    await this.getCSRFToken();
+    
     const formData = new FormData();
     formData.append('name', request.name);
     formData.append('description', request.description);
@@ -101,9 +156,16 @@ class ApiService {
       formData.append('imageUrl', request.imageUrl);
     }
 
+    // Get CSRF token for FormData requests
+    const token = getCSRFToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['X-CSRF-Token'] = token;
+    }
+
     return this.request(API_ENDPOINTS.mint, {
       method: 'POST',
-      headers: {}, // Let browser set Content-Type for FormData
+      headers, // Add CSRF token, let browser set Content-Type for FormData
       body: formData,
     });
   }

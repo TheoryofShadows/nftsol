@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "esModuleInterop": true,
+    "strict": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/__tests__/**/*.test.ts",
+    "jest.config.js"
+  ],
+  "exclude": ["node_modules"]
+}

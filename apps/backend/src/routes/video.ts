@@ -3,7 +3,8 @@
  * Handles user video uploads, Pinata storage, and metadata creation
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
+import { Multer } from 'multer';
 import multer from 'multer';
 import { uploadToPinata } from '../utils/pinataUpload';
 import { uploadMetadataToIrys } from '../utils/irysUpload';
@@ -13,7 +14,25 @@ import bs58 from 'bs58';
 import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
 
+// Extend the Express Request type to include file
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
 const router = Router();
+
+// Pre-check Content-Length to fail fast on oversized uploads
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100MB
+const contentLengthCheck: RequestHandler = (req, res, next) => {
+  const lenHeader = req.headers['content-length'];
+  if (lenHeader) {
+    const len = parseInt(Array.isArray(lenHeader) ? lenHeader[0] : lenHeader, 10);
+    if (!Number.isNaN(len) && len > MAX_VIDEO_BYTES) {
+      return res.status(400).json({ success: false, error: 'Video file too large. Maximum size: 100MB' });
+    }
+  }
+  return next();
+};
 
 // Rate limiting for video uploads
 const uploadLimiter = expressRateLimit({
@@ -50,7 +69,7 @@ const videoUpload = multer({
  * POST /api/video/upload
  * Upload video to Pinata, create metadata, upload metadata to Irys
  */
-router.post('/upload', uploadLimiter, videoUpload.single('video'), async (req: Request, res: Response) => {
+router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('video'), async (req: MulterRequest, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -160,6 +179,40 @@ router.post('/upload', uploadLimiter, videoUpload.single('video'), async (req: R
     });
   }
 });
+
+// Define custom error interface for Multer errors
+interface MulterError extends Error {
+  code?: string;
+  field?: string;
+  storageErrors?: Error[];
+}
+
+// Error handler middleware with proper types
+const errorHandler: ErrorRequestHandler = (err: Error & { code?: string }, _req: Request, res: Response, next: NextFunction) => {
+  if (err) {
+    // Standard Multer error
+    if ('code' in err && err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Video file too large. Maximum size: 100MB' 
+      });
+    }
+    
+    // Some environments surface as generic Error('File too large')
+    if (err.message && typeof err.message === 'string' && 
+        err.message.toLowerCase().includes('file too large')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Video file too large. Maximum size: 100MB' 
+      });
+    }
+  }
+  
+  return next(err);
+};
+
+// Register error handler
+router.use(errorHandler);
 
 export default router;
 

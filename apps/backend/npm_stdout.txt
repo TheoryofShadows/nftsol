@@ -1,0 +1,52 @@
+
+> nftsol-backend@1.0.0 dev
+> ts-node-dev src/index.ts
+
+[INFO] 19:35:44 ts-node-dev ver. 2.0.0 (using ts-node ver. 10.9.2, typescript ver. 5.9.3)
+[dotenv@17.2.3] injecting env (9) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[Secrets] 🔐 Initializing secrets from environment variables and secret files...
+[Secrets] ✅ Loaded PLATFORM_SECRET_KEY_BASE58 from environment variable
+[Secrets] ✅ Loaded JWT_SECRET from environment variable
+[Secrets] ✅ Loaded HELIUS_API_KEY from environment variable
+[Secrets] ✅ Loaded PINATA_JWT from environment variable
+[Secrets] ✅ Loaded SESSION_SECRET from environment variable
+[Secrets] ✅ Loaded DATABASE_URL from environment variable
+[Secrets] ✅ Successfully initialized 6 secrets
+[Helius] Service initialized
+[Helius] Cluster: devnet
+[Helius] API Key: Configured
+[CLOUT] Service initialized
+[CLOUT] Mint address: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+[CLOUT] RPC URL: https://api.devnet.solana.com
+[CLOUT] Cluster: devnet
+[CrossPlatform] Marketplace service initialized
+[OnChain] Transaction service initialized
+[UltraCheapMint] UMI initialized with Bubblegum & Irys
+[Secrets] 🔐 Initializing secrets from environment variables and secret files...
+[Secrets] ✅ Loaded PLATFORM_SECRET_KEY_BASE58 from environment variable
+[Secrets] ✅ Loaded JWT_SECRET from environment variable
+[Secrets] ✅ Loaded HELIUS_API_KEY from environment variable
+[Secrets] ✅ Loaded PINATA_JWT from environment variable
+[Secrets] ✅ Loaded SESSION_SECRET from environment variable
+[Secrets] ✅ Loaded DATABASE_URL from environment variable
+[Secrets] ✅ Successfully initialized 6 secrets
+🚀 NFTSol Backend Server Started
+📍 Port: 3001 (from PORT env var)
+🌍 Environment: development
+🌐 CORS Origins: http://localhost:5173, http://localhost:5174, http://localhost:3000
+⚡ Rate Limit: 2000 requests per 60s
+📤 File Upload: Max 10MB
+🔗 Solana RPC: https://api.devnet.solana.com
+🌐 Cluster: devnet
+✅ Server ready at http://0.0.0.0:3001
+💰 CLOUT Token: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+🏦 Rewards Vault: Will be created on first use (auto-calculated)
+Database connection established
+[2025-11-09T00:35:53.152Z] INFO: HTTP Request {
+  method: 'GET',
+  url: '/api/csrf-token',
+  status: 200,
+  duration: '5ms',
+  ip: '127.0.0.1',
+  userAgent: 'Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.7019'
+}
