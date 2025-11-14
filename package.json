@@ -17,7 +17,6 @@
     "lint:backend": "cd apps/backend && npm run lint",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
-    "prepare": "husky install",
     "scan:secrets": "node scripts/scan-secrets.js",
     "audit": "cd apps/backend && npm audit",
     "audit:fix": "cd apps/backend && npm audit fix",
@@ -34,7 +33,6 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^8.57.0",
-    "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
     "prettier": "^3.6.2"
   },
