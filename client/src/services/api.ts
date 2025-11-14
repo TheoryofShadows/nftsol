@@ -65,12 +65,12 @@ class ApiService {
       // Add timeout to prevent hanging requests
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
+
       const response = await fetch(url, {
         ...defaultOptions,
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
       const data = await response.json();
 
@@ -80,7 +80,15 @@ class ApiService {
 
       return data;
     } catch (error) {
-      // Log error in development only
+      // Treat aborted requests as benign cancellations
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Request was cancelled.',
+        };
+      }
+
+      // Log other errors in development only
       if (import.meta.env.DEV) {
         // eslint-disable-next-line no-console
         console.error(`API Error (${endpoint}):`, error);

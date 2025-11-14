@@ -23,7 +23,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      buffer: 'buffer',
+      buffer: 'buffer/',
       '@': path.resolve(__dirname, './src'),
       '@components': path.resolve(__dirname, './src/components'),
       '@hooks': path.resolve(__dirname, './src/hooks'),

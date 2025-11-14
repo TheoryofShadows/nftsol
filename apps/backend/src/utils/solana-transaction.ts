@@ -11,16 +11,9 @@ import {
   TransactionInstruction,
   PublicKey,
   SystemProgram,
-  LAMPORTS_PER_SOL,
   Keypair,
 } from '@solana/web3.js';
 import { optimizedSolanaService } from '../services/solana-optimized';
-
-interface TransactionOptions {
-  priorityFee?: number;
-  skipPreflight?: boolean;
-  maxRetries?: number;
-}
 
 /**
  * Build a transaction with optimal configuration

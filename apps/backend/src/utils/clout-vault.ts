@@ -9,7 +9,7 @@ import {
   createAssociatedTokenAccountInstruction,
   getAccount,
 } from '@solana/spl-token';
-import { programConfig, solanaConfig } from '../config/index';
+import { programConfig } from '../config/index';
 
 /**
  * Calculate the rewards vault ATA address (deterministic)
@@ -72,15 +72,14 @@ export async function getOrCreateCloutVault(
   // ATA doesn't exist - create it
   console.log(`Creating rewards vault ATA: ${ata.toBase58()}`);
 
-  const createInstruction = createAssociatedTokenAccountInstruction(
+  // Prepare the instruction (not sent here; actual creation happens when sending rewards)
+  createAssociatedTokenAccountInstruction(
     payer.publicKey, // payer
     ata, // ata
     owner, // owner
     mint // mint
   );
 
-  // For now, just log - actual creation would need a transaction
-  // This can be called when actually sending CLOUT rewards
   console.log(`ATA creation instruction prepared. Will create on first reward send.`);
 
   return ata;

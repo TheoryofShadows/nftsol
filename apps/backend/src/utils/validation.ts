@@ -1,8 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
-import { PublicKey, Connection, Cluster, clusterApiUrl } from '@solana/web3.js';
+import { PublicKey, Connection, Cluster } from '@solana/web3.js';
 import { appConfig } from '../config';
 import csrf from 'csurf';
-import { Express } from 'express';
 
 // Type for Multer file
 type MulterFile = {
@@ -214,8 +213,8 @@ export function validateFile(
       type: file.mimetype,
       size: file.size
     }
-  } as const;
-};
+  } as const
+}
 
 /**
  * Express middleware for file upload validation
@@ -253,10 +252,22 @@ export const sanitizeInput = (input: string | number | undefined | null): string
   if (input === null || input === undefined) return '';
   
   const str = String(input);
-  
-  // Remove potentially dangerous characters and trim whitespace
-  return str
-    .replace(/[\u0000-\u001F\u007F-\u009F\u2000-\u200F\u2028-\u202F\u205F-\u206F\u3000]/g, '')
+
+  // Remove potentially dangerous control characters using char codes
+  const cleaned = Array.from(str)
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      if (code <= 0x1f) return false; // C0 controls
+      if (code >= 0x7f && code <= 0x9f) return false; // C1 controls
+      if (code >= 0x2000 && code <= 0x200f) return false; // General punctuation
+      if (code >= 0x2028 && code <= 0x202f) return false; // Line/paragraph separators
+      if (code >= 0x205f && code <= 0x206f) return false; // Additional spacing marks
+      if (code === 0x3000) return false; // Ideographic space
+      return true;
+    })
+    .join('');
+
+  return cleaned
     .replace(/[<>&"'`=]/g, '')
     .trim();
 };
@@ -605,7 +616,7 @@ const extractWalletAddress = (req: Request, fields: string[] = [...DEFAULT_WALLE
  * @param options - Validation options
  * @returns Express middleware function
  */
-const validateWalletLegacy = (options: WalletValidationOptions = {}) => {
+export const validateWalletLegacy = (options: WalletValidationOptions = {}) => {
   // Create mutable copies of the arrays to avoid readonly issues
   const addressFields = options.addressFields ? [...options.addressFields] : [...DEFAULT_WALLET_FIELDS];
   const testAddresses = options.testAddresses ? [...options.testAddresses] : [];

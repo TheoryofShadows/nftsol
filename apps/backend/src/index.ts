@@ -10,10 +10,7 @@ import { createServer } from 'http';
 import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
 import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
-// Use mock database in development, real database in production
-const { pool } = process.env.NODE_ENV === 'development'
-  ? require('./lib/db-mock') 
-  : require('./lib/db');
+import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
   validateWallet,
@@ -549,6 +546,49 @@ apiV1.get('/nfts/:owner', async (req, res) => {
       success: false,
       error: 'Failed to get NFTs by owner',
     });
+  }
+});
+
+// Get wallet info (balance + existence)
+apiV1.get('/wallet/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      const response: ApiResponse = {
+        success: false,
+        error: 'Wallet address is required',
+        code: 'MISSING_ADDRESS',
+      };
+      return res.status(400).json(response);
+    }
+
+    const [exists, balance] = await Promise.all([
+      solanaService.accountExists(address),
+      solanaService.getBalance(address).catch(() => 0),
+    ]);
+
+    const walletInfo = {
+      address,
+      balance,
+      exists,
+      solBalance: `${balance.toFixed(4)} SOL`,
+    };
+
+    const response: ApiResponse = {
+      success: true,
+      data: walletInfo,
+    };
+
+    return res.json(response);
+  } catch (error) {
+    errorLogger(error as Error, { endpoint: '/api/v1/wallet/:address' });
+    const response: ApiResponse = {
+      success: false,
+      error: 'Failed to get wallet info',
+      code: 'WALLET_INFO_ERROR',
+    };
+    return res.status(500).json(response);
   }
 });
 

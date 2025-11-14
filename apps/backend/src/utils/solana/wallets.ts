@@ -1,5 +1,4 @@
 import { Connection, PublicKey, Keypair, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { getNetwork } from './connection';
 import * as bs58 from 'bs58';
 
 /**

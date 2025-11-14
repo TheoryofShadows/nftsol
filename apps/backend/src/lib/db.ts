@@ -261,91 +261,86 @@ async function createPoolWithRetry(attempt = 1): Promise<Pool> {
  */
 async function getPool(): Promise<DatabasePool> {
   if (!poolInstance) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔹 Using mock database for development');
-      poolInstance = new MockPool() as unknown as PoolType;
-    } else {
-      console.log('🔹 Connecting to production database...');
-      const pgPool = await createPoolWithRetry();
-      
-      poolInstance = {
-        _pool: pgPool,
-        query: pgPool.query.bind(pgPool) as QueryFunction,
-        connect: async () => {
-          try {
-            const client = await pgPool.connect();
-            return wrapPoolClient(client);
-          } catch (error) {
-            console.error('Failed to get database client:', error);
-            throw error;
-          }
-        },
-        end: async () => {
-          if (pgPool) {
-            await pgPool.end();
-            poolInstance = null;
-          }
-        },
-        on: (event: string, listener: (...args: any[]) => void) => {
-          pgPool.on(event as any, listener);
-          return poolInstance!;
-        },
-        removeListener: (event: string, listener: (...args: any[]) => void) => {
-          pgPool.removeListener(event as any, listener);
-          return poolInstance!;
-        },
-        removeAllListeners: (event?: string | symbol) => {
-          if (event) {
-            pgPool.removeAllListeners(event as any);
-          } else {
-            pgPool.removeAllListeners();
-          }
-          return poolInstance!;
-        },
-        healthCheck: async () => {
-          const start = Date.now();
-          try {
-            await pgPool.query('SELECT 1');
-            const duration = Date.now() - start;
-            return {
-              status: 'healthy' as const,
-              details: {
-                message: 'Database is responding normally',
-                timestamp: new Date().toISOString(),
-                responseTime: `${duration}ms`
-              }
-            };
-          } catch (error) {
-            return {
-              status: 'unhealthy' as const,
-              details: {
-                message: 'Database connection failed',
-                error: error instanceof Error ? error.message : String(error),
-                timestamp: new Date().toISOString()
-              }
-            };
-          }
-        },
-        getStats: () => {
-          if (!('totalCount' in pgPool)) return null;
-          const pool = pgPool as any;
+    console.log('🔹 Connecting to database...');
+    const pgPool = await createPoolWithRetry();
+    
+    poolInstance = {
+      _pool: pgPool,
+      query: pgPool.query.bind(pgPool) as QueryFunction,
+      connect: async () => {
+        try {
+          const client = await pgPool.connect();
+          return wrapPoolClient(client);
+        } catch (error) {
+          console.error('Failed to get database client:', error);
+          throw error;
+        }
+      },
+      end: async () => {
+        if (pgPool) {
+          await pgPool.end();
+          poolInstance = null;
+        }
+      },
+      on: (event: string, listener: (...args: any[]) => void) => {
+        pgPool.on(event as any, listener);
+        return poolInstance!;
+      },
+      removeListener: (event: string, listener: (...args: any[]) => void) => {
+        pgPool.removeListener(event as any, listener);
+        return poolInstance!;
+      },
+      removeAllListeners: (event?: string | symbol) => {
+        if (event) {
+          pgPool.removeAllListeners(event as any);
+        } else {
+          pgPool.removeAllListeners();
+        }
+        return poolInstance!;
+      },
+      healthCheck: async () => {
+        const start = Date.now();
+        try {
+          await pgPool.query('SELECT 1');
+          const duration = Date.now() - start;
           return {
-            total: pool.totalCount || 0,
-            idle: pool.idleCount || 0,
-            waiting: pool.waitingCount || 0
+            status: 'healthy' as const,
+            details: {
+              message: 'Database is responding normally',
+              timestamp: new Date().toISOString(),
+              responseTime: `${duration}ms`
+            }
+          };
+        } catch (error) {
+          return {
+            status: 'unhealthy' as const,
+            details: {
+              message: 'Database connection failed',
+              error: error instanceof Error ? error.message : String(error),
+              timestamp: new Date().toISOString()
+            }
           };
         }
-      };
-    }
-    
-    // Set up error handling
-    if (poolInstance) {
-      poolInstance.on('error', (err: Error) => {
-        console.error('Unexpected error on database client:', err);
-      });
-    }
+      },
+      getStats: () => {
+        if (!('totalCount' in pgPool)) return null;
+        const pool = pgPool as any;
+        return {
+          total: pool.totalCount || 0,
+          idle: pool.idleCount || 0,
+          waiting: pool.waitingCount || 0
+        };
+      }
+    };
   }
-  
+
+  // Set up error handling once when the pool is created
+  if (poolInstance) {
+    poolInstance.on('error', (err: Error) => {
+      console.error('Unexpected error on database client:', err);
+    });
+  }
+
   return poolInstance as DatabasePool;
 }
 

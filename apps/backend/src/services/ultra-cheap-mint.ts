@@ -12,13 +12,7 @@
  */
 
 import { 
-  PublicKey as Web3PublicKey,
   Connection,
-  Keypair as Web3Keypair,
-  Transaction,
-  SystemProgram,
-  LAMPORTS_PER_SOL,
-  sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import { 
   createUmi,
@@ -26,15 +20,9 @@ import {
   generateSigner,
   Umi,
   publicKey as umiPublicKey,
-  PublicKey as UmiPublicKey,
   KeypairSigner,
-  TransactionBuilder,
-  Keypair as UmiKeypair,
-  publicKey,
   createSignerFromKeypair,
-  signerIdentity
 } from '@metaplex-foundation/umi';
-import { base58 } from '@metaplex-foundation/umi/serializers';
 
 // Use the base Umi type with additional properties we need
 type UmiInstance = Umi & {
@@ -50,7 +38,6 @@ import {
 } from '@metaplex-foundation/mpl-bubblegum';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { solanaConfig } from '../config';
-import { BUBBLEGUM_PROGRAM_ID } from '../config/programs';
 import { getPlatformKeypair } from '../lib/platformKeypair';
 import bs58 from 'bs58';
 // UMI publicKey is already imported above
@@ -108,7 +95,7 @@ export class UltraCheapMintService {
       }
 
       // Create UMI instance with the RPC endpoint
-      let umi = createUmi()
+      const umi = createUmi()
         .use(mplBubblegum())
         .use(irysUploader({
           address: solanaConfig.cluster === 'mainnet-beta' 
@@ -163,7 +150,7 @@ export class UltraCheapMintService {
     
     try {
       // Create a new merkle tree with all required parameters
-      const builder = createTree(umi, {
+      const builder = await createTree(umi, {
         maxDepth: MERKLE_TREE_CONFIG.maxDepth,
         maxBufferSize: MERKLE_TREE_CONFIG.maxBufferSize,
         canopyDepth: MERKLE_TREE_CONFIG.canopyDepth,

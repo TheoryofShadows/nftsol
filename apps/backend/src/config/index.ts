@@ -77,9 +77,8 @@ export const solanaConfig: SolanaConfig = {
 type SslConfig = boolean | { rejectUnauthorized?: boolean };
 
 export const databaseConfig: DatabaseConfig = {
-  url: process.env.NODE_ENV === 'development' 
-    ? 'mock://localhost/nftsol' 
-    : getEnv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/nftsol'),
+  // Always use a real PostgreSQL URL (from env or a sane localhost default)
+  url: getEnv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/nftsol'),
   ssl: (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false) as SslConfig,
   pool: {
     min: 2,

@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { server } from './app-production';
-import { db } from './lib/db';
+import { pool } from './lib/db';
 
 const PORT = process.env.PORT || 3001;
 
@@ -8,7 +8,7 @@ async function start() {
   // Connect to database (Drizzle)
   try {
     // Test connection
-    await db.execute('SELECT 1');
+    await pool.query('SELECT 1');
     console.log('Database connected');
   } catch (error) {
     console.error('Database connection failed:', error);
