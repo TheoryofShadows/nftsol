@@ -11,8 +11,6 @@
     "lint": "eslint . --ext .ts,.tsx --config .eslintrc.cjs",
     "lint:fix": "eslint . --ext .ts,.tsx --fix --config .eslintrc.cjs",
     "prepare": "husky install",
-    "snyk-protect": "snyk protect",
-    "postinstall": "npm run snyk-protect",
     "build": "npm run clean && tsc -p tsconfig.build.json && npm run copy:assets",
     "build:prod": "NODE_ENV=production npm run build",
     "clean": "rimraf dist",
