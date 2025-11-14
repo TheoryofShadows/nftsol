@@ -65,6 +65,16 @@ export function sanitizeInput(_req: Request, _res: Response, next: NextFunction)
 }
 
 // Request size limiter placeholder (body parser limits are applied elsewhere)
-export function requestSizeLimiter(_req: Request, _res: Response, next: NextFunction) {
+export const requestSizeLimiter = (_req: Request, _res: Response, next: NextFunction) => {
   next();
-}
+};
+
+// Default export with all security middleware
+export default [
+  helmet(),
+  corsConfig,
+  securityHeaders,
+  securityLogger,
+  sanitizeInput,
+  requestSizeLimiter
+];

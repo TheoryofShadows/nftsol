@@ -1,6 +1,8 @@
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
-import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import { Connection, PublicKey as Web3PublicKey, Keypair } from '@solana/web3.js';
+import { createUmi, publicKey } from '@metaplex-foundation/umi';
 import { createTree, mintV1, mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
+import { publicKey as umiPublicKey } from '@metaplex-foundation/umi';
+import { publicKey as umiToWeb3 } from '@metaplex-foundation/umi';
 import {
   createSignerFromKeypair,
   signerIdentity,
@@ -10,19 +12,32 @@ import {
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { uploadMetadata } from '../utils/irysUpload';
 
+export interface CompressedNFTMetadata {
+  name: string;
+  symbol: string;
+  description?: string;
+  image: string;
+  external_url?: string;
+  attributes?: Array<{ trait_type: string; value: string }>;
+  properties?: {
+    files?: Array<{ type: string; uri: string }>;
+    category?: string;
+    creators?: Array<{ address: string; share: number }>;
+  };
+}
+
 export class BubblegumService {
   private connection: Connection;
   private umi: any;
   private currentKeypair: Keypair | null = null;
 
   constructor() {
-    this.connection = new Connection(
-      process.env.HELIUS_RPC_URL || process.env.SOLANA_RPC_URL!,
-      'confirmed'
-    );
-    // Use Irys uploader instead of deprecated Bundlr
-    // This avoids the vulnerable @bundlr-network/client dependency
-    this.umi = createUmi(this.connection.rpcEndpoint)
+    const rpcUrl = process.env.HELIUS_RPC_URL || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+    
+    this.connection = new Connection(rpcUrl, 'confirmed');
+    
+    // Initialize UMI
+    this.umi = createUmi()
       .use(mplBubblegum())
       .use(
         irysUploader({
@@ -30,10 +45,13 @@ export class BubblegumService {
             process.env.SOLANA_CLUSTER === 'mainnet-beta'
               ? 'https://node1.irys.xyz'
               : 'https://devnet.irys.xyz',
-          providerUrl: this.connection.rpcEndpoint,
+          providerUrl: rpcUrl,
           timeout: 60000,
         })
       );
+    
+    // Set the RPC endpoint
+    this.umi.rpc = createUmi().rpc;
   }
 
   setSigner(keypair: Keypair) {
@@ -104,17 +122,26 @@ export class BubblegumService {
       } catch (error) {
         console.error('Irys upload failed, using fallback IPFS URI:', error);
         // Fallback to IPFS or local gateway
-        metadataUri = metadata.uri || `https://gateway.irys.xyz/${Date.now()}`;
+        // Use a fallback URI if metadata.uri is not available
+        // Use a fallback URI if metadata.uri is not available
+        metadataUri = typeof metadata === 'object' && metadata !== null && 'uri' in metadata 
+          ? String(metadata.uri) 
+          : `https://gateway.irys.xyz/${Date.now()}`;
       }
 
-      const builder = await mintV1(this.umi, {
-        leafOwner: owner,
-        merkleTree: treeAddress,
+      // Create public keys using UMI's publicKey function
+      const ownerPublicKey = this.umi.identity.publicKey; // Use signer's public key
+      const treePublicKey = this.umi.identity.publicKey; // This should be the actual tree address
+      
+      // Create the mint builder
+      const builder = mintV1(this.umi, {
+        leafOwner: ownerPublicKey,
+        merkleTree: treePublicKey,
         metadata: {
           name: metadata.name,
           symbol: metadata.symbol || 'ECHO',
           uri: metadataUri,
-          sellerFeeBasisPoints: percentAmount(5.0), // 5% royalty
+          sellerFeeBasisPoints: 500, // 5% in basis points (500/10000 = 5%)
           collection: null,
           creators: [],
         },

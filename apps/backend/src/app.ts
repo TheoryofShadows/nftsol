@@ -24,6 +24,7 @@ import echoRouter from './routes/echo';
 import nftRouter from './routes/nfts';
 import orbRouter from './routes/orb';
 import withdrawalsRouter from './routes/withdrawals';
+import apiRoutes from './routes/api';
 
 // Import security middleware
 import {
@@ -145,11 +146,14 @@ app.use(sanitizeInput);
 // Rate limiting - apply to all routes (AFTER session/auth, BEFORE routes)
 app.use(generalLimiter as any);
 
-// API routes (only existing, minimal)
+// API routes
 app.use('/api/echo', echoRouter);
 app.use('/api/nfts', nftRouter);
 app.use('/api/orb', orbRouter);
 app.use('/api/withdrawals', withdrawalsRouter);
+
+// New API v1 routes
+app.use('/api/v1', apiRoutes);
 
 app.get('/', (_req, res) => res.json({ ok: true }));
 

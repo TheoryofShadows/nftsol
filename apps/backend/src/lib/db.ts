@@ -1,45 +1,78 @@
-import { Pool, PoolClient, QueryResult, QueryResultRow, PoolConfig, PoolClientConfig } from 'pg';
+import { 
+  Pool, 
+  PoolClient, 
+  QueryResult, 
+  QueryResultRow, 
+  PoolConfig, 
+  ClientConfig, 
+  QueryConfig, 
+  QueryArrayConfig 
+} from 'pg';
 import { databaseConfig } from '../config/index';
 
 /**
  * Types for our database operations
  */
 
-type QueryFunction = <T extends QueryResultRow = any>(
-  text: string,
-  params?: any[]
-) => Promise<QueryResult<T>>;
+// Use the full query function type from pg to ensure compatibility
+type QueryFunction = {
+  <T extends QueryResultRow = any>(
+    queryTextOrConfig: string | QueryConfig,
+    values?: any[]
+  ): Promise<QueryResult<T>>;
+  <T extends QueryResultRow = any, I extends any[] = any[]>(
+    config: QueryArrayConfig<I>,
+    values?: I
+  ): Promise<QueryResult<T>>;
+};
 
-interface DatabaseClient {
+// DatabaseClient extends PoolClient with our custom methods
+interface DatabaseClient extends Omit<PoolClient, 'query' | 'release'> {
   query: QueryFunction;
   release: (err?: Error | boolean) => void;
-  on: (event: string, listener: (...args: any[]) => void) => this;
+  // Add these methods to match PoolClient's event emitter interface
+  on(event: 'drain', listener: () => void): this;
+  on(event: 'error', listener: (err: Error) => void): this;
+  on(event: 'notice', listener: (notice: any) => void): this;
+  on(event: 'notification', listener: (message: any) => void): this;
+  on(event: 'end', listener: () => void): this;
+  on(event: string, listener: (...args: any[]) => void): this;
+  
+  removeListener(event: string, listener: (...args: any[]) => void): this;
+  removeAllListeners(event?: string | symbol): this;
 }
 
 interface DatabasePool {
   query: QueryFunction;
-  connect: () => Promise<DatabaseClient>;
+  connect: () => Promise<ExtendedPoolClient>;
   end: () => Promise<void>;
-  on: (event: string, listener: (...args: any[]) => void) => this;
-  removeListener: (event: string, listener: (...args: any[]) => void) => this;
-  removeAllListeners: (event?: string | symbol) => this;
+  on: (event: string, listener: (...args: any[]) => void) => void;
+  removeListener: (event: string, listener: (...args: any[]) => void) => void;
+  removeAllListeners: (event?: string | symbol) => void;
+  healthCheck: () => Promise<{
+    status: 'healthy' | 'degraded' | 'unhealthy';
+    details: {
+      message: string;
+      error?: any;
+      timestamp: string;
+      responseTime?: string;
+    };
+  }>;
+  getStats: () => {
+    total: number;
+    idle: number;
+    waiting: number;
+  } | null;
+  _pool?: Pool; // Add this line to include the _pool property
 }
 
 // Extend the PoolClient interface to include our custom methods
-interface ExtendedPoolClient extends PoolClient, DatabaseClient {}
+interface ExtendedPoolClient extends PoolClient {}
 
 // Helper type for the pool instance
 type PoolType = DatabasePool & {
   _pool?: Pool;
 };
-}
-
-interface DatabasePool {
-  query: QueryFunction;
-  connect: () => Promise<DatabaseClient>;
-  end: () => Promise<void>;
-  on: (event: string, listener: (...args: any[]) => void) => void;
-}
 
 // Simple mock database for development
 class MockPool {
@@ -137,18 +170,58 @@ const RETRY_DELAY = 1000; // 1 second
  * Wraps a PoolClient to match our DatabaseClient interface
  */
 function wrapPoolClient(client: PoolClient): ExtendedPoolClient {
-  const extendedClient = client as ExtendedPoolClient;
-  
-  // Ensure the release method is properly typed
-  const originalRelease = client.release.bind(client);
-  extendedClient.release = (err?: Error | boolean) => {
-    if (err instanceof Error) {
-      console.error('Releasing client with error:', err.message);
-    }
-    originalRelease(err);
+  // Create a proxy that forwards all properties and methods to the original client
+  // but ensures the return types match our DatabaseClient interface
+  const handler: ProxyHandler<PoolClient> = {
+    get(target: PoolClient, prop: string | symbol, receiver: any) {
+      const value = Reflect.get(target, prop, receiver);
+      
+      // Handle special cases for methods we need to wrap
+      if (prop === 'query') {
+        return (text: string | QueryConfig, values?: any[]) => {
+          return (target.query as any)(text, values);
+        };
+      }
+      
+      if (prop === 'release') {
+        return (err?: Error | boolean) => target.release(err);
+      }
+      
+      if (prop === 'on' || prop === 'addListener') {
+        return (event: string, listener: (...args: any[]) => void) => {
+          target.on(event as any, listener);
+          return proxyClient;
+        };
+      }
+      
+      if (prop === 'removeListener') {
+        return (event: string, listener: (...args: any[]) => void) => {
+          target.removeListener(event as any, listener);
+          return proxyClient;
+        };
+      }
+      
+      if (prop === 'removeAllListeners') {
+        return (event?: string | symbol) => {
+          if (event) {
+            target.removeAllListeners(event);
+          } else {
+            target.removeAllListeners();
+          }
+          return proxyClient;
+        };
+      }
+      
+      // For all other properties/methods, return as is
+      if (typeof value === 'function') {
+        return value.bind(target);
+      }
+      return value;
+    },
   };
   
-  return extendedClient;
+  const proxyClient = new Proxy(client, handler) as unknown as ExtendedPoolClient;
+  return proxyClient;
 }
 
 /**
@@ -228,33 +301,89 @@ async function getPool(): Promise<DatabasePool> {
             pgPool.removeAllListeners();
           }
           return poolInstance!;
+        },
+        healthCheck: async () => {
+          const start = Date.now();
+          try {
+            await pgPool.query('SELECT 1');
+            const duration = Date.now() - start;
+            return {
+              status: 'healthy' as const,
+              details: {
+                message: 'Database is responding normally',
+                timestamp: new Date().toISOString(),
+                responseTime: `${duration}ms`
+              }
+            };
+          } catch (error) {
+            return {
+              status: 'unhealthy' as const,
+              details: {
+                message: 'Database connection failed',
+                error: error instanceof Error ? error.message : String(error),
+                timestamp: new Date().toISOString()
+              }
+            };
+          }
+        },
+        getStats: () => {
+          if (!('totalCount' in pgPool)) return null;
+          const pool = pgPool as any;
+          return {
+            total: pool.totalCount || 0,
+            idle: pool.idleCount || 0,
+            waiting: pool.waitingCount || 0
+          };
         }
       };
     }
     
     // Set up error handling
-    poolInstance.on('error', (err: Error) => {
-      console.error('Unexpected error on database client:', err);
-    });
+    if (poolInstance) {
+      poolInstance.on('error', (err: Error) => {
+        console.error('Unexpected error on database client:', err);
+      });
+    }
   }
   
   return poolInstance as DatabasePool;
 }
 
 // Public API
-export const pool = {
+export const pool: DatabasePool = {
+  // Event emitter methods
+  on: (event: string, listener: (...args: any[]) => void) => {
+    getPool().then(p => p.on(event, listener));
+    return pool;
+  },
+  removeListener: (event: string, listener: (...args: any[]) => void) => {
+    getPool().then(p => p.removeListener(event, listener));
+    return pool;
+  },
+  removeAllListeners: (event?: string | symbol) => {
+    getPool().then(p => event ? p.removeAllListeners(event) : p.removeAllListeners());
+    return pool;
+  },
   /**
    * Execute a database query
    */
   query: async <T extends QueryResultRow = any>(
-    text: string,
-    params?: any[]
+    queryTextOrConfig: string | QueryConfig,
+    values?: any[]
   ): Promise<QueryResult<T>> => {
     const pool = await getPool();
     try {
-      return await pool.query(text, params);
+      if (typeof queryTextOrConfig === 'string') {
+        return await pool.query(queryTextOrConfig, values);
+      } else {
+        return await pool.query(queryTextOrConfig);
+      }
     } catch (error) {
-      console.error('Query failed:', { query: text, params, error });
+      console.error('Query failed:', { 
+        query: typeof queryTextOrConfig === 'string' ? queryTextOrConfig : queryTextOrConfig.text,
+        params: values || (typeof queryTextOrConfig === 'object' ? queryTextOrConfig.values : []),
+        error 
+      });
       throw error;
     }
   },
@@ -301,6 +430,7 @@ export const pool = {
       message: string;
       error?: any;
       timestamp: string;
+      responseTime?: string;
     };
   }> => {
     try {
@@ -347,7 +477,9 @@ export const pool = {
 };
 
 // Initialize the database connection when this module is loaded
-(async () => {
+const initializeDatabase = async () => {
+  if (process.env.NODE_ENV === 'test') return;
+  
   try {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔹 Initializing development database...');
@@ -364,7 +496,10 @@ export const pool = {
     // Don't throw here to allow the application to start
     // The first actual query will fail if there are connection issues
   }
-})();
+};
+
+// Initialize the database
+initializeDatabase().catch(console.error);
 
 // Ensure we clean up connections on process exit
 process.on('SIGINT', async () => {
@@ -394,40 +529,6 @@ process.on('uncaughtException', async (error) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
 });
-
-    // In production, test the real connection
-    console.log('🔹 Testing database connection...');
-    const client = await pool.connect();
-    try {
-      await client.query('SELECT NOW()');
-      console.log('✅ Database connection successful');
-    } finally {
-      client.release();
-    }
-
-  try {
-    const client = await pool.connect();
-    try {
-      const res = await client.query('SELECT NOW()');
-      console.log('✅ Database connection established at:', res.rows[0].now);
-    } finally {
-      client.release();
-    }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('❌ Database connection failed:', errorMessage);
-    
-    if (process.env.NODE_ENV === 'production') {
-      process.exit(1);
-    }
-  }
-}
-
-// Only initialize in non-test environments
-if (process.env.NODE_ENV !== 'test') {
-  initializeDatabase();
-}
-
 // Handle pool errors
 pool.on('error', (err: Error) => {
   console.error('Unexpected error on idle database client', err.message);
@@ -443,7 +544,7 @@ export async function withClient<T>(
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    const result = await callback(client);
+    const result = await callback(client as PoolClient);
     await client.query('COMMIT');
     return result;
   } catch (error) {
@@ -453,6 +554,3 @@ export async function withClient<T>(
     client.release();
   }
 }
-
-// Export the pool and utility functions
-export { pool };

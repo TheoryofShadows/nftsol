@@ -50,7 +50,6 @@ initializeSecrets();
 // const PORT = parseInt(process.env.PORT || '3001', 10); // Not used, commented out
 
 const app = express();
-const server = createServer(app);
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -1182,15 +1181,29 @@ apiV1.get('/market', async (req, res) => {
           listingsResult.rows.map((row: any) => [row.mintAddress, row])
         );
 
+        // Define types for listing and NFT
+        interface Listing {
+          price: number;
+          listedAt: string | Date;
+          status: string;
+          mintAddress: string;
+        }
+
+        interface NFT {
+          mintAddress: string;
+          status: string;
+          [key: string]: any;
+        }
+
         // Merge listing data
-        nfts = nfts.map((nft) => {
-          const listing = listingsMap.get(nft.mintAddress);
+        nfts = nfts.map((nft: NFT) => {
+          const listing = listingsMap.get(nft.mintAddress) as Listing | undefined;
           return {
             ...nft,
             isListed: !!listing,
-            price: listing?.price || null,
-            listedAt: listing?.listedAt || null,
-            status: listing?.status || nft.status,
+            price: listing?.price ?? null,
+            listedAt: listing?.listedAt ?? null,
+            status: listing?.status ?? nft.status,
           };
         });
       } catch (error) {
@@ -1270,10 +1283,10 @@ app.get('/api/nfts', async (req, res) => {
             owner: owner,
             collection: nft.grouping?.find((g: any) => g.group_key === 'collection')?.group_value || 'Unknown',
             // Local listing data if available
-            isListed: localData?.status === 'listed',
-            price: localData?.price || null,
-            listedAt: localData?.listedAt || null,
-            status: localData?.status || 'owned',
+            isListed: (localData as any)?.status === 'listed',
+            price: (localData as any)?.price ?? null,
+            listedAt: (localData as any)?.listedAt ?? null,
+            status: (localData as any)?.status ?? 'owned',
             // Blockchain data
             compressed: nft.compression?.compressed || false,
             source: 'blockchain',
@@ -1616,6 +1629,9 @@ process.on('SIGINT', () => {
     console.warn('Vault will be created automatically when first reward is sent');
   }
 })();
+
+// Create HTTP server
+const server = createServer(app);
 
 // Start server
 const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;

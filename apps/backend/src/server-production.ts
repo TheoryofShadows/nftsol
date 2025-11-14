@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { server } from './app-production';
-import { db } from './db';
+import { db } from './lib/db';
 
 const PORT = process.env.PORT || 3001;
 

@@ -6,7 +6,7 @@ import { collectDefaultMetrics } from 'prom-client';
 // Enable default Prometheus metrics
 collectDefaultMetrics({
   prefix: 'nftsol_',
-  timeout: 10000,
+  eventLoopMonitoringPrecision: 10,
   gcDurationBuckets: [0.1, 0.2, 0.5, 1, 2, 5],
 });
 
