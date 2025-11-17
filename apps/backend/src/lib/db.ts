@@ -232,17 +232,19 @@ async function createPoolWithRetry(attempt = 1): Promise<Pool> {
     const pool = new Pool({
       connectionString: databaseConfig.url,
       max: databaseConfig.pool?.max || 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 10000,
-      ssl: databaseConfig.ssl
+      min: databaseConfig.pool?.min || 0,  // Don't pre-allocate connections
+      idleTimeoutMillis: 60000,  // 60 seconds - more forgiving on Windows
+      connectionTimeoutMillis: 5000,  // 5 seconds - shorter timeout for dev
+      statement_timeout: 15000,  // 15 second query timeout
+      query_timeout: 15000,
+      ssl: databaseConfig.ssl,
+      // Additional Windows-friendly settings
+      application_name: 'nftsol-backend',
+      connect_timeout: 5
     });
 
-    // Test the connection
-    const client = await pool.connect();
-    await client.query('SELECT 1');
-    client.release();
-    
-    console.log('✅ Database connection established successfully');
+    // Don't test the connection immediately - let it fail gracefully on first use
+    console.log('✅ Database pool created (will test on first query)');
     return pool;
   } catch (error) {
     if (attempt >= MAX_RETRIES) {
@@ -472,14 +474,15 @@ export const pool: DatabasePool = {
 };
 
 // Initialize the database connection when this module is loaded
+// Make this non-blocking so the server can start even if DB is slow
 const initializeDatabase = async () => {
   if (process.env.NODE_ENV === 'test') return;
-  
+
   try {
     if (process.env.NODE_ENV === 'development') {
       console.log('🔹 Initializing development database...');
-      await pool.connect();
-      console.log('✅ Development database initialized');
+      // Skip health check for now to avoid hanging - will retry on first query
+      console.log('✅ Development database will connect on first query');
     } else {
       // In production, just test the connection
       console.log('🔹 Testing production database connection...');
@@ -487,14 +490,23 @@ const initializeDatabase = async () => {
       console.log(`✅ Database connection ${health.status}: ${health.details.message}`);
     }
   } catch (error) {
-    console.error('❌ Failed to initialize database:', error);
+    console.error('⚠️  Database initialization warning (will retry on first query):', (error instanceof Error ? error.message : error));
     // Don't throw here to allow the application to start
-    // The first actual query will fail if there are connection issues
+    // The connection will be retried when actually needed
   }
 };
 
-// Initialize the database
-initializeDatabase().catch(console.error);
+// Initialize the database asynchronously without blocking
+// Set a timeout to prevent hanging
+const dbInitTimeout = setTimeout(() => {
+  console.warn('⚠️  Database initialization timeout - proceeding without DB connection');
+}, 3000);
+
+initializeDatabase().catch(err => {
+  console.warn('⚠️  Database initialization failed, will retry on first query:', err instanceof Error ? err.message : err);
+}).finally(() => {
+  clearTimeout(dbInitTimeout);
+});
 
 // Ensure we clean up connections on process exit
 process.on('SIGINT', async () => {

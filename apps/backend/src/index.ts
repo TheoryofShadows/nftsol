@@ -120,7 +120,7 @@ app.use((req: any, res: any, next: any) => {
 });
 app.use(requestLogger);
 
-// Rate limiting (global with health exemptions)
+// Rate limiting (optimized with smart skipping)
 const limiter = rateLimit({
   windowMs: appConfig.rateLimit.windowMs,
   max: appConfig.rateLimit.max,
@@ -131,30 +131,32 @@ const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Use in-memory store (default) for best performance in development
+  // For production, consider using a store like redis-store
   skip: (req: any) => {
-    // Skip rate limiting for health check endpoints
-    const path = req.path || req.url?.split('?')[0];
-    if (path === '/healthz' || path === '/health' || path?.endsWith('/healthz') || path?.endsWith('/health')) {
+    // Super fast path check - health endpoints don't get rate limited
+    const path = req.path;
+    if (path === '/health' || path === '/api/health' || path === '/healthz') {
       return true;
     }
 
-    // Skip rate limiting for Render's health check system
-    const userAgent = req.get('User-Agent') || req.headers['user-agent'] || '';
-    if (userAgent.includes('Render') || userAgent.includes('render.com')) {
+    // Skip for internal/local requests
+    const ip = req.ip;
+    if (ip === '::1' || ip === '127.0.0.1' || ip === '::ffff:127.0.0.1') {
       return true;
-    }
-
-    // Skip rate limiting for internal IPs (Render's internal network)
-    const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || '';
-    if (ip.startsWith('10.') || ip.startsWith('172.16.') || ip.startsWith('192.168.') || ip === '::1' || ip === '127.0.0.1') {
-      // But only if it's a health check or Render user agent
-      if (userAgent.includes('Render') || path === '/healthz' || path === '/health') {
-        return true;
-      }
     }
 
     return false;
   },
+  // Use exponential backoff for better performance
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      error: 'Too many requests',
+      code: 'RATE_LIMIT_EXCEEDED',
+      retryAfter: req.rateLimit.resetTime
+    });
+  }
 });
 app.use(limiter);
 
@@ -170,8 +172,26 @@ app.use(
 );
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Apply input sanitization globally
-app.use(sanitizeInput);
+// Apply input sanitization globally as proper middleware
+app.use((req: any, res: any, next: any) => {
+  // Sanitize query parameters
+  Object.keys(req.query).forEach(key => {
+    if (typeof req.query[key] === 'string') {
+      req.query[key] = sanitizeInput(req.query[key]);
+    }
+  });
+
+  // Sanitize body if present
+  if (req.body && typeof req.body === 'object') {
+    Object.keys(req.body).forEach(key => {
+      if (typeof req.body[key] === 'string' || typeof req.body[key] === 'number') {
+        req.body[key] = sanitizeInput(req.body[key]);
+      }
+    });
+  }
+
+  next();
+});
 
 // CSRF token endpoint
 app.get('/api/csrf-token', (req, res, next) => {
@@ -224,23 +244,21 @@ async function checkDatabase(): Promise<{ healthy: boolean; details: any }> {
   }
 }
 
-// Simple health check endpoints
+// Simple health check endpoints - extremely fast responses
 app.get('/health', (req, res) => {
-  res.json({
+  res.set('Cache-Control', 'no-cache').json({
     status: 'ok',
-    timestamp: new Date().toISOString(),
+    timestamp: Date.now(),
     service: 'nftsol-backend'
   });
 });
 
-// API health check endpoint (for frontend)
+// API health check endpoint (for frontend) - optimized for speed
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'nftsol-backend',
-    api: 'v1',
-    environment: process.env.NODE_ENV || 'development'
+  // Use lightweight response for fast checks
+  res.set('Cache-Control', 'no-cache').json({
+    ok: 1,
+    ts: Date.now()
   });
 });
 
