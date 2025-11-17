@@ -10,6 +10,7 @@ import {
 } from '../types';
 
 import { API_BASE, API_ENDPOINTS } from '../config/api';
+import { logger } from '../utils/logger';
 
 // CSRF token management
 let csrfToken: string | null = null;
@@ -48,18 +49,23 @@ class ApiService {
       'Content-Type': 'application/json',
       ...options.headers as Record<string, string>,
     };
-    
+
     if (options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method)) {
       const token = getCSRFToken();
       if (token) {
         headers['X-CSRF-Token'] = token;
       }
     }
-    
+
     const defaultOptions: RequestInit = {
       headers,
       ...options,
     };
+
+    // Log API request
+    const method = options.method || 'GET';
+    logger.api(method, endpoint, options.body ? JSON.parse(options.body as string) : undefined);
+    const startTime = performance.now();
 
     try {
       // Add timeout to prevent hanging requests
@@ -73,6 +79,10 @@ class ApiService {
 
       clearTimeout(timeoutId);
       const data = await response.json();
+      const duration = performance.now() - startTime;
+
+      // Log successful response
+      logger.apiResponse(endpoint, response.status, duration, response.ok ? data : undefined);
 
       if (!response.ok) {
         throw new Error(data.error || `HTTP ${response.status}`);
@@ -80,19 +90,19 @@ class ApiService {
 
       return data;
     } catch (error) {
+      const duration = performance.now() - startTime;
+
       // Treat aborted requests as benign cancellations
       if (error instanceof DOMException && error.name === 'AbortError') {
+        logger.warn(`Request cancelled: ${endpoint}`);
         return {
           success: false,
           error: 'Request was cancelled.',
         };
       }
 
-      // Log other errors in development only
-      if (import.meta.env.DEV) {
-        // eslint-disable-next-line no-console
-        console.error(`API Error (${endpoint}):`, error);
-      }
+      // Log API error
+      logger.error(`API Error (${endpoint})`, error);
 
       // Return user-friendly error message
       let errorMessage = 'Network error. Please check your connection and try again.';
