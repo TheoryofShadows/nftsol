@@ -97,7 +97,10 @@ function NotificationContainer() {
         <div
           key={notification.id}
           className="pointer-events-auto animate-slide-in-right w-full md:w-auto"
-          data-animation-delay={Math.round((index * 100) / 50) * 50}
+          style={{
+            animationDelay: `${index * 100}ms`,
+            animationFillMode: 'both',
+          }}
         >
           <NotificationItem
             notification={notification}
@@ -118,19 +121,19 @@ function NotificationItem({
 }) {
   const getNotificationStyles = () => {
     const baseStyles =
-      'glass p-4 rounded-xl shadow-2xl max-w-sm border-l-4 flex items-start space-x-3 backdrop-blur-md transition-all duration-300 transform hover:scale-105';
+      'glass p-4 rounded-xl shadow-2xl max-w-sm border-l-4 flex items-start space-x-3 backdrop-blur-md transition-all duration-300 transform hover:scale-[1.02] hover:shadow-glow relative overflow-hidden';
 
     switch (notification.type) {
       case 'success':
-        return `${baseStyles} bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-green-400/60 text-green-100 border-green-400`;
+        return `${baseStyles} bg-gradient-to-br from-green-500/20 via-emerald-500/15 to-green-600/20 border-green-400/60 text-green-100 border-green-400 shadow-green-500/20`;
       case 'error':
-        return `${baseStyles} bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-400/60 text-red-100 border-red-400`;
+        return `${baseStyles} bg-gradient-to-br from-red-500/20 via-orange-500/15 to-red-600/20 border-red-400/60 text-red-100 border-red-400 shadow-red-500/20`;
       case 'warning':
-        return `${baseStyles} bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-400/60 text-yellow-100 border-yellow-400`;
+        return `${baseStyles} bg-gradient-to-br from-yellow-500/20 via-amber-500/15 to-yellow-600/20 border-yellow-400/60 text-yellow-100 border-yellow-400 shadow-yellow-500/20`;
       case 'info':
-        return `${baseStyles} bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400/60 text-blue-100 border-blue-400`;
+        return `${baseStyles} bg-gradient-to-br from-blue-500/20 via-cyan-500/15 to-blue-600/20 border-blue-400/60 text-blue-100 border-blue-400 shadow-blue-500/20`;
       default:
-        return `${baseStyles} bg-gradient-to-r from-gray-500/20 to-slate-500/20 border-gray-400/60 text-gray-100 border-gray-400`;
+        return `${baseStyles} bg-gradient-to-br from-purple-500/20 via-indigo-500/15 to-purple-600/20 border-purple-400/60 text-purple-100 border-purple-400 shadow-purple-500/20`;
     }
   };
 
@@ -151,14 +154,19 @@ function NotificationItem({
 
   return (
     <div className={getNotificationStyles()}>
-      <span className="text-xl flex-shrink-0">{getIcon()}</span>
-      <div className="flex-1 min-w-0">
-        <h4 className="font-bold text-sm mb-1">{notification.title}</h4>
-        <p className="text-sm opacity-90 break-words">{notification.message}</p>
+      {/* Animated shimmer effect */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+      </div>
+
+      <span className="text-2xl flex-shrink-0 animate-bounce-subtle z-10">{getIcon()}</span>
+      <div className="flex-1 min-w-0 z-10">
+        <h4 className="font-bold text-sm mb-1 tracking-wide">{notification.title}</h4>
+        <p className="text-sm opacity-90 break-words leading-relaxed">{notification.message}</p>
       </div>
       <button
         onClick={onRemove}
-        className="text-white/60 hover:text-white transition-colors flex-shrink-0 ml-2 p-1 rounded hover:bg-white/10"
+        className="text-white/60 hover:text-white transition-all duration-200 flex-shrink-0 ml-2 p-1.5 rounded hover:bg-white/10 hover:rotate-90 z-10"
         aria-label="Close notification"
       >
         ✕
