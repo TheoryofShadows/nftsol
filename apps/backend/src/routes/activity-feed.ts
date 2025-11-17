@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { getWebSocketService } from '../services/websocket.service';
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
 const router = Router();
-const logger = createLogger('activity-feed-route');
 
 /**
  * GET /api/v1/activity/feed

@@ -1,6 +1,5 @@
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('gamification-service');
 
 export enum AchievementType {
   FIRST_NFT = 'first_nft',

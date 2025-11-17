@@ -1,6 +1,5 @@
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('creator-tools-service');
 
 export interface CreatorProfile {
   creatorId: string;

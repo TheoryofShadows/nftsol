@@ -1,6 +1,5 @@
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('rarity-service');
 
 export interface TraitFrequency {
   traitType: string;

@@ -1,6 +1,5 @@
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('recommendation-service');
 
 export interface NFTMetadata {
   mint: string;
@@ -254,7 +253,7 @@ export class RecommendationService {
   /**
    * Get trending recommendations based on community activity
    */
-  private getTrendingRecommendations(limit: number): Recommendation[] {
+  public getTrendingRecommendations(limit: number): Recommendation[] {
     return Array.from(this.nftCache.values())
       .map(nft => ({
         mint: nft.mint,

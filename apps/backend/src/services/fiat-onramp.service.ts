@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('fiat-onramp-service');
 
 export enum PaymentProvider {
   STRIPE = 'stripe',

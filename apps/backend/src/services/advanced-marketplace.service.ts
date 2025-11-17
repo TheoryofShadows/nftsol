@@ -1,6 +1,5 @@
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('advanced-marketplace-service');
 
 export enum ListingType {
   FIXED_PRICE = 'fixed_price',
@@ -385,13 +384,13 @@ export class AdvancedMarketplaceService {
     const collectionStats = new Map<string, { volume: number; count: number }>();
 
     // Combine all listing types
-    [...this.listings.values(), ...this.auctions.values(), ...this.offers.values()].forEach(listing => {
-      const collection = 'collection' in listing ? listing.collection : 'unknown';
+    [...this.listings.values(), ...this.auctions.values(), ...this.offers.values()].forEach((listing: any) => {
+      const collection = 'collection' in listing ? (listing.collection as string) : 'unknown';
       if (!collectionStats.has(collection)) {
         collectionStats.set(collection, { volume: 0, count: 0 });
       }
       const stats = collectionStats.get(collection)!;
-      stats.volume += listing.price;
+      stats.volume += (listing.price as number);
       stats.count += 1;
     });
 

@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { getCreatorToolsService } from '../services/creator-tools.service';
-import { createLogger } from '../lib/logger';
-import { verifyAuth } from '../middleware/auth';
+import logger from '../utils/logger';
+import { authenticate as verifyAuth } from '../middlewares/auth';
 
 const router = Router();
-const logger = createLogger('creator-tools-route');
 
 /**
  * POST /api/v1/creators/profile/init

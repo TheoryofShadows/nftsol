@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { getCommunityService } from '../services/community.service';
-import { createLogger } from '../lib/logger';
-import { verifyAuth } from '../middleware/auth';
+import logger from '../utils/logger';
+import { authenticate as verifyAuth } from '../middlewares/auth';
 
 const router = Router();
-const logger = createLogger('community-route');
 
 /**
  * GET /api/v1/community/profile/:userId

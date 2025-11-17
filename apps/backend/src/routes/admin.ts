@@ -250,7 +250,7 @@ router.patch('/tenants/:tenantId', async (req: Request, res: Response) => {
     const { tenantId } = req.params;
     const { name, status, planId, monthlyRevenueCut } = req.body;
 
-    const updates = [];
+    const updates: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
 

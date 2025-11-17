@@ -1,8 +1,7 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { Server } from 'http';
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
-const logger = createLogger('websocket-service');
 
 export interface ActivityEvent {
   type: 'nft_created' | 'nft_sold' | 'offer_made' | 'user_followed' | 'collection_created' | 'clout_earned';

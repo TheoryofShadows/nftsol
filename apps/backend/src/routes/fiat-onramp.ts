@@ -1,16 +1,15 @@
 import { Router } from 'express';
 import { getFiatOnrampService, PaymentProvider } from '../services/fiat-onramp.service';
-import { createLogger } from '../lib/logger';
-import { verifyAuth } from '../middleware/auth';
+import logger from '../utils/logger';
+import { authenticate as verifyAuth } from '../middlewares/auth';
 
 const router = Router();
-const logger = createLogger('fiat-onramp-route');
 
 /**
  * POST /api/v1/fiat/create-session
  * Create a new fiat onramp session
  */
-router.post('/create-session', verifyAuth, (req, res) => {
+router.post('/create-session', verifyAuth, async (req, res) => {
   try {
     const userId = req.user?.id;
     const { provider, amount, currency, walletAddress, cryptoCurrency = 'SOL' } = req.body;

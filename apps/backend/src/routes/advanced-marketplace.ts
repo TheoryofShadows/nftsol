@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { getAdvancedMarketplaceService } from '../services/advanced-marketplace.service';
-import { createLogger } from '../lib/logger';
-import { verifyAuth } from '../middleware/auth';
+import logger from '../utils/logger';
+import { authenticate as verifyAuth } from '../middlewares/auth';
 
 const router = Router();
-const logger = createLogger('advanced-marketplace-route');
 
 /**
  * POST /api/v1/marketplace/listings/fixed-price

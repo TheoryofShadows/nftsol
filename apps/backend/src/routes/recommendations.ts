@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { getRecommendationService } from '../services/recommendation.service';
-import { createLogger } from '../lib/logger';
-import { verifyAuth } from '../middleware/auth';
+import logger from '../utils/logger';
+import { authenticate as verifyAuth } from '../middlewares/auth';
 
 const router = Router();
-const logger = createLogger('recommendations-route');
 
 /**
  * GET /api/v1/recommendations/personalized

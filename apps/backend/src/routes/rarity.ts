@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { getRarityService } from '../services/rarity.service';
-import { createLogger } from '../lib/logger';
+import logger from '../utils/logger';
 
 const router = Router();
-const logger = createLogger('rarity-route');
 
 /**
  * POST /api/v1/rarity/index-collection
