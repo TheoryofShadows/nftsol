@@ -148,13 +148,17 @@ class MockPool {
   }
 }
 
-// Create a real database pool
+// Create a real database pool with optimized Windows-friendly settings
 const createRealPool = () => {
   return new Pool({
     connectionString: databaseConfig.url,
     max: databaseConfig.pool?.max || 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    min: 0, // Don't pre-allocate connections
+    idleTimeoutMillis: 60000, // 60 seconds idle timeout
+    connectionTimeoutMillis: 5000, // 5 second connection timeout
+    statement_timeout: 15000, // 15 second query timeout
+    query_timeout: 15000,
+    application_name: 'nftsol-backend',
     ssl: databaseConfig.ssl
   });
 };
@@ -239,8 +243,7 @@ async function createPoolWithRetry(attempt = 1): Promise<Pool> {
       query_timeout: 15000,
       ssl: databaseConfig.ssl,
       // Additional Windows-friendly settings
-      application_name: 'nftsol-backend',
-      connect_timeout: 5
+      application_name: 'nftsol-backend'
     });
 
     // Don't test the connection immediately - let it fail gracefully on first use
@@ -336,10 +339,43 @@ async function getPool(): Promise<DatabasePool> {
     };
   }
 
-  // Set up error handling once when the pool is created
-  if (poolInstance) {
-    poolInstance.on('error', (err: Error) => {
-      console.error('Unexpected error on database client:', err);
+  // Set up comprehensive error handling once when the pool is created
+  if (poolInstance && poolInstance._pool) {
+    const pgPool = poolInstance._pool as Pool;
+
+    // Handle errors on idle clients
+    pgPool.on('error', (err: Error, client: PoolClient) => {
+      console.error('⚠️  Unexpected error on idle database client:', err.message);
+      // Gracefully handle the error without crashing
+      if (client) {
+        try {
+          client.release(err);
+        } catch (releaseErr) {
+          console.error('Error releasing client:', releaseErr);
+        }
+      }
+    });
+
+    // Handle connection errors
+    pgPool.on('connect', () => {
+      console.log('[DB Pool] New connection established');
+    });
+
+    // Set up periodic health check to detect stale connections
+    const healthCheckInterval = setInterval(async () => {
+      try {
+        const health = await poolInstance!.healthCheck();
+        if (health.status !== 'healthy') {
+          console.warn('⚠️  Database health check failed:', health.details.message);
+        }
+      } catch (error) {
+        console.warn('Health check error:', error instanceof Error ? error.message : error);
+      }
+    }, 30000); // Every 30 seconds
+
+    // Clean up interval on process exit
+    process.on('exit', () => {
+      clearInterval(healthCheckInterval);
     });
   }
 
@@ -542,22 +578,37 @@ pool.on('error', (err: Error) => {
 });
 
 /**
- * Executes a function within a database transaction
+ * Executes a function within a database transaction with proper error handling
  * @param callback - Function that receives a client and returns a Promise
  */
 export async function withClient<T>(
   callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const client = await pool.connect();
+  let isReleased = false;
+
   try {
     await client.query('BEGIN');
     const result = await callback(client as PoolClient);
     await client.query('COMMIT');
     return result;
   } catch (error) {
-    await client.query('ROLLBACK');
+    try {
+      await client.query('ROLLBACK');
+    } catch (rollbackError) {
+      console.error('Error during ROLLBACK:', rollbackError);
+      // Continue with cleanup even if rollback fails
+    }
     throw error;
   } finally {
-    client.release();
+    // Ensure client is released exactly once
+    if (!isReleased) {
+      try {
+        client.release();
+        isReleased = true;
+      } catch (releaseError) {
+        console.error('Error releasing client:', releaseError);
+      }
+    }
   }
 }
