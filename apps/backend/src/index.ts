@@ -39,6 +39,7 @@ import grokVerificationRouter from './routes/grok-verification';
 import transactionsRouter from './routes/transactions';
 import videoRouter from './routes/video';
 import { initializeSecrets } from './lib/secrets-loader';
+import verificationRealRouter from './routes/verification-real';
 
 initializeSecrets();
 
@@ -942,6 +943,7 @@ app.use('/api', (req, res, next) => {
 // Grok AI verification routes
 app.use('/api/grok', grokVerificationRouter);
 
+app.use('/api/verify', verificationRealRouter);
 // Video upload routes
 app.use('/api/video', videoRouter);
 
