@@ -12,6 +12,7 @@ import { useNotification } from './components/NotificationSystem';
 import { useOnboarding } from './context/OnboardingContext';
 import { trackPageView, trackWalletConnect, trackTabChange } from './utils/analytics';
 import { initScrollReveal } from './hooks/useScrollReveal';
+import { logger } from './utils/logger';
 import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
@@ -106,16 +107,25 @@ function AppContent() {
     ? 'Solana Testnet'
     : 'Solana Devnet';
 
-  // Load NFTs on mount
+  // Initialize logger banner and scroll reveal
   useEffect(() => {
-    loadMarketplace();
-  }, [loadMarketplace]);
+    // Display welcome banner in console
+    logger.banner();
+    logger.info('NFTSol Platform initialized');
+    logger.debug('Environment:', import.meta.env.MODE);
+    logger.debug('Cluster:', solanaCluster);
 
-  // Initialize scroll reveal animations
-  useEffect(() => {
+    // Initialize scroll reveal animations
     const cleanup = initScrollReveal();
     return cleanup;
   }, []);
+
+  // Load NFTs on mount
+  useEffect(() => {
+    logger.timeStart('Marketplace Load');
+    loadMarketplace();
+    logger.timeEnd('Marketplace Load');
+  }, [loadMarketplace]);
 
   // Track page views
   useEffect(() => {
