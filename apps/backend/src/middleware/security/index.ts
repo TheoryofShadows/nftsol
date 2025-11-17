@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';
 import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
-import { validationResult, ValidationChain, body, param, query } from 'express-validator';
+// Using the default export approach for express-validator v7
+const ev = require('express-validator');
+const { validationResult, body, param, query, ValidationChain } = ev;
 import env from '../../config';
 import { SecurityConfig, RedisConfig } from '../../types/config';
 import logger from '../../utils/logger';

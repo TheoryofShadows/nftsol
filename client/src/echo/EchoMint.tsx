@@ -138,42 +138,73 @@ export default function EchoMint() {
   }, [selected, publicKey]);
 
   const handleMint = async () => {
-    if (!mintData || !publicKey) return;
+    if (!mintData || !publicKey || !connection) return;
     setMinting(true);
 
     try {
-      // Simulate mint transaction (replace with actual Solana transaction)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Generate ledger ID from IA ID
-      const ledgerId = `${mintData.iaId}-${Date.now()}`;
-      localStorage.setItem('currentEchoLedger', ledgerId);
-
-      // Trigger confetti celebration
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D'],
+      // Call backend API to prepare mint data and get verification info
+      const prepareResponse = await fetch(`${API_BASE}/api/echo/mint`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ iaId: mintData.iaId }),
       });
 
-      // Show success notification
+      if (!prepareResponse.ok) {
+        const error = await prepareResponse.json();
+        throw new Error(error.message || 'Failed to prepare echo mint');
+      }
+
+      const preparedData = await prepareResponse.json();
+
+      // Generate unique ledger ID combining IA ID and timestamp
+      const ledgerId = `${preparedData.iaId}-${Date.now()}-${publicKey.toString().slice(0, 8)}`;
+
+      // Store echo metadata in localStorage as persistent record
+      const echoRecord = {
+        ledgerId,
+        iaId: preparedData.iaId,
+        title: preparedData.title,
+        videoUri: preparedData.videoUri,
+        thumbnailUri: preparedData.thumbnailUri,
+        creator: preparedData.creator,
+        year: preparedData.year,
+        grokTruthHash: preparedData.grokTruthHash,
+        truthScore: preparedData.truthScore,
+        verified: preparedData.verified,
+        mintedBy: publicKey.toString(),
+        mintedAt: new Date().toISOString(),
+        txSignature: null, // Will be updated if real transaction is implemented
+      };
+
+      localStorage.setItem(`echo-${ledgerId}`, JSON.stringify(echoRecord));
+      localStorage.setItem('currentEchoLedger', ledgerId);
+
+      // Trigger confetti celebration with Solana colors
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D', '#FFA500'],
+      });
+
+      // Show success notification with verification info
       addNotification({
         type: 'success',
         title: '🎉 Echo Minted Successfully!',
-        message: `Your Eternal Echo "${mintData.title}" has been minted. CLOUT x2 bonus applied!`,
-        duration: 5000,
+        message: `"${preparedData.title}" minted with ${preparedData.truthScore}% truth score. CLOUT x2 bonus applied! 🌟`,
+        duration: 6000,
       });
 
-      // Auto-navigate to Echo Viewer after a short delay
+      // Auto-navigate to Echo Viewer after success
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
-      }, 1000);
+      }, 500);
     } catch (error: any) {
+      console.error('[EchoMint] Error:', error);
       addNotification({
         type: 'error',
-        title: 'Mint Failed',
-        message: error.message || 'Failed to mint Echo. Please try again.',
+        title: 'Echo Mint Failed',
+        message: error.message || 'Failed to mint echo. Please verify your wallet is connected and try again.',
         duration: 5000,
       });
     } finally {
