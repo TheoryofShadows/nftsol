@@ -10,7 +10,7 @@ let connection: Connection | null = null;
  */
 export function getConnection(): Connection {
   if (!connection) {
-    const rpcUrl = config.solanaConfig.rpcUrl || clusterApiUrl('devnet');
+    const rpcUrl = config.solanaConfig.rpcUrl || clusterApiUrl('mainnet-beta');
     
     connection = new Connection(rpcUrl, {
       commitment: config.solanaConfig.commitment,
@@ -30,7 +30,7 @@ export function getConnection(): Connection {
 
 // Helper function to get the current network
 export function getNetwork(): string {
-  return config.solanaConfig.cluster || 'devnet';
+  return config.solanaConfig.cluster || 'mainnet-beta';
 }
 
 // Helper function to check if connected to devnet

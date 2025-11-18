@@ -23,7 +23,7 @@ export const env = {
   DATABASE_URL: process.env.DATABASE_URL || '',
   
   // Solana
-  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
   SOLANA_WS_URL: process.env.SOLANA_WS_URL,
   SOLANA_COMMITMENT: (process.env.SOLANA_COMMITMENT || 'confirmed') as 'confirmed' | 'processed' | 'finalized',
   
@@ -68,9 +68,9 @@ export const appConfig: AppConfig = {
 };
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: getEnv('SOLANA_RPC_URL', 'https://api.devnet.solana.com'),
+  rpcUrl: getEnv('SOLANA_RPC_URL', 'https://api.mainnet-beta.solana.com'),
   commitment: 'confirmed',
-  cluster: (getEnv('SOLANA_CLUSTER', 'devnet') as 'devnet' | 'testnet' | 'mainnet-beta'),
+  cluster: (getEnv('SOLANA_CLUSTER', 'mainnet-beta') as 'devnet' | 'testnet' | 'mainnet-beta'),
 };
 
 // Database configuration with proper SSL handling

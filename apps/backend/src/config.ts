@@ -26,7 +26,7 @@ export interface AppConfig {
 }
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com',
+  rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
   commitment: 'confirmed'
 };
 

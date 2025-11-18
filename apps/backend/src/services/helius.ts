@@ -101,7 +101,7 @@ export class HeliusService {
 
   constructor(config?: Partial<HeliusConfig>) {
     const apiKey = process.env.HELIUS_API_KEY || '';
-    const cluster = (process.env.SOLANA_CLUSTER as 'mainnet-beta' | 'devnet') || 'devnet';
+    const cluster = (process.env.SOLANA_CLUSTER as 'mainnet-beta' | 'devnet') || 'mainnet-beta';
     
     this.config = {
       apiKey,

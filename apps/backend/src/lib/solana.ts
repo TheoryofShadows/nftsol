@@ -10,7 +10,7 @@ import {
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { getPlatformKeypair } from './platformKeypair';
 
-const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 export const SOLANA_COMMITMENT: Commitment = 'confirmed';
 export const connection = new Connection(RPC_URL, SOLANA_COMMITMENT);
 

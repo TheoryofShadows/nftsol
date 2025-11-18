@@ -12,7 +12,7 @@ import '@solana/wallet-adapter-react-ui/styles.css';
 import '../styles/WalletSetup.css';
 
 export default function WalletSetup({ children }: { children: React.ReactNode }) {
-  const cluster = (import.meta as any).env?.VITE_SOLANA_CLUSTER || 'devnet';
+  const cluster = (import.meta as any).env?.VITE_SOLANA_CLUSTER || 'mainnet-beta';
   const endpoint =
     cluster === 'mainnet-beta' ? clusterApiUrl('mainnet-beta') : clusterApiUrl('devnet');
   const wallets = useMemo(
