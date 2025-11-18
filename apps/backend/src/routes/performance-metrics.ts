@@ -4,7 +4,6 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { getCacheStats } from '../middleware/cache';
 
 const router = Router();
 
@@ -55,14 +54,13 @@ router.post('/web-vitals', (req: Request, res: Response) => {
  */
 router.get('/performance', async (req: Request, res: Response) => {
   try {
-    const cacheStats = await getCacheStats();
     const metricsReport = getMetricsReport();
 
     res.json({
       success: true,
       data: {
-        cacheStats,
         webVitals: metricsReport,
+        metricsCollected: metricsStore.length,
         timestamp: new Date().toISOString()
       }
     });
