@@ -6,13 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "vite build --mode analyze",
+    "preview": "vite preview --port 5173",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:coverage": "vitest --coverage",
     "lint": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --config .eslintrc.cjs . --ext .ts,.tsx",
     "format": "prettier -w .",
     "format:check": "prettier -c .",
-    "preview": "vite preview --port 5173"
+    "type-check": "tsc --noEmit",
+    "optimize": "npm run build && npm run type-check"
   },
   "dependencies": {
     "@solana/wallet-adapter-base": "^0.9.27",

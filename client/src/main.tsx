@@ -13,6 +13,7 @@ import './styles/shared-utilities.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
 import { QueryProvider } from './lib/react-query.tsx';
+import { reportWebVitals } from './utils/web-vitals';
 
 // Polyfill Buffer for browser
 interface WindowWithBuffer extends Window {
@@ -127,5 +128,8 @@ root.render(
     </QueryProvider>
   </React.StrictMode>
 );
+
+// Report Web Vitals for performance monitoring
+reportWebVitals();
 
 // Performance monitoring complete
