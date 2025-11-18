@@ -23,7 +23,7 @@ This guide will help you set up Sentry error tracking for both the NFTSol backen
 ## Your Sentry Organization
 
 **Organization:** nftsol
-**Organization Token:** `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`
+**Organization Token:** `sntrys_[YOUR_TOKEN_HERE]` (See Sentry dashboard for your actual token)
 
 **Next Steps:**
 1. Go to https://sentry.io/organizations/nftsol/projects/

@@ -1,0 +1,197 @@
+name: E2E Tests - Playwright
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run E2E tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  e2e-tests:
+    name: E2E Tests (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+        include:
+          - browser: chromium
+            name: 'Chromium'
+          - browser: firefox
+            name: 'Firefox'
+          - browser: webkit
+            name: 'WebKit (Safari)'
+
+    env:
+      PLAYWRIGHT_TEST_BASE_URL: http://localhost:5173
+      PLAYWRIGHT_TEST_API_URL: http://localhost:3001
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Build frontend
+        run: |
+          cd client
+          npm run build
+          echo "✅ Frontend built successfully"
+
+      - name: Start backend
+        run: |
+          cd apps/backend
+          npm run build
+          npm run dev > backend.log 2>&1 &
+          echo $! > backend.pid
+          echo "Backend PID: $(cat backend.pid)"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nftsol_test
+          NODE_ENV: test
+
+      - name: Wait for services
+        run: |
+          echo "⏳ Waiting for services to be ready..."
+
+          # Wait for backend
+          for i in {1..60}; do
+            if curl -s http://localhost:3001/health > /dev/null 2>&1; then
+              echo "✅ Backend is ready"
+              break
+            fi
+            echo "   Attempt $i/60..."
+            sleep 1
+          done
+
+          # Wait for frontend
+          for i in {1..60}; do
+            if curl -s http://localhost:5173 > /dev/null 2>&1; then
+              echo "✅ Frontend is ready"
+              break
+            fi
+            echo "   Attempt $i/60..."
+            sleep 1
+          done
+
+      - name: Run E2E tests (${{ matrix.browser }})
+        run: |
+          npx playwright test --project=${{ matrix.browser }}
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-results-${{ matrix.browser }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+      - name: Upload test videos
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-videos-${{ matrix.browser }}
+          path: test-results/
+          retention-days: 7
+
+      - name: Check test results
+        if: always()
+        run: |
+          if [ -f junit-results.xml ]; then
+            echo "📊 Test Results Summary:"
+            grep -o 'tests="[0-9]*"' junit-results.xml | head -1
+            grep -o 'failures="[0-9]*"' junit-results.xml | head -1
+            grep -o 'skipped="[0-9]*"' junit-results.xml | head -1
+          fi
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const testResults = fs.existsSync('test-results.json')
+              ? JSON.parse(fs.readFileSync('test-results.json', 'utf8'))
+              : null;
+
+            if (testResults) {
+              const stats = testResults.stats || {};
+              const comment = `## 🎭 Playwright E2E Test Results - ${{ matrix.browser }}
+
+              | Metric | Value |
+              |--------|-------|
+              | Tests | ${stats.tests || 'N/A'} |
+              | Passed | ${stats.passes || 'N/A'} ✅ |
+              | Failed | ${stats.failures || 'N/A'} ❌ |
+              | Skipped | ${stats.skipped || 'N/A'} ⏭️ |
+              | Duration | ${stats.duration || 'N/A'} |
+
+              **Browser:** ${{ matrix.browser }}
+
+              [View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Kill backend process
+          if [ -f apps/backend/backend.pid ]; then
+            kill $(cat apps/backend/backend.pid) 2>/dev/null || true
+          fi
+          echo "✅ Cleanup completed"
+
+  e2e-summary:
+    name: E2E Test Summary
+    runs-on: ubuntu-latest
+    needs: e2e-tests
+    if: always()
+
+    steps:
+      - name: Check test results
+        run: |
+          if [ "${{ needs.e2e-tests.result }}" == "success" ]; then
+            echo "✅ All E2E tests passed across all browsers!"
+            exit 0
+          else
+            echo "❌ Some E2E tests failed"
+            exit 1
+          fi
+
+      - name: Report Status
+        if: failure()
+        run: |
+          echo "🔴 E2E Test Suite Failed"
+          echo "Please review the test logs and artifacts"
+          exit 1

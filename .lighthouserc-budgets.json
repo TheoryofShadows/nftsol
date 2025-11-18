@@ -1,0 +1,166 @@
+{
+  "version": 1.0,
+  "resourceBudgets": [
+    {
+      "resourceType": "document",
+      "budget": 50
+    },
+    {
+      "resourceType": "stylesheet",
+      "budget": 50
+    },
+    {
+      "resourceType": "script",
+      "budget": 300,
+      "description": "Main app scripts (React bundle + vendors)"
+    },
+    {
+      "resourceType": "image",
+      "budget": 300,
+      "description": "Optimized images with lazy loading"
+    },
+    {
+      "resourceType": "media",
+      "budget": 500,
+      "description": "Video previews and NFT media"
+    },
+    {
+      "resourceType": "font",
+      "budget": 100,
+      "description": "Web fonts (limited to essential fonts only)"
+    },
+    {
+      "resourceType": "other",
+      "budget": 50,
+      "description": "Third-party scripts and trackers"
+    }
+  ],
+  "timingBudgets": [
+    {
+      "metric": "first-contentful-paint",
+      "budget": 1800,
+      "description": "Time until first content appears (ms)"
+    },
+    {
+      "metric": "largest-contentful-paint",
+      "budget": 2500,
+      "description": "Time until largest content paints (ms)"
+    },
+    {
+      "metric": "cumulative-layout-shift",
+      "budget": 0.1,
+      "description": "Layout stability score (lower is better)"
+    },
+    {
+      "metric": "interaction-to-next-paint",
+      "budget": 200,
+      "description": "Responsiveness to user input (ms)"
+    },
+    {
+      "metric": "total-blocking-time",
+      "budget": 200,
+      "description": "Total time main thread is blocked (ms)"
+    },
+    {
+      "metric": "time-to-first-byte",
+      "budget": 600,
+      "description": "Server response time (ms)"
+    }
+  ],
+  "performanceTargets": {
+    "pages": {
+      "/": {
+        "description": "Landing/homepage",
+        "budgets": {
+          "performance": 90,
+          "largestContentfulPaint": 2000,
+          "totalBlockingTime": 100,
+          "cumulativeLayoutShift": 0.05,
+          "maxBundleSize": 300
+        }
+      },
+      "/marketplace": {
+        "description": "NFT marketplace listing",
+        "budgets": {
+          "performance": 85,
+          "largestContentfulPaint": 2500,
+          "totalBlockingTime": 150,
+          "cumulativeLayoutShift": 0.1,
+          "maxBundleSize": 400
+        }
+      },
+      "/dashboard": {
+        "description": "User dashboard",
+        "budgets": {
+          "performance": 80,
+          "largestContentfulPaint": 3000,
+          "totalBlockingTime": 200,
+          "cumulativeLayoutShift": 0.15,
+          "maxBundleSize": 500
+        }
+      },
+      "/mint": {
+        "description": "NFT minting form",
+        "budgets": {
+          "performance": 85,
+          "largestContentfulPaint": 2500,
+          "totalBlockingTime": 150,
+          "cumulativeLayoutShift": 0.1,
+          "maxBundleSize": 350
+        }
+      }
+    }
+  },
+  "recommendations": {
+    "bundle": {
+      "strategy": "code-splitting",
+      "description": "Use lazy loading and code splitting for route-based bundles",
+      "expected": "Reduce main bundle from 400kb to 150kb with route-based chunks"
+    },
+    "images": {
+      "strategy": "modern-formats-and-lazy-loading",
+      "description": "Use WebP format with fallbacks and lazy load all off-screen images",
+      "expected": "Reduce image payload by 40-60% with WebP optimization"
+    },
+    "fonts": {
+      "strategy": "system-fonts-and-subset",
+      "description": "Use system fonts or subseted web fonts with preload",
+      "expected": "Reduce font payload from 100kb to 20kb"
+    },
+    "third-party": {
+      "strategy": "defer-and-async",
+      "description": "Defer non-critical third-party scripts using async loading",
+      "expected": "Reduce main thread blocking time by 30-50%"
+    },
+    "caching": {
+      "strategy": "service-worker-and-cdn",
+      "description": "Implement service worker with CDN caching headers",
+      "expected": "Serve repeat visitors in < 1s"
+    }
+  },
+  "tracking": {
+    "enabled": true,
+    "baseline": "main",
+    "compareWith": "develop",
+    "tolerancePercent": 5,
+    "failOnThreshold": true,
+    "thresholds": {
+      "performance": {
+        "regression": -5,
+        "improvement": 10
+      },
+      "accessibility": {
+        "regression": -2,
+        "improvement": 5
+      },
+      "bestPractices": {
+        "regression": -2,
+        "improvement": 5
+      },
+      "seo": {
+        "regression": -2,
+        "improvement": 5
+      }
+    }
+  }
+}

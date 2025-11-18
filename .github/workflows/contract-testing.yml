@@ -1,0 +1,315 @@
+name: Contract Testing
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'client/src/**'
+      - 'apps/backend/src/**'
+      - 'client/package.json'
+      - 'apps/backend/package.json'
+      - '.github/workflows/contract-testing.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'client/src/**'
+      - 'apps/backend/src/**'
+      - 'client/package.json'
+      - 'apps/backend/package.json'
+
+concurrency:
+  group: contract-testing-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===== CONSUMER CONTRACT TESTS (FRONTEND) =====
+  consumer-contracts:
+    name: Consumer Contract Tests (Frontend)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Run consumer contract tests
+        run: npm run test:contracts -- --coverage --testTimeout=10000
+        working-directory: client
+        env:
+          PACT_SPEC_VERSION: '2.0.0'
+
+      - name: Generate contract files
+        if: always()
+        run: ls -la pacts/ || echo "No pacts directory"
+        working-directory: client
+
+      - name: Upload consumer contracts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: consumer-contracts-node${{ matrix.node-version }}
+          path: client/pacts/
+          retention-days: 30
+
+      - name: Upload coverage
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./client/coverage/lcov.info
+          flags: contract-tests-consumer
+          name: contract-consumer-coverage
+
+  # ===== PROVIDER VERIFICATION (BACKEND) =====
+  provider-verification:
+    name: Provider Verification (Backend)
+    runs-on: ubuntu-latest
+    needs: consumer-contracts
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    services:
+      postgres:
+        image: postgres:14-alpine
+        env:
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: nftsol_test
+          POSTGRES_USER: test_user
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: apps/backend/package-lock.json
+
+      - name: Download consumer contracts
+        uses: actions/download-artifact@v3
+        with:
+          name: consumer-contracts-node${{ matrix.node-version }}
+          path: apps/backend/pacts/
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: apps/backend
+
+      - name: Setup test database
+        run: npm run db:migrate:test
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql://test_user:testpass@localhost:5432/nftsol_test
+          NODE_ENV: test
+
+      - name: Start backend server
+        run: npm run dev &
+        working-directory: apps/backend
+        timeout-minutes: 2
+        env:
+          DATABASE_URL: postgresql://test_user:testpass@localhost:5432/nftsol_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          PORT: 3001
+
+      - name: Wait for backend readiness
+        run: |
+          max_attempts=30
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if curl -f http://localhost:3001/health 2>/dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            echo "Waiting for backend... (attempt $attempt/$max_attempts)"
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+          echo "Backend failed to start"
+          exit 1
+        timeout-minutes: 2
+
+      - name: Run provider verification
+        run: npm run test:pact:verify -- --testTimeout=30000
+        working-directory: apps/backend
+        env:
+          DATABASE_URL: postgresql://test_user:testpass@localhost:5432/nftsol_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          LOG_LEVEL: debug
+
+      - name: Upload verification results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: provider-verification-results-node${{ matrix.node-version }}
+          path: apps/backend/test-results/
+          retention-days: 30
+
+      - name: Upload coverage
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./apps/backend/coverage/lcov.info
+          flags: contract-tests-provider
+          name: contract-provider-coverage
+
+  # ===== PACT BROKER PUBLICATION (optional) =====
+  publish-contracts:
+    name: Publish Contracts to Pact Broker
+    runs-on: ubuntu-latest
+    needs: [consumer-contracts, provider-verification]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+
+      - name: Download consumer contracts
+        uses: actions/download-artifact@v3
+        with:
+          name: consumer-contracts-node20.x
+          path: pacts/
+
+      - name: Install Pact CLI
+        run: npm install -g @pact-foundation/pact-cli
+
+      - name: Publish to Pact Broker
+        run: |
+          pact-broker publish pacts/ \
+            --consumer-app-version="${{ github.sha }}" \
+            --broker-base-url="${{ secrets.PACT_BROKER_URL }}" \
+            --broker-username="${{ secrets.PACT_BROKER_USERNAME }}" \
+            --broker-password="${{ secrets.PACT_BROKER_PASSWORD }}"
+        if: env.PACT_BROKER_URL != ''
+
+      - name: Check deployment readiness
+        run: |
+          pact-broker can-i-deploy \
+            --pacticipant=NFTSol-Backend \
+            --version="${{ github.sha }}" \
+            --broker-base-url="${{ secrets.PACT_BROKER_URL }}" \
+            --broker-username="${{ secrets.PACT_BROKER_USERNAME }}" \
+            --broker-password="${{ secrets.PACT_BROKER_PASSWORD }}"
+        if: env.PACT_BROKER_URL != ''
+        continue-on-error: true
+
+  # ===== TEST SUMMARY =====
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [consumer-contracts, provider-verification]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          echo "## Contract Testing Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Consumer Contracts: ${{ needs.consumer-contracts.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Provider Verification: ${{ needs.provider-verification.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.consumer-contracts.result }}" == "failure" ] || [ "${{ needs.provider-verification.result }}" == "failure" ]; then
+            echo "❌ Contract tests failed" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ All contract tests passed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Contract Testing Results ✅\n\n- Consumer Contracts: ${{ needs.consumer-contracts.result }}\n- Provider Verification: ${{ needs.provider-verification.result }}\n\n[View artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
+            })
+
+  # ===== FAILURE NOTIFICATION =====
+  notify-failure:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: [consumer-contracts, provider-verification]
+    if: failure()
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "❌ Contract Testing Failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Contract Testing Failed* 🔴\n\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref }}\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+
+  # ===== SUCCESS NOTIFICATION =====
+  notify-success:
+    name: Notify on Success
+    runs-on: ubuntu-latest
+    needs: [consumer-contracts, provider-verification]
+    if: success()
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "✅ Contract Testing Passed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Contract Testing Passed* ✅\n\n*Repository:* ${{ github.repository }}\n*Branch:* ${{ github.ref }}\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Details>"
+                  }
+                }
+              ]
+            }
+        if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
