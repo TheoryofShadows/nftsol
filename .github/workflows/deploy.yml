@@ -21,32 +21,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: apps/backend/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           npm ci || npm install
         continue-on-error: false
-      
+
       - name: Type check
         run: npm run type-check || echo "Type check failed but continuing..."
         continue-on-error: true
-      
+
       - name: Lint
         run: npm run lint || echo "Lint failed but continuing..."
         continue-on-error: true
-      
+
       - name: Build
         run: |
           npm run build || (echo "Build failed!" && exit 1)
         continue-on-error: false
-      
+
       - name: Deploy to Render
         if: github.ref == 'refs/heads/main' && success()
         uses: johnbeynon/render-deploy-action@v0.0.8
@@ -68,23 +68,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: client/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           npm ci || npm install
         continue-on-error: false
-      
+
       - name: Lint
         run: npm run lint || echo "Lint failed but continuing..."
         continue-on-error: true
-      
+
       - name: Build
         run: |
           npm run build || (echo "Build failed!" && exit 1)
@@ -103,14 +103,14 @@ jobs:
           CI: false
           NPM_CONFIG_PRODUCTION: false
         continue-on-error: false
-      
+
       - name: Deploy to Netlify
         if: github.ref == 'refs/heads/main' && success()
         uses: nwtgck/actions-netlify@v2.1
         with:
           publish-dir: './client/dist'
           production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_PAT }}
           deploy-message: "Deploy from GitHub Actions"
           enable-pull-request-comment: false
           enable-commit-comment: false

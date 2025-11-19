@@ -40,8 +40,21 @@ import transactionsRouter from './routes/transactions';
 import videoRouter from './routes/video';
 import { initializeSecrets } from './lib/secrets-loader';
 import verificationRealRouter from './routes/verification-real';
+import { createSolanaRPCFailover } from './services/rpc-failover';
+import { initializeHelius } from './services/helius-optimized';
 
 initializeSecrets();
+
+// Initialize Solana best practices services
+const heliusApiKey = process.env.HELIUS_API_KEY;
+if (heliusApiKey) {
+  initializeHelius({ apiKey: heliusApiKey });
+  console.log('✓ Helius optimized service initialized');
+}
+
+// Initialize RPC failover for reliability
+const rpcFailover = createSolanaRPCFailover(heliusApiKey);
+console.log('✓ RPC failover service initialized');
 
 // PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
 // This is just for reference - actual port used is from appConfig.port or Render's PORT

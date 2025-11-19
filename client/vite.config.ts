@@ -69,10 +69,6 @@ export default defineConfig({
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
-        // Optimize chunk sizes
-        optimize: {
-          minChunkSize: 15000, // Minimum 15KB per chunk
-        }
       },
     },
     chunkSizeWarningLimit: 500, // Warn on chunks > 500KB

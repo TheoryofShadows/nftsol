@@ -17,5 +17,6 @@ config-variables:
   - NETLIFY_AUTH_TOKEN
   - NETLIFY_SITE_ID
   - GITHUB_TOKEN
+  - GITHUB_PAT
 
 

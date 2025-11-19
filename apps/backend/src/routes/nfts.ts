@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { mintNFT, getWalletBalance, accountExists } from '../lib/solana';
+import { mintNFT, getWalletBalance, accountExists, connection } from '../lib/solana';
 import { validateWallet, sanitizeInput } from '../utils/validation';
 import { ApiResponse } from '../types';
+import { getPlatformKeypair } from '../lib/platformKeypair';
 
 const router = Router();
 
@@ -164,6 +165,48 @@ router.get('/verify/:address', async (req, res) => {
       code: 'VERIFICATION_FAILED',
     };
     return res.status(500).json(response);
+  }
+});
+
+router.get('/mint/status', async (req, res) => {
+  try {
+    const keypair = getPlatformKeypair();
+    const balance = await getWalletBalance(keypair.publicKey.toBase58());
+
+    // Check RPC health by getting latest blockhash
+    let rpcHealth = 'unknown';
+    let rpcWorking = false;
+    try {
+      await connection.getLatestBlockhash('confirmed');
+      rpcHealth = 'ok';
+      rpcWorking = true;
+    } catch (error) {
+      rpcHealth = 'error';
+      rpcWorking = false;
+    }
+
+    const response: ApiResponse = {
+      success: true,
+      data: {
+        platformWallet: keypair.publicKey.toBase58(),
+        balance: balance,
+        balanceFormatted: `${balance.toFixed(4)} SOL`,
+        hasMinimumBalance: balance >= 0.02,
+        rpcHealth: rpcHealth,
+        rpcWorking: rpcWorking,
+        rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+        network: process.env.SOLANA_CLUSTER || 'mainnet-beta',
+        canMint: balance >= 0.02 && rpcWorking,
+      },
+    };
+    return res.json(response);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return res.status(500).json({
+      success: false,
+      error: errorMessage,
+      code: 'STATUS_CHECK_FAILED',
+    });
   }
 });
 

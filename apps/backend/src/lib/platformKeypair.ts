@@ -10,9 +10,10 @@ let cachedKeypair: Web3Keypair | null = null;
 export function getPlatformKeypair(): Web3Keypair {
   if (cachedKeypair) return cachedKeypair;
 
-  const secret = process.env.PLATFORM_KEYPAIR;
+  // Try PLATFORM_KEYPAIR first, then PLATFORM_SECRET_KEY_BASE58
+  const secret = process.env.PLATFORM_KEYPAIR || process.env.PLATFORM_SECRET_KEY_BASE58;
   if (!secret) {
-    throw new Error("PLATFORM_KEYPAIR env var missing");
+    throw new Error("PLATFORM_KEYPAIR or PLATFORM_SECRET_KEY_BASE58 env var missing");
   }
 
   let secretBytes: Uint8Array;
@@ -33,9 +34,9 @@ export function getPlatformKeypair(): Web3Keypair {
       secretBytes = bs58.decode(secret);
     }
   } catch (error: unknown) {
-    console.error('Error parsing PLATFORM_KEYPAIR:', error);
+    console.error('Error parsing platform keypair:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    throw new Error(`Invalid PLATFORM_KEYPAIR format: ${errorMessage}`);
+    throw new Error(`Invalid platform keypair format: ${errorMessage}`);
   }
 
   cachedKeypair = Web3Keypair.fromSecretKey(secretBytes);

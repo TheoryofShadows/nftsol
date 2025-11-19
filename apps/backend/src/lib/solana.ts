@@ -9,6 +9,7 @@ import {
 } from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { getPlatformKeypair } from './platformKeypair';
+import { ensurePlatformBalance } from './checkBalance';
 
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 export const SOLANA_COMMITMENT: Commitment = 'confirmed';
@@ -41,9 +42,22 @@ export async function mintNFT(
   description?: string
 ) {
   try {
+    // Check platform wallet balance BEFORE attempting mint
+    const balance = await ensurePlatformBalance(0.02); // Need at least 0.02 SOL
+    console.log(`[Mint] Platform balance: ${balance.toFixed(4)} SOL`);
+
+    // Validate RPC connection by getting latest blockhash
+    try {
+      await connection.getLatestBlockhash('confirmed');
+    } catch (error) {
+      throw new Error(`RPC connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
     const toPublicKey = new PublicKey(toAddress);
     const metaplexInstance = getMetaplex();
     const keypair = getPlatformKeypair();
+
+    console.log(`[Mint] Minting NFT "${name}" to ${toAddress}`);
 
     const { nft } = await metaplexInstance.nfts().create({
       uri: metadataUri,
@@ -54,11 +68,15 @@ export async function mintNFT(
       mintAuthority: keypair,
     });
 
+    console.log(`[Mint] NFT created: ${nft.address.toString()}`);
+
     // Transfer NFT to user
     const transferResult = await metaplexInstance.nfts().transfer({
       nftOrSft: nft,
       toOwner: toPublicKey,
     });
+
+    console.log(`[Mint] ✅ Success! Signature: ${transferResult.response.signature}`);
 
     return {
       mintAddress: nft.address.toString(),
@@ -66,13 +84,35 @@ export async function mintNFT(
       success: true,
     };
   } catch (error) {
-    console.error('NFT minting error:', error);
-    // Don't expose internal error details to client
+    console.error('[Mint] ❌ NFT minting error:', error);
+
+    // Provide detailed error in development, generic in production
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = {
+      message: errorMessage,
+      // Include helpful hints
+      hints: [] as string[],
+    };
+
+    // Add helpful hints based on error type
+    if (errorMessage.includes('PLATFORM_KEYPAIR') || errorMessage.includes('PLATFORM_SECRET_KEY')) {
+      errorDetails.hints.push('Check PLATFORM_SECRET_KEY_BASE58 or PLATFORM_KEYPAIR environment variable');
+    }
+    if (errorMessage.includes('balance') || errorMessage.includes('insufficient')) {
+      errorDetails.hints.push('Platform wallet needs at least 0.02 SOL for minting');
+      errorDetails.hints.push(`Platform wallet: ${getPlatformKeypair().publicKey.toBase58()}`);
+    }
+    if (errorMessage.includes('connection') || errorMessage.includes('RPC')) {
+      errorDetails.hints.push('Check SOLANA_RPC_URL environment variable');
+      errorDetails.hints.push(`Current RPC: ${RPC_URL}`);
+    }
+
     return {
       success: false,
-      error: 'NFT minting failed',
-      details: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
+      error: process.env.NODE_ENV === 'development'
+        ? `NFT minting failed: ${errorMessage}`
+        : 'NFT minting failed. Please check platform wallet balance and RPC connection.',
+      details: process.env.NODE_ENV === 'development' ? errorDetails : undefined,
     };
   }
 }
