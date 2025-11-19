@@ -11,7 +11,13 @@
       "Bash(npm audit:*)",
       "Bash(git push:*)",
       "Bash(git commit:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(find:*)",
+      "Bash(while read f)",
+      "Bash(do sed -n '8p' \"$f\")",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []

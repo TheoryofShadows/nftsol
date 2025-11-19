@@ -1,6 +1,7 @@
 import express from 'express';
 import session from 'express-session';
 import { appConfig } from './index';
+import MemoryStoreFactory from 'memorystore';
 
 // Extend the Express Session type
 declare module 'express-session' {
@@ -18,7 +19,7 @@ let store: any = undefined;
 
 if (!isProduction) {
   // Use memorystore for development
-  const MemoryStore = require('memorystore')(session);
+  const MemoryStore = MemoryStoreFactory(session);
   store = new MemoryStore({
     checkPeriod: 86400000 // Prune expired entries every 24h
   });

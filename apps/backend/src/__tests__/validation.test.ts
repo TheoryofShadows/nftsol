@@ -50,12 +50,13 @@ jest.mock('../config', () => {
 import { appConfig } from '../config';
 
 // Import the functions to test
-import { 
-  validateFileType, 
-  validateFileSize, 
-  validateFile, 
-  isValidSolanaAddress, 
-  validateAndNormalizeSolanaAddress, 
+import * as validationModule from '../utils/validation';
+import {
+  validateFileType,
+  validateFileSize,
+  validateFile,
+  isValidSolanaAddress,
+  validateAndNormalizeSolanaAddress,
   sanitizeInput,
   validateWallet,
   ValidationError
@@ -152,7 +153,7 @@ describe('Solana Address Validation', () => {
       // This is a valid Solana testnet address
       const validAddress = '8K4oZ2xqQ3pP8vJ9LmN1Xy2BvC3D4E5F6G7H8J9K0L1M2N3P4Q5R6S7T8U9V0W';
       // Mock the actual implementation to return true for test
-      jest.spyOn(require('../utils/validation'), 'isValidSolanaAddress').mockReturnValue(true);
+      jest.spyOn(validationModule, 'isValidSolanaAddress').mockReturnValue(true);
       expect(isValidSolanaAddress(validAddress)).toBe(true);
     });
 
@@ -215,8 +216,8 @@ describe('Solana Address Validation', () => {
 
     it('should reject invalid Solana addresses', () => {
       // Mock the implementation to return false for invalid addresses
-      const mockIsValid = jest.spyOn(require('../utils/validation'), 'isValidSolanaAddress');
-      mockIsValid.mockImplementation((addr) => {
+      const mockIsValid = jest.spyOn(validationModule, 'isValidSolanaAddress');
+      mockIsValid.mockImplementation((addr: string) => {
         // Only return true for the specific test address we're using
         return addr === '8K4oZ2xqQ3pP8vJ9LmN1Xy2BvC3D4E5F6G7H8J9K0L1M2N3P4Q5R6S7T8U9V0W';
       });
@@ -238,7 +239,7 @@ describe('Solana Address Validation', () => {
 
     it('should throw for invalid addresses', () => {
       // Mock the implementation to throw an error for this test
-      jest.spyOn(require('../utils/validation'), 'validateAndNormalizeSolanaAddress').mockImplementation(() => {
+      jest.spyOn(validationModule, 'validateAndNormalizeSolanaAddress').mockImplementation(() => {
         throw new Error('Invalid Solana address');
       });
       

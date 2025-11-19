@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';
 import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
-// Using the default export approach for express-validator v7
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const ev = require('express-validator');
 const { validationResult, body, param, query, ValidationChain } = ev;
 import env from '../../config';

@@ -7,6 +7,7 @@ import multer from 'multer';
 import rateLimit from 'express-rate-limit';
 import { nanoid } from 'nanoid';
 import { createServer } from 'http';
+import { randomBytes } from 'crypto';
 import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
 import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
@@ -418,7 +419,7 @@ const apiV1 = expressPkg.Router();
 // CSRF token endpoint
 apiV1.get('/csrf-token', (req, res) => {
   // Generate CSRF token
-  const csrfToken = require('crypto').randomBytes(32).toString('hex');
+  const csrfToken = randomBytes(32).toString('hex');
   
   if (req.session) {
     req.session.csrfToken = csrfToken;
