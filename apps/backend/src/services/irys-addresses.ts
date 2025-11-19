@@ -3,8 +3,6 @@
  * Handle both Irys (base58) and Execution (hex/EVM) address formats
  */
 
-import { irysToExecAddr, execToIrysAddr } from "@irys/js/common/utils";
-
 /**
  * Convert between Irys and Execution address formats
  *
@@ -16,11 +14,92 @@ import { irysToExecAddr, execToIrysAddr } from "@irys/js/common/utils";
 
 export class IrysAddressConverter {
   /**
+   * Base58 alphabet used by Irys
+   */
+  private static readonly BASE58_ALPHABET =
+    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+  /**
+   * Decode base58 string to bytes
+   */
+  private static base58Decode(str: string): Buffer {
+    let bytes = Buffer.from([0]);
+
+    for (const char of str) {
+      const digit = this.BASE58_ALPHABET.indexOf(char);
+      if (digit === -1) {
+        throw new Error(`Invalid base58 character: ${char}`);
+      }
+
+      let carry = digit;
+      for (let j = 0; j < bytes.length; j++) {
+        carry += bytes[j] * 58;
+        bytes[j] = carry & 0xff;
+        carry >>= 8;
+      }
+
+      while (carry > 0) {
+        bytes = Buffer.concat([bytes, Buffer.from([carry & 0xff])]);
+        carry >>= 8;
+      }
+    }
+
+    // Handle leading zeros
+    for (const char of str) {
+      if (char === "1") {
+        bytes = Buffer.concat([Buffer.from([0]), bytes]);
+      } else {
+        break;
+      }
+    }
+
+    return bytes.reverse();
+  }
+
+  /**
+   * Encode bytes to base58 string
+   */
+  private static base58Encode(buf: Buffer): string {
+    if (buf.length === 0) return "";
+
+    let bytes = Buffer.from(buf);
+    const digits = [0];
+
+    for (const byte of bytes) {
+      let carry = byte;
+      for (let j = 0; j < digits.length; j++) {
+        carry += digits[j] << 8;
+        digits[j] = carry % 58;
+        carry = Math.floor(carry / 58);
+      }
+
+      while (carry > 0) {
+        digits.push(carry % 58);
+        carry = Math.floor(carry / 58);
+      }
+    }
+
+    let result = "";
+    for (let i = bytes.length - 1; i >= 0 && bytes[i] === 0; i--) {
+      result = "1" + result;
+    }
+
+    for (let i = digits.length - 1; i >= 0; i--) {
+      result += this.BASE58_ALPHABET[digits[i]];
+    }
+
+    return result;
+  }
+
+  /**
    * Convert Irys address (base58) to Execution address (hex)
    */
   static irysToExecution(irysAddr: string): string {
     try {
-      return irysToExecAddr(irysAddr);
+      const bytes = this.base58Decode(irysAddr);
+      // Take the first 20 bytes (40 hex chars) for EVM address
+      const addressBytes = bytes.slice(0, 20);
+      return "0x" + addressBytes.toString("hex");
     } catch (error) {
       console.error("Failed to convert Irys to Execution address:", error);
       throw new Error(`Invalid Irys address: ${irysAddr}`);
@@ -32,7 +111,10 @@ export class IrysAddressConverter {
    */
   static executionToIrys(execAddr: string): string {
     try {
-      return execToIrysAddr(execAddr);
+      // Remove 0x prefix if present
+      const hexAddr = execAddr.startsWith("0x") ? execAddr.slice(2) : execAddr;
+      const bytes = Buffer.from(hexAddr, "hex");
+      return this.base58Encode(bytes);
     } catch (error) {
       console.error("Failed to convert Execution to Irys address:", error);
       throw new Error(`Invalid Execution address: ${execAddr}`);
