@@ -37,6 +37,7 @@
     "@coral-xyz/anchor": "^0.32.1",
     "@hapi/boom": "^10.0.1",
     "@hapi/iron": "^7.0.1",
+    "@irys/js": "^0.0.2",
     "@irys/query": "^0.0.13",
     "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-bubblegum": "^5.0.2",
