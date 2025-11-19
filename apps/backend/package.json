@@ -48,7 +48,7 @@
     "@metaplex-foundation/mpl-toolbox": "^0.10.0",
     "@metaplex-foundation/umi": "^1.4.1",
     "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
-    "@metaplex-foundation/umi-uploader-irys": "^0.9.2",
+    "@metaplex-foundation/umi-uploader-irys": "^1.4.1",
     "@ory/hydra-client": "^25.4.0",
     "@ory/kratos-client": "^1.1.1",
     "@simplewebauthn/server": "^8.0.0",
