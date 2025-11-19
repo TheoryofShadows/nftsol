@@ -242,8 +242,14 @@ export function getTenantFilter(tenantId: string): { tenantId: string } {
 
 /**
  * Build WHERE clause for tenant-scoped queries
+ * NOTE: This function returns a template string. Parameters must be passed separately
+ * to avoid SQL injection. Use parameterized queries instead.
+ *
+ * DEPRECATED: Use parameterized queries directly instead
+ * Example: pool.query('SELECT * FROM table WHERE "tenantId" = $1', [tenantId])
  */
 export function buildTenantWhereClause(tenantId: string, tableAlias?: string): string {
   const prefix = tableAlias ? `${tableAlias}.` : '';
-  return `${prefix}"tenantId" = '${tenantId}'`;
+  // Return placeholder for parameterized query - actual parameter binding must be done by caller
+  return `${prefix}"tenantId" = $1`;
 }

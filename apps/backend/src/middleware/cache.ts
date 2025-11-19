@@ -86,11 +86,11 @@ export function cacheMiddleware(ttl: number = 5 * 60 * 1000) {
 
     // Store original json method
     const originalJson = res.json.bind(res);
-    
+
     // Override json to cache response
-    res.json = function(data: any) {
+    res.json = function(data: any): Response {
       const etag = generateETag(data);
-      
+
       // Store in cache
       responseCache.set(cacheKey, {
         data,
