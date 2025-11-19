@@ -107,11 +107,11 @@ class MockPool {
         this.connected = false;
         console.log('[Mock DB] Connection released');
       },
-      on: (event: string, callback: Function) => {
+      on: (event: string, callback: (...args: any[]) => void) => {
         console.log(`[Mock DB] Event: ${event}`);
         return this;
       },
-      once: (event: string, callback: Function) => {
+      once: (event: string, callback: (...args: any[]) => void) => {
         console.log(`[Mock DB] Event (once): ${event}`);
         return this;
       },

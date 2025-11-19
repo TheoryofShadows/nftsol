@@ -271,6 +271,7 @@ export function sanitizeInput(input: string, maxLength: number = 1000): string {
   let sanitized = input.trim().substring(0, maxLength);
 
   // Remove control characters
+  // eslint-disable-next-line no-control-regex
   sanitized = sanitized.replace(/[\x00-\x1F\x7F]/g, '');
 
   return sanitized;

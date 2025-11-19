@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { pool } from '../../lib/db';
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: any;

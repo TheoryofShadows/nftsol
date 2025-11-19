@@ -62,7 +62,7 @@ export class IrysAddressConverter {
   private static base58Encode(buf: Buffer): string {
     if (buf.length === 0) return "";
 
-    let bytes = Buffer.from(buf);
+    const bytes = Buffer.from(buf);
     const digits = [0];
 
     for (const byte of bytes) {

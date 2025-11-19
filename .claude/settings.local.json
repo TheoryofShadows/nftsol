@@ -17,7 +17,8 @@
       "Bash(find:*)",
       "Bash(while read f)",
       "Bash(do sed -n '8p' \"$f\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
