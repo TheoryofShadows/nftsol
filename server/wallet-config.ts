@@ -22,7 +22,7 @@ const WALLET_SPECS: Record<PlatformWalletKey, WalletSpec> = {
     label: "Developer Wallet",
     envVar: "DEVELOPER_WALLET_PUBLIC_KEY",
     fallback: "3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad",
-    purpose: "Receives 2% commission from all marketplace sales",
+    purpose: "Receives 1% commission from all marketplace sales (platform operations & development)",
   },
   CLOUT_TREASURY: {
     label: "CLOUT Treasury",
