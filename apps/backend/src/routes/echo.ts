@@ -1,6 +1,12 @@
 /**
  * 🎬 Eternal Echoes API Routes
  * Internet Archive + Grok Verification + cNFT Evolution
+ *
+ * @module routes/echo
+ * @creator NFTSol Team
+ * @license MIT
+ * @description Eternal Echoes is an NFTSol original feature enabling collaborative,
+ *              layered NFT creation from public domain video archives with AI verification.
  */
 
 import { Router, Request, Response } from 'express';

@@ -1,5 +1,17 @@
 /* eslint-disable react/forbid-dom-props */
 // Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoMint.css)
+
+/**
+ * 🎬 EchoMint Component
+ * NFTSol's Eternal Echoes minting interface for creating layered video NFTs
+ *
+ * @component
+ * @creator NFTSol Team
+ * @license MIT
+ * @description Eternal Echoes is an original NFTSol feature enabling collaborative
+ *              creation of layered NFTs from Internet Archive public domain videos
+ *              with AI verification via Grok and compression via Metaplex Bubblegum.
+ */
 import React, { useEffect, useState, lazy, Suspense } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';

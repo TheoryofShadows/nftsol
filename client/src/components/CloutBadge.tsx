@@ -9,6 +9,10 @@ import '../styles/CloutBadge.css';
  * Positioned as a fixed badge in bottom-right corner
  *
  * @component
+ * @creator NFTSol Team
+ * @license MIT
+ * @description UI component for displaying CLOUT token balance, part of NFTSol's
+ *              native reward system for platform engagement.
  */
 export default function CloutBadge() {
   const { publicKey, connected } = useWallet();

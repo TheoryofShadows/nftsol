@@ -1,5 +1,17 @@
 /* eslint-disable react/forbid-dom-props */
 // Microsoft Edge Tools: All inline styles have been moved to external CSS file (EchoMarketplace.css)
+
+/**
+ * 🎬 EchoMarketplace Component
+ * NFTSol's marketplace for browsing and trading Eternal Echoes NFTs
+ *
+ * @component
+ * @creator NFTSol Team
+ * @license MIT
+ * @description Marketplace interface for Eternal Echoes, an original NFTSol feature.
+ *              Browse, filter, and trade collaborative video NFTs created from
+ *              public domain sources with community contributions.
+ */
 import React, { useEffect, useMemo, useState } from 'react';
 import { lazy, Suspense } from 'react';
 import TruthBadge from '../components/TruthBadge';

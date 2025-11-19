@@ -1,6 +1,13 @@
 /**
  * 🎬 Eternal Echoes Service
  * Core business logic for Echo NFT management and marketplace integration
+ *
+ * @module services/eternalEchoesService
+ * @creator NFTSol Team
+ * @license MIT
+ * @description Eternal Echoes is an NFTSol original feature for collaborative
+ *              layered video NFT creation with AI verification and CLOUT rewards.
+ *              This service manages the complete echo lifecycle from creation to minting.
  */
 
 import { PublicKey } from '@solana/web3.js';

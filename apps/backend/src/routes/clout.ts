@@ -3,6 +3,10 @@
  * API endpoints for CLOUT token operations
  *
  * @module routes/clout
+ * @creator NFTSol Team
+ * @license MIT
+ * @description CLOUT is the native utility token of the NFTSol marketplace.
+ *              These endpoints manage rewards distribution and balance queries.
  */
 
 import express from 'express';

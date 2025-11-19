@@ -3,6 +3,10 @@
  * Handles sending CLOUT token rewards to users on Solana
  *
  * @module services/cloutToken
+ * @creator NFTSol Team
+ * @license MIT
+ * @description CLOUT is the native reward token of the NFTSol platform.
+ *              This service manages token distribution and balance tracking.
  */
 
 import {
