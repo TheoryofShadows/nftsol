@@ -22,7 +22,7 @@ const ensureUploadsDir = async () => {
 
 // Initialize storage with proper typing
 const storage = multer.diskStorage({
-  destination: async (req: Request, file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+  destination: async (req: Request, file: any, cb: (error: Error | null, destination: string) => void) => {
     try {
       const uploadsDir = await ensureUploadsDir();
       cb(null, uploadsDir);
@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
       cb(error as Error, '');
     }
   },
-  filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+  filename: (req: Request, file: any, cb: (error: Error | null, filename: string) => void) => {
     try {
       const ext = path.extname(file.originalname);
       const filename = `${uuidv4()}${ext}`;

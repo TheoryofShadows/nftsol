@@ -16,7 +16,7 @@ import expressRateLimit from 'express-rate-limit';
 
 // Extend the Express Request type to include file
 interface MulterRequest extends Request {
-  file?: Express.Multer.File;
+  file?: any;
 }
 
 const router = Router();

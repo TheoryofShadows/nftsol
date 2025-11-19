@@ -20,7 +20,7 @@ export interface MintRequest {
   name: string;
   description: string;
   imageUrl?: string;
-  file?: Express.Multer.File;
+  file?: any;
   creatorWallet: string;
   owner?: string;
 }

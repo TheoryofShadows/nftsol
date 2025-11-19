@@ -162,12 +162,12 @@ const limiter = rateLimit({
     return false;
   },
   // Use exponential backoff for better performance
-  handler: (req, res) => {
+  handler: (req: any, res) => {
     res.status(429).json({
       success: false,
       error: 'Too many requests',
       code: 'RATE_LIMIT_EXCEEDED',
-      retryAfter: req.rateLimit.resetTime
+      retryAfter: req.rateLimit?.resetTime || 60
     });
   }
 });
