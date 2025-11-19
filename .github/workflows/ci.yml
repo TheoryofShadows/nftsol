@@ -29,13 +29,13 @@ jobs:
       - name: Client install and build
         working-directory: client
         run: |
-          npm ci
+          npm install --legacy-peer-deps --ignore-scripts || npm ci
           npm run build
 
       - name: Backend install and build
         working-directory: apps/backend
         run: |
-          npm ci
+          npm install --legacy-peer-deps --ignore-scripts || npm ci
           npm run build
 
       - name: Lint
