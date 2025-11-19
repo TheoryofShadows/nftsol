@@ -44,7 +44,7 @@ const storage = multer.diskStorage({
 // File filter with proper typing
 const fileFilter = (
   req: Request,
-  file: Express.Multer.File,
+  file: any,
   cb: FileFilterCallback
 ) => {
   try {
@@ -71,8 +71,8 @@ const upload = multer({
 
 // Export with proper typing
 export interface MulterRequest extends Request {
-  file?: Express.Multer.File;
-  files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[];
+  file?: any;
+  files?: any;
 }
 
 export const fileUpload = {
