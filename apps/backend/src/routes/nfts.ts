@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { mintNFT, getWalletBalance, accountExists, connection } from '../lib/solana';
-import { validateWallet, sanitizeInput } from '../utils/validation';
+import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { getPlatformKeypair } from '../lib/platformKeypair';
 
 const router = Router();
 
 // POST /api/nfts/mint - Real NFT minting
-router.post('/mint', sanitizeInput, validateWallet, async (req, res) => {
+router.post('/mint', validateWallet, async (req, res) => {
   try {
     const { toAddress, name, description, imageUrl } = req.body;
 

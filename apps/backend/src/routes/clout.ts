@@ -15,7 +15,6 @@ import { getAssociatedTokenAddress } from '@solana/spl-token';
 import { CloutTokenService } from '../services/cloutToken';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types/index';
-import { sanitizeInput } from '../utils/validation';
 import { programConfig } from '../config/index';
 
 const router = express.Router();
@@ -31,7 +30,7 @@ const cloutService = new CloutTokenService();
  *   multiplier?: number (optional, default: 1.0)
  * }
  */
-router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
+router.post('/reward', validateWallet, async (req, res) => {
   try {
     const { recipientAddress, amount, multiplier = 1.0 } = req.body;
 
@@ -110,7 +109,7 @@ router.post('/reward', sanitizeInput, validateWallet, async (req, res) => {
  * GET /api/clout/balance/:address
  * Get CLOUT balance for a wallet
  */
-router.get('/balance/:address', sanitizeInput, async (req, res) => {
+router.get('/balance/:address', async (req, res) => {
   try {
     const { address } = req.params;
 

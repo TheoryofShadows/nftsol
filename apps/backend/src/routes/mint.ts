@@ -5,7 +5,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { ultraCheapMintService } from '../services/ultra-cheap-mint';
-import { validateWallet, sanitizeInput } from '../utils/validation';
+import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 
 const router = Router();
@@ -67,7 +67,7 @@ router.get('/compare', async (_req: Request, res: Response) => {
  * POST /api/mint/ultra-cheap
  * Mint NFT with ultra-low cost optimization
  */
-router.post('/ultra-cheap', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+router.post('/ultra-cheap', validateWallet, async (req: Request, res: Response) => {
   try {
     const { toAddress, name, symbol, description, imageUrl, externalUrl } = req.body;
 

@@ -14,9 +14,9 @@ import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
   validateWallet,
-  sanitizeInput,
   csrfProtection,
   generateCSRFToken,
+  sanitizeInput,
 } from './utils/validation';
 import { solanaService } from './services/solana';
 import { nftService } from './services/nft';
@@ -483,7 +483,6 @@ apiV1.get('/solana/status', async (req, res) => {
 apiV1.post(
   '/simple-mint',
   csrfProtection,
-  sanitizeInput,
   validateWallet,
   upload.single('file'),
   async (req, res) => {
@@ -982,7 +981,7 @@ app.use('/api/video', videoRouter);
 app.use('/api/transactions', transactionsRouter);
 
 // Waitlist subscription endpoint
-app.post('/api/waitlist/subscribe', sanitizeInput, async (req, res) => {
+app.post('/api/waitlist/subscribe', async (req, res) => {
   try {
     const { email, walletAddress, referralCode, source } = req.body;
 

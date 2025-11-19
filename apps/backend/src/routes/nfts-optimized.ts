@@ -5,7 +5,7 @@
 import { Router, Request, Response } from 'express';
 import { cacheMiddleware, clearCache } from '../middleware/cache';
 import { optimizedNFTService } from '../services/nft-optimized';
-import { validateWallet, sanitizeInput } from '../utils/validation';
+import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import multer from 'multer';
 
@@ -70,7 +70,6 @@ router.get('/owner/:owner', async (req: Request, res: Response) => {
 // POST /api/nfts/mint - Mint NFT (no cache, invalidates cache)
 router.post(
   '/mint',
-  sanitizeInput,
   validateWallet,
   upload.single('file'),
   async (req: Request, res: Response) => {

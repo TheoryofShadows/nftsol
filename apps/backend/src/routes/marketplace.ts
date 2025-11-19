@@ -8,7 +8,7 @@ import type { Request, Response } from 'express';
 import { marketplaceService } from '../services/marketplace';
 import { crossPlatformMarketplace } from '../services/cross-platform-marketplace';
 import { onChainTransactions } from '../services/on-chain-transactions';
-import { validateWallet, sanitizeInput } from '../utils/validation';
+import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { solanaConfig } from '../config';
 
@@ -18,7 +18,7 @@ const router = Router();
  * POST /api/marketplace/list
  * List an NFT for sale
  */
-router.post('/list', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+router.post('/list', validateWallet, async (req: Request, res: Response) => {
   try {
     const { mintAddress, seller, price } = req.body;
 
@@ -71,7 +71,7 @@ router.post('/list', sanitizeInput, validateWallet, async (req: Request, res: Re
  * POST /api/marketplace/delist
  * Remove NFT from marketplace
  */
-router.post('/delist', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+router.post('/delist', validateWallet, async (req: Request, res: Response) => {
   try {
     const { mintAddress, seller } = req.body;
 
@@ -188,7 +188,7 @@ router.get('/listing/:mintAddress', async (req: Request, res: Response) => {
  * POST /api/marketplace/buy/prepare
  * Create unsigned transaction for buyer to sign
  */
-router.post('/buy/prepare', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+router.post('/buy/prepare', validateWallet, async (req: Request, res: Response) => {
   try {
     const { mintAddress, buyer, seller, price } = req.body;
 
@@ -239,7 +239,7 @@ router.post('/buy/prepare', sanitizeInput, validateWallet, async (req: Request, 
  * POST /api/marketplace/buy/confirm
  * Record successful purchase after transaction is confirmed
  */
-router.post('/buy/confirm', sanitizeInput, async (req: Request, res: Response) => {
+router.post('/buy/confirm', async (req: Request, res: Response) => {
   try {
     const { mintAddress, buyer, seller, price, signature } = req.body;
 
@@ -427,7 +427,7 @@ router.get('/search', async (req: Request, res: Response) => {
  * ⛓️ Real Blockchain Transaction!
  * Returns unsigned transaction for wallet to sign
  */
-router.post('/create-buy-transaction', sanitizeInput, validateWallet, async (req: Request, res: Response) => {
+router.post('/create-buy-transaction', validateWallet, async (req: Request, res: Response) => {
   try {
     const { buyer, seller, mintAddress, price, royaltyPercent, creatorAddress } = req.body;
 
@@ -520,7 +520,7 @@ router.post('/create-buy-transaction', sanitizeInput, validateWallet, async (req
  * Confirm and record a completed NFT sale after transaction is signed
  * 📝 Records sale in database after blockchain confirmation
  */
-router.post('/confirm-sale', sanitizeInput, async (req: Request, res: Response) => {
+router.post('/confirm-sale', async (req: Request, res: Response) => {
   try {
     const { mintAddress, buyer, seller, price, signature } = req.body;
 

@@ -33,7 +33,6 @@ import {
   generalLimiter,
   securityHeaders,
   securityLogger,
-  sanitizeInput,
 } from './middleware/security';
 
 // Import new security middleware
@@ -61,7 +60,6 @@ app.use(sessionMiddleware);
 // Apply additional security middleware
 app.use(securityHeaders);
 app.use(securityLogger);
-app.use(sanitizeInput);
 
 // Apply rate limiting (using the existing limiter)
 app.use(generalLimiter);
@@ -140,8 +138,8 @@ app.use((req: any, res: any, next: any) => {
   next();
 });
 
-// Input sanitization (AFTER body parsing)
-app.use(sanitizeInput);
+// Input sanitization is now handled globally in index.ts
+// Removed: app.use(sanitizeInput) - sanitizeInput is a utility function, not middleware
 
 // Rate limiting - apply to all routes (AFTER session/auth, BEFORE routes)
 app.use(generalLimiter as any);
