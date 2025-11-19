@@ -19,6 +19,7 @@ interface VirtualizedNFTGridProps {
 const NFTCardPlaceholder = memo(() => (
   <div className="aspect-square bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg animate-pulse" />
 ));
+NFTCardPlaceholder.displayName = 'NFTCardPlaceholder';
 
 const NFTCard = memo(({ nft }: { nft: NFT }) => (
   <div className="cursor-pointer group">
@@ -38,6 +39,7 @@ const NFTCard = memo(({ nft }: { nft: NFT }) => (
     </div>
   </div>
 ));
+NFTCard.displayName = 'NFTCard';
 
 export const VirtualizedNFTGrid = memo(({
   nfts,
@@ -79,6 +81,7 @@ export const VirtualizedNFTGrid = memo(({
       </div>
     );
   });
+  Row.displayName = 'Row';
 
   return (
     <InfiniteLoader
