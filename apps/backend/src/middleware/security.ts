@@ -18,7 +18,8 @@ export const corsConfig = cors({
     const allowedOrigins = [
       'https://nftsol.app',
       'https://www.nftsol.app',
-      'https://nftsol.onrender.com'
+      'https://nftsol.onrender.com',
+      'https://nftsolmarket.netlify.app'
     ];
 
     if (allowedOrigins.includes(origin)) {

@@ -45,6 +45,7 @@ import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
+import performanceMetricsRouter from './routes/performance-metrics';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
 
@@ -1019,6 +1020,9 @@ app.use('/api/archive', archiveGrokEchoRouter);
 
 // Solana/Helius comprehensive tools (error handling, monitoring, optimization)
 app.use('/api/tools', solanaToolsRouter);
+
+// Performance metrics (Web Vitals collection and reporting)
+app.use('/api/metrics', performanceMetricsRouter);
 
 // CLOUT routes
 app.use('/api/clout', cloutRouter);
