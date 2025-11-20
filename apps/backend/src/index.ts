@@ -117,7 +117,7 @@ app.use(
     },
     credentials: appConfig.cors.credentials,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID', 'X-CSRF-Token', 'x-csrf-token'],
   })
 );
 
