@@ -251,10 +251,15 @@ router.get('/:identifier', searchLimiter, async (req: Request, res: Response) =>
   try {
     const { identifier } = req.params;
 
-    if (!identifier || identifier.length === 0) {
+    // Validate that identifier is strictly alphanumeric (plus dash/underscore), no slashes, etc.
+    if (
+      !identifier ||
+      identifier.length === 0 ||
+      !/^[a-zA-Z0-9\-_]+$/.test(identifier)
+    ) {
       return res.status(400).json({
         success: false,
-        error: { message: 'Identifier required' },
+        error: { message: 'Invalid identifier: must only contain letters, numbers, "-", and "_"'},
       });
     }
 
@@ -292,6 +297,18 @@ router.get('/:identifier', searchLimiter, async (req: Request, res: Response) =>
  */
 router.get('/:identifier/media', searchLimiter, async (req: Request, res: Response) => {
   try {
+    // Validate that identifier is strictly alphanumeric (plus dash/underscore), no slashes, etc.
+    if (
+      !identifier ||
+      identifier.length === 0 ||
+      !/^[a-zA-Z0-9\-_]+$/.test(identifier)
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Invalid identifier: must only contain letters, numbers, "-", and "_"'},
+      });
+    }
+
     const { identifier } = req.params;
 
     const mediaFiles = await integration.getAllMediaForEcho(identifier);
