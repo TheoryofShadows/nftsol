@@ -322,6 +322,121 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Root API documentation endpoint
+app.get('/', (req, res) => {
+  const apiDocs = {
+    service: 'NFTSol Backend API',
+    version: '1.0.0',
+    status: 'operational',
+    timestamp: new Date().toISOString(),
+    uptime: `${Math.round(process.uptime())} seconds`,
+    environment: appConfig.nodeEnv,
+
+    endpoints: {
+      health: {
+        '/health': 'Simple health check',
+        '/api/health': 'Lightweight health check',
+        '/healthz': 'Detailed health check with database and Solana status',
+        '/api/health/detailed': 'Full health diagnostics',
+      },
+
+      nfts: {
+        'GET /api/nfts': 'List all NFTs in marketplace',
+        'GET /api/nfts/:owner': 'Get NFTs by owner wallet address',
+        'GET /api/nft/:mintAddress': 'Get specific NFT metadata',
+        'POST /api/simple-mint': 'Mint a new NFT',
+      },
+
+      wallet: {
+        'GET /api/wallet/:address': 'Get wallet info (balance, existence)',
+      },
+
+      orb: {
+        'GET /api/orb/history/:ledgerId': 'Get AI-explained transaction history',
+        'GET /api/orb/embed/:ledgerId': 'Get Orb embed URL for iframe',
+        'GET /api/orb/explain/:signature': 'Get AI explanation for transaction',
+        'GET /api/orb/heatmap/:ledgerId': 'Get contribution heatmap data',
+        'GET /api/orb/timeline/:ledgerId': 'Get historical timeline',
+      },
+
+      clout: {
+        'GET /api/clout/balance/:wallet': 'Get CLOUT token balance',
+        'POST /api/clout/transfer': 'Transfer CLOUT tokens',
+      },
+
+      echo: {
+        'POST /api/echo/mint': 'Create new Echo (collaborative NFT)',
+        'GET /api/echo/:echoId': 'Get Echo details',
+        'POST /api/echo/:echoId/add-layer': 'Add layer to Echo',
+      },
+
+      marketplace: {
+        'GET /api/marketplace/browse': 'Browse marketplace with filters',
+        'POST /api/marketplace/list': 'List NFT for sale',
+        'POST /api/marketplace/buy': 'Buy NFT from marketplace',
+      },
+
+      admin: {
+        'POST /api/auth/admin': 'Authenticate as admin (requires wallet signature)',
+        'POST /api/admin/withdrawals': 'Process withdrawal (admin only)',
+      },
+    },
+
+    authentication: {
+      description: 'Wallet signature-based authentication',
+      method: 'POST to /api/auth/admin',
+      required_fields: ['walletAddress', 'signature', 'message'],
+      response: {
+        token: 'JWT token for authenticated requests',
+        expires: '24 hours',
+      },
+    },
+
+    error_format: {
+      success: false,
+      error: 'Error message',
+      code: 'ERROR_CODE',
+      requestId: 'Unique request identifier',
+    },
+
+    success_format: {
+      success: true,
+      data: '{}',
+      message: 'Optional success message',
+    },
+
+    features: {
+      'NFT Marketplace': 'Mint, buy, and sell NFTs on Solana',
+      'Eternal Echoes': 'Collaborative, layered NFT creation',
+      'CLOUT Tokens': 'Platform reward token system',
+      'AI Verification': 'Grok AI video authenticity verification',
+      'Compressed NFTs': 'Low-cost minting via Bubblegum',
+      'Helius ORB': 'AI-powered transaction explorer',
+    },
+
+    blockchain: {
+      network: solanaConfig.cluster,
+      rpcUrl: solanaConfig.rpcUrl,
+      'CLOUT Token': programConfig.cloutProgramId,
+    },
+
+    documentation: {
+      'GitHub': 'https://github.com/TheoryofShadows/nftsol',
+      'Frontend': 'https://nftsol.app',
+      'Issues': 'https://github.com/TheoryofShadows/nftsol/issues',
+    },
+
+    quick_start: {
+      '1_health_check': 'curl https://nftsol.onrender.com/healthz',
+      '2_list_nfts': 'curl https://nftsol.onrender.com/api/nfts',
+      '3_wallet_info': 'curl https://nftsol.onrender.com/api/wallet/{walletAddress}',
+    },
+  };
+
+  res.setHeader('Content-Type', 'application/json');
+  res.json(apiDocs);
+});
+
     // Enhanced health check with detailed diagnostics
 app.get('/api/health/detailed', async (req, res) => {
   try {
