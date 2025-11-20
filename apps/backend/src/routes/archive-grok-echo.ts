@@ -11,12 +11,14 @@
 import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import ArchiveGrokEchoIntegration from '../services/archive-grok-echo-integration';
+import ArchiveAdvancedSearchService, { AdvancedSearchFilters } from '../services/archive-advanced-search';
 
 const router = Router();
 
 // Initialize the integration service
 const grokApiKey = process.env.XAI_API_KEY || '';
 const integration = new ArchiveGrokEchoIntegration(grokApiKey);
+const advancedSearch = new ArchiveAdvancedSearchService();
 
 // Rate limiting
 const searchLimiter = rateLimit({
@@ -86,6 +88,148 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
         message: error.message || 'Search failed',
         code: 'ARCHIVE_SEARCH_FAILED',
       },
+    });
+  }
+});
+
+// ============================================================================
+// 1.5 ADVANCED SEARCH (with comprehensive filters)
+// ============================================================================
+
+/**
+ * POST /api/archive/advanced-search
+ * Comprehensive search with ALL filters
+ *
+ * Body Parameters (all optional except keyword):
+ * - keyword: Search term (required)
+ * - phraseMatch: Exact phrase match (optional)
+ * - mediaTypes: ['video', 'audio', 'image', 'document', 'text']
+ * - yearFrom, yearTo: Date range
+ * - creator: Single creator or array of creators
+ * - licenses: ['public-domain', 'cc-by', 'cc-by-sa', 'cc-by-nd', 'cc-by-nc', 'cc0']
+ * - minDownloads, maxDownloads: Popularity range
+ * - minDuration, maxDuration: Duration in seconds (for video/audio)
+ * - languages: ['en', 'es', 'fr', 'de', etc.]
+ * - formats: ['mp4', 'pdf', 'jpg', etc.]
+ * - subjects, tags: Topic tags
+ * - collections: ['community_texts', 'movingimage', 'audio', etc.]
+ * - sortBy: 'downloads' | 'date' | 'title' | 'relevance'
+ * - limit: Results per page (1-100, default 20)
+ * - offset: Pagination offset
+ *
+ * Response: AdvancedSearchResponse with results and facets
+ */
+router.post('/advanced-search', searchLimiter, async (req: Request, res: Response) => {
+  try {
+    const { keyword, ...filters } = req.body;
+
+    if (!keyword || typeof keyword !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Keyword is required' },
+      });
+    }
+
+    const results = await advancedSearch.advancedSearch(keyword, filters as AdvancedSearchFilters);
+
+    res.json({
+      success: true,
+      data: results,
+    });
+  } catch (error: any) {
+    console.error('Advanced search error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        message: error.message || 'Advanced search failed',
+        code: 'ADVANCED_SEARCH_FAILED',
+      },
+    });
+  }
+});
+
+/**
+ * GET /api/archive/filter-options
+ * Get available filter options for UI dropdowns
+ */
+router.get('/filter-options', searchLimiter, async (req: Request, res: Response) => {
+  try {
+    const options = await advancedSearch.getFilterOptions();
+
+    res.json({
+      success: true,
+      data: {
+        mediaTypes: options.mediaTypes,
+        languages: options.languages,
+        licenses: options.licenses,
+        collections: options.collections,
+        formats: options.formats,
+      },
+    });
+  } catch (error: any) {
+    console.error('Filter options error:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to fetch filter options' },
+    });
+  }
+});
+
+/**
+ * GET /api/archive/trending
+ * Get trending/popular searches
+ */
+router.get('/trending', searchLimiter, async (req: Request, res: Response) => {
+  try {
+    const trending = await advancedSearch.getTrendingSearches();
+
+    res.json({
+      success: true,
+      data: {
+        trending,
+      },
+    });
+  } catch (error: any) {
+    console.error('Trending error:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to fetch trending searches' },
+    });
+  }
+});
+
+/**
+ * GET /api/archive/suggestions
+ * Get search suggestions based on partial keyword
+ *
+ * Query Params:
+ * - q: Partial keyword (required)
+ */
+router.get('/suggestions', searchLimiter, async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== 'string') {
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Query parameter "q" is required' },
+      });
+    }
+
+    const suggestions = await advancedSearch.getSuggestions(q);
+
+    res.json({
+      success: true,
+      data: {
+        query: q,
+        suggestions,
+      },
+    });
+  } catch (error: any) {
+    console.error('Suggestions error:', error);
+    res.status(500).json({
+      success: false,
+      error: { message: 'Failed to fetch suggestions' },
     });
   }
 });
