@@ -28,7 +28,9 @@
       "Bash(npm run build:check:*)",
       "Bash(npm ls:*)",
       "WebFetch(domain:nftsol.app)",
-      "WebFetch(domain:nftsol.onrender.com)"
+      "WebFetch(domain:nftsol.onrender.com)",
+      "WebFetch(domain:github.com)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []

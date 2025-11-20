@@ -126,14 +126,15 @@ export default function Hero() {
 
         {/* Hero Title - Modern Typography - Responsive */}
         <h1 className="text-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl gradient-text-modern mb-3 md:mb-6 animate-fade-in leading-tight md:leading-none px-2 md:px-4">
-          NFTSol + Eternal Echoes
+          Mint NFTs from 20M+ Public Domain Items
         </h1>
 
-        <p className="text-body text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 mb-6 md:mb-12 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">
-          Create, collect, and immortalize moments on Solana.
-          <span className="block mt-2 text-xs sm:text-sm md:text-lg text-gray-400">
-            Next-generation NFTs with eternal on-chain memory.
-          </span>
+        <p className="text-body text-sm sm:text-base md:text-xl lg:text-2xl text-gray-300 mb-2 md:mb-4 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">
+          Powered by Internet Archive + Grok AI + Eternal Echoes
+        </p>
+
+        <p className="text-xs sm:text-sm md:text-lg text-gray-400 mb-6 md:mb-12 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">
+          Discover, verify, and create collaborative NFTs on Solana. Lightning-fast. Community-driven. Revolutionary.
         </p>
 
         {/* Wallet Connect Button - Modern Design - Mobile Responsive */}
@@ -195,16 +196,35 @@ export default function Hero() {
           )}
         </div>
 
+        {/* Unique Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-8 md:mb-12 animate-fade-in animate-delay-400 px-4 max-w-4xl mx-auto">
+          <div className="glass-card p-4 md:p-6 rounded-xl border border-cyan-500/20 hover:border-cyan-500/50 transition-all">
+            <div className="text-3xl md:text-4xl mb-2">📚</div>
+            <h3 className="text-sm md:text-base font-bold text-white mb-1">Archive Search</h3>
+            <p className="text-xs md:text-sm text-gray-400">Access 20M+ public domain items with 15+ advanced filters</p>
+          </div>
+          <div className="glass-card p-4 md:p-6 rounded-xl border border-purple-500/20 hover:border-purple-500/50 transition-all">
+            <div className="text-3xl md:text-4xl mb-2">🤖</div>
+            <h3 className="text-sm md:text-base font-bold text-white mb-1">Grok Verification</h3>
+            <p className="text-xs md:text-sm text-gray-400">AI-powered authenticity verification for every NFT</p>
+          </div>
+          <div className="glass-card p-4 md:p-6 rounded-xl border border-pink-500/20 hover:border-pink-500/50 transition-all">
+            <div className="text-3xl md:text-4xl mb-2">🎭</div>
+            <h3 className="text-sm md:text-base font-bold text-white mb-1">Eternal Echoes</h3>
+            <p className="text-xs md:text-sm text-gray-400">Collaborative NFT layers with contributor rewards</p>
+          </div>
+        </div>
+
         {/* Quick Action Buttons - Modern Design - Mobile Responsive */}
         <div className="flex flex-wrap justify-center gap-2 md:gap-4 animate-fade-in animate-delay-400 px-4">
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'archive' }))}
             className="btn-modern text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             <span className="relative z-10 flex items-center gap-1 md:gap-2">
-              <span className="text-lg md:text-2xl">🏪</span>
-              <span className="hidden sm:inline">Browse</span>
-              <span className="sm:hidden">Market</span>
+              <span className="text-lg md:text-2xl">🔍</span>
+              <span className="hidden sm:inline">Search Archive</span>
+              <span className="sm:hidden">Archive</span>
             </span>
           </button>
           <button
@@ -217,13 +237,13 @@ export default function Hero() {
             </span>
           </button>
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-mint' }))}
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
             className="btn-modern btn-gradient-pink text-sm md:text-base px-4 md:px-6 py-2 md:py-3"
           >
             <span className="relative z-10 flex items-center gap-1 md:gap-2">
-              <span className="text-lg md:text-2xl">🎬</span>
-              <span className="hidden sm:inline">Create Echo</span>
-              <span className="sm:hidden">Echo</span>
+              <span className="text-lg md:text-2xl">🏪</span>
+              <span className="hidden sm:inline">Browse Market</span>
+              <span className="sm:hidden">Market</span>
             </span>
           </button>
         </div>
