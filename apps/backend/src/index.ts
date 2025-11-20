@@ -45,6 +45,8 @@ import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
+import swaggerUi from 'swagger-ui-express';
+import { loadSwaggerDocs } from './config/swagger';
 
 initializeSecrets();
 
@@ -231,6 +233,27 @@ const upload = multer({
       cb(new Error(`Invalid file type. Allowed: ${appConfig.fileUpload.allowedTypes.join(', ')}`));
     }
   },
+});
+
+// Setup Swagger UI for API documentation
+const swaggerDocs = loadSwaggerDocs();
+app.use('/api-docs', swaggerUi.serve);
+app.get('/api-docs', swaggerUi.setup(swaggerDocs, {
+  customCss: '.swagger-ui { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }',
+  customSiteTitle: 'NFTSol API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayOperationId: true,
+    filter: true,
+    tryItOutEnabled: true,
+    deepLinking: true,
+  }
+}));
+
+// Also serve OpenAPI JSON spec
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerDocs);
 });
 
 // Database health check function

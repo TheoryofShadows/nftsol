@@ -1,0 +1,945 @@
+openapi: 3.0.0
+info:
+  title: NFTSol API
+  description: |
+    # NFTSol - Revolutionary NFT Marketplace on Solana
+
+    NFTSol is a next-generation NFT marketplace featuring:
+    - **Archive Integration**: Access 20M+ public domain items from Internet Archive
+    - **Grok AI Verification**: AI-powered authenticity verification for every NFT
+    - **Eternal Echoes**: Collaborative NFT layers with contributor rewards
+    - **Ultra-Cheap Minting**: Lowest fees on Solana with compressed NFTs
+
+    ## Authentication
+
+    Most endpoints support two authentication methods:
+    1. **Wallet Signature**: Sign a message with your Solana wallet
+    2. **JWT Token**: Use Bearer token from admin authentication
+
+    All requests should include the `X-CSRF-Token` header for CSRF protection.
+
+    ## Rate Limiting
+
+    - Standard endpoints: 100 requests per 15 minutes per IP
+    - Health checks: Unlimited
+    - Admin endpoints: Requires JWT token
+
+    ## Response Format
+
+    All responses follow a consistent format:
+
+    ```json
+    {
+      "success": true,
+      "data": { "...": "..." },
+      "message": "Optional message",
+      "requestId": "Unique request ID"
+    }
+    ```
+
+    Error responses include an error code for better error handling.
+  version: 1.0.0
+  contact:
+    name: NFTSol Support
+    url: https://github.com/TheoryofShadows/nftsol
+    email: support@nftsol.app
+  license:
+    name: MIT
+    url: https://github.com/TheoryofShadows/nftsol/blob/main/LICENSE
+
+servers:
+  - url: https://nftsol.onrender.com
+    description: Production API
+  - url: http://localhost:3001
+    description: Development API
+
+tags:
+  - name: Health & Status
+    description: API health checks and status
+  - name: NFTs
+    description: NFT operations (list, mint, retrieve)
+  - name: Marketplace
+    description: Marketplace operations (buy, sell, list)
+  - name: Echo (Collaborative NFTs)
+    description: Eternal Echoes - collaborative NFT creation
+  - name: Grok AI Verification
+    description: AI-powered authenticity verification
+  - name: CLOUT Token
+    description: CLOUT reward token operations
+  - name: Archive Integration
+    description: Internet Archive integration for public domain items
+  - name: Authentication
+    description: User and admin authentication
+  - name: Wallet
+    description: Wallet information and balance queries
+
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+        data:
+          type: object
+          description: Response data payload
+        message:
+          type: string
+          description: Human-readable message
+        error:
+          type: string
+          description: Error message (if success=false)
+        code:
+          type: string
+          description: Error code for programmatic handling
+        requestId:
+          type: string
+          description: Unique request identifier for debugging
+      required:
+        - success
+
+    NFTMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique NFT identifier (mint address)
+        mintAddress:
+          type: string
+          description: Solana mint address
+        name:
+          type: string
+          description: NFT name
+        description:
+          type: string
+          description: NFT description
+        image:
+          type: string
+          format: uri
+          description: NFT image URL
+        imageUrl:
+          type: string
+          format: uri
+          description: Alternative image URL field
+        owner:
+          type: string
+          description: Current owner wallet address
+        creator:
+          type: string
+          description: Original creator wallet address
+        collection:
+          type: string
+          description: Collection name or identifier
+        isListed:
+          type: boolean
+          description: Whether NFT is listed for sale
+        price:
+          type: number
+          description: Listed price in SOL
+        status:
+          type: string
+          enum: [owned, listed, sold, auction]
+          description: NFT status
+        compressed:
+          type: boolean
+          description: Whether this is a compressed NFT (cNFT)
+        royalty:
+          type: number
+          description: Creator royalty percentage
+        source:
+          type: string
+          enum: [blockchain, database, archive]
+          description: Data source
+        verificationScore:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Grok AI verification confidence score
+
+    WalletInfo:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Wallet address
+        balance:
+          type: number
+          description: Balance in lamports
+        solBalance:
+          type: string
+          description: Balance formatted as SOL string
+        exists:
+          type: boolean
+          description: Whether wallet exists on-chain
+
+    CloutBalance:
+      type: object
+      properties:
+        address:
+          type: string
+          description: Wallet address
+        balance:
+          type: number
+          description: CLOUT token balance
+        cloutUSD:
+          type: number
+          description: Estimated USD value
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from admin authentication
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: CSRF protection token
+
+security:
+  - csrfToken: []
+
+paths:
+  /:
+    get:
+      tags:
+        - Health & Status
+      summary: API Documentation Root
+      description: Get general API documentation and endpoint overview
+      operationId: getRootDocs
+      responses:
+        '200':
+          description: API documentation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                  version:
+                    type: string
+                  status:
+                    type: string
+                  endpoints:
+                    type: object
+
+  /health:
+    get:
+      tags:
+        - Health & Status
+      summary: Simple Health Check
+      description: Quick health check endpoint for monitoring
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: integer
+
+  /api/health:
+    get:
+      tags:
+        - Health & Status
+      summary: Lightweight Health Check
+      description: Optimized health check for frequent polling
+      operationId: getApiHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: integer
+                  ts:
+                    type: integer
+
+  /healthz:
+    get:
+      tags:
+        - Health & Status
+      summary: Detailed Health Check
+      description: Comprehensive health check including database and Solana status
+      operationId: getDetailedHealth
+      responses:
+        '200':
+          description: Detailed service health
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                      timestamp:
+                        type: string
+                      uptime:
+                        type: number
+                      environment:
+                        type: string
+                      solana:
+                        type: object
+                      database:
+                        type: object
+        '503':
+          description: Service unhealthy
+
+  /api/v1/programs:
+    get:
+      tags:
+        - Authentication
+      summary: Get Program Configuration
+      description: Get Solana program IDs and network configuration
+      operationId: getProgramConfig
+      responses:
+        '200':
+          description: Program configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/v1/csrf-token:
+    get:
+      tags:
+        - Authentication
+      summary: Get CSRF Token
+      description: Retrieve a CSRF token for secure requests
+      operationId: getCsrfToken
+      responses:
+        '200':
+          description: CSRF token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  csrfToken:
+                    type: string
+
+  /api/v1/auth/admin:
+    post:
+      tags:
+        - Authentication
+      summary: Admin Authentication
+      description: Authenticate as admin using wallet signature verification
+      operationId: authenticateAdmin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                walletAddress:
+                  type: string
+                  description: Admin wallet address
+                signature:
+                  type: string
+                  description: Ed25519 signature (base58 encoded)
+                message:
+                  type: string
+                  description: Message that was signed
+              required:
+                - walletAddress
+                - signature
+                - message
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: JWT token for authenticated requests
+                      wallet:
+                        type: string
+        '403':
+          description: Authentication failed or wallet not authorized
+
+  /api/wallet/{address}:
+    get:
+      tags:
+        - Wallet
+      summary: Get Wallet Information
+      description: Get wallet balance and on-chain existence status
+      operationId: getWalletInfo
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Solana wallet address
+      responses:
+        '200':
+          description: Wallet information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/WalletInfo'
+        '400':
+          description: Invalid wallet address
+
+  /api/nfts:
+    get:
+      tags:
+        - NFTs
+      summary: List NFTs
+      description: Get NFTs from marketplace with optional filtering
+      operationId: listNfts
+      parameters:
+        - name: collection
+          in: query
+          schema:
+            type: string
+          description: Filter by collection
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [owned, listed, sold]
+          description: Filter by NFT status
+        - name: owner
+          in: query
+          schema:
+            type: string
+          description: Filter by owner wallet address
+      responses:
+        '200':
+          description: NFT list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  nfts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NFTMetadata'
+                  total:
+                    type: integer
+
+  /api/nft/{mintAddress}:
+    get:
+      tags:
+        - NFTs
+      summary: Get NFT Details
+      description: Get detailed information about a specific NFT
+      operationId: getNftDetails
+      parameters:
+        - name: mintAddress
+          in: path
+          required: true
+          schema:
+            type: string
+          description: NFT mint address
+      responses:
+        '200':
+          description: NFT details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/NFTMetadata'
+        '404':
+          description: NFT not found
+
+  /api/nfts/{owner}:
+    get:
+      tags:
+        - NFTs
+      summary: Get NFTs by Owner
+      description: Get all NFTs owned by a wallet address
+      operationId: getNftsByOwner
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Owner wallet address
+      responses:
+        '200':
+          description: Owner's NFTs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  nfts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NFTMetadata'
+                  total:
+                    type: integer
+
+  /api/v1/simple-mint:
+    post:
+      tags:
+        - NFTs
+      summary: Mint NFT
+      description: Create and mint a new NFT on Solana
+      operationId: mintNft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: NFT name
+                description:
+                  type: string
+                  description: NFT description
+                imageUrl:
+                  type: string
+                  format: uri
+                  description: Image URL for the NFT
+                creatorWallet:
+                  type: string
+                  description: Creator wallet address
+              required:
+                - name
+                - imageUrl
+            examples:
+              basic:
+                summary: Basic NFT mint
+                value:
+                  name: "My First NFT"
+                  description: "A beautiful digital artwork"
+                  imageUrl: "https://example.com/image.jpg"
+                  creatorWallet: "11111111111111111111111111111111"
+      responses:
+        '200':
+          description: NFT minted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      mintAddress:
+                        type: string
+                      transactionSignature:
+                        type: string
+                      name:
+                        type: string
+        '400':
+          description: Validation error
+        '503':
+          description: Solana network unavailable
+
+  /api/marketplace/browse:
+    get:
+      tags:
+        - Marketplace
+      summary: Browse Marketplace
+      description: Browse NFTs in the marketplace with pagination and filters
+      operationId: browseMarketplace
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+          description: Page number
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+          description: Items per page
+        - name: collection
+          in: query
+          schema:
+            type: string
+          description: Filter by collection
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by status
+      responses:
+        '200':
+          description: Marketplace NFTs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      nfts:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/NFTMetadata'
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+
+  /api/marketplace/list:
+    post:
+      tags:
+        - Marketplace
+      summary: List NFT for Sale
+      description: List an NFT for sale on the marketplace
+      operationId: listNftForSale
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mintAddress:
+                  type: string
+                  description: NFT mint address
+                seller:
+                  type: string
+                  description: Seller wallet address
+                price:
+                  type: number
+                  description: Price in SOL
+              required:
+                - mintAddress
+                - seller
+                - price
+      responses:
+        '200':
+          description: NFT listed successfully
+        '400':
+          description: Validation error
+
+  /api/marketplace/delist:
+    post:
+      tags:
+        - Marketplace
+      summary: Delist NFT
+      description: Remove an NFT from marketplace listing
+      operationId: delistNft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mintAddress:
+                  type: string
+                seller:
+                  type: string
+              required:
+                - mintAddress
+                - seller
+      responses:
+        '200':
+          description: NFT delisted successfully
+
+  /api/clout/balance/{wallet}:
+    get:
+      tags:
+        - CLOUT Token
+      summary: Get CLOUT Balance
+      description: Get CLOUT token balance for a wallet
+      operationId: getCloutBalance
+      parameters:
+        - name: wallet
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Wallet address
+      responses:
+        '200':
+          description: CLOUT balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/CloutBalance'
+
+  /api/echo/mint:
+    post:
+      tags:
+        - Echo (Collaborative NFTs)
+      summary: Create Echo NFT
+      description: Create a new Eternal Echo (collaborative NFT) with layers
+      operationId: createEcho
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                baseMintAddress:
+                  type: string
+                  description: Base NFT mint address
+                creatorWallet:
+                  type: string
+                  description: Creator wallet address
+                metadata:
+                  type: object
+                  description: Echo metadata
+              required:
+                - baseMintAddress
+                - creatorWallet
+      responses:
+        '200':
+          description: Echo created successfully
+        '400':
+          description: Validation error
+
+  /api/echo/{echoId}:
+    get:
+      tags:
+        - Echo (Collaborative NFTs)
+      summary: Get Echo Details
+      description: Get details about a specific Echo NFT
+      operationId: getEchoDetails
+      parameters:
+        - name: echoId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Echo details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+
+  /api/archive:
+    get:
+      tags:
+        - Archive Integration
+      summary: Search Archive
+      description: Search Internet Archive for public domain items
+      operationId: searchArchive
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Search query
+        - name: mediaType
+          in: query
+          schema:
+            type: string
+            enum: [audio, video, image, document, texts]
+          description: Filter by media type
+        - name: yearFrom
+          in: query
+          schema:
+            type: integer
+          description: Filter by year range (from)
+        - name: yearTo
+          in: query
+          schema:
+            type: integer
+          description: Filter by year range (to)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Archive search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        url:
+                          type: string
+                        mediaType:
+                          type: string
+                        year:
+                          type: integer
+
+  /api/grok/verify:
+    post:
+      tags:
+        - Grok AI Verification
+      summary: Verify with Grok AI
+      description: Verify NFT authenticity using Grok AI
+      operationId: verifyWithGrok
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nftMintAddress:
+                  type: string
+                  description: NFT mint address
+                contentUrl:
+                  type: string
+                  description: URL to content for verification
+              required:
+                - nftMintAddress
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      confidenceScore:
+                        type: number
+                        minimum: 0
+                        maximum: 100
+                      isAuthentic:
+                        type: boolean
+                      details:
+                        type: object
+
+  /api/v1/market:
+    get:
+      tags:
+        - Marketplace
+      summary: Get Marketplace Data
+      description: Get marketplace listings with optional filters
+      operationId: getMarketplace
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: collection
+          in: query
+          schema:
+            type: string
+        - name: owner
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Marketplace data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /api/public/stats:
+    get:
+      tags:
+        - Health & Status
+      summary: Get Public Statistics
+      description: Get platform statistics for display on landing page
+      operationId: getPublicStats
+      responses:
+        '200':
+          description: Platform statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  platform:
+                    type: object
+                    properties:
+                      totalNFTs:
+                        type: integer
+                      listedNFTs:
+                        type: integer
+                      soldNFTs:
+                        type: integer
+                      totalVolume:
+                        type: number
