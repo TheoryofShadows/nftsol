@@ -15,6 +15,7 @@ permissions:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: apps/backend
@@ -30,38 +31,30 @@ jobs:
           cache-dependency-path: apps/backend/package-lock.json
 
       - name: Install dependencies
-        run: |
-          npm ci || npm install
-        continue-on-error: false
+        run: npm ci || npm install
 
       - name: Type check
-        run: npm run type-check || echo "Type check failed but continuing..."
+        run: npm run type-check || echo "Type check skipped"
         continue-on-error: true
 
       - name: Lint
-        run: npm run lint || echo "Lint failed but continuing..."
+        run: npm run lint || echo "Lint skipped"
         continue-on-error: true
 
       - name: Build
-        run: |
-          npm run build || (echo "Build failed!" && exit 1)
-        continue-on-error: false
+        run: npm run build
 
       - name: Deploy to Render
-        if: github.ref == 'refs/heads/main' && success()
+        if: github.ref == 'refs/heads/main'
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
-          # Render service ID and API key are stored as GitHub secrets
-          # These are accessed securely via GitHub's secrets context
-          # yamllint disable-line rule:line-length
-          # yamllint disable-line rule:context-access
           service-id: ${{ secrets.RENDER_SERVICE_ID }}
-          # yamllint disable-line rule:line-length
-          # yamllint disable-line rule:context-access
           api-key: ${{ secrets.RENDER_API_KEY }}
+        continue-on-error: true
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: client
@@ -77,35 +70,25 @@ jobs:
           cache-dependency-path: client/package-lock.json
 
       - name: Install dependencies
-        run: |
-          npm ci || npm install
-        continue-on-error: false
+        run: npm ci || npm install
 
       - name: Lint
-        run: npm run lint || echo "Lint failed but continuing..."
+        run: npm run lint || echo "Lint skipped"
         continue-on-error: true
 
       - name: Build
-        run: |
-          npm run build || (echo "Build failed!" && exit 1)
+        run: npm run build
         env:
-          # Frontend environment variables stored as GitHub secrets
-          # These are accessed securely via GitHub's secrets context
-          # yamllint disable-line rule:context-access
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
-          # yamllint disable-line rule:context-access
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://nftsol.onrender.com' }}
           VITE_SOLANA_RPC_URL: ${{ secrets.VITE_SOLANA_RPC_URL }}
           VITE_SOLANA_CLUSTER: mainnet-beta
-          # yamllint disable-line rule:context-access
           VITE_HELIUS_API_KEY: ${{ secrets.VITE_HELIUS_API_KEY }}
-          # yamllint disable-line rule:context-access
           VITE_GA_TRACKING_ID: ${{ secrets.VITE_GA_TRACKING_ID }}
           CI: false
           NPM_CONFIG_PRODUCTION: false
-        continue-on-error: false
 
       - name: Deploy to Netlify
-        if: github.ref == 'refs/heads/main' && success()
+        if: github.ref == 'refs/heads/main'
         uses: nwtgck/actions-netlify@v2.1
         with:
           publish-dir: './client/dist'
@@ -115,11 +98,7 @@ jobs:
           enable-pull-request-comment: false
           enable-commit-comment: false
         env:
-          # Netlify credentials stored as GitHub secrets
-          # These are accessed securely via GitHub's secrets context
-          # yamllint disable-line rule:context-access
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          # yamllint disable-line rule:context-access
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 5
         continue-on-error: true

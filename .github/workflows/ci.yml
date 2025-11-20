@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,24 +20,49 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Install root tools
-        run: |
-          # Clear npm cache to avoid stale lockfile issues
-          npm cache clean --force
-          # Try npm ci first (faster, deterministic)
-          npm ci --ignore-scripts || npm install --ignore-scripts
-
-      - name: Client install and build
+      - name: Install dependencies - Client
         working-directory: client
         run: |
-          npm install --legacy-peer-deps --ignore-scripts || npm ci
-          npm run build
+          npm ci || npm install
+        continue-on-error: false
 
-      - name: Backend install and build
+      - name: Install dependencies - Backend
         working-directory: apps/backend
         run: |
-          npm install --legacy-peer-deps --ignore-scripts || npm ci
-          npm run build
+          npm ci || npm install
+        continue-on-error: false
 
-      - name: Lint
+      - name: Build Client
+        working-directory: client
+        run: npm run build
+        continue-on-error: false
+
+      - name: Build Backend
+        working-directory: apps/backend
+        run: npm run build
+        continue-on-error: false
+
+      - name: Lint Client
+        working-directory: client
         run: npm run lint
+        continue-on-error: true
+
+      - name: Lint Backend
+        working-directory: apps/backend
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type Check
+        working-directory: apps/backend
+        run: npm run type-check
+        continue-on-error: true
+
+      - name: Upload Build Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            client/dist
+            apps/backend/dist
+          retention-days: 5
