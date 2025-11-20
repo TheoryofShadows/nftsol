@@ -44,6 +44,7 @@ import verificationRealRouter from './routes/verification-real';
 import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
+import archiveGrokEchoRouter from './routes/archive-grok-echo';
 
 initializeSecrets();
 
@@ -989,6 +990,9 @@ app.get('/api/public/stats', async (req, res) => {
 // Echo routes
 app.use('/api/echo', echoRouter);
 app.use('/api/orb', orbRouter);
+
+// 🌍 Internet Archive + Grok + Echo Integration (revolutionary NFT workflow)
+app.use('/api/archive', archiveGrokEchoRouter);
 
 // Solana/Helius comprehensive tools (error handling, monitoring, optimization)
 app.use('/api/tools', solanaToolsRouter);

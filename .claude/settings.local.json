@@ -18,7 +18,17 @@
       "Bash(while read f)",
       "Bash(do sed -n '8p' \"$f\")",
       "Bash(done)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(dir \"C:\\Users\\KHK89\\nftsol\\client\\src\\components\")",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(npm run build:check:*)",
+      "Bash(npm ls:*)",
+      "WebFetch(domain:nftsol.app)",
+      "WebFetch(domain:nftsol.onrender.com)"
     ],
     "deny": [],
     "ask": []
