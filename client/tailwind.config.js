@@ -21,6 +21,14 @@ export default {
         display: ['Poppins', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
       },
+      borderRadius: {
+        'app-xs': 'var(--radius-xs, 4px)',
+        'app-sm': 'var(--radius-sm, 8px)',
+        'app': 'var(--radius-md, 16px)',
+        'app-md': 'var(--radius-md, 16px)',
+        'app-lg': 'var(--radius-lg, 24px)',
+        'app-xl': 'var(--radius-xl, 32px)',
+      },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #9945ff 0%, #14f195 100%)',
         'gradient-secondary': 'linear-gradient(135deg, #00d4ff 0%, #ff6b9d 100%)',
@@ -88,6 +96,8 @@ export default {
       boxShadow: {
         glow: '0 0 20px rgba(153, 69, 255, 0.3)',
         'glow-lg': '0 0 40px rgba(153, 69, 255, 0.5)',
+        'soft': '0 4px 12px rgba(124, 58, 237, 0.1)',
+        'soft-lg': '0 12px 32px rgba(124, 58, 237, 0.15)',
       },
     },
   },

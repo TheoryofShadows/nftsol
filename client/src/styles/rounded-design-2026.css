@@ -1,0 +1,374 @@
+/**
+ * 🎨 NFTSol Rounded Design System 2025-2026
+ * Soft, Organic, Humanized Design Trend
+ *
+ * A comprehensive system for consistent rounded corners across the entire application.
+ * Uses CSS custom properties for easy customization and responsive scaling.
+ *
+ * Radius Hierarchy:
+ * - --radius-xs: 4px   → Micro-elements, icons, minimal rounding
+ * - --radius-sm: 8px   → Badges, small interactive elements
+ * - --radius-md: 16px  → BASE - Buttons, cards, inputs, standard elements
+ * - --radius-lg: 24px  → LARGER - Modals, overlays, hero sections
+ * - --radius-xl: 32px  → EXTRA LARGE - Major components, containers
+ * - --radius-full: ∞   → Fully rounded (pills, circular elements)
+ */
+
+/* ============================================================================
+   BASE ROUNDED UTILITIES - Direct radius application
+   ============================================================================ */
+
+/* Extra small radius (4px) - Icons, minimal elements */
+.rounded-xs {
+  border-radius: var(--radius-xs, 4px);
+}
+
+/* Small radius (8px) - Badges, small buttons, minor elements */
+.rounded-sm {
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* Medium radius (16px) - BASE level for most interactive elements */
+.rounded-md,
+.rounded {
+  border-radius: var(--radius-md, 16px);
+}
+
+/* Large radius (24px) - Modals, overlays, containers */
+.rounded-lg {
+  border-radius: var(--radius-lg, 24px);
+}
+
+/* Extra Large radius (32px) - Major components */
+.rounded-xl {
+  border-radius: var(--radius-xl, 32px);
+}
+
+/* Fully rounded (pill-shaped) */
+.rounded-full {
+  border-radius: var(--radius-full, 9999px);
+}
+
+/* ============================================================================
+   SEMANTIC ROUNDED UTILITIES - Purpose-based classes
+   ============================================================================ */
+
+/* Interactive elements (buttons, inputs, selects) */
+.rounded-interactive {
+  border-radius: var(--radius-md, 16px);
+}
+
+/* Card containers */
+.rounded-card {
+  border-radius: var(--radius-md, 16px);
+}
+
+/* Modal/overlay containers */
+.rounded-modal {
+  border-radius: var(--radius-lg, 24px);
+}
+
+/* Hero sections and large containers */
+.rounded-hero {
+  border-radius: var(--radius-lg, 24px);
+}
+
+/* Badge/pill elements */
+.rounded-badge {
+  border-radius: var(--radius-full, 9999px);
+}
+
+/* Icon containers */
+.rounded-icon {
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* ============================================================================
+   DIRECTIONAL ROUNDED UTILITIES - Top, bottom, left, right
+   ============================================================================ */
+
+/* Top only */
+.rounded-t-md { border-top-left-radius: var(--radius-md, 16px); border-top-right-radius: var(--radius-md, 16px); }
+.rounded-t-lg { border-top-left-radius: var(--radius-lg, 24px); border-top-right-radius: var(--radius-lg, 24px); }
+
+/* Bottom only */
+.rounded-b-md { border-bottom-left-radius: var(--radius-md, 16px); border-bottom-right-radius: var(--radius-md, 16px); }
+.rounded-b-lg { border-bottom-left-radius: var(--radius-lg, 24px); border-bottom-right-radius: var(--radius-lg, 24px); }
+
+/* Left only */
+.rounded-l-md { border-top-left-radius: var(--radius-md, 16px); border-bottom-left-radius: var(--radius-md, 16px); }
+.rounded-l-lg { border-top-left-radius: var(--radius-lg, 24px); border-bottom-left-radius: var(--radius-lg, 24px); }
+
+/* Right only */
+.rounded-r-md { border-top-right-radius: var(--radius-md, 16px); border-bottom-right-radius: var(--radius-md, 16px); }
+.rounded-r-lg { border-top-right-radius: var(--radius-lg, 24px); border-bottom-right-radius: var(--radius-lg, 24px); }
+
+/* Corners */
+.rounded-tl-md { border-top-left-radius: var(--radius-md, 16px); }
+.rounded-tr-md { border-top-right-radius: var(--radius-md, 16px); }
+.rounded-bl-md { border-bottom-left-radius: var(--radius-md, 16px); }
+.rounded-br-md { border-bottom-right-radius: var(--radius-md, 16px); }
+
+/* ============================================================================
+   COMPONENT SPECIFIC ROUNDED STYLES
+   ============================================================================ */
+
+/* Buttons - Soft, rounded appearance */
+.btn-rounded {
+  border-radius: var(--radius-md, 16px);
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+}
+
+.btn-rounded:hover {
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15);
+  transform: translateY(-2px);
+}
+
+.btn-rounded:active {
+  transform: translateY(0);
+}
+
+/* Cards - Soft, rounded containers */
+.card-rounded {
+  border-radius: var(--radius-md, 16px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+  transition: all var(--transition-normal);
+  overflow: hidden;
+}
+
+.card-rounded:hover {
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+  transform: translateY(-4px);
+}
+
+/* Input fields - Smooth, rounded inputs */
+.input-rounded {
+  border-radius: var(--radius-md, 16px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all var(--transition-normal);
+}
+
+.input-rounded:focus {
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+/* Modals/Dialogs - Large, rounded containers */
+.modal-rounded {
+  border-radius: var(--radius-lg, 24px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Badge/Pill elements - Fully rounded */
+.badge-rounded {
+  border-radius: var(--radius-full, 9999px);
+  padding: 0.5rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Hero sections - Slightly more rounded */
+.hero-rounded {
+  border-radius: var(--radius-lg, 24px);
+}
+
+/* Image containers - Soft, rounded images */
+.image-rounded {
+  border-radius: var(--radius-md, 16px);
+  overflow: hidden;
+}
+
+/* ============================================================================
+   COMBINED UTILITIES - Rounded + Shadow + Border
+   ============================================================================ */
+
+/* Soft Card (rounded + shadow) */
+.soft-card {
+  border-radius: var(--radius-md, 16px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  transition: all var(--transition-normal);
+}
+
+.soft-card:hover {
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Glass Card (rounded + glass effect) */
+.glass-card-rounded {
+  border-radius: var(--radius-md, 16px);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+  transition: all var(--transition-normal);
+}
+
+.glass-card-rounded:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+}
+
+/* Gradient Card (rounded + gradient) */
+.gradient-card-rounded {
+  border-radius: var(--radius-md, 16px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gradient-card-rounded::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.gradient-card-rounded:hover::before {
+  opacity: 1;
+}
+
+/* ============================================================================
+   HOVER & INTERACTIVE STATES
+   ============================================================================ */
+
+/* Rounded element with hover elevation */
+.rounded-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(124, 58, 237, 0.15);
+}
+
+/* Rounded element with hover scale */
+.rounded-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Rounded element with glow effect */
+.rounded-glow {
+  border-radius: var(--radius-md, 16px);
+  box-shadow: 0 0 20px rgba(153, 69, 255, 0.3);
+  transition: all var(--transition-normal);
+}
+
+.rounded-glow:hover {
+  box-shadow: 0 0 40px rgba(153, 69, 255, 0.5);
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  /* Scale down radius on small screens for better proportions */
+  :root {
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+  }
+
+  /* Adjust padding/spacing for small buttons */
+  .btn-rounded {
+    padding: 0.75rem 1.5rem;
+  }
+
+  /* Reduce shadow intensity on mobile */
+  .card-rounded,
+  .soft-card,
+  .glass-card-rounded {
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+  }
+
+  .card-rounded:hover,
+  .soft-card:hover,
+  .glass-card-rounded:hover {
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.12);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Extra small devices */
+  :root {
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY & REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all transitions and transforms */
+  .rounded-hover-lift:hover,
+  .rounded-hover-scale:hover,
+  .btn-rounded:hover,
+  .btn-rounded:active,
+  .card-rounded:hover,
+  .soft-card:hover,
+  .glass-card-rounded:hover,
+  .gradient-card-rounded:hover,
+  .rounded-glow:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Keep box shadows subtle */
+  .rounded-glow:hover {
+    box-shadow: 0 0 20px rgba(153, 69, 255, 0.3);
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .soft-card,
+  .glass-card-rounded,
+  .gradient-card-rounded {
+    border-width: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  .soft-card:hover,
+  .glass-card-rounded:hover,
+  .gradient-card-rounded:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* ============================================================================
+   UTILITY COMBINATIONS
+   ============================================================================ */
+
+/* Common combinations */
+.rounded-soft {
+  @apply rounded-md transition-all duration-300;
+}
+
+.rounded-interactive-soft {
+  @apply rounded-interactive shadow-soft hover:shadow-soft-lg transition-all duration-300;
+}
+
+.rounded-card-soft {
+  @apply rounded-card shadow-soft hover:shadow-soft-lg transition-all duration-300;
+}
+
+/* Export as @apply utilities */
+@layer components {
+  .rounded-app { @apply rounded-md; }
+  .rounded-app-sm { @apply rounded-sm; }
+  .rounded-app-lg { @apply rounded-lg; }
+  .rounded-app-xl { @apply rounded-xl; }
+}

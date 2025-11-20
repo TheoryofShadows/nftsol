@@ -45,8 +45,8 @@
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -80,10 +80,11 @@
   -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  border-radius: var(--radius-md);
   padding: 1.5rem;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
 }
 
 .card-modern::before {
@@ -153,11 +154,11 @@
   color: white;
   background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink));
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
 }
 
 .btn-modern::before {
@@ -203,12 +204,13 @@
   padding: 0.5rem 1rem;
   background: rgba(168, 85, 247, 0.1);
   border: 1px solid rgba(168, 85, 247, 0.3);
-  border-radius: 100px;
+  border-radius: var(--radius-full);
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--neon-purple);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.05);
 }
 
 /* Skeleton Loader */
@@ -221,7 +223,7 @@
   );
   background-size: 200% 100%;
   animation: skeleton-pulse 1.5s ease-in-out infinite;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
 }
 
 @keyframes skeleton-pulse {
@@ -235,20 +237,21 @@
   padding: 1rem 1.5rem;
   background: rgba(255, 255, 255, 0.05);
   border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   color: white;
   font-family: var(--font-body);
   font-size: 1rem;
   transition: all 0.3s;
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .input-modern:focus {
   outline: none;
   border-color: var(--neon-purple);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
 }
 
 /* Scroll Reveal Animation */
