@@ -75,6 +75,7 @@ const OnboardingProgress = lazyWithErrorBoundary(() => import('./components/Onbo
 const MyNfts = lazyWithErrorBoundary(() => import('./components/MyNfts'));
 const Collections = lazyWithErrorBoundary(() => import('./components/Collections'));
 const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
+const ArchiveAdvancedSearchForm = lazyWithErrorBoundary(() => import('./components/ArchiveAdvancedSearchForm'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -342,6 +343,7 @@ function AppContent() {
             { id: 'home', label: 'Home', icon: '🏠', desc: 'Landing' },
             { id: 'dashboard', label: 'Dashboard', icon: '📊', desc: 'Overview' },
             { id: 'market', label: 'Marketplace', icon: '🏪', desc: 'Discover NFTs' },
+            { id: 'archive', label: 'Archive Search', icon: '📚', desc: '20M+ items' },
             { id: 'mint', label: 'Mint NFT', icon: '✨', desc: 'Create new' },
             { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭', desc: 'Collaborative' },
             { id: 'echo-mint', label: 'Mint Echo', icon: '🎬', desc: 'Eternal Echoes' },
@@ -384,6 +386,7 @@ function AppContent() {
                   { id: 'home', label: 'Home', icon: '🏠' },
                   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
                   { id: 'market', label: 'Market', icon: '🏪' },
+                  { id: 'archive', label: 'Archive', icon: '📚' },
                   { id: 'mint', label: 'Mint', icon: '✨' },
                   { id: 'echo-marketplace', label: 'Echo Market', icon: '🎭' },
                   { id: 'echo-mint', label: 'Mint Echo', icon: '🎬' },
@@ -424,6 +427,7 @@ function AppContent() {
                 {[
                   { id: 'home', icon: '🏠', label: 'Home' },
                   { id: 'market', icon: '🏪', label: 'Market' },
+                  { id: 'archive', icon: '📚', label: 'Archive' },
                   { id: 'mint', icon: '✨', label: 'Mint' },
                   { id: 'echo-marketplace', icon: '🎭', label: 'Echo' },
                   { id: 'my-nfts', icon: '👤', label: 'My NFTs' },
@@ -559,6 +563,14 @@ function AppContent() {
                   </div>
                 </Suspense>
               )}
+            </div>
+          )}
+
+          {activeTab === 'archive' && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <ArchiveAdvancedSearchForm />
+              </Suspense>
             </div>
           )}
 
