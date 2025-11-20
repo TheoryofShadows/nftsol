@@ -43,6 +43,7 @@ import { initializeSecrets } from './lib/secrets-loader';
 import verificationRealRouter from './routes/verification-real';
 import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
+import solanaToolsRouter from './routes/solana-tools';
 
 initializeSecrets();
 
@@ -988,6 +989,9 @@ app.get('/api/public/stats', async (req, res) => {
 // Echo routes
 app.use('/api/echo', echoRouter);
 app.use('/api/orb', orbRouter);
+
+// Solana/Helius comprehensive tools (error handling, monitoring, optimization)
+app.use('/api/tools', solanaToolsRouter);
 
 // CLOUT routes
 app.use('/api/clout', cloutRouter);
