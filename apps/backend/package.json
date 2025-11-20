@@ -35,6 +35,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.540.0",
     "@coral-xyz/anchor": "^0.32.1",
+    "@dr.pogodin/csurf": "^1.16.6",
     "@hapi/boom": "^10.0.1",
     "@hapi/iron": "^7.0.1",
     "@irys/js": "^0.0.2",
@@ -67,7 +68,6 @@
     "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "csurf": "^1.2.2",
     "csv-parse": "^6.1.0",
     "dotenv": "^16.4.1",
     "drizzle-orm": "^0.29.5",
@@ -205,5 +205,8 @@
   },
   "peerDependencies": {
     "arweave": "^1.15.7"
+  },
+  "overrides": {
+    "bigint-buffer": "npm:@trufflesuite/bigint-buffer@1.1.10"
   }
 }
