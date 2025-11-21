@@ -103,6 +103,32 @@ export const API_ENDPOINTS = {
   waitlist: {
     subscribe: buildApiUrl('api/waitlist/subscribe'),
   },
+  // Sprint 1: New feature endpoints
+  tensor: {
+    orderbook: (collection: string) => buildApiUrl(`api/tensor/orderbook/${collection}`),
+    stats: (collection: string) => buildApiUrl(`api/tensor/stats/${collection}`),
+    history: (collection: string, period: string = '7d') =>
+      buildApiUrl(`api/tensor/history/${collection}?period=${period}`),
+    trending: buildApiUrl('api/tensor/trending'),
+    search: (query: string) => buildApiUrl(`api/tensor/search?q=${encodeURIComponent(query)}`),
+    floor: (collection: string) => buildApiUrl(`api/tensor/floor/${collection}`),
+  },
+  pnl: {
+    leaderboard: (period: string = 'daily', limit: number = 50) =>
+      buildApiUrl(`api/pnl/leaderboard?period=${period}&limit=${limit}`),
+    wallet: (address: string) => buildApiUrl(`api/pnl/wallet/${address}`),
+    snapshot: buildApiUrl('api/pnl/snapshot'),
+    rank: (address: string, period: string = 'daily') =>
+      buildApiUrl(`api/pnl/rank/${address}?period=${period}`),
+    portfolio: (address: string) => buildApiUrl(`api/pnl/portfolio/${address}`),
+  },
+  alerts: {
+    types: buildApiUrl('api/alerts/types'),
+    subscriptions: (wallet: string) => buildApiUrl(`api/alerts/subscriptions/${wallet}`),
+    subscribe: buildApiUrl('api/alerts/subscribe'),
+    unsubscribe: (id: string) => buildApiUrl(`api/alerts/unsubscribe/${id}`),
+    history: (wallet: string) => buildApiUrl(`api/alerts/history/${wallet}`),
+  },
 };
 
 export default API_BASE;

@@ -49,6 +49,11 @@ import performanceMetricsRouter from './routes/performance-metrics';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
 
+// Sprint 1: New feature imports
+import tensorRouter from './routes/tensor';
+import pnlLeaderboardRouter from './routes/pnl-leaderboard';
+import alertsRouter from './routes/alerts';
+
 initializeSecrets();
 
 // Initialize Solana best practices services
@@ -1030,6 +1035,11 @@ app.use('/api/clout', cloutRouter);
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/marketplace', marketplaceBrowseRouter);
+
+// Sprint 1: Tensor Trade API, PnL Leaderboard, and Alerts
+app.use('/api/tensor', tensorRouter);
+app.use('/api/pnl', pnlLeaderboardRouter);
+app.use('/api/alerts', alertsRouter);
 
 // Ultra-cheap minting routes
 app.use('/api/mint', mintRouter);

@@ -297,6 +297,8 @@ router.get('/:identifier', searchLimiter, async (req: Request, res: Response) =>
  */
 router.get('/:identifier/media', searchLimiter, async (req: Request, res: Response) => {
   try {
+    const { identifier } = req.params;
+
     // Validate that identifier is strictly alphanumeric (plus dash/underscore), no slashes, etc.
     if (
       !identifier ||
@@ -308,8 +310,6 @@ router.get('/:identifier/media', searchLimiter, async (req: Request, res: Respon
         error: { message: 'Invalid identifier: must only contain letters, numbers, "-", and "_"'},
       });
     }
-
-    const { identifier } = req.params;
 
     const mediaFiles = await integration.getAllMediaForEcho(identifier);
 
