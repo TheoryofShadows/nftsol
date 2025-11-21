@@ -54,6 +54,12 @@ import tensorRouter from './routes/tensor';
 import pnlLeaderboardRouter from './routes/pnl-leaderboard';
 import alertsRouter from './routes/alerts';
 
+// Sprint 2: Trading power features
+import jupiterRouter from './routes/jupiter';
+import magicEdenRouter from './routes/magic-eden';
+import whalesRouter from './routes/whales';
+import taxExportRouter from './routes/tax-export';
+
 initializeSecrets();
 
 // Initialize Solana best practices services
@@ -1040,6 +1046,12 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 app.use('/api/tensor', tensorRouter);
 app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
+
+// Sprint 2: Jupiter Limit Orders, Magic Eden Diamonds, Whale Tracker, Tax Export
+app.use('/api/jupiter', jupiterRouter);
+app.use('/api/magic-eden', magicEdenRouter);
+app.use('/api/whales', whalesRouter);
+app.use('/api/tax', taxExportRouter);
 
 // Ultra-cheap minting routes
 app.use('/api/mint', mintRouter);

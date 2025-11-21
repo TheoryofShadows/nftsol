@@ -129,6 +129,46 @@ export const API_ENDPOINTS = {
     unsubscribe: (id: string) => buildApiUrl(`api/alerts/unsubscribe/${id}`),
     history: (wallet: string) => buildApiUrl(`api/alerts/history/${wallet}`),
   },
+  // Sprint 2: Trading power features
+  jupiter: {
+    price: (token: string, vsToken?: string) =>
+      buildApiUrl(`api/jupiter/price/${token}${vsToken ? `?vsToken=${vsToken}` : ''}`),
+    prices: (tokens: string[]) =>
+      buildApiUrl(`api/jupiter/prices?tokens=${tokens.join(',')}`),
+    createOrder: buildApiUrl('api/jupiter/limit-order/create'),
+    cancelOrder: buildApiUrl('api/jupiter/limit-order/cancel'),
+    openOrders: (wallet: string) => buildApiUrl(`api/jupiter/limit-order/open/${wallet}`),
+    orderHistory: (wallet: string) => buildApiUrl(`api/jupiter/limit-order/history/${wallet}`),
+    quote: buildApiUrl('api/jupiter/quote'),
+  },
+  magicEden: {
+    diamonds: (wallet: string) => buildApiUrl(`api/magic-eden/diamonds/${wallet}`),
+    quests: (wallet: string) => buildApiUrl(`api/magic-eden/quests/${wallet}`),
+    tiers: buildApiUrl('api/magic-eden/tiers'),
+    collection: (symbol: string) => buildApiUrl(`api/magic-eden/collection/${symbol}`),
+  },
+  whales: {
+    top: (limit: number = 20) => buildApiUrl(`api/whales/top?limit=${limit}`),
+    activity: (limit: number = 50) => buildApiUrl(`api/whales/activity?limit=${limit}`),
+    details: (address: string) => buildApiUrl(`api/whales/details/${address}`),
+    follow: buildApiUrl('api/whales/follow'),
+    unfollow: buildApiUrl('api/whales/unfollow'),
+    following: (wallet: string) => buildApiUrl(`api/whales/following/${wallet}`),
+  },
+  tax: {
+    formats: buildApiUrl('api/tax/formats'),
+    transactions: (wallet: string, startDate?: string, endDate?: string) => {
+      let url = `api/tax/transactions/${wallet}`;
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      return buildApiUrl(params.toString() ? `${url}?${params}` : url);
+    },
+    summary: (wallet: string, year: number) =>
+      buildApiUrl(`api/tax/summary/${wallet}/${year}`),
+    export: (wallet: string, format: string = 'csv', year?: number) =>
+      buildApiUrl(`api/tax/export/${wallet}?format=${format}${year ? `&year=${year}` : ''}`),
+  },
 };
 
 export default API_BASE;
