@@ -52,7 +52,7 @@ export const appConfig: AppConfig = {
   port: parseInt(getEnv('PORT', '3001'), 10),
   nodeEnv: (getEnv('NODE_ENV', 'development') as 'development' | 'production' | 'test'),
   cors: {
-    origin: getEnv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000')
+    origin: getEnv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:5174,http://localhost:3000')
       .split(',')
       .map(o => o.trim()),
     credentials: true,
