@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { authLimiter, sensitiveOpLimiter } from '../middleware/rate-limiting';
 
 const router = express.Router();
 
@@ -14,8 +15,9 @@ const router = express.Router();
 /**
  * Admin login (simple JWT approach)
  * In production, use OAuth2 / SSO
+ * Rate limited to prevent brute force attacks
  */
-router.post('/auth/login', async (req: Request, res: Response) => {
+router.post('/auth/login', authLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -84,8 +86,9 @@ router.post('/auth/login', async (req: Request, res: Response) => {
 
 /**
  * Create new admin account (superadmin only)
+ * Rate limited to prevent account enumeration and creation abuse
  */
-router.post('/accounts', async (req: Request, res: Response) => {
+router.post('/accounts', sensitiveOpLimiter, async (req: Request, res: Response) => {
   try {
     const { email, password, role = 'admin' } = req.body;
 

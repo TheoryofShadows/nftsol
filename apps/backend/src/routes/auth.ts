@@ -2,6 +2,7 @@ import { Router } from 'express';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
 import { Express } from 'express-serve-static-core';
+import { authLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -10,8 +11,8 @@ function generateCSRFToken(): string {
   return crypto.randomBytes(16).toString('hex');
 }
 
-// Endpoint to get a CSRF token
-router.get('/csrf-token', (req: Request, res: Response) => {
+// Endpoint to get a CSRF token (rate limited to prevent token enumeration)
+router.get('/csrf-token', authLimiter, (req: Request, res: Response) => {
   try {
     const csrfToken = generateCSRFToken();
     req.session.csrfToken = csrfToken;

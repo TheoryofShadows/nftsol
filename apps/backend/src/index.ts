@@ -47,6 +47,12 @@ import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
+import {
+  authLimiter,
+  sensitiveOpLimiter,
+  dataLimiter,
+  rateLimiters
+} from './middleware/rate-limiting';
 
 initializeSecrets();
 

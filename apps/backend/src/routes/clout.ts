@@ -16,13 +16,14 @@ import { CloutTokenService } from '../services/cloutToken';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types/index';
 import { programConfig } from '../config/index';
+import { sensitiveOpLimiter, dataLimiter } from '../middleware/rate-limiting';
 
 const router = express.Router();
 const cloutService = new CloutTokenService();
 
 /**
  * POST /api/clout/reward
- * Send CLOUT tokens to a user
+ * Send CLOUT tokens to a user (sensitive operation - rate limited)
  *
  * Body: {
  *   recipientAddress: string (required),
@@ -30,7 +31,7 @@ const cloutService = new CloutTokenService();
  *   multiplier?: number (optional, default: 1.0)
  * }
  */
-router.post('/reward', validateWallet, async (req, res) => {
+router.post('/reward', sensitiveOpLimiter, validateWallet, async (req, res) => {
   try {
     const { recipientAddress, amount, multiplier = 1.0 } = req.body;
 
