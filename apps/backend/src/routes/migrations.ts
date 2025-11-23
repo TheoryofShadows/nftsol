@@ -5,10 +5,33 @@
 
 import { Router, Request, Response } from 'express';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { join, normalize, resolve } from 'path';
 import jwt from 'jsonwebtoken';
 import { pool } from '../lib/db';
 import { ApiResponse } from '../types';
+
+/**
+ * Validate migration file path to prevent directory traversal attacks
+ * Ensures the resolved path is within the migrations directory
+ */
+function validateMigrationPath(baseDir: string, filePath: string): string {
+  // Normalize and resolve the full path
+  const fullPath = resolve(baseDir, filePath);
+  const baseDirResolved = resolve(baseDir);
+
+  // Ensure the path is within the migrations directory
+  if (!fullPath.startsWith(baseDirResolved + require('path').sep) && fullPath !== baseDirResolved) {
+    throw new Error(`Invalid migration path: path traversal detected`);
+  }
+
+  // Ensure no ../ sequences remain after normalization
+  if (normalize(filePath).includes('..')) {
+    throw new Error(`Invalid migration path: contains parent directory references`);
+  }
+
+  return fullPath;
+}
+
 // Authentication middleware (inline to avoid circular dependency)
 const authenticate = (req: any, res: any, next: any) => {
   try {
@@ -147,18 +170,21 @@ router.post('/:name', authenticate, requireAdmin, async (req: Request, res: Resp
       return res.json(response);
     }
 
-    // Read migration file
-    const migrationPath = join(process.cwd(), 'migrations', migration.file);
+    // Read migration file (with path traversal protection)
+    let migrationPath: string;
     let sql: string;
     try {
+      const migrationsDir = join(process.cwd(), 'migrations');
+      migrationPath = validateMigrationPath(migrationsDir, migration.file);
       sql = readFileSync(migrationPath, 'utf-8');
-    } catch (_error) {
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
       const response: ApiResponse = {
         success: false,
-        error: `Failed to read migration file: ${migration.file}`,
-        code: 'FILE_NOT_FOUND',
+        error: `Failed to read migration file: ${errorMsg}`,
+        code: 'FILE_ERROR',
       };
-      return res.status(500).json(response);
+      return res.status(400).json(response);
     }
 
     // Run migration in transaction
@@ -225,9 +251,11 @@ router.post('/run-all', authenticate, requireAdmin, async (_req: Request, res: R
 
     type MigrationResult = { migration: string; status: 'success' | 'failed'; error?: string };
     const results: MigrationResult[] = [];
+    const migrationsDir = join(process.cwd(), 'migrations');
+
     for (const migration of pendingMigrations) {
       try {
-        const migrationPath = join(process.cwd(), 'migrations', migration.file);
+        const migrationPath = validateMigrationPath(migrationsDir, migration.file);
         const sql = readFileSync(migrationPath, 'utf-8');
 
         const client = await pool.connect();
