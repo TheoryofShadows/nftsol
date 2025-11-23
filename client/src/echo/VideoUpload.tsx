@@ -151,7 +151,6 @@ export default function VideoUpload({ onSuccess, onError }: VideoUploadProps) {
             src={preview}
             controls
             className="w-full rounded-lg"
-            loading="lazy"
             preload="metadata"
           />
         </div>

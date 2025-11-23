@@ -82,9 +82,13 @@ export function useArchiveAdvancedSearch(
 
   // Debounce timer for suggestions
   useEffect(() => {
-    let suggestionsTimer: NodeJS.Timeout;
+    let suggestionsTimer: NodeJS.Timeout | undefined;
 
-    return () => clearTimeout(suggestionsTimer);
+    return () => {
+      if (suggestionsTimer) {
+        clearTimeout(suggestionsTimer);
+      }
+    };
   }, []);
 
   /**

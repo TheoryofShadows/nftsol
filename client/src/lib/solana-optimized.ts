@@ -91,10 +91,10 @@ export async function simulateTransaction(
       err: simulation.value.err,
       logs: simulation.value.logs || null,
     };
-  } catch {
+  } catch (error) {
     return {
       success: false,
-      err: error,
+      err: error instanceof Error ? error.message : String(error),
     };
   }
 }

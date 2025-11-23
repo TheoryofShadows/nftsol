@@ -150,7 +150,7 @@ export default function EchoMint() {
   }, [selected, publicKey]);
 
   const handleMint = async () => {
-    if (!mintData || !publicKey || !connection) return;
+    if (!mintData || !publicKey) return;
     setMinting(true);
 
     try {
