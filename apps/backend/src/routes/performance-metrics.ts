@@ -83,6 +83,19 @@ router.get('/health', (req: Request, res: Response) => {
 });
 
 /**
+ * POST /api/metrics/visibility - Track page visibility changes
+ */
+router.post('/visibility', (req: Request, res: Response) => {
+  try {
+    // Just acknowledge receipt - can extend to track visibility metrics
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to track visibility:', error);
+    res.status(500).json({ success: false, error: 'Failed to track visibility' });
+  }
+});
+
+/**
  * Generate performance metrics report
  */
 function getMetricsReport() {

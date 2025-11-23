@@ -16,6 +16,7 @@ export default function corsAllowed(req: Request, res: Response, next: NextFunct
       "https://nftsol.app",
       "https://www.nftsol.app",
       "https://market.nftsol.app",
+      "https://nftsolmarket.netlify.app",
     ];
     productionDomains.forEach((domain) => {
       if (!list.includes(domain)) list.push(domain);

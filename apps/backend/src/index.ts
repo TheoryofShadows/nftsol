@@ -46,6 +46,7 @@ import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
+import performanceMetricsRouter from './routes/performance-metrics';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
 import {
@@ -54,6 +55,11 @@ import {
   dataLimiter,
   rateLimiters
 } from './middleware/rate-limiting';
+
+// Sprint 1: New feature imports
+import tensorRouter from './routes/tensor';
+import pnlLeaderboardRouter from './routes/pnl-leaderboard';
+import alertsRouter from './routes/alerts';
 
 initializeSecrets();
 
@@ -1066,12 +1072,20 @@ app.use('/api/archive', archiveGrokEchoRouter);
 // Solana/Helius comprehensive tools (error handling, monitoring, optimization)
 app.use('/api/tools', solanaToolsRouter);
 
+// Performance metrics (Web Vitals collection and reporting)
+app.use('/api/metrics', performanceMetricsRouter);
+
 // CLOUT routes
 app.use('/api/clout', cloutRouter);
 
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/marketplace', marketplaceBrowseRouter);
+
+// Sprint 1: Tensor Trade API, PnL Leaderboard, and Alerts
+app.use('/api/tensor', tensorRouter);
+app.use('/api/pnl', pnlLeaderboardRouter);
+app.use('/api/alerts', alertsRouter);
 
 // Ultra-cheap minting routes
 app.use('/api/mint', mintRouter);

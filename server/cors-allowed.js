@@ -6,6 +6,10 @@ export default function corsAllowed(req, res, next) {
     // Always allow local dev UI
     if (!list.includes("http://localhost:3000"))
         list.push("http://localhost:3000");
+    if (!list.includes("http://localhost:5173"))
+        list.push("http://localhost:5173");
+    if (!list.includes("https://nftsolmarket.netlify.app"))
+        list.push("https://nftsolmarket.netlify.app");
     const allowed = new Set(list);
     const origin = req.headers.origin;
     if (origin && allowed.has(origin)) {
