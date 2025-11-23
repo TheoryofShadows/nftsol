@@ -100,19 +100,26 @@ if (
   throw new Error('ALLOWED_ORIGINS must be set in production');
 }
 
-// CORS configuration with dynamic origin support for Netlify
+// CORS configuration with dynamic origin support
 app.use(
   cors({
     origin: (origin, callback) => {
       const allowedOrigins = appConfig.cors.origin;
 
-      // Allow requests with no origin (mobile apps, Postman, etc.)
+      // Require origin header in production, but allow it from trusted sources
       if (!origin) {
-        return callback(null, true);
+        // Only allow no origin in development mode
+        if (appConfig.nodeEnv === 'development') {
+          return callback(null, true);
+        }
+        // In production, reject requests with no origin
+        return callback(new Error('Origin header is required in production'));
       }
 
-      // Allow Netlify preview deployments (*.netlify.app)
-      if (origin.endsWith('.netlify.app')) {
+      // Allow Netlify deployments only if they match expected production domain
+      // DO NOT allow all *.netlify.app subdomains - only the specific one we use
+      const allowedNetlifyDomain = process.env.ALLOWED_NETLIFY_DOMAIN || 'nftsolmarket.netlify.app';
+      if (origin === `https://${allowedNetlifyDomain}`) {
         return callback(null, true);
       }
 
@@ -124,8 +131,9 @@ app.use(
       }
     },
     credentials: appConfig.cors.credentials,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID', 'X-CSRF-Token', 'x-csrf-token'],
+    maxAge: 86400, // Cache preflight requests for 24 hours
   })
 );
 

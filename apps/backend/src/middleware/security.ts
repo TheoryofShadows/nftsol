@@ -3,19 +3,26 @@ import helmet from 'helmet';
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
 
-// CORS configuration
+// CORS configuration - RESTRICTED in production
 export const corsConfig = cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return cb(null, true);
-    
-    // Allow all origins in development
-    if (process.env.NODE_ENV !== 'production' || process.env.NODE_ENV === undefined) {
+    const nodeEnv = process.env.NODE_ENV || 'development';
+
+    // In development, allow all origins for testing
+    if (nodeEnv === 'development') {
+      // But still require origin header to be present or allow no origin
+      if (!origin) return cb(null, true);
       return cb(null, true);
     }
 
-    // In production, only allow specific origins
+    // In production, ONLY allow specific trusted origins
+    if (!origin) {
+      // Reject requests with no origin in production
+      return cb(new Error('Origin header is required in production'));
+    }
+
     const allowedOrigins = [
+      'https://nftsolmarket.netlify.app',
       'https://nftsol.app',
       'https://www.nftsol.app',
       'https://nftsol.onrender.com'
@@ -25,14 +32,15 @@ export const corsConfig = cors({
       return cb(null, true);
     }
 
-    // Block the request
+    // Block the request with specific error
+    console.warn(`CORS request blocked from unauthorized origin: ${origin}`);
     return cb(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With'],
-  exposedHeaders: ['X-CSRF-Token'],
-  maxAge: 600 // 10 minutes
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'X-Request-ID'],
+  exposedHeaders: ['X-CSRF-Token', 'X-Request-ID'],
+  maxAge: 86400 // 24 hours
 });
 
 export const helmetConfig = helmet({ contentSecurityPolicy: false });
