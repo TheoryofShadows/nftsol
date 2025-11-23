@@ -220,7 +220,9 @@ export default function FeatureTour() {
 
       if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
         if (status === STATUS.FINISHED) {
-          completeStep(currentStep as any);
+          if (currentStep) {
+            completeStep(currentStep);
+          }
         } else {
           skipOnboarding();
         }

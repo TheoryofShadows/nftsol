@@ -8,6 +8,8 @@ export type OnboardingStep =
   | 'marketplace-tour'
   | 'mint-tour'
   | 'portfolio-tour'
+  | 'video-upload-tour'
+  | 'echo-tour'
   | 'completed';
 
 interface OnboardingState {

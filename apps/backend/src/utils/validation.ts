@@ -213,7 +213,7 @@ export function validateFile(
       type: file.mimetype,
       size: file.size
     }
-  } as const
+  } as const;
 }
 
 /**
