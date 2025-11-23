@@ -250,7 +250,7 @@ export const validateUpload = (req: Request, res: Response, next: NextFunction):
  */
 export const sanitizeInput = (input: string | number | undefined | null): string => {
   if (input === null || input === undefined) return '';
-  
+
   const str = String(input);
 
   // Remove potentially dangerous control characters using char codes
@@ -270,6 +270,78 @@ export const sanitizeInput = (input: string | number | undefined | null): string
   return cleaned
     .replace(/[<>&"'`=]/g, '')
     .trim();
+};
+
+/**
+ * Sanitizes request body to remove sensitive fields before logging
+ * Prevents logging of passwords, tokens, keys, and other sensitive data
+ * @param body - The request body object
+ * @returns Sanitized copy of the body with sensitive fields removed
+ */
+export const sanitizeRequestBody = (body: any): any => {
+  if (!body || typeof body !== 'object') {
+    return body;
+  }
+
+  // Fields that should never be logged
+  const sensitiveFields = [
+    'password',
+    'passwordHash',
+    'token',
+    'accessToken',
+    'refreshToken',
+    'apiKey',
+    'secretKey',
+    'secret',
+    'privateKey',
+    'privateKeyHex',
+    'authorization',
+    'auth',
+    'csrf',
+    'csrfToken',
+    'sessionId',
+    'session',
+    'signature',
+    'pin',
+    'otp',
+    'twoFactor',
+    '2fa',
+    'mnemonic',
+    'seed',
+    'recoveryCode',
+    'recoveryPhrase'
+  ];
+
+  const sanitized: any = {};
+
+  for (const [key, value] of Object.entries(body)) {
+    // Check if this is a sensitive field (case-insensitive)
+    const lowerKey = key.toLowerCase();
+    const isSensitive = sensitiveFields.some(field =>
+      lowerKey.includes(field.toLowerCase())
+    );
+
+    if (isSensitive) {
+      // Don't log sensitive field values
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      // Safe to log these primitive types
+      sanitized[key] = value;
+    } else if (value === null) {
+      sanitized[key] = null;
+    } else if (Array.isArray(value)) {
+      // For arrays, just log the length
+      sanitized[key] = `[Array(${value.length})]`;
+    } else if (typeof value === 'object') {
+      // For nested objects, recursively sanitize
+      sanitized[key] = sanitizeRequestBody(value);
+    } else {
+      // For other types, just indicate presence
+      sanitized[key] = `[${typeof value}]`;
+    }
+  }
+
+  return sanitized;
 };
 
 /**

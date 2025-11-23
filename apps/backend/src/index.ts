@@ -18,6 +18,7 @@ import {
   csrfProtection,
   generateCSRFToken,
   sanitizeInput,
+  sanitizeRequestBody,
 } from './utils/validation';
 import { solanaService } from './services/solana';
 import { nftService } from './services/nft';
@@ -1783,7 +1784,10 @@ app.use((err: any, req: any, res: any, _next: any) => {
   const requestId = req.id;
   const userId = req.user?.id;
 
-  // Log error with full context
+  // Sanitize body to avoid logging sensitive data like passwords or tokens
+  const sanitizedBody = req.body ? sanitizeRequestBody(req.body) : undefined;
+
+  // Log error with context (but not raw request body)
   errorLogger(err, {
     requestId,
     userId,
@@ -1791,7 +1795,8 @@ app.use((err: any, req: any, res: any, _next: any) => {
     method: req.method,
     ip: req.ip,
     userAgent: req.get('User-Agent'),
-    body: req.body,
+    // Only log sanitized body structure, not the actual values
+    bodyKeys: req.body ? Object.keys(req.body) : [],
   });
 
   // Log security-relevant errors (skip 429s for health checks)
