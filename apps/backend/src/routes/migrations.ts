@@ -5,7 +5,7 @@
 
 import { Router, Request, Response } from 'express';
 import { readFileSync } from 'fs';
-import { join, normalize, resolve } from 'path';
+import { join, normalize, resolve, sep } from 'path';
 import jwt from 'jsonwebtoken';
 import { pool } from '../lib/db';
 import { ApiResponse } from '../types';
@@ -20,7 +20,7 @@ function validateMigrationPath(baseDir: string, filePath: string): string {
   const baseDirResolved = resolve(baseDir);
 
   // Ensure the path is within the migrations directory
-  if (!fullPath.startsWith(baseDirResolved + require('path').sep) && fullPath !== baseDirResolved) {
+  if (!fullPath.startsWith(baseDirResolved + sep) && fullPath !== baseDirResolved) {
     throw new Error(`Invalid migration path: path traversal detected`);
   }
 
