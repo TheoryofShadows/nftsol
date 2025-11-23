@@ -76,19 +76,50 @@ const app = express();
 // Session middleware
 app.use(sessionMiddleware);
 
-// Security middleware
+// Security middleware with proper CSP configuration
 app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:', 'ipfs:', 'ipfs.io', 'gateway.pinata.cloud'],
-        connectSrc: ["'self'", 'https:', 'wss:', 'ws:'],
+        styleSrc: ["'self'"],  // Removed 'unsafe-inline' - use external stylesheets or inline nonces
+        scriptSrc: ["'self'"],  // Only allow self for scripts
+        imgSrc: ["'self'", 'data:', 'https://ipfs.io', 'https://gateway.pinata.cloud'],
+        // Only allow secure protocols to specific trusted domains
+        connectSrc: [
+          "'self'",
+          'https://ipfs.io',
+          'https://gateway.pinata.cloud',
+          'https://api.solana.com',
+          'https://rpc.helius.xyz',
+          'wss://ipfs.io',
+          'wss://gateway.pinata.cloud'
+        ],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+        // Restrict frame ancestors to prevent clickjacking
+        frameSrc: ["'none'"],
+        // Prevent plugin injection
+        objectSrc: ["'none'"],
+        // Prevent MIME type sniffing
+        mediaSrc: ["'self'"],
       },
     },
+    // Enable other important security headers
+    crossOriginEmbedderPolicy: true,
+    crossOriginOpenerPolicy: true,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    dnsPrefetchControl: true,
+    frameguard: { action: 'deny' },
+    hidePoweredBy: true,
+    hsts: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true
+    },
+    ieNoOpen: true,
+    noSniff: true,
+    referrerPolicy: { policy: 'no-referrer' },
+    xssFilter: true,
   })
 );
 
