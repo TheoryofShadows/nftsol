@@ -62,6 +62,9 @@ jobs:
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm ci || npm install
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
         continue-on-error: true
 
       - name: Install dependencies - Frontend
@@ -74,6 +77,9 @@ jobs:
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm run lint
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
         continue-on-error: true
 
       - name: Lint Frontend
@@ -86,6 +92,9 @@ jobs:
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm run type-check
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
         continue-on-error: true
 
   # Build and test
@@ -107,6 +116,9 @@ jobs:
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm ci || npm install
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
         continue-on-error: true
 
       - name: Install dependencies - Frontend
@@ -119,6 +131,12 @@ jobs:
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm run build
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
+          SOLANA_RPC_URL: ${{ secrets.SOLANA_RPC_URL }}
+          PLATFORM_SECRET_KEY_BASE58: ${{ secrets.PLATFORM_SECRET_KEY_BASE58 }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         continue-on-error: true
 
       - name: Build Frontend
@@ -160,10 +178,22 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install dependencies - Backend
+        if: ${{ needs.changes.outputs.backend == 'true' }}
+        working-directory: apps/backend
+        run: npm ci || npm install
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
+        continue-on-error: true
+
       - name: Audit Backend
         if: ${{ needs.changes.outputs.backend == 'true' }}
         working-directory: apps/backend
         run: npm audit --production
+        env:
+          CLOUT_MINT: ${{ secrets.CLOUT_MINT }}
+          CLOUT_PROGRAM_ID: ${{ secrets.CLOUT_PROGRAM_ID }}
         continue-on-error: true
 
       - name: Audit Frontend
