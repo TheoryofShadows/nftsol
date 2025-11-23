@@ -18,7 +18,7 @@ const accessLogStream = fs.createWriteStream(
 );
 
 import { sessionMiddleware } from './config/session';
-import authRouter, { validateCSRFToken, setupTestEndpoints } from './routes/auth';
+import authRouter, { validateCSRFToken } from './routes/auth';
 import cookieParser from 'cookie-parser';
 import echoRouter from './routes/echo';
 import nftRouter from './routes/nfts';

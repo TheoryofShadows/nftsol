@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 import { pool } from '../lib/db';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
@@ -37,9 +39,9 @@ router.post('/auth/login', async (req: Request, res: Response) => {
 
     const admin = result.rows[0];
 
-    // Verify password
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
-    if (passwordHash !== admin.passwordHash) {
+    // Verify password using bcrypt
+    const passwordMatch = await bcrypt.compare(password, admin.passwordHash);
+    if (!passwordMatch) {
       return res.status(401).json({
         error: 'Invalid credentials',
       });
@@ -51,11 +53,17 @@ router.post('/auth/login', async (req: Request, res: Response) => {
       });
     }
 
-    // Generate JWT token (in production, use proper JWT library)
-    const token = crypto.randomBytes(32).toString('hex');
-
-    // TODO: Store token in cache with expiration
-    // For now, just return it
+    // Generate JWT token with 24-hour expiry
+    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
+    const token = jwt.sign(
+      {
+        adminId: admin.id,
+        email: admin.email,
+        role: admin.role,
+      },
+      jwtSecret,
+      { expiresIn: '24h' }
+    );
 
     res.json({
       success: true,
@@ -87,8 +95,15 @@ router.post('/accounts', async (req: Request, res: Response) => {
       });
     }
 
+    if (password.length < 12) {
+      return res.status(400).json({
+        error: 'Password must be at least 12 characters long',
+      });
+    }
+
     const adminId = uuidv4();
-    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    const saltRounds = 12;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
 
     await pool.query(
       `
@@ -129,15 +144,29 @@ router.get('/tenants', async (req: Request, res: Response) => {
     const { page = 1, limit = 20, status = 'all' } = req.query;
 
     const offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
-    const statusFilter =
-      status && status !== 'all' ? `AND status = '${status}'` : '';
+    const pageNum = Math.max(1, parseInt(page as string) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
+
+    // Build query safely with parameterized queries
+    const params: any[] = [];
+    let queryCondition = `WHERE t."deletedAt" IS NULL`;
+    let paramIndex = 1;
+
+    if (status && status !== 'all' && ['active', 'suspended', 'inactive'].includes(status as string)) {
+      queryCondition += ` AND t.status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
 
     // Get total count
     const countResult = await pool.query(
-      `SELECT COUNT(*) as total FROM saas_tenants WHERE "deletedAt" IS NULL ${statusFilter}`
+      `SELECT COUNT(*) as total FROM saas_tenants t ${queryCondition}`,
+      params
     );
 
     // Get tenants with stats
+    params.push(limitNum, (pageNum - 1) * limitNum);
+
     const result = await pool.query(
       `
       SELECT
@@ -154,11 +183,11 @@ router.get('/tenants', async (req: Request, res: Response) => {
         (SELECT COUNT(*) FROM saas_tenant_collections WHERE "tenantId" = t.id)::int as collections,
         (SELECT COUNT(*) FROM saas_api_request_logs WHERE "tenantId" = t.id AND "createdAt" > NOW() - INTERVAL '7 days')::int as requests_7d
       FROM saas_tenants t
-      WHERE t."deletedAt" IS NULL ${statusFilter}
+      ${queryCondition}
       ORDER BY t."createdAt" DESC
-      LIMIT $1 OFFSET $2
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
       `,
-      [parseInt(limit as string), offset]
+      params
     );
 
     res.json({
@@ -166,10 +195,10 @@ router.get('/tenants', async (req: Request, res: Response) => {
       data: {
         tenants: result.rows,
         pagination: {
-          page: parseInt(page as string),
-          limit: parseInt(limit as string),
+          page: pageNum,
+          limit: limitNum,
           total: parseInt(countResult.rows[0].total),
-          pages: Math.ceil(parseInt(countResult.rows[0].total) / parseInt(limit as string)),
+          pages: Math.ceil(parseInt(countResult.rows[0].total) / limitNum),
         },
       },
     });
@@ -359,12 +388,24 @@ router.get('/invoices', async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 20, status } = req.query;
 
-    const offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
-    const statusFilter = status ? `AND bi.status = '${status}'` : '';
+    const pageNum = Math.max(1, parseInt(page as string) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
+    const invoiceParams: any[] = [];
+    let invoiceCondition = '1=1';
+    let paramIndex = 1;
+
+    if (status && ['draft', 'sent', 'paid', 'overdue', 'cancelled'].includes(status as string)) {
+      invoiceCondition += ` AND bi.status = $${paramIndex}`;
+      invoiceParams.push(status);
+      paramIndex++;
+    }
 
     const countResult = await pool.query(
-      `SELECT COUNT(*) as total FROM saas_billing_invoices bi WHERE 1=1 ${statusFilter}`
+      `SELECT COUNT(*) as total FROM saas_billing_invoices bi WHERE ${invoiceCondition}`,
+      invoiceParams
     );
+
+    invoiceParams.push(limitNum, (pageNum - 1) * limitNum);
 
     const result = await pool.query(
       `
@@ -379,11 +420,11 @@ router.get('/invoices', async (req: Request, res: Response) => {
         t.slug
       FROM saas_billing_invoices bi
       JOIN saas_tenants t ON bi."tenantId" = t.id
-      WHERE 1=1 ${statusFilter}
+      WHERE ${invoiceCondition}
       ORDER BY bi."createdAt" DESC
-      LIMIT $1 OFFSET $2
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
       `,
-      [parseInt(limit as string), offset]
+      invoiceParams
     );
 
     res.json({
@@ -391,8 +432,8 @@ router.get('/invoices', async (req: Request, res: Response) => {
       data: {
         invoices: result.rows,
         pagination: {
-          page: parseInt(page as string),
-          limit: parseInt(limit as string),
+          page: pageNum,
+          limit: limitNum,
           total: parseInt(countResult.rows[0].total),
         },
       },
