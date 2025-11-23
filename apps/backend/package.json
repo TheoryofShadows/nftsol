@@ -108,6 +108,7 @@
     "zod": "^3.22.0"
   },
   "overrides": {
+    "bigint-buffer": "npm:@trufflesuite/bigint-buffer@1.1.10",
     "minimist": "^1.2.8",
     "semver": "^7.6.0",
     "follow-redirects": "^1.15.6",
@@ -205,8 +206,5 @@
   },
   "peerDependencies": {
     "arweave": "^1.15.7"
-  },
-  "overrides": {
-    "bigint-buffer": "npm:@trufflesuite/bigint-buffer@1.1.10"
   }
 }
