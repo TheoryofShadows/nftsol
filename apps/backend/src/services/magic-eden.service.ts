@@ -115,8 +115,12 @@ class MagicEdenService {
    */
   async getDiamondStatus(wallet: string): Promise<DiamondStatus | null> {
     try {
+      // Failsafe: validate wallet address again
+      if (typeof wallet !== 'string' || !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet)) {
+        throw new Error('Invalid wallet address format');
+      }
       // Try official rewards endpoint
-      const response = await fetch(`${ME_REWARDS_API}/user/${wallet}`, {
+      const response = await fetch(`${ME_REWARDS_API}/user/${encodeURIComponent(wallet)}`, {
         headers: this.getHeaders(),
       });
 

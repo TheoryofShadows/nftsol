@@ -9,6 +9,11 @@ import logger from '../utils/logger';
 
 const router = Router();
 
+// Utility: Validate Solana wallet address (base58, 32-44 chars, excludes 0, O, I, l)
+function isValidWallet(wallet: string): boolean {
+  return typeof wallet === 'string' && /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet);
+}
+
 /**
  * GET /api/magic-eden/diamonds/:wallet
  * Get Diamond status for a wallet
@@ -17,7 +22,7 @@ router.get('/diamonds/:wallet', async (req, res) => {
   try {
     const { wallet } = req.params;
 
-    if (!wallet || wallet.length < 32) {
+    if (!isValidWallet(wallet)) {
       return res.status(400).json({
         success: false,
         error: 'Invalid wallet address',
@@ -48,6 +53,13 @@ router.get('/diamonds/:wallet', async (req, res) => {
 router.get('/quests/:wallet', async (req, res) => {
   try {
     const { wallet } = req.params;
+
+    if (!isValidWallet(wallet)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid wallet address',
+      });
+    }
 
     const meService = getMagicEdenService();
     const quests = await meService.getQuests(wallet);
