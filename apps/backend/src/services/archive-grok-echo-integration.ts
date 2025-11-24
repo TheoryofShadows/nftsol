@@ -10,7 +10,7 @@
  */
 
 import axios from 'axios';
-import { PublicKey, Connection } from '@solana/web3.js';
+import { PublicKey as _PublicKey, Connection as _Connection } from '@solana/web3.js';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -338,7 +338,7 @@ export class InternetArchiveService {
 // ============================================================================
 
 export class GrokArchiveVerificationService {
-  private grokApiKey: string;
+  private _grokApiKey: string;
   private grokUrl = 'https://api.x.ai/v1/chat/completions';
 
   constructor(apiKey: string) {
@@ -545,7 +545,7 @@ export class ArchiveGrokEchoIntegration {
   private archiveService: InternetArchiveService;
   private grokService: GrokArchiveVerificationService;
 
-  constructor(grokApiKey: string) {
+  constructor(_grokApiKey: string) {
     this.archiveService = new InternetArchiveService();
     this.grokService = new GrokArchiveVerificationService(grokApiKey);
   }
@@ -564,7 +564,7 @@ export class ArchiveGrokEchoIntegration {
   async prepareVerifiedMediaForMinting(
     archiveIdentifier: string,
     creatorWallet: string,
-    grokApiKey?: string
+    _grokApiKey?: string
   ): Promise<VerifiedMediaPackage> {
     console.log(`🌍 Preparing ${archiveIdentifier} for minting...`);
 
@@ -620,7 +620,7 @@ export class ArchiveGrokEchoIntegration {
     console.log(`🎪 Creating Echo ledger: ${ledgerId}`);
 
     // Initialize with archive base
-    const baseEcho: EchoLayerWithArchive = {
+    const _baseEcho: EchoLayerWithArchive = {
       layerId: `${ledgerId}-base`,
       echoType: 'video',
       content: verifiedPackage.archiveProof.archiveMetadata.title,
@@ -728,7 +728,7 @@ export class ArchiveGrokEchoIntegration {
   }
 
   // Helper methods
-  private async savePermanentMetadata(data: any): Promise<string> {
+  private async savePermanentMetadata(_data: any): Promise<string> {
     // TODO: Implement Irys/Arweave upload
     // For now, return mock URI
     const mockUri = `ar://${Math.random().toString(36).substring(7)}`;

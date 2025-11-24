@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-import { Express } from 'express-serve-static-core';
+import { Express as _Express } from 'express-serve-static-core';
 import { authLimiter } from '../middleware/rate-limiting';
 
 const router = Router();

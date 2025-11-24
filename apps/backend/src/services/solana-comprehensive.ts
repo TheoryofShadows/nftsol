@@ -18,14 +18,14 @@ import {
   Connection,
   PublicKey,
   Transaction,
-  TransactionMessage,
+  // TransactionMessage,
   VersionedTransaction,
   Commitment,
-  RpcResponseAndContext,
+  // RpcResponseAndContext,
   SignatureStatus,
-  ConfirmedSignatureInfo,
-  ParsedAccountData,
-  AccountInfo,
+  // ConfirmedSignatureInfo,
+  // ParsedAccountData,
+  // AccountInfo,
 } from '@solana/web3.js';
 import axios, { AxiosInstance } from 'axios';
 
@@ -360,7 +360,7 @@ class SolanaComprehensiveService {
    * 7. ENHANCED ERROR DIAGNOSTICS
    * Categorize and provide recovery suggestions for errors
    */
-  private diagnoseError(error: any, context: string): EnhancedErrorDiagnostic {
+  private diagnoseError(error: any, _context: string): EnhancedErrorDiagnostic {
     const errorString = JSON.stringify(error);
     const timestamp = Date.now();
 
@@ -556,7 +556,7 @@ class SolanaComprehensiveService {
    * CLEANUP: Stop all monitors on shutdown
    */
   async shutdown(): Promise<void> {
-    for (const [address, monitor] of this.accountMonitors) {
+    for (const [_address, monitor] of this.accountMonitors) {
       clearInterval(monitor);
     }
     this.accountMonitors.clear();

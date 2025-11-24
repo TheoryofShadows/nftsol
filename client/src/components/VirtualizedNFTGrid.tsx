@@ -13,7 +13,7 @@ interface VirtualizedNFTGridProps {
   isLoading: boolean;
   hasMore: boolean;
   onLoadMore: () => void;
-  itemsPerRow?: number;
+  _itemsPerRow?: number;
 }
 
 const NFTCardPlaceholder = memo(() => (
@@ -46,7 +46,7 @@ export const VirtualizedNFTGrid = memo(({
   isLoading,
   hasMore,
   onLoadMore,
-  itemsPerRow = 4
+  _itemsPerRow = 4
 }: VirtualizedNFTGridProps) => {
   const itemSize = 280; // Item height including text
   const itemWidth = 220;

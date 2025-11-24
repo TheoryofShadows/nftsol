@@ -3,8 +3,8 @@ import {
   PoolClient, 
   QueryResult, 
   QueryResultRow, 
-  PoolConfig, 
-  ClientConfig, 
+  // PoolConfig, 
+  // ClientConfig, 
   QueryConfig, 
   QueryArrayConfig 
 } from 'pg';
@@ -36,9 +36,9 @@ interface DatabaseClient extends Omit<PoolClient, 'query' | 'release'> {
   on(event: 'notice', listener: (notice: any) => void): this;
   on(event: 'notification', listener: (message: any) => void): this;
   on(event: 'end', listener: () => void): this;
-  on(event: string, listener: (...args: any[]) => void): this;
+  on(event: string, _listener: (...args: any[]) => void): this;
   
-  removeListener(event: string, listener: (...args: any[]) => void): this;
+  removeListener(event: string, _listener: (...args: any[]) => void): this;
   removeAllListeners(event?: string | symbol): this;
 }
 
@@ -46,8 +46,8 @@ interface DatabasePool {
   query: QueryFunction;
   connect: () => Promise<ExtendedPoolClient>;
   end: () => Promise<void>;
-  on: (event: string, listener: (...args: any[]) => void) => void;
-  removeListener: (event: string, listener: (...args: any[]) => void) => void;
+  on: (event: string, _listener: (...args: any[]) => void) => void;
+  removeListener: (event: string, _listener: (...args: any[]) => void) => void;
   removeAllListeners: (event?: string | symbol) => void;
   healthCheck: () => Promise<{
     status: 'healthy' | 'degraded' | 'unhealthy';
@@ -75,7 +75,7 @@ type PoolType = DatabasePool & {
 };
 
 // Simple mock database for development
-class MockPool {
+class _MockPool {
   private mockData: Record<string, any[]> = {};
   private connected = false;
 
@@ -107,11 +107,11 @@ class MockPool {
         this.connected = false;
         console.log('[Mock DB] Connection released');
       },
-      on: (event: string, callback: (...args: any[]) => void) => {
+      on: (event: string, _callback: (...args: any[]) => void) => {
         console.log(`[Mock DB] Event: ${event}`);
         return this;
       },
-      once: (event: string, callback: (...args: any[]) => void) => {
+      once: (event: string, _callback: (...args: any[]) => void) => {
         console.log(`[Mock DB] Event (once): ${event}`);
         return this;
       },
@@ -127,17 +127,17 @@ class MockPool {
   }
 
   // Event emitter methods
-  on(event: string, listener: (...args: any[]) => void) {
+  on(event: string, _listener: (...args: any[]) => void) {
     console.log(`[Mock DB] Added listener for ${event}`);
     return this;
   }
 
-  once(event: string, listener: (...args: any[]) => void) {
+  once(event: string, _listener: (...args: any[]) => void) {
     console.log(`[Mock DB] Added one-time listener for ${event}`);
     return this;
   }
 
-  removeListener(event: string, listener: (...args: any[]) => void) {
+  removeListener(event: string, _listener: (...args: any[]) => void) {
     console.log(`[Mock DB] Removed listener for ${event}`);
     return this;
   }
@@ -149,7 +149,7 @@ class MockPool {
 }
 
 // Create a real database pool with optimized Windows-friendly settings
-const createRealPool = () => {
+const _createRealPool = () => {
   return new Pool({
     connectionString: databaseConfig.url,
     max: databaseConfig.pool?.max || 10,
@@ -192,14 +192,14 @@ function wrapPoolClient(client: PoolClient): ExtendedPoolClient {
       }
       
       if (prop === 'on' || prop === 'addListener') {
-        return (event: string, listener: (...args: any[]) => void) => {
+        return (event: string, _listener: (...args: any[]) => void) => {
           target.on(event as any, listener);
           return proxyClient;
         };
       }
       
       if (prop === 'removeListener') {
-        return (event: string, listener: (...args: any[]) => void) => {
+        return (event: string, _listener: (...args: any[]) => void) => {
           target.removeListener(event as any, listener);
           return proxyClient;
         };
@@ -287,11 +287,11 @@ async function getPool(): Promise<DatabasePool> {
           poolInstance = null;
         }
       },
-      on: (event: string, listener: (...args: any[]) => void) => {
+      on: (event: string, _listener: (...args: any[]) => void) => {
         pgPool.on(event as any, listener);
         return poolInstance!;
       },
-      removeListener: (event: string, listener: (...args: any[]) => void) => {
+      removeListener: (event: string, _listener: (...args: any[]) => void) => {
         pgPool.removeListener(event as any, listener);
         return poolInstance!;
       },
@@ -385,11 +385,11 @@ async function getPool(): Promise<DatabasePool> {
 // Public API
 export const pool: DatabasePool = {
   // Event emitter methods
-  on: (event: string, listener: (...args: any[]) => void) => {
+  on: (event: string, _listener: (...args: any[]) => void) => {
     getPool().then(p => p.on(event, listener));
     return pool;
   },
-  removeListener: (event: string, listener: (...args: any[]) => void) => {
+  removeListener: (event: string, _listener: (...args: any[]) => void) => {
     getPool().then(p => p.removeListener(event, listener));
     return pool;
   },
@@ -582,7 +582,7 @@ pool.on('error', (err: Error) => {
  * @param callback - Function that receives a client and returns a Promise
  */
 export async function withClient<T>(
-  callback: (client: PoolClient) => Promise<T>
+  _callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const client = await pool.connect();
   let isReleased = false;

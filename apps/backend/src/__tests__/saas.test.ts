@@ -18,7 +18,7 @@ const client: AxiosInstance = axios.create({
 // Test data
 let testTenantId: string;
 let testApiKey: string;
-let testApiKeyId: string;
+let _testApiKeyId: string;
 let authenticatedClient: AxiosInstance;
 
 // ============================================
@@ -527,7 +527,7 @@ async function testErrorHandling() {
     });
 
     // Test 3: Duplicate slug
-    const dup1 = await client.post('/saas/tenants', {
+    const _dup1 = await client.post('/saas/tenants', {
       name: 'Unique Name',
       slug: `unique-slug-${Date.now()}`,
       email: `unique-${Date.now()}@test.com`,

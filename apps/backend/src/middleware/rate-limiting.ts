@@ -4,10 +4,10 @@
  */
 
 import rateLimit from 'express-rate-limit';
-import { Request, Response } from 'express';
+import { Request, Response as _Response } from 'express';
 
 // Store for in-memory rate limiting (can be replaced with Redis for distributed systems)
-const store = new Map<string, { count: number; resetTime: number }>();
+const _store = new Map<string, { count: number; resetTime: number }>();
 
 // Helper to get client IP (considers X-Forwarded-For header for proxies)
 export function getClientIp(req: Request): string {

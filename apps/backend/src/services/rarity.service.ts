@@ -45,7 +45,7 @@ export class RarityService {
     mint: string,
     collectionId: string,
     traits: Record<string, string | number>,
-    metadata?: any
+    _metadata?: any
   ): NFTRarity {
     const stats = this.collectionStats.get(collectionId);
     if (!stats) {

@@ -15,7 +15,7 @@ import * as bs58 from 'bs58';
  */
 export function isValidSolanaAddress(address: string): boolean {
   try {
-    const publicKey = new PublicKey(address);
+    // const publicKey = new PublicKey(address);
     // Verify the address is exactly 32 bytes when decoded
     const decoded = bs58.decode(address);
     return decoded.length === 32;

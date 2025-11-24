@@ -3,7 +3,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { cache, cacheKeys } from '../utils/cache';
+import { cache as _cache, cacheKeys as _cacheKeys } from '../utils/cache';
 import crypto from 'crypto';
 
 interface CachedResponse {

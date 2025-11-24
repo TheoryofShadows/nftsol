@@ -19,7 +19,7 @@ export default function ActivityFeed() {
   }
 
   const activities: Activity[] = useMemo(() => {
-    const now = mountTimeRef.current || Date.now();
+    const now = mountTimeRef.current || 0;
     return [
       {
         id: '1',

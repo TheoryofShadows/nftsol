@@ -6,7 +6,7 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { pool } from '../lib/db';
-import { heliusService } from './helius';
+import { heliusService as _heliusService } from './helius';
 
 interface NFTListing {
   mintAddress: string;

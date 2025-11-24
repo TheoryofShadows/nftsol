@@ -147,12 +147,12 @@ router.get('/trending', (req, res) => {
       }
     });
 
-    const topNFTs = Array.from(trendingNFTs.entries())
+    const _topNFTs = Array.from(trendingNFTs.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([mint, count]) => ({ mint, activityCount: count }));
 
-    const topCollections = Array.from(trendingCollections.entries())
+    const _topCollections = Array.from(trendingCollections.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)
       .map(([id, count]) => ({ id, activityCount: count }));

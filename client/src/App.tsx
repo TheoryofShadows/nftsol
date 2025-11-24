@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { getRpcUrl, getWalletAdapters } from './config/wallet';
-import { clusterApiUrl } from '@solana/web3.js';
 import { AppProvider } from './context/AppContext';
 import { OnboardingProvider } from './context/OnboardingContext';
 import { NotificationProvider } from './components/NotificationSystem';
@@ -119,7 +118,7 @@ function AppContent() {
     // Initialize scroll reveal animations
     const cleanup = initScrollReveal();
     return cleanup;
-  }, []);
+  }, [solanaCluster]);
 
   // Load NFTs on mount
   useEffect(() => {

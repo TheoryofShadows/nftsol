@@ -2,11 +2,11 @@
  * Optimized NFT service with caching and query optimization
  */
 
-import { solanaService } from './solana';
+import { solanaService as _solanaService } from './solana';
 import { nftService } from './nft';
 import { cache, cached, cacheKeys } from '../utils/cache';
 import { withRetry, requestDeduplicator } from '../utils/retry';
-import { MintRequest, MintResponse, NFTMetadata } from '../types';
+import { MintRequest, MintResponse, NFTMetadata as _NFTMetadata } from '../types';
 import { pool } from '../lib/db';
 
 class OptimizedNFTService {

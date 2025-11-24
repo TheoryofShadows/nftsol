@@ -21,7 +21,7 @@ import { getPlatformKeypair } from './src/lib/platformKeypair';
 import { getWalletBalance, connection } from './src/lib/solana';
 import { mintNFT } from './src/lib/solana';
 
-const PLATFORM_WALLET = '3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o';
+const _PLATFORM_WALLET = '3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o';
 const MINIMUM_BALANCE = 0.02;
 const CHECK_INTERVAL = 10000; // 10 seconds
 const MAX_CHECKS = 60; // Check for up to 10 minutes (60 * 10s)

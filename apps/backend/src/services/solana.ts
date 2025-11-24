@@ -2,13 +2,13 @@ import {
   Connection,
   PublicKey,
   Transaction,
-  SystemProgram,
+  // SystemProgram,
   LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
 import { getRewardsVaultAddress } from '../utils/clout-vault';
 import logger from '../utils/logger';
-import { ApiResponse, MintResponse } from '../types';
+import { ApiResponse as _ApiResponse, MintResponse as _MintResponse } from '../types';
 
 class SolanaService {
   private connection: Connection;

@@ -69,7 +69,7 @@ export const TensorOrderbook: React.FC<TensorOrderbookProps> = ({
       } else {
         setError(data.error || 'Failed to fetch orderbook');
       }
-    } catch (err) {
+    } catch {
       setError('Network error - please try again');
     } finally {
       setLoading(false);

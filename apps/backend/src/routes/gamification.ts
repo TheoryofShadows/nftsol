@@ -11,7 +11,7 @@ const router = Router();
  */
 router.post('/init', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
     const username = req.user?.username || userId;
 
     const gamificationService = getGamificationService();
@@ -46,7 +46,7 @@ router.get('/achievements', (req, res) => {
  */
 router.get('/user-achievements', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
 
     const gamificationService = getGamificationService();
     const userAchievements = gamificationService.getUserAchievements(userId);
@@ -76,7 +76,7 @@ router.get('/user-achievements', verifyAuth, (req, res) => {
  */
 router.post('/track-activity', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
     const { action, stats } = req.body;
 
     if (!action || !stats) {
@@ -153,7 +153,7 @@ router.get('/leaderboard', (req, res) => {
  */
 router.get('/user-rank', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
 
     const gamificationService = getGamificationService();
     const rank = gamificationService.getUserRank(userId);
@@ -175,8 +175,8 @@ router.get('/user-rank', verifyAuth, (req, res) => {
  */
 router.get('/leaderboard/friends', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
-    const { limit = 20 } = req.query;
+    const _userId = req.user?.id;
+    const { limit: _limit2 = 20 } = req.query;
 
     // TODO: Implement friend list check
     // For now, return empty
@@ -196,7 +196,7 @@ router.get('/leaderboard/friends', verifyAuth, (req, res) => {
  */
 router.post('/daily-login', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
 
     const gamificationService = getGamificationService();
     gamificationService.updateStreak(userId);

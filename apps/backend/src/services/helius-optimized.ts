@@ -8,7 +8,7 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import { PublicKey, Connection, Commitment } from '@solana/web3.js';
+import { PublicKey, Connection, Commitment as _Commitment } from '@solana/web3.js';
 
 interface HeliusConfig {
   apiKey: string;

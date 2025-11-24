@@ -11,8 +11,8 @@ import {
   SystemProgram,
   LAMPORTS_PER_SOL,
   TransactionInstruction,
-  Keypair,
-  sendAndConfirmTransaction,
+  // Keypair,
+  // sendAndConfirmTransaction,
 } from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
@@ -21,7 +21,7 @@ import {
   getAccount,
   createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
-import { solanaConfig, programConfig } from '../config';
+import { solanaConfig, programConfig as _programConfig } from '../config';
 import { pool } from '../lib/db';
 
 interface CreateBuyTransactionParams {

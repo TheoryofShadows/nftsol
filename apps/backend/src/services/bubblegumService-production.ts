@@ -1,13 +1,13 @@
-import { Connection, PublicKey as Web3PublicKey, Keypair } from '@solana/web3.js';
-import { createUmi, publicKey } from '@metaplex-foundation/umi';
+import { Connection, PublicKey as _Web3PublicKey, Keypair } from '@solana/web3.js';
+import { createUmi, publicKey as _publicKey } from '@metaplex-foundation/umi';
 import { createTree, mintV1, mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
-import { publicKey as umiPublicKey } from '@metaplex-foundation/umi';
-import { publicKey as umiToWeb3 } from '@metaplex-foundation/umi';
+import { publicKey as _umiPublicKey } from '@metaplex-foundation/umi';
+import { publicKey as _umiToWeb3 } from '@metaplex-foundation/umi';
 import {
   createSignerFromKeypair,
   signerIdentity,
   generateSigner,
-  percentAmount,
+  percentAmount as _percentAmount,
 } from '@metaplex-foundation/umi';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { uploadMetadata } from '../utils/irysUpload';
@@ -93,7 +93,7 @@ export class BubblegumService {
     owner: string;
   }) {
     try {
-      const { treeAddress, metadata, owner } = opts;
+      const { treeAddress: _treeAddress, metadata, owner: _owner } = opts;
 
       // Upload metadata to Irys/Arweave using latest Irys SDK
       let metadataUri: string;

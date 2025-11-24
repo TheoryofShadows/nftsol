@@ -5,14 +5,14 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey as _PublicKey } from '@solana/web3.js';
 import axios from 'axios';
-import crypto from 'crypto';
+import _crypto from 'crypto';
 import {
   grokVerify,
   generateTruthHash,
   getVerificationTeaser,
-  batchGrokVerify,
+  batchGrokVerify as _batchGrokVerify,
 } from '../utils/grokpedia-free';
 import expressRateLimit from 'express-rate-limit';
 

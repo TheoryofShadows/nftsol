@@ -1,18 +1,18 @@
 import { Request, Response, NextFunction, RequestHandler, ErrorRequestHandler } from 'express';
-import rateLimit from 'express-rate-limit';
+import _rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors, { CorsOptions } from 'cors';
 import { RateLimiterRedis } from 'rate-limiter-flexible';
 import Redis from 'ioredis';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ev = require('express-validator');
-const { validationResult, body, param, query, ValidationChain } = ev;
+const { validationResult: _validationResult, body: _body, param: _param, query: _query, ValidationChain: _ValidationChain } = ev;
 import env from '../../config';
-import { SecurityConfig, RedisConfig } from '../../types/config';
-import logger from '../../utils/logger';
+import { SecurityConfig as _SecurityConfig, RedisConfig } from '../../types/config';
+import _logger from '../../utils/logger';
 
 // Rate limiting tiers (requests per 15 minutes)
-const RATE_LIMIT_TIERS = {
+const _RATE_LIMIT_TIERS = {
   public: {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
@@ -175,7 +175,7 @@ export const validateRequest = (schema: any) => {
 };
 
 // Request size limiter
-export const requestSizeLimiter = (limit = '10mb') => {
+export const requestSizeLimiter = (_limit = '10mb') => {
   return (req: Request, res: Response, next: NextFunction) => {
     const contentLength = req.headers['content-length'];
     if (contentLength && parseInt(contentLength, 10) > 10 * 1024 * 1024) {

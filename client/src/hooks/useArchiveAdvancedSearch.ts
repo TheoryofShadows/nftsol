@@ -53,7 +53,7 @@ export interface UseArchiveAdvancedSearchReturn {
 export function useArchiveAdvancedSearch(
   options: UseArchiveAdvancedSearchOptions = {}
 ): UseArchiveAdvancedSearchReturn {
-  const { autoFetch = false, debounceSuggestions = 300 } = options;
+  const { autoFetch: _autoFetch = false, debounceSuggestions: _debounceSuggestions = 300 } = options;
 
   // Search results
   const [results, setResults] = useState<SearchResult[]>([]);

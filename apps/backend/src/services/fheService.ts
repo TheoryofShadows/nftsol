@@ -191,7 +191,7 @@ export class FHEService {
   private mockCompute(
     encryptedData: EncryptedData,
     operation: string,
-    params?: any
+    _params?: any
   ): ComputeResult {
     console.log(`🔐 FHE Mock Compute: ${operation}`);
 

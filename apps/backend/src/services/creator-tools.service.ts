@@ -319,7 +319,7 @@ export class CreatorToolsService {
     let successful = 0;
     let failed = 0;
 
-    nfts.forEach(({ mint, metadata }) => {
+    nfts.forEach(({ mint, metadata: _metadata }) => {
       try {
         // TODO: Update on-chain metadata via Metaplex
         logger.debug(`Updated metadata for NFT: ${mint}`);

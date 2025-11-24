@@ -2,7 +2,7 @@ import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 import { databaseConfig } from '../config/index';
 
 // Types
-type QueryFunction = <T extends QueryResultRow = any>(
+type _QueryFunction = <T extends QueryResultRow = any>(
   text: string,
   params?: any[]
 ) => Promise<QueryResult<T>>;

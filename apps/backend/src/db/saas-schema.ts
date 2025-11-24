@@ -1,6 +1,6 @@
 import {
   pgTable,
-  serial,
+  serial as _serial,
   text,
   timestamp,
   boolean,

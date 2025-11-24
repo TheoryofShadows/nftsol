@@ -11,12 +11,12 @@ import {
   updateTenantPlan,
   suspendTenant,
   deleteTenant,
-  recordApiCall,
+  recordApiCall as _recordApiCall,
 } from '../services/tenant.service';
 import {
   tenantMiddleware,
-  requirePermission,
-  enforceRateLimit,
+  requirePermission as _requirePermission,
+  enforceRateLimit as _enforceRateLimit,
 } from '../middleware/tenant';
 
 const router = express.Router();

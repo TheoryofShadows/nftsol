@@ -1,4 +1,4 @@
-import { pool, query, withTransaction, healthCheck, DatabaseClient } from '../lib/database';
+import { pool, query, withTransaction, healthCheck, DatabaseClient as _DatabaseClient } from '../lib/database';
 import { mockDatabase } from '../__mocks__/pg';
 
 // Mock the database before importing the actual database module
@@ -8,7 +8,7 @@ describe('Database', () => {
   beforeEach(() => {
     mockDatabase.resetMocks();
     // Setup default mock implementations
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
       release: jest.fn(),
       on: jest.fn()
@@ -18,7 +18,7 @@ describe('Database', () => {
 
   // Test database connection
   it('should connect to the database', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn().mockResolvedValue({ rows: [{ now: new Date() }], rowCount: 1 }),
       release: jest.fn(),
       on: jest.fn()
@@ -40,7 +40,7 @@ describe('Database', () => {
 
   // Test basic query
   it('should execute a simple query', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn().mockResolvedValue({ rows: [{ message: 'Hello, World!' }], rowCount: 1 }),
       release: jest.fn(),
       on: jest.fn()
@@ -55,7 +55,7 @@ describe('Database', () => {
 
   // Test transaction
   it('should handle transactions', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn()
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 1, value: 'test-value' }], rowCount: 1 }) // INSERT
@@ -82,7 +82,7 @@ describe('Database', () => {
 
   // Test transaction rollback on error
   it('should rollback transactions on error', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn()
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // INSERT
@@ -107,7 +107,7 @@ describe('Database', () => {
 
   // Test health check
   it('should return healthy status', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn().mockResolvedValue({ rows: [{ now: new Date() }], rowCount: 1 }),
       release: jest.fn(),
       on: jest.fn()
@@ -158,7 +158,7 @@ describe('Database', () => {
     });
     
     // Run concurrent queries using pool.connect()
-    const promises = testValues.map(async (value, index) => {
+    const promises = testValues.map(async (value, _index) => {
       const client = await pool.connect();
       try {
         const result = await client.query('SELECT $1::int as num', [value]);
@@ -175,7 +175,7 @@ describe('Database', () => {
     expect(results).toEqual(expectedResults);
     
     // Verify each client was used and released
-    mockClients.forEach((client, index) => {
+    mockClients.forEach((client, _index) => {
       expect(client.query).toHaveBeenCalledWith('SELECT $1::int as num', [testValues[index]]);
       expect(client.release).toHaveBeenCalled();
     });

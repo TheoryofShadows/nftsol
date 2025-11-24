@@ -10,9 +10,9 @@
  * - Account compression support
  */
 
-import { Connection, PublicKey, VersionedTransaction, Transaction } from '@solana/web3.js';
+import { Connection, VersionedTransaction, Transaction } from '@solana/web3.js';
 import axios, { AxiosInstance } from 'axios';
-import { solanaConfig } from '../config';
+import { solanaConfig as _solanaConfig } from '../config';
 
 interface HeliusConfig {
   apiKey: string;

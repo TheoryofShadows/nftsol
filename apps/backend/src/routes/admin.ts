@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { pool } from '../lib/db';
-import crypto from 'crypto';
+import _crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -146,7 +146,7 @@ router.get('/tenants', async (req: Request, res: Response) => {
   try {
     const { page = 1, limit = 20, status = 'all' } = req.query;
 
-    const offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
+    const _offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
     const pageNum = Math.max(1, parseInt(page as string) || 1);
     const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
 
@@ -496,7 +496,7 @@ router.get('/support-tickets', async (req: Request, res: Response) => {
   try {
     const { status = 'open', page = 1, limit = 20 } = req.query;
 
-    const offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
+    const _offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
 
     const result = await pool.query(
       `

@@ -48,7 +48,7 @@ export interface LeaderboardEntry {
 }
 
 // In-memory cache for leaderboard (refreshed every 5 minutes)
-let leaderboardCache: {
+const leaderboardCache: {
   daily: LeaderboardEntry[];
   weekly: LeaderboardEntry[];
   monthly: LeaderboardEntry[];

@@ -90,7 +90,7 @@ class ApiService {
 
       return data;
     } catch (error) {
-      const duration = performance.now() - startTime;
+      const _duration = performance.now() - startTime;
 
       // Treat aborted requests as benign cancellations
       if (error instanceof DOMException && error.name === 'AbortError') {

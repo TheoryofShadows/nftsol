@@ -9,12 +9,12 @@
 
 import {
   Connection,
-  PublicKey,
+  // PublicKey,
   Transaction,
   VersionedTransaction,
-  TransactionMessage,
+  // TransactionMessage,
   Commitment,
-  RpcResponseAndContext,
+  // RpcResponseAndContext,
   SignatureStatus,
 } from '@solana/web3.js';
 
@@ -145,8 +145,7 @@ class SolanaTransactionHandler {
 
     while (attempts < this.confirmationAttempts) {
       try {
-        const { blockhash, lastValidBlockHeight } =
-          await this.getLatestBlockhash();
+        await this.getLatestBlockhash();
 
         const status = await this.connection.getSignatureStatus(signature);
 

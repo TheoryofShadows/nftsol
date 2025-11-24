@@ -1,7 +1,7 @@
 // src/routes/withdrawals.ts
 import express from 'express';
 import { withClient } from '../lib/db';
-import { getWalletBalance, accountExists } from '../lib/solana';
+import { getWalletBalance as _getWalletBalance, accountExists } from '../lib/solana';
 import { ApiResponse } from '../types';
 import { isValidSolanaAddress } from '../utils/validation';
 

@@ -30,7 +30,10 @@
       "WebFetch(domain:nftsol.app)",
       "WebFetch(domain:nftsol.onrender.com)",
       "WebFetch(domain:github.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run:*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

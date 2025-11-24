@@ -3,7 +3,7 @@
  * Automatically switches between RPC providers for optimal performance
  */
 
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey as _PublicKey } from '@solana/web3.js';
 
 interface RPCProvider {
   url: string;

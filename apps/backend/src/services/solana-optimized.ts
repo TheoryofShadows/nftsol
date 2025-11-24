@@ -15,14 +15,14 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   Commitment,
-  SendTransactionError,
+  // SendTransactionError,
   TransactionError,
   VersionedTransaction,
   SendOptions,
 } from '@solana/web3.js';
 import { solanaConfig, programConfig } from '../config';
 import { getRewardsVaultAddress } from '../utils/clout-vault';
-import { cache, cached, cacheKeys } from '../utils/cache';
+import { cache as _cache, cached, cacheKeys } from '../utils/cache';
 import { withRetry, requestDeduplicator } from '../utils/retry';
 import logger from '../utils/logger';
 

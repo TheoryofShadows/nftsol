@@ -70,7 +70,7 @@ export const AlertSettings: React.FC<AlertSettingsProps> = ({
       if (data.success && data.data) {
         setSubscriptions(data.data);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load subscriptions');
     } finally {
       setLoading(false);
@@ -114,7 +114,7 @@ export const AlertSettings: React.FC<AlertSettingsProps> = ({
       } else {
         setError(data.error || 'Failed to create alert');
       }
-    } catch (err) {
+    } catch {
       setError('Network error - please try again');
     } finally {
       setSaving(false);

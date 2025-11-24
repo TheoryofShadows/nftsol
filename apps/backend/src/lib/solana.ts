@@ -39,7 +39,7 @@ export async function mintNFT(
   toAddress: string,
   metadataUri: string,
   name: string,
-  description?: string
+  _description?: string
 ) {
   try {
     // Check platform wallet balance BEFORE attempting mint

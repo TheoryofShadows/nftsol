@@ -8,7 +8,7 @@
  * - Response caching
  */
 
-import { Connection, Commitment } from '@solana/web3.js';
+import { Connection, Commitment as _Commitment } from '@solana/web3.js';
 
 interface RPCProvider {
   name: string;

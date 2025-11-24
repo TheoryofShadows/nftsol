@@ -58,7 +58,7 @@ export async function sendSOL(
   to: PublicKey,
   amountLamports: number
 ): Promise<string> {
-  const connection = await optimizedSolanaService.getConnection();
+  // const connection = await optimizedSolanaService.getConnection();
 
   const transaction = new Transaction();
   
@@ -131,11 +131,11 @@ export async function batchSendTransactions(
  * Create token transfer instruction (SPL Token)
  */
 export function createTokenTransferInstruction(
-  source: PublicKey,
-  destination: PublicKey,
-  amount: number,
-  mint: PublicKey,
-  owner: PublicKey
+  _source: PublicKey,
+  _destination: PublicKey,
+  _amount: number,
+  _mint: PublicKey,
+  _owner: PublicKey
 ): TransactionInstruction {
   // This is a placeholder - implement actual SPL token transfer
   // You would use @solana/spl-token library
@@ -150,7 +150,7 @@ export async function getTransactionStatus(signature: string): Promise<{
   finalized: boolean;
   err: any;
 }> {
-  const connection = await optimizedSolanaService.getConnection();
+  // const connection = await optimizedSolanaService.getConnection();
   
   const status = await connection.getSignatureStatus(signature);
 

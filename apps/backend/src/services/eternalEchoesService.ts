@@ -10,7 +10,7 @@
  *              This service manages the complete echo lifecycle from creation to minting.
  */
 
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey as _PublicKey } from '@solana/web3.js';
 import { BubblegumService, CompressedNFTMetadata } from './bubblegumService-production';
 import { CloutTokenService } from './cloutToken';
 
@@ -40,7 +40,7 @@ interface NftTable {
   attributes?: Array<{ trait_type: string; value: string }>;
 }
 
-type QueryResult<T> = T[];
+type _QueryResult<T> = T[];
 
 // Enhanced mock database client that matches Drizzle ORM interface with proper typing
 interface QueryBuilder<T> {
@@ -52,7 +52,7 @@ interface QueryBuilder<T> {
   execute(): Promise<T[]>;
 }
 
-const createMockQueryBuilder = <T extends Record<string, any>>(data: T[] = []): QueryBuilder<T> => {
+const _createMockQueryBuilder = <T extends Record<string, any>>(data: T[] = []): QueryBuilder<T> => {
   return {
     from() {
       return this;
@@ -161,7 +161,7 @@ const db = {
 };
 
 // Table references with proper typing
-const echoTable = {
+const _echoTable = {
   id: 'id',
   creator: 'creator',
   contributor: 'contributor',
@@ -171,7 +171,7 @@ const echoTable = {
   mintAddress: 'mintAddress'
 } as const;
 
-const nfts = {
+const _nfts = {
   id: 'id',
   mintAddress: 'mintAddress',
   owner: 'owner',
@@ -186,7 +186,7 @@ const nfts = {
 } as const;
 
 // Simple equality helper
-const eq = (column: string, value: any) => (item: any) => item[column] === value;
+const _eq = (column: string, value: any) => (item: any) => item[column] === value;
 
 export class EternalEchoesService {
   private bubblegumService: BubblegumService;

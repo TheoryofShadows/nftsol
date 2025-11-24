@@ -12,7 +12,7 @@
  * - Trust score calculation
  */
 
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError as _AxiosError } from 'axios';
 
 const GROK_API_BASE = 'https://api.x.ai/v1';
 const GROK_MODEL = 'grok-beta';

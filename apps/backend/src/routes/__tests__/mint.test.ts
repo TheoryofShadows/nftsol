@@ -6,7 +6,7 @@
 import request from 'supertest';
 import express from 'express';
 import mintRoutes from '../mint';
-import { validateWallet, sanitizeInput } from '../../utils/validation';
+import { validateWallet as _validateWallet, sanitizeInput } from '../../utils/validation';
 
 // Create test app with routes
 const app = express();
@@ -18,7 +18,7 @@ describe('🚀 NFT Minting Tests', () => {
 
   describe('GET /api/mint/estimate', () => {
     it('should return minting cost estimate', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -35,7 +35,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should have solCost and usdCost as numbers', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -48,7 +48,7 @@ describe('🚀 NFT Minting Tests', () => {
 
   describe('GET /api/mint/compare', () => {
     it('should return cost comparison data', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/compare')
         .expect(200);
 
@@ -67,7 +67,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should show massive savings versus OpenSea', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/compare')
         .expect(200);
 
@@ -83,7 +83,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should have proper cost data format', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/compare')
         .expect(200);
 
@@ -110,7 +110,7 @@ describe('🚀 NFT Minting Tests', () => {
     };
 
     it('should validate required fields', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           toAddress: validMintRequest.toAddress,
@@ -126,7 +126,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should require toAddress', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           name: 'Test',
@@ -139,7 +139,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should require name', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           toAddress: validMintRequest.toAddress,
@@ -152,7 +152,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should require imageUrl', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           toAddress: validMintRequest.toAddress,
@@ -166,7 +166,7 @@ describe('🚀 NFT Minting Tests', () => {
 
     it('should handle valid mint request structure', async () => {
       // Note: This will fail at the blockchain level, but we're testing the request structure
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send(validMintRequest);
 
@@ -200,7 +200,7 @@ describe('🚀 NFT Minting Tests', () => {
 
   describe('💡 Minting Service Features', () => {
     it('should offer ultra-cheap compressed NFTs (cNFTs)', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/compare')
         .expect(200);
 
@@ -210,7 +210,7 @@ describe('🚀 NFT Minting Tests', () => {
 
     it('should support metadata upload', async () => {
       // The service uploads to Arweave via Irys
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -220,7 +220,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should provide real-time SOL pricing', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -244,7 +244,7 @@ describe('🚀 NFT Minting Tests', () => {
         imageUrl: 'https://example.com/image.png',
       };
 
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send(maliciousInput);
 
@@ -254,7 +254,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should validate wallet address format', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           toAddress: 'invalid-address',
@@ -268,7 +268,7 @@ describe('🚀 NFT Minting Tests', () => {
     });
 
     it('should return consistent error format', async () => {
-      const response = await request(app)
+      const _response = await request(app)
         .post('/api/mint/ultra-cheap')
         .send({
           name: 'Test',
@@ -286,7 +286,7 @@ describe('🚀 NFT Minting Tests', () => {
     it('cost estimate should respond quickly', async () => {
       const start = Date.now();
 
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -299,7 +299,7 @@ describe('🚀 NFT Minting Tests', () => {
     it('comparison data should respond quickly', async () => {
       const start = Date.now();
 
-      const response = await request(app)
+      const _response = await request(app)
         .get('/api/mint/compare')
         .expect(200);
 

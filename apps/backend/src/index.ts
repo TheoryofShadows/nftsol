@@ -49,11 +49,13 @@ import archiveGrokEchoRouter from './routes/archive-grok-echo';
 import performanceMetricsRouter from './routes/performance-metrics';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
+// Rate limiters available for future route-specific limiting
+// Prefixed with underscore to indicate intentionally unused but available
 import {
-  authLimiter,
-  sensitiveOpLimiter,
-  dataLimiter,
-  rateLimiters
+  authLimiter as _authLimiter,
+  sensitiveOpLimiter as _sensitiveOpLimiter,
+  dataLimiter as _dataLimiter,
+  rateLimiters as _rateLimiters
 } from './middleware/rate-limiting';
 
 // Sprint 1: New feature imports
@@ -71,7 +73,7 @@ if (heliusApiKey) {
 }
 
 // Initialize RPC failover for reliability
-const rpcFailover = createSolanaRPCFailover(heliusApiKey);
+createSolanaRPCFailover(heliusApiKey);
 console.log('✓ RPC failover service initialized');
 
 // PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
@@ -264,7 +266,7 @@ app.use((req: any, res: any, next: any) => {
 });
 
 // CSRF token endpoint
-app.get('/api/csrf-token', (req, res, next) => {
+app.get('/api/csrf-token', (req, res, _next) => {
   generateCSRFToken(req, res, () => {
     // The token is now available in res.locals.csrfToken
     res.json({ csrfToken: res.locals.csrfToken || '' });
@@ -1799,7 +1801,10 @@ app.use((err: any, req: any, res: any, _next: any) => {
   const userId = req.user?.id;
 
   // Sanitize body to avoid logging sensitive data like passwords or tokens
-  const sanitizedBody = req.body ? sanitizeRequestBody(req.body) : undefined;
+  // Note: sanitizedBody prepared but not logged to avoid exposing any data in logs
+  if (req.body) {
+    sanitizeRequestBody(req.body);
+  }
 
   // Log error with context (but not raw request body)
   errorLogger(err, {

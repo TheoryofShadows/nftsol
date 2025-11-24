@@ -4,7 +4,7 @@
  */
 
 import { Router, Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
-import { Multer } from 'multer';
+import { Multer as _Multer } from 'multer';
 import multer from 'multer';
 import { uploadToPinata } from '../utils/pinataUpload';
 import { uploadMetadataToIrys } from '../utils/irysUpload';
@@ -181,7 +181,7 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
 });
 
 // Define custom error interface for Multer errors
-interface MulterError extends Error {
+interface _MulterError extends Error {
   code?: string;
   field?: string;
   storageErrors?: Error[];

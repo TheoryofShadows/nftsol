@@ -84,7 +84,7 @@ export class MetaplexMintingService {
    * Mint a new NFT using Metaplex standard
    * Returns mint address and metadata URI
    */
-  async mintNFT(params: MetaplexMintParams): Promise<MetaplexMintResult> {
+  async mintNFT(_params: MetaplexMintParams): Promise<MetaplexMintResult> {
     try {
       if (!this.platformSigner) {
         return {
@@ -160,7 +160,7 @@ export class MetaplexMintingService {
   /**
    * Verify an NFT follows Metaplex standard
    */
-  async verifyMetaplexStandard(mintAddress: string): Promise<{
+  async verifyMetaplexStandard(_mintAddress: string): Promise<{
     success: boolean;
     isMetaplex?: boolean;
     metadata?: any;
@@ -185,7 +185,7 @@ export class MetaplexMintingService {
   /**
    * Update NFT metadata (if mutable)
    */
-  async updateMetadata(params: {
+  async updateMetadata(_params: {
     mintAddress: string;
     newName?: string;
     newUri?: string;

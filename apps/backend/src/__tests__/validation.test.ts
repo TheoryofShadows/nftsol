@@ -47,7 +47,7 @@ jest.mock('../config', () => {
 });
 
 // Import the mocked config after setting up the mock
-import { appConfig } from '../config';
+import { appConfig as _appConfig } from '../config';
 
 // Import the functions to test
 import * as validationModule from '../utils/validation';
@@ -62,7 +62,7 @@ import {
   ValidationError
 } from '../utils/validation';
 
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction as _NextFunction } from 'express';
 
 describe('File Validation', () => {
 
@@ -146,7 +146,7 @@ describe('File Validation', () => {
 describe('Solana Address Validation', () => {
   // Using a valid Solana testnet address (44 characters, base58)
   const validAddress = '8K4oZ2xqQ3pP8vJ9LmN1Xy2BvC3D4E5F6G7H8J9K0L1M2N3P4Q5R6S7T8U9V0W';
-  const invalidAddress = 'invalid-address';
+  const _invalidAddress = 'invalid-address';
 
   describe('isValidSolanaAddress', () => {
     it('should validate a valid Solana address', () => {

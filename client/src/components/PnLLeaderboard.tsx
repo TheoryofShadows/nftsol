@@ -66,7 +66,7 @@ export const PnLLeaderboard: React.FC<PnLLeaderboardProps> = ({
       } else {
         setError(data.error || 'Failed to fetch leaderboard');
       }
-    } catch (err) {
+    } catch {
       setError('Network error - please try again');
     } finally {
       setLoading(false);

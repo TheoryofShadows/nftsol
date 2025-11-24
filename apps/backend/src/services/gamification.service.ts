@@ -38,7 +38,7 @@ export interface UserAchievements {
 export interface Leaderboard {
   rank: number;
   userId: string;
-  username: string;
+  _username: string;
   totalPoints: number;
   level: number;
   achievementCount: number;
@@ -180,7 +180,7 @@ export class GamificationService {
   /**
    * Initialize user achievements
    */
-  public initializeUser(userId: string, username: string): UserAchievements {
+  public initializeUser(userId: string, _username: string): UserAchievements {
     const existing = this.userAchievements.get(userId);
     if (existing) return existing;
 
@@ -320,7 +320,7 @@ export class GamificationService {
       .map((userAch, idx) => ({
         rank: idx + 1,
         userId: userAch.userId,
-        username: userAch.userId, // TODO: Get from database
+        _username: userAch.userId, // TODO: Get from database
         totalPoints: userAch.totalPoints,
         level: userAch.level,
         achievementCount: userAch.achievements.length,
