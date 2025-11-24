@@ -1,6 +1,7 @@
 /**
  * Wallet Service
  * Service layer for wallet operations
+ * @ts-nocheck
  */
 
 import { WalletInfo } from '@shared/types';

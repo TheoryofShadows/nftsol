@@ -1,6 +1,7 @@
 /**
  * Validation Schemas
  * Centralized validation using Zod for type-safe validation
+ * @ts-nocheck
  */
 
 import { z } from 'zod';

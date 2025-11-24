@@ -1,7 +1,4 @@
-:root {
-  --solana-purple: #9945ff; /* Solana Purple */
-  --solana-green: #14f195; /* Solana Green  */
-}
+/* Variables now consolidated in _variables.css */
 .sla-gradient {
   background: linear-gradient(135deg, var(--solana-purple) 0%, var(--solana-green) 100%);
 }

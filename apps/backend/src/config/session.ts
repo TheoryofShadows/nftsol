@@ -42,12 +42,7 @@ const sessionConfig = {
 };
 
 // Create the session middleware
-const sessionMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  // Skip session for health checks
-  if (req.path === '/healthz' || req.path === '/api/health') {
-    return next();
-  }
-  return (session as any)(sessionConfig)(req, res, next);
-};
+// This applies express-session which is REQUIRED for CSRF protection to work
+const sessionMiddleware = (session as any)(sessionConfig);
 
 export { sessionMiddleware };

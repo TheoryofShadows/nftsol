@@ -7,7 +7,7 @@ import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 
 // Mock environment variables
-import.meta.env.VITE_API_BASE = 'http://localhost:3001';
+(import.meta.env as any).VITE_API_BASE = 'http://localhost:3001';
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

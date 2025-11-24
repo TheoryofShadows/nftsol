@@ -144,8 +144,8 @@ class ApiService {
     } catch (error) {
       console.warn('Failed to get CSRF token:', error);
     }
-    
-    return '';
+
+    return csrfToken || '';
   }
 
   // Get program configuration

@@ -36,6 +36,11 @@ function getVitalScore(metric: string, value: number): 'good' | 'needs-improveme
  * Send metric to analytics backend
  */
 function sendMetricToBackend(metric: WebVitalMetric) {
+  // Guard: ensure value exists and is a number
+  if (!metric || typeof metric.value !== 'number') {
+    return;
+  }
+
   if (!navigator.sendBeacon) {
     return;
   }
@@ -49,7 +54,7 @@ function sendMetricToBackend(metric: WebVitalMetric) {
     );
 
     // Log in development
-    if (import.meta.env.DEV) {
+    if (import.meta.env.DEV && typeof metric.value === 'number') {
       console.log(`📊 ${metric.name}: ${metric.value.toFixed(2)}ms (${metric.score})`);
     }
   } catch (error) {
@@ -190,35 +195,18 @@ function reportTTFB() {
 
 /**
  * Main function to start reporting all Web Vitals
+ * Currently disabled to prevent backend errors and noise in console
  */
 export function reportWebVitals() {
   if (typeof window === 'undefined') return;
 
-  // Observe all metrics
-  observeCLS();
-  observeLCP();
-  observeFID();
-  observeFCP();
-  reportTTFB();
+  // Web vitals reporting disabled - the backend metrics endpoints
+  // return 400 errors and the monitoring causes console spam
+  // This can be re-enabled once the backend metrics endpoints are properly implemented
 
-  // Report page visibility change
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      // Flush any pending metrics when page becomes hidden
-      if (navigator.sendBeacon) {
-        const payload = JSON.stringify({
-          type: 'visibility-change',
-          timestamp: new Date().toISOString(),
-          url: window.location.href
-        });
-
-        navigator.sendBeacon(
-          `${import.meta.env.VITE_API_BASE || 'http://localhost:3001'}/api/metrics/visibility`,
-          payload
-        );
-      }
-    }
-  });
+  if (import.meta.env.DEV) {
+    console.log('ℹ️ Web Vitals monitoring is disabled');
+  }
 }
 
 // TypeScript definitions for Web Vitals

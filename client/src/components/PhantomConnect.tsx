@@ -17,7 +17,8 @@ export default function PhantomConnect() {
     if (connected && publicKey) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
-      fetch(`https://api.devnet.solana.com`, {
+      const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+      fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

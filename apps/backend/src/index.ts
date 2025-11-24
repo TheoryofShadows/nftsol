@@ -674,7 +674,33 @@ apiV1.get('/solana/status', async (req, res) => {
   }
 });
 
+// Initialize CSRF token for mint endpoint (GET request, no CSRF check needed)
+// This generates and sets the XSRF-TOKEN cookie that will be used in the POST request
+apiV1.get(
+  '/simple-mint',
+  csrfProtection,
+  (req, res) => {
+    try {
+      // The csrfProtection middleware will generate and set the XSRF-TOKEN cookie
+      // We return a success response to confirm token is ready
+      res.json({
+        success: true,
+        message: 'CSRF token generated and set in cookie',
+        code: 'CSRF_TOKEN_READY'
+      });
+    } catch (error) {
+      console.error('Error generating CSRF token:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate CSRF token',
+        code: 'CSRF_TOKEN_ERROR'
+      });
+    }
+  }
+);
+
 // Enhanced mint endpoint with full validation
+// CSRF protection enabled with support for FormData file uploads
 apiV1.post(
   '/simple-mint',
   csrfProtection,
@@ -1951,3 +1977,4 @@ server.listen(serverPort, '0.0.0.0', async () => {
 });
 
 export { app, server };
+

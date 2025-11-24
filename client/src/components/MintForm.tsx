@@ -17,48 +17,46 @@ export default function MintForm() {
     setLoading(true);
 
     try {
-      // First, verify wallet exists
       const { API_ENDPOINTS } = await import('../config/api');
-      const verifyRes = await fetch(
-        API_ENDPOINTS.withdrawals.verify(publicKey!.toBase58()),
-        { credentials: 'include' }
-      );
-      const verifyData = await verifyRes.json();
 
-      if (!verifyData.success || !verifyData.data.exists) {
-        addNotification({
-          type: 'error',
-          title: 'Wallet Verification Failed',
-          message:
-            'Wallet not found on Solana network. Please ensure your wallet is properly connected.',
-          duration: 5000,
-        });
-        setLoading(false);
-        return;
-      }
+      console.log('🚀 Starting NFT mint...');
+      console.log('  Name:', name);
+      console.log('  File:', file.name, `(${(file.size / 1024).toFixed(2)}KB)`);
+      console.log('  Wallet:', publicKey?.toBase58());
 
-      // Fetch CSRF token
-      const csrfRes = await fetch(API_ENDPOINTS.csrf, {
+      // Fetch CSRF token from a GET endpoint (CSRF middleware doesn't protect GET)
+      console.log('🔐 Fetching CSRF token...');
+      const csrfRes = await fetch(API_ENDPOINTS.mint, {
+        method: 'GET',
         credentials: 'include',
       });
-      const csrfData = await csrfRes.json();
-      if (!csrfData?.success || !csrfData?.csrfToken) {
-        throw new Error('Unable to obtain CSRF token');
+
+      // Get CSRF token from cookie (set by generateCSRFToken middleware)
+      const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('XSRF-TOKEN='))
+        ?.split('=')[1];
+
+      if (!csrfToken) {
+        throw new Error('Failed to obtain CSRF token');
       }
 
+      console.log('✅ CSRF token obtained');
+
+      // Create form data with all required fields
       const formData = new FormData();
       formData.append('name', name);
       formData.append('description', `Minted NFT: ${name}`);
       formData.append('creatorWallet', publicKey!.toBase58());
       formData.append('file', file, file.name);
+      formData.append('_csrf', csrfToken);
 
       // Mint NFT using real Solana blockchain
+      console.log('📤 Sending to:', API_ENDPOINTS.mint);
+
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'x-csrf-token': csrfData.csrfToken,
-        },
         body: formData,
       });
 

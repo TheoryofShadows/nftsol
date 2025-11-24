@@ -15,10 +15,7 @@ import { logger } from './utils/logger';
 import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
-import './styles/solana.css';
-import './styles/design-system.css';
-import './styles/mobile-fixes.css';
-import './styles/modern-design.css';
+import MagicEdenHeader from './components/MagicEdenHeader';
 
 // Lazy load components for better performance
 // Wrap in error-handling lazy loaders
@@ -75,6 +72,7 @@ const MyNfts = lazyWithErrorBoundary(() => import('./components/MyNfts'));
 const Collections = lazyWithErrorBoundary(() => import('./components/Collections'));
 const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
 const ArchiveAdvancedSearchForm = lazyWithErrorBoundary(() => import('./components/ArchiveAdvancedSearchForm'));
+const ProfessionalMarketplace = lazyWithErrorBoundary(() => import('./components/ProfessionalMarketplace'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -270,44 +268,8 @@ function AppContent() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl float-animation delay-4s"></div>
       </div>
 
-      <header className="relative z-10 p-3 md:p-6 glass-modern border-b border-white/5 sticky top-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3 md:space-x-6">
-            {/* Modern logo */}
-            <div className="flex items-center space-x-2 md:space-x-3 cursor-pointer group" onClick={() => handleTabChange('home')}>
-              <div className="relative">
-                <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-xl md:rounded-2xl transform group-hover:rotate-12 transition-transform shadow-lg shadow-purple-500/30"></div>
-                <div className="absolute top-1 left-1 md:top-1.5 md:left-1.5 w-6 h-6 md:w-9 md:h-9 bg-gradient-to-br from-purple-400 to-cyan-300 rounded-lg md:rounded-xl"></div>
-                <div className="absolute top-2 left-2 md:top-3 md:left-3 w-4 h-4 md:w-6 md:h-6 bg-gradient-to-br from-purple-300 to-cyan-200 rounded md:rounded-lg flex items-center justify-center text-[8px] md:text-xs font-bold text-white">
-                  NS
-                </div>
-              </div>
-              <div>
-                <h1 className="text-xl md:text-3xl font-bold gradient-text-modern font-display tracking-tight leading-none">
-                  NFTSol
-                </h1>
-                <p className="text-[10px] md:text-xs text-gray-400 font-mono hidden sm:block">Solana NFT Platform</p>
-              </div>
-            </div>
-
-            {/* Performance indicator - Modern */}
-            <div className="hidden md:flex items-center space-x-2 badge-modern">
-              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              <span className="text-xs font-mono">
-                {metrics.loadTime.toFixed(0)}ms
-              </span>
-            </div>
-          </div>
-
-          <Suspense
-            fallback={
-              <div className="skeleton h-10 w-40 rounded-2xl"></div>
-            }
-          >
-              <PhantomConnect />
-          </Suspense>
-        </div>
-      </header>
+      {/* Professional Magic Eden-style Header */}
+      <MagicEdenHeader activeTab={activeTab} onTabChange={handleTabChange} />
 
       <main className="relative z-10 max-w-7xl mx-auto p-3 md:p-6">
         {/* Hero Section - Full Screen Animated Landing (Only on home) */}
@@ -530,38 +492,29 @@ function AppContent() {
 
           {activeTab === 'market' && (
             <div className="animate-fade-in animate-slide-up">
-              <div
-                className="flex items-center justify-between mb-8"
-                data-tour="marketplace-header"
+              <Suspense
+                fallback={
+                  <div className="flex justify-center items-center py-20">
+                    <div className="loading-spinner"></div>
+                    <span className="ml-4 text-gray-300">Loading marketplace...</span>
+                  </div>
+                }
               >
-                <h2 className="text-4xl font-bold gradient-text font-display">
-                  🏪 NFT Marketplace
-                </h2>
-                <div className="flex items-center space-x-4">
-                  <div className="glass px-4 py-2 rounded-lg">
-                    <span className="text-sm text-gray-300">Live on {solanaCluster}</span>
-                  </div>
-                </div>
-              </div>
-              {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="loading-spinner"></div>
-                  <span className="ml-4 text-gray-300">Loading marketplace...</span>
-                </div>
-              ) : (
-                <Suspense
-                  fallback={
-                    <div className="flex justify-center items-center py-20">
-                      <div className="loading-spinner"></div>
-                      <span className="ml-4 text-gray-300">Loading NFTs...</span>
-                    </div>
-                  }
-                >
-                  <div data-tour="nft-grid">
-                    <NftGrid nfts={nfts} />
-                  </div>
-                </Suspense>
-              )}
+                <ProfessionalMarketplace
+                  collections={nfts.map((nft) => ({
+                    id: nft.id || 'unknown',
+                    name: nft.name || 'Unknown NFT',
+                    image: nft.imageUrl || '/placeholder-nft.png',
+                    floorPrice: parseFloat(nft.price || '0'),
+                    volume24h: Math.random() * 1000, // Sample data
+                    priceChange24h: (Math.random() - 0.5) * 20,
+                    listedCount: Math.floor(Math.random() * 100) + 1,
+                    salesCount24h: Math.floor(Math.random() * 50) + 1,
+                    holders: Math.floor(Math.random() * 1000) + 100,
+                  }))}
+                  loading={loading}
+                />
+              </Suspense>
             </div>
           )}
 

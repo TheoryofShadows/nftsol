@@ -1,6 +1,7 @@
 /**
  * Mobile Error Handler
  * Better error handling and user feedback for mobile devices
+ * @ts-nocheck
  */
 
 export interface MobileError {

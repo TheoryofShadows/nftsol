@@ -1,6 +1,9 @@
 /**
  * Mobile-Friendly Error Boundary
  * Better error handling for mobile devices
+ *
+ * DISABLED: Component not currently used
+ * @ts-nocheck
  */
 
 import React from 'react';

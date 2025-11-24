@@ -101,7 +101,7 @@ describe('VideoUpload Component', () => {
 
   it('should call onError when upload fails', async () => {
     // Mock XHR to trigger error
-    const _errorHandler: (() => void) | null = null;
+    let errorHandler: (() => void) | null = null;
     const mockXHR = {
       open: vi.fn(),
       send: vi.fn(),

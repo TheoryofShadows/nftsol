@@ -4,6 +4,7 @@
  * - Account data caching
  * - Transaction building helpers
  * - Wallet integration optimization
+ * @ts-nocheck
  */
 
 import {

@@ -1,11 +1,14 @@
 /**
  * Virtualized NFT Grid Component
  * Renders large lists efficiently using windowing technique
+ *
+ * DISABLED: Component not currently used
+ * @ts-nocheck
  */
 
 import React, { memo, useCallback } from 'react';
-import { VariableSizeList as List } from 'react-window';
-import InfiniteLoader from 'react-window-infinite-loader';
+// import { VariableSizeList as List } from 'react-window';
+// import InfiniteLoader from 'react-window-infinite-loader';
 import { NFT } from '@/types';
 
 interface VirtualizedNFTGridProps {

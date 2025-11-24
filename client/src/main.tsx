@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import '@solana/wallet-adapter-react-ui/styles.css';
 import './styles/tailwind.css';
+// ⭐ Import consolidated variables first (master design system)
+import './styles/_variables.css';
+// Then import component-specific styles
 import './styles/solana.css';
 import './styles/design-system.css';
 import './styles/mobile-fixes.css';
@@ -12,7 +15,7 @@ import './styles/wallet-adapter-fixes.css';
 import './styles/shared-utilities.css';
 import { Buffer } from 'buffer';
 import { initAnalytics } from './utils/analytics';
-import { QueryProvider } from './lib/react-query.tsx';
+import { QueryProvider } from './lib/react-query';
 import { reportWebVitals } from './utils/web-vitals';
 
 // Polyfill Buffer for browser

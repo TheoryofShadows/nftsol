@@ -1,0 +1,254 @@
+/**
+ * 🎨 Consolidated CSS Variables
+ * Master design system for NFTSol
+ * All CSS custom properties defined in a single location for consistency
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ============================
+     PRIMARY BRAND COLORS - SOLANA INSPIRED
+     ============================ */
+  --solana-purple: #9945ff;
+  --solana-green: #14f195;
+  --primary-purple: #9945ff;
+  --primary-green: #14f195;
+  --primary-blue: #00d4ff;
+  --primary-pink: #ff6b9d;
+
+  /* ============================
+     MODERN/NEON COLOR PALETTE
+     ============================ */
+  --neon-purple: #a855f7;
+  --neon-pink: #ec4899;
+  --neon-blue: #3b82f6;
+  --neon-cyan: #06b6d4;
+  --neon-green: #10b981;
+  --neon-orange: #f97316;
+
+  /* ============================
+     EXTENDED ACCENT COLORS
+     ============================ */
+  --accent-orange: #ff8c42;
+  --accent-cyan: #00f5ff;
+  --accent-yellow: #ffd700;
+  --accent-red: #ff4757;
+
+  /* ============================
+     BACKGROUND COLORS - DARK THEME
+     ============================ */
+  --dark-bg: #0a0b0d;
+  --dark-surface: #1a1b23;
+  --dark-elevated: #2a2b35;
+  --dark-border: #3a3b47;
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #13131a;
+  --bg-tertiary: #1a1a24;
+  --bg-elevated: #25253a;
+
+  /* ============================
+     TEXT COLORS
+     ============================ */
+  --text-primary: #ffffff;
+  --text-secondary: #b8bcc8;
+  --text-muted: #8a8d9a;
+  --text-accent: #00d4ff;
+
+  /* ============================
+     GLASS MORPHISM EFFECTS
+     ============================ */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-hover: rgba(255, 255, 255, 0.08);
+  --gradient-glass: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+
+  /* ============================
+     GRADIENTS
+     ============================ */
+  --gradient-primary: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-green) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-pink) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent-orange) 0%, var(--accent-cyan) 100%);
+  --gradient-dark: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-surface) 100%);
+
+  /* ============================
+     SHADOWS - COMPREHENSIVE SYSTEM
+     ============================ */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 20px rgba(153, 69, 255, 0.3);
+  --shadow-glow-cyan: 0 0 40px rgba(6, 182, 212, 0.4);
+  /* Modern shadow variants */
+  --shadow-sm-modern: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md-modern: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg-modern: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-xl-modern: 0 20px 60px rgba(0, 0, 0, 0.6);
+
+  /* ============================
+     BORDER RADIUS - 2025-2026 SOFT DESIGN TREND
+     ============================ */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* ============================
+     SPACING SYSTEM
+     ============================ */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* ============================
+     TYPOGRAPHY - FONTS
+     ============================ */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display-alt: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* ============================
+     TYPOGRAPHY - FONT SIZES
+     ============================ */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* ============================
+     TRANSITIONS & ANIMATIONS
+     ============================ */
+  --transition-fast: 0.15s ease-out;
+  --transition-normal: 0.25s ease-out;
+  --transition-slow: 0.35s ease-out;
+}
+
+/* ============================
+   DARK THEME OVERRIDES
+   ============================ */
+html[data-theme="dark"] {
+  --bg-primary: #0a0a0f;
+  --text-primary: #ffffff;
+  --text-secondary: #b8bcc8;
+}
+
+/* ============================
+   RESPONSIVE MEDIA QUERIES - MEDIUM SCREENS
+   ============================ */
+@media (max-width: 768px) {
+  :root {
+    /* Adjust spacing for smaller screens */
+    --space-lg: 1.25rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2.5rem;
+
+    /* Smaller border radius */
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+
+    /* Smaller font sizes */
+    --text-2xl: 1.375rem;
+    --text-3xl: 1.75rem;
+    --text-4xl: 2rem;
+    --text-5xl: 2.5rem;
+  }
+}
+
+/* ============================
+   RESPONSIVE MEDIA QUERIES - SMALL SCREENS
+   ============================ */
+@media (max-width: 640px) {
+  :root {
+    /* Even smaller spacing */
+    --space-lg: 1rem;
+    --space-xl: 1.25rem;
+    --space-2xl: 2rem;
+
+    /* Even smaller border radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 24px;
+
+    /* Smaller font sizes for mobile */
+    --text-lg: 1rem;
+    --text-xl: 1.125rem;
+    --text-2xl: 1.25rem;
+    --text-3xl: 1.5rem;
+    --text-4xl: 1.875rem;
+    --text-5xl: 2.25rem;
+  }
+}
+
+/* ============================
+   RESPONSIVE MEDIA QUERIES - EXTRA SMALL SCREENS
+   ============================ */
+@media (max-width: 480px) {
+  :root {
+    /* Minimal spacing */
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.25rem;
+
+    /* Minimal border radius */
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+
+    /* Minimal font sizes */
+    --text-sm: 0.8125rem;
+    --text-base: 0.9375rem;
+    --text-lg: 1rem;
+    --text-xl: 1.0625rem;
+  }
+}
+
+/* ============================
+   ACCESSIBILITY - HIGH CONTRAST MODE
+   ============================ */
+@media (prefers-contrast: more) {
+  :root {
+    /* Increase border opacity for better visibility */
+    --glass-border: rgba(255, 255, 255, 0.15);
+
+    /* Increase text contrast */
+    --text-secondary: #d8dce8;
+    --text-muted: #a8adb8;
+
+    /* Enhance shadows for depth */
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* ============================
+   ACCESSIBILITY - PREFERS REDUCED MOTION
+   ============================ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    /* Disable animations for users who prefer reduced motion */
+    --transition-fast: 0s;
+    --transition-normal: 0s;
+    --transition-slow: 0s;
+  }
+}

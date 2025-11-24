@@ -4,6 +4,9 @@
  *
  * Note: Requires lightweight-charts package
  * npm install lightweight-charts
+ *
+ * DISABLED: Component not currently used
+ * @ts-nocheck
  */
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';

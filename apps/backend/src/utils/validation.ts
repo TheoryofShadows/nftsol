@@ -346,8 +346,10 @@ export const sanitizeRequestBody = (body: any): any => {
 
 /**
  * CSRF Protection Middleware
+ * Configured to work with both session-based and body-based token extraction
  */
 export const csrfProtection: RequestHandler = csrf({
+  // Use cookie-based CSRF tokens
   cookie: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
@@ -357,7 +359,22 @@ export const csrfProtection: RequestHandler = csrf({
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
     domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined
   },
-  ignoreMethods: ['GET', 'HEAD', 'OPTIONS']
+  // Only check POST, PUT, DELETE, PATCH - skip GET and HEAD
+  ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
+  // Custom token validator for multipart/form-data (file uploads)
+  value: (req: Request): string | undefined => {
+    // Try to get token from body first (for multipart form data)
+    if (req.body && typeof req.body === 'object') {
+      const tokenFromBody = (req.body as any)._csrf;
+      if (tokenFromBody) {
+        return tokenFromBody;
+      }
+    }
+
+    // Fall back to header-based token
+    return req.headers['x-csrf-token'] as string |
+           req.headers['x-xsrf-token'] as string || undefined;
+  }
 });
 
 // Generate CSRF Token

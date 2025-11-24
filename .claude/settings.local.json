@@ -33,7 +33,21 @@
       "WebSearch",
       "Bash(npm run:*)",
       "Bash(npx tsc --noEmit)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(if git diff origin/main..HEAD)",
+      "Bash(then echo \"❌ Local ahead of remote\")",
+      "Bash(else echo \"✅ Local synchronized with remote\")",
+      "Bash(fi)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(wmic process where \"name=''node.exe'' and commandline like ''%5173%''\" delete /nointeractive)",
+      "WebFetch(domain:magiceden.us)",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command \"Stop-Process -Id 22560 -Force\")",
+      "Bash(timeout 10 cmd:*)",
+      "Bash(del \"C:\\Users\\KHK89\\nftsol\\client\\src\\styles\\rounded-design-2026.css\")",
+      "Bash(powershell -Command \"Remove-Item ''C:\\Users\\KHK89\\nftsol\\client\\src\\styles\\rounded-design-2026.css'' -Force\")",
+      "Bash(powershell -Command \"Remove-Item ''nul'' -Force -ErrorAction SilentlyContinue; git add -A\")"
     ],
     "deny": [],
     "ask": []
