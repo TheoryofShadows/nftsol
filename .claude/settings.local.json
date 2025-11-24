@@ -47,7 +47,9 @@
       "Bash(timeout 10 cmd:*)",
       "Bash(del \"C:\\Users\\KHK89\\nftsol\\client\\src\\styles\\rounded-design-2026.css\")",
       "Bash(powershell -Command \"Remove-Item ''C:\\Users\\KHK89\\nftsol\\client\\src\\styles\\rounded-design-2026.css'' -Force\")",
-      "Bash(powershell -Command \"Remove-Item ''nul'' -Force -ErrorAction SilentlyContinue; git add -A\")"
+      "Bash(powershell -Command \"Remove-Item ''nul'' -Force -ErrorAction SilentlyContinue; git add -A\")",
+      "Bash(powershell -Command \"Remove-Item -Path ''nul'' -Force -ErrorAction SilentlyContinue; Write-Host ''nul file removed (or did not exist)''\")",
+      "Bash(del nul)"
     ],
     "deny": [],
     "ask": []
