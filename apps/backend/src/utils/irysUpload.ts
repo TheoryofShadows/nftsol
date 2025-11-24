@@ -23,7 +23,7 @@ export interface IrysUploadResult {
 /**
  * Creates an Irys node instance for Solana
  */
-export async function createIrysNode(__options: IrysUploadOptions): Promise<Irys> {
+export async function createIrysNode(options: IrysUploadOptions): Promise<Irys> {
   const { network = 'mainnet-beta' } = options;
   
   // Create Irys instance for querying
@@ -40,7 +40,7 @@ export async function createIrysNode(__options: IrysUploadOptions): Promise<Irys
  */
 export async function uploadToIrys(
   _data: Buffer | Uint8Array | string,
-  _options: IrysUploadOptions
+  options: IrysUploadOptions
 ): Promise<IrysUploadResult> {
   // For now, we'll return a mock response since we're using @irys/query which is read-only
   // In a real implementation, you would use @irys/sdk for writing
@@ -56,8 +56,8 @@ export async function uploadToIrys(
  * Uploads JSON metadata to Irys
  */
 export async function uploadMetadata(
-  _meta_data: Record<string, any>,
-  _options: IrysUploadOptions
+  metadata: Record<string, any>,
+  options: IrysUploadOptions
 ): Promise<IrysUploadResult> {
   const jsonString = JSON.stringify(metadata);
   return uploadToIrys(jsonString, options);
@@ -71,8 +71,8 @@ export async function uploadMetadata(
  * @returns Arweave URI
  */
 export async function uploadMetadataToIrys(
-  _meta_data: Record<string, any>,
-  _options: IrysUploadOptions
+  metadata: Record<string, any>,
+  options: IrysUploadOptions
 ): Promise<IrysUploadResult> {
   const jsonString = JSON.stringify(metadata);
   const jsonSize = Buffer.byteLength(jsonString, 'utf8');

@@ -150,8 +150,8 @@ export async function getTransactionStatus(signature: string): Promise<{
   finalized: boolean;
   err: any;
 }> {
-  // const connection = await optimizedSolanaService.getConnection();
-  
+  const connection = await optimizedSolanaService.getConnection();
+
   const status = await connection.getSignatureStatus(signature);
 
   return {

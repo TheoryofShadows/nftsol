@@ -338,7 +338,7 @@ export class InternetArchiveService {
 // ============================================================================
 
 export class GrokArchiveVerificationService {
-  private _grokApiKey: string;
+  private grokApiKey: string;
   private grokUrl = 'https://api.x.ai/v1/chat/completions';
 
   constructor(apiKey: string) {
@@ -545,7 +545,7 @@ export class ArchiveGrokEchoIntegration {
   private archiveService: InternetArchiveService;
   private grokService: GrokArchiveVerificationService;
 
-  constructor(_grokApiKey: string) {
+  constructor(grokApiKey: string) {
     this.archiveService = new InternetArchiveService();
     this.grokService = new GrokArchiveVerificationService(grokApiKey);
   }

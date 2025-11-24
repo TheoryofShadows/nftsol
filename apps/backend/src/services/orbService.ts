@@ -75,7 +75,7 @@ export class OrbService {
   /**
    * Get AI-explained transaction history for echo ledger
    */
-  async getEchoTxHistory(_ledgerPda: string): Promise<{
+  async getEchoTxHistory(ledgerPda: string): Promise<{
     txs: Transaction[];
     explained: AIExplanation[];
     heatmap: HeatmapData;
@@ -101,7 +101,7 @@ export class OrbService {
   /**
    * Get Orb embed URL for iframe integration
    */
-  getOrbEmbed(_ledgerPda: string): string {
+  getOrbEmbed(ledgerPda: string): string {
     // Real URL when Orb is live:
     // return `https://orb.helius.dev/explore/${ledgerPda}?ai=true&heatmap=true`;
 
@@ -128,7 +128,7 @@ export class OrbService {
   /**
    * Generate heatmap for echo contributions
    */
-  async generateHeatmap(_ledgerPda: string): Promise<HeatmapData> {
+  async generateHeatmap(ledgerPda: string): Promise<HeatmapData> {
     if (this.mockMode) {
       return this.getMockHeatmap();
     }
@@ -162,7 +162,7 @@ export class OrbService {
   // Remove when real Orb API is available
   // =============================================================
 
-  private getMockTxHistory(_ledgerPda: string) {
+  private getMockTxHistory(ledgerPda: string) {
     const now = Date.now();
 
     const txs: Transaction[] = [

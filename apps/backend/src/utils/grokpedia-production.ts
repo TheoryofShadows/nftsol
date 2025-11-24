@@ -31,7 +31,7 @@ export interface GrokVerificationResult {
  */
 export async function verifyWithGrok(
   videoUri: string,
-  _nftId: string
+  nftId: string
 ): Promise<GrokVerificationResult> {
   try {
     const xaiApiKey = process.env.XAI_API_KEY;
@@ -131,7 +131,7 @@ Respond with: VERIFIED or NEEDS_REVIEW
  */
 async function verifyWithCloudflareAI(
   videoUri: string,
-  _nftId: string
+  nftId: string
 ): Promise<GrokVerificationResult> {
   try {
     // Cloudflare AI is free but requires different API structure

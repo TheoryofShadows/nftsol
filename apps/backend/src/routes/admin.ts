@@ -496,7 +496,7 @@ router.get('/support-tickets', async (req: Request, res: Response) => {
   try {
     const { status = 'open', page = 1, limit = 20 } = req.query;
 
-    const _offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
+    const offset = ((parseInt(page as string) || 1) - 1) * parseInt(limit as string);
 
     const result = await pool.query(
       `
