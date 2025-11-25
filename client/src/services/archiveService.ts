@@ -88,7 +88,7 @@ class ArchiveService {
     filters: AdvancedSearchFilters = {}
   ): Promise<AdvancedSearchResponse> {
     try {
-      const response = await fetch(`${this.apiBase}/api/archive/advanced-search`, {
+      const response = await fetch(`${this.apiBase}/api/v1/archive/advanced-search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ class ArchiveService {
    */
   async getFilterOptions(): Promise<FilterOptions> {
     try {
-      const response = await fetch(`${this.apiBase}/api/archive/filter-options`);
+      const response = await fetch(`${this.apiBase}/api/v1/archive/filter-options`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch filter options');
@@ -142,7 +142,7 @@ class ArchiveService {
    */
   async getTrendingSearches(): Promise<string[]> {
     try {
-      const response = await fetch(`${this.apiBase}/api/archive/trending`);
+      const response = await fetch(`${this.apiBase}/api/v1/archive/trending`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch trending searches');
@@ -166,7 +166,7 @@ class ArchiveService {
   async getSuggestions(partial: string): Promise<string[]> {
     try {
       const params = new URLSearchParams({ q: partial });
-      const response = await fetch(`${this.apiBase}/api/archive/suggestions?${params}`);
+      const response = await fetch(`${this.apiBase}/api/v1/archive/suggestions?${params}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions');
@@ -190,7 +190,7 @@ class ArchiveService {
    */
   async getItemMetadata(identifier: string): Promise<any> {
     try {
-      const response = await fetch(`${this.apiBase}/api/archive/${identifier}`);
+      const response = await fetch(`${this.apiBase}/api/v1/archive/${identifier}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch item metadata');
@@ -211,7 +211,7 @@ class ArchiveService {
    */
   async getItemMedia(identifier: string): Promise<any[]> {
     try {
-      const response = await fetch(`${this.apiBase}/api/archive/${identifier}/media`);
+      const response = await fetch(`${this.apiBase}/api/v1/archive/${identifier}/media`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch item media');
@@ -236,7 +236,7 @@ class ArchiveService {
   async verifyWithGrok(identifier: string): Promise<any> {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/archive/${identifier}/verify-with-grok`,
+        `${this.apiBase}/api/v1/archive/${identifier}/verify-with-grok`,
         {
           method: 'POST',
           headers: {
@@ -265,7 +265,7 @@ class ArchiveService {
   async prepareForMint(identifier: string): Promise<any> {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/archive/${identifier}/prepare-for-mint`,
+        `${this.apiBase}/api/v1/archive/${identifier}/prepare-for-mint`,
         {
           method: 'POST',
           headers: {
@@ -294,7 +294,7 @@ class ArchiveService {
   async createEchoLedger(identifier: string, walletAddress: string): Promise<any> {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/archive/${identifier}/create-echo-ledger`,
+        `${this.apiBase}/api/v1/archive/${identifier}/create-echo-ledger`,
         {
           method: 'POST',
           headers: {
@@ -332,7 +332,7 @@ class ArchiveService {
   ): Promise<any> {
     try {
       const response = await fetch(
-        `${this.apiBase}/api/archive/echo/${ledgerId}/add-layer`,
+        `${this.apiBase}/api/v1/archive/echo/${ledgerId}/add-layer`,
         {
           method: 'POST',
           headers: {

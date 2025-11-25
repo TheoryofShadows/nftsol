@@ -678,15 +678,30 @@ apiV1.get('/solana/status', async (req, res) => {
 // This generates and sets the XSRF-TOKEN cookie that will be used in the POST request
 apiV1.get(
   '/simple-mint',
-  csrfProtection,
   (req, res) => {
     try {
-      // The csrfProtection middleware will generate and set the XSRF-TOKEN cookie
-      // We return a success response to confirm token is ready
+      // Generate a CSRF token directly using cryptography
+      const token = randomBytes(32).toString('hex');
+
+      // Store in session for validation on POST
+      if (req.session) {
+        req.session.csrfToken = token;
+      }
+
+      // Set as cookie for JavaScript access
+      res.cookie('XSRF-TOKEN', token, {
+        httpOnly: false, // Allow JavaScript to read
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        path: '/'
+      });
+
       res.json({
         success: true,
         message: 'CSRF token generated and set in cookie',
-        code: 'CSRF_TOKEN_READY'
+        code: 'CSRF_TOKEN_READY',
+        csrfToken: token
       });
     } catch (error) {
       console.error('Error generating CSRF token:', error);
@@ -1036,6 +1051,9 @@ apiV1.use('/admin/migrations', migrationRoutes);
 // Mount NFT routes with caching
 apiV1.use('/nfts', nftRouter);
 
+// 🌍 Internet Archive + Grok + Echo Integration (revolutionary NFT workflow)
+apiV1.use('/archive', archiveGrokEchoRouter);
+
 // Apply response compression and caching headers
 apiV1.use((req, res, next) => {
   // Set cache headers for GET requests
@@ -1094,9 +1112,6 @@ app.get('/api/public/stats', async (req, res) => {
 app.use('/api/echo', echoRouter);
 app.use('/api/orb', orbRouter);
 
-// 🌍 Internet Archive + Grok + Echo Integration (revolutionary NFT workflow)
-app.use('/api/archive', archiveGrokEchoRouter);
-
 // Solana/Helius comprehensive tools (error handling, monitoring, optimization)
 app.use('/api/tools', solanaToolsRouter);
 
@@ -1114,9 +1129,6 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 app.use('/api/tensor', tensorRouter);
 app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
-
-// Ultra-cheap minting routes
-app.use('/api/mint', mintRouter);
 
 // NFT verification and balance endpoints (for frontend compatibility)
 app.get('/api/nfts/verify/:address', async (req, res) => {

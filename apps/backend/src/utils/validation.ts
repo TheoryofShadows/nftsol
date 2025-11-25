@@ -349,31 +349,30 @@ export const sanitizeRequestBody = (body: any): any => {
  * Configured to work with both session-based and body-based token extraction
  */
 export const csrfProtection: RequestHandler = csrf({
-  // Use cookie-based CSRF tokens
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    key: 'XSRF-TOKEN',
-    path: '/',
-    maxAge: 1000 * 60 * 60 * 24, // 24 hours
-    domain: process.env.NODE_ENV === 'production' ? process.env.DOMAIN : undefined
-  },
-  // Only check POST, PUT, DELETE, PATCH - skip GET and HEAD
-  ignoreMethods: ['GET', 'HEAD', 'OPTIONS'],
-  // Custom token validator for multipart/form-data (file uploads)
-  value: (req: Request): string | undefined => {
-    // Try to get token from body first (for multipart form data)
+  // Use session-based CSRF tokens (required for csurf to work properly)
+  value: (req: any): string => {
+    // Try to get token from body first (for multipart form data with _csrf field)
     if (req.body && typeof req.body === 'object') {
       const tokenFromBody = (req.body as any)._csrf;
-      if (tokenFromBody) {
+      if (tokenFromBody && typeof tokenFromBody === 'string') {
         return tokenFromBody;
       }
     }
 
-    // Fall back to header-based token
-    return req.headers['x-csrf-token'] as string |
-           req.headers['x-xsrf-token'] as string || undefined;
+    // Try to get token from headers
+    const tokenFromHeader = req.headers['x-csrf-token'] || req.headers['x-xsrf-token'];
+    if (tokenFromHeader && typeof tokenFromHeader === 'string') {
+      return tokenFromHeader;
+    }
+
+    // Try to get token from cookie
+    const tokenFromCookie = req.cookies?.['XSRF-TOKEN'];
+    if (tokenFromCookie && typeof tokenFromCookie === 'string') {
+      return tokenFromCookie;
+    }
+
+    // Must return a string for csurf, will be validated against session
+    return '';
   }
 });
 
