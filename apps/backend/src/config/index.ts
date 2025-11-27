@@ -79,7 +79,10 @@ type SslConfig = boolean | { rejectUnauthorized?: boolean };
 export const databaseConfig: DatabaseConfig = {
   // Always use a real PostgreSQL URL (from env or a sane localhost default)
   url: getEnv('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/nftsol'),
-  ssl: (process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false) as SslConfig,
+  // Always enable SSL if DATABASE_URL contains 'neon' or 'pooler' (cloud-hosted), otherwise only in production
+  ssl: (getEnv('DATABASE_URL', '').includes('neon') || getEnv('DATABASE_URL', '').includes('pooler') || process.env.NODE_ENV === 'production'
+    ? { rejectUnauthorized: false }
+    : false) as SslConfig,
   pool: {
     min: 2,
     max: 10,
