@@ -47,6 +47,7 @@ import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
 import performanceMetricsRouter from './routes/performance-metrics';
+import rpcProxyRouter from './routes/rpc-proxy';
 import swaggerUi from 'swagger-ui-express';
 import { loadSwaggerDocs } from './config/swagger';
 // Rate limiters available for future route-specific limiting
@@ -1129,6 +1130,12 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 app.use('/api/tensor', tensorRouter);
 app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
+
+// Archive + Grok + Echo integration routes
+app.use('/api/archive', archiveGrokEchoRouter);
+
+// Solana RPC Proxy (handles JSON-RPC requests, avoids CORS/rate limiting issues)
+app.use('/api/rpc', rpcProxyRouter);
 
 // NFT verification and balance endpoints (for frontend compatibility)
 app.get('/api/nfts/verify/:address', async (req, res) => {

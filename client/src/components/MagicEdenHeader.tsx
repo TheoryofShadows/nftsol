@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import { solanaRpcProxy } from '@/services/solanaRpcProxy';
 
 interface MagicEdenHeaderProps {
   activeTab: string;
@@ -20,26 +21,14 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
-  // Fetch wallet balance
+  // Fetch wallet balance using backend RPC proxy
   useEffect(() => {
     if (connected && publicKey) {
       setIsLoadingBalance(true);
-      const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
-      fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getBalance',
-          params: [publicKey.toBase58()],
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.result?.value) {
-            setBalance(data.result.value / 1e9); // Convert lamports to SOL
-          }
+      solanaRpcProxy
+        .getBalanceInSol(publicKey.toBase58())
+        .then((solBalance) => {
+          setBalance(solBalance);
         })
         .catch((error) => {
           if (import.meta.env.DEV) {

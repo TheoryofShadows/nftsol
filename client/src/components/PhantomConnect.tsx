@@ -1,6 +1,7 @@
 import { WalletMultiButton, useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useState, useEffect } from 'react';
+import { solanaRpcProxy } from '@/services/solanaRpcProxy';
 
 export default function PhantomConnect() {
   const { publicKey, connected, disconnect } = useWallet();
@@ -12,27 +13,15 @@ export default function PhantomConnect() {
     setVisible(true);
   };
 
-  // Fetch wallet balance
+  // Fetch wallet balance using backend RPC proxy
   useEffect(() => {
     if (connected && publicKey) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoading(true);
-      const rpcUrl = import.meta.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
-      fetch(rpcUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'getBalance',
-          params: [publicKey.toBase58()],
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.result?.value) {
-            setBalance(data.result.value / 1e9); // Convert lamports to SOL
-          }
+      solanaRpcProxy
+        .getBalanceInSol(publicKey.toBase58())
+        .then((solBalance) => {
+          setBalance(solBalance);
         })
         .catch((error) => {
           if (import.meta.env.DEV) {
