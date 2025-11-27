@@ -67,7 +67,7 @@ interface DatabasePool {
 }
 
 // Extend the PoolClient interface to include our custom methods
-interface ExtendedPoolClient extends PoolClient {}
+interface ExtendedPoolClient extends DatabaseClient {}
 
 // Helper type for the pool instance
 type PoolType = DatabasePool & {
