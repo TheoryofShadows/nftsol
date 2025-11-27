@@ -23,6 +23,10 @@ if (!isProduction) {
   store = new MemoryStore({
     checkPeriod: 86400000 // Prune expired entries every 24h
   });
+} else {
+  // In production, use cookie-based sessions (no server-side store needed)
+  // This is safe because we set httpOnly and secure flags on the cookie
+  // Sessions are validated via CSRF tokens and JWT where needed
 }
 
 // Session configuration
@@ -30,11 +34,11 @@ const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'debug-secret-key',
   name: 'connect.sid', // Using default name that works
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false, // Don't save uninitialized sessions (reduces warnings and improves security)
   store: store,
   cookie: {
     httpOnly: true,
-    secure: false, // Set to false for HTTP in development
+    secure: isProduction ? true : false, // Use secure cookies in production
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     path: '/'

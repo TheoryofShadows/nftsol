@@ -147,14 +147,9 @@ app.use(
     origin: (origin, callback) => {
       const allowedOrigins = appConfig.cors.origin;
 
-      // Require origin header in production, but allow it from trusted sources
+      // Allow requests without origin (health checks, internal requests)
       if (!origin) {
-        // Only allow no origin in development mode
-        if (appConfig.nodeEnv === 'development') {
-          return callback(null, true);
-        }
-        // In production, reject requests with no origin
-        return callback(new Error('Origin header is required in production'));
+        return callback(null, true);
       }
 
       // Allow Netlify deployments only if they match expected production domain
@@ -168,7 +163,12 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        // Allow in development, reject in production if not in allowlist
+        if (appConfig.nodeEnv === 'development') {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
       }
     },
     credentials: appConfig.cors.credentials,

@@ -77,7 +77,7 @@ class PnLService {
           nft_count INTEGER NOT NULL,
           snapshot_type VARCHAR(20) DEFAULT 'daily',
           created_at TIMESTAMP DEFAULT NOW(),
-          UNIQUE(wallet, snapshot_type, created_at::date)
+          UNIQUE(wallet, snapshot_type, DATE(created_at))
         )
       `);
 
