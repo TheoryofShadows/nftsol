@@ -12,7 +12,9 @@ import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
 import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
 import { pool } from './lib/db';
-import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
+import { requestLogger, errorLogger, auditLogger, securityLogger, createModuleLogger } from './utils/logger';
+
+const log = createModuleLogger('index');
 import {
   validateWallet,
   csrfProtection,
@@ -70,12 +72,12 @@ initializeSecrets();
 const heliusApiKey = process.env.HELIUS_API_KEY;
 if (heliusApiKey) {
   initializeHelius({ apiKey: heliusApiKey });
-  console.log('✓ Helius optimized service initialized');
+  log.info('✓ Helius optimized service initialized');
 }
 
 // Initialize RPC failover for reliability
 createSolanaRPCFailover(heliusApiKey);
-console.log('✓ RPC failover service initialized');
+log.info('✓ RPC failover service initialized');
 
 // PORT is set by Render automatically, but we use appConfig.port which reads from PORT env var
 // This is just for reference - actual port used is from appConfig.port or Render's PORT
@@ -705,7 +707,7 @@ apiV1.get(
         csrfToken: token
       });
     } catch (error) {
-      console.error('Error generating CSRF token:', error);
+      log.error('Error generating CSRF token', error as Error);
       res.status(500).json({
         success: false,
         error: 'Failed to generate CSRF token',
@@ -1272,8 +1274,8 @@ app.post('/api/waitlist/subscribe', async (req, res) => {
     // Log successful signup
     auditLogger(
       'WAITLIST_SIGNUP',
-      `New waitlist signup: ${email}`,
-      { email, hasWallet: !!walletAddress, hasReferral: !!referralCode }
+      { email, hasWallet: !!walletAddress, hasReferral: !!referralCode },
+      req
     );
 
     const response: ApiResponse = {
@@ -1287,7 +1289,7 @@ app.post('/api/waitlist/subscribe', async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error('Waitlist subscription error:', error);
+    log.error('Waitlist subscription error', error as Error);
 
     const response: ApiResponse = {
       success: false,
@@ -1319,7 +1321,7 @@ apiV1.post('/admin/emergency/pause-withdrawals', authenticate, requireAdmin, (re
 
   // In production, this would update a database or config service
   if (process.env.NODE_ENV !== 'production') {
-    console.log(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'} - Reason: ${reason}`);
+    log.warn(`EMERGENCY: Withdrawals ${paused ? 'PAUSED' : 'RESUMED'}`, { reason });
   }
   auditLogger('EMERGENCY_WITHDRAWAL_TOGGLE', { paused, reason, adminId: (req as any).user.id }, req);
 
@@ -1369,7 +1371,7 @@ apiV1.get('/market', async (req, res) => {
         }));
         total = result.total;
       } catch (error) {
-        console.error('[Market] Error fetching collection:', error);
+        log.error('[Market] Error fetching collection', error as Error);
         nfts = [];
       }
     }
@@ -1397,14 +1399,14 @@ apiV1.get('/market', async (req, res) => {
           }));
         total = result.total;
       } catch (error) {
-        console.error('[Market] Error fetching owner NFTs:', error);
+        log.error('[Market] Error fetching owner NFTs', error as Error);
         nfts = [];
       }
     }
     // 3) DEFAULT: Fetch featured/popular NFTs from mainnet (with smart fallbacks)
     else {
       try {
-        console.log(`[Market] Fetching marketplace NFTs (page ${page}, limit ${limit})...`);
+        log.info(`[Market] Fetching marketplace NFTs`, { page, limit });
 
         // Strategy: Try to get NFTs from platform wallet first (fastest)
         // Then fallback to popular collections if available
@@ -1433,9 +1435,9 @@ apiV1.get('/market', async (req, res) => {
               creator: item.ownership?.owner || '',
             }));
             total = result.total;
-            console.log(`[Market] Found ${nfts.length} NFTs from platform wallet`);
+            log.info(`[Market] Found NFTs from platform wallet`, { count: nfts.length });
           } catch (ownerError) {
-            console.error('[Market] Error fetching from platform wallet:', ownerError);
+            log.error('[Market] Error fetching from platform wallet', ownerError as Error);
             nfts = [];
           }
         }
@@ -1476,20 +1478,20 @@ apiV1.get('/market', async (req, res) => {
                  WHERE (status = 'listed' OR status = 'active' OR listed = true)`
               );
               total = parseInt(countResult.rows[0]?.count || '0', 10);
-              console.log(`[Market] Found ${nfts.length} NFTs from database listings`);
+              log.info(`[Market] Found NFTs from database listings`, { count: nfts.length });
             }
           } catch (dbError) {
-            console.error('[Market] Error fetching from database:', dbError);
+            log.error('[Market] Error fetching from database', dbError as Error);
             nfts = [];
           }
         }
 
         // Final fallback: Return empty array with helpful message
         if (nfts.length === 0) {
-          console.log('[Market] No NFTs found - marketplace is empty. Users can mint NFTs to populate it.');
+          log.info('[Market] No NFTs found - marketplace is empty. Users can mint NFTs to populate it.');
         }
       } catch (error) {
-        console.error('[Market] Error fetching marketplace NFTs:', error);
+        log.error('[Market] Error fetching marketplace NFTs', error as Error);
         nfts = [];
       }
     }
@@ -1533,7 +1535,7 @@ apiV1.get('/market', async (req, res) => {
           };
         });
       } catch (error) {
-        console.error('[Market] Error fetching listings:', error);
+        log.error('[Market] Error fetching listings', error as Error);
         // Continue without listing data
       }
     }
@@ -1581,7 +1583,7 @@ app.get('/api/nfts', async (req, res) => {
     } else if (owner) {
       // Get ALL NFTs from blockchain using Helius DAS API
       try {
-        console.log(`[NFTs] Fetching ALL Solana NFTs for owner: ${owner}`);
+        log.info(`[NFTs] Fetching ALL Solana NFTs for owner`, { owner });
 
         // Get ALL NFTs from blockchain
         const heliusNFTs = await heliusService.getAssetsByOwner(owner, { limit: 1000 });
@@ -1622,9 +1624,9 @@ app.get('/api/nfts', async (req, res) => {
           };
         });
 
-        console.log(`[NFTs] Found ${nfts.length} NFTs on blockchain for ${owner}`);
+        log.info(`[NFTs] Found NFTs on blockchain for owner`, { count: nfts.length, owner });
       } catch (e) {
-        console.error('[NFTs] Helius error, falling back to local database:', e);
+        log.error('[NFTs] Helius error, falling back to local database', e as Error);
         // Fallback to local database
         try {
           const result = await nftService.getNFTsByOwner(owner);
@@ -1937,17 +1939,17 @@ app.use((req, res) => {
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
+  log.info('SIGTERM received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    log.info('Process terminated');
     process.exit(0);
   });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
+  log.info('SIGINT received, shutting down gracefully');
   server.close(() => {
-    console.log('Process terminated');
+    log.info('Process terminated');
     process.exit(0);
   });
 });
@@ -1958,8 +1960,8 @@ process.on('SIGINT', () => {
     const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
     await verifyCloutVault(connection);
   } catch (error) {
-    console.warn('Could not verify CLOUT vault on startup:', error instanceof Error ? error.message : error);
-    console.warn('Vault will be created automatically when first reward is sent');
+    log.warn('Could not verify CLOUT vault on startup', { error: error instanceof Error ? error.message : error });
+    log.warn('Vault will be created automatically when first reward is sent');
   }
 })();
 
@@ -1969,28 +1971,28 @@ const server = createServer(app);
 // Start server
 const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;
 server.listen(serverPort, '0.0.0.0', async () => {
-  console.log(`🚀 NFTSol Backend Server Started`);
-  console.log(`📍 Port: ${serverPort} (from ${process.env.PORT ? 'PORT env var' : 'config'})`);
-  console.log(`🌍 Environment: ${appConfig.nodeEnv}`);
-  console.log(`🌐 CORS Origins: ${appConfig.cors.origin.join(', ')}`);
-  console.log(`⚡ Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
-  console.log(`📤 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  console.log(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
-  console.log(`🌐 Cluster: ${solanaConfig.cluster}`);
-  console.log(`✅ Server ready at http://0.0.0.0:${serverPort}`);
+  log.info(`🚀 NFTSol Backend Server Started`);
+  log.info(`📍 Port: ${serverPort} (from ${process.env.PORT ? 'PORT env var' : 'config'})`);
+  log.info(`🌍 Environment: ${appConfig.nodeEnv}`);
+  log.info(`🌐 CORS Origins: ${appConfig.cors.origin.join(', ')}`);
+  log.info(`⚡ Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
+  log.info(`📤 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
+  log.info(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
+  log.info(`🌐 Cluster: ${solanaConfig.cluster}`);
+  log.info(`✅ Server ready at http://0.0.0.0:${serverPort}`);
 
   if (programConfig.cloutProgramId) {
-    console.log(`💰 CLOUT Token: ${programConfig.cloutProgramId}`);
+    log.info(`💰 CLOUT Token: ${programConfig.cloutProgramId}`);
     // Calculate rewards vault dynamically
     try {
       const rewardsVault = await getRewardsVaultAddress();
       if (rewardsVault) {
-        console.log(`🏦 Rewards Vault: ${rewardsVault.toBase58()} (auto-calculated from REWARDS_OWNER + CLOUT_MINT)`);
+        log.info(`🏦 Rewards Vault: ${rewardsVault.toBase58()} (auto-calculated from REWARDS_OWNER + CLOUT_MINT)`);
       } else {
-        console.log(`🏦 Rewards Vault: Will be created on first use (auto-calculated)`);
+        log.info(`🏦 Rewards Vault: Will be created on first use (auto-calculated)`);
       }
     } catch (error) {
-      console.warn('⚠️ Could not calculate rewards vault:', error instanceof Error ? error.message : error);
+      log.warn('⚠️ Could not calculate rewards vault', { error: error instanceof Error ? error.message : error });
     }
   }
 });

@@ -25,6 +25,9 @@ import { Connection, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('echo');
 // Optional service (not required for dev/in-memory mode). Avoid importing to reduce build surface.
 
 const router = Router();
@@ -166,7 +169,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       total: iaResponse.data.response?.numFound || 0,
     });
   } catch (error: any) {
-    console.error('IA Search Error:', error);
+    log.error('IA Search Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -246,7 +249,7 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
 
     res.json(response);
   } catch (error: any) {
-    console.error('Mint Preparation Error:', error);
+    log.error('Mint Preparation Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -283,7 +286,7 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
       count: echoes.length,
     });
   } catch (error: any) {
-    console.error('Fetch Echoes Error:', error);
+    log.error('Fetch Echoes Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch echoes',
@@ -338,7 +341,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
         : '⚠️ Echo added but not verified.',
     });
   } catch (error: any) {
-    console.error('Add Echo Error:', error);
+    log.error('Add Echo Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -479,7 +482,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
       message: 'Remix created successfully',
     });
   } catch (error: any) {
-    console.error('[Echo] Remix creation error:', error);
+    log.error('[Echo] Remix creation error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -537,7 +540,7 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
       echoCount: echoes.length,
     });
   } catch (error: any) {
-    console.error('Reverify Error:', error);
+    log.error('Reverify Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to reverify ledger',
@@ -579,7 +582,7 @@ router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
       trendingCount,
     });
   } catch (error: any) {
-    console.error('Get Echo stats error:', error);
+    log.error('Get Echo stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch Echo statistics',
@@ -612,7 +615,7 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
       echoes: trending,
     });
   } catch (error: any) {
-    console.error('Get trending echoes error:', error);
+    log.error('Get trending echoes error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch trending echoes',
@@ -651,7 +654,7 @@ router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Get echo stats error:', error);
+    log.error('Get echo stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch stats',
@@ -732,7 +735,7 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Echo] Get by ID error:', error);
+    log.error('[Echo] Get by ID error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get Echo',
@@ -765,7 +768,7 @@ router.get('/stats/:wallet', echoLimiter, async (req: Request, res: Response) =>
       ...stats,
     });
   } catch (error: any) {
-    console.error('Get echo stats error:', error);
+    log.error('Get echo stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch stats',

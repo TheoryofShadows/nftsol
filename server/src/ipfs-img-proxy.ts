@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import fetch from 'node-fetch';
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('ipfsImgProxy');
 
 const app = express();
 const PORT = Number(process.env.AUX_PORT || process.env.PORT || 3003);
@@ -44,7 +47,7 @@ app.get('/ipfs-img', async (req, res) => {
     // Stream bytes
     r.body.pipe(res);
   } catch (e: any) {
-    console.error('proxy error:', e?.message || e);
+    log.error('proxy error:', e?.message || e);
     res.status(500).send('proxy failure');
   }
 });
@@ -53,8 +56,8 @@ if (process.env.RUN_STANDALONE) { // app.listen DISABLED (PORT, '0.0.0.0', () =>
 // RUN_STANDALONE gate:
 if (process.env.RUN_STANDALONE) {
   // app.listen DISABLED (PORT, "0.0.0.0", () => {
-    console.log(`ipfs-img-proxy listening on http://0.0.0.0:${PORT}`);
+    log.info(`ipfs-img-proxy listening on http://0.0.0.0:${PORT}`);
   });
 }
-  console.log(`ipfs-img-proxy listening on http://0.0.0.0:${PORT}`);
+  log.info(`ipfs-img-proxy listening on http://0.0.0.0:${PORT}`);
 });

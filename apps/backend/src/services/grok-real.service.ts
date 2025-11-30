@@ -13,6 +13,9 @@
  */
 
 import axios, { AxiosError as _AxiosError } from 'axios';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('grokReal.service');
 
 const GROK_API_BASE = 'https://api.x.ai/v1';
 const GROK_MODEL = 'grok-beta';
@@ -57,8 +60,8 @@ class GrokRealService {
     this.baseUrl = GROK_API_BASE;
 
     if (!this.apiKey) {
-      console.warn('⚠️ GROK_API_KEY not configured. Set GROK_API_KEY in .env');
-      console.warn('Get a free key at: https://console.x.ai/');
+      log.warn('⚠️ GROK_API_KEY not configured. Set GROK_API_KEY in .env');
+      log.warn('Get a free key at: https://console.x.ai/');
     }
   }
 
@@ -104,7 +107,7 @@ class GrokRealService {
 
       return result;
     } catch (error) {
-      console.error('[Grok] Verification error:', error);
+      log.error('[Grok] Verification error:', error);
       throw new Error(`Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -436,8 +439,8 @@ Return ONLY valid JSON.`;
         }
       };
     } catch (error) {
-      console.error('[Parse Error]:', error);
-      console.error('[Raw Response]:', content);
+      log.error('[Parse Error]:', error);
+      log.error('[Raw Response]:', content);
 
       // Fallback: return safe default
       return {

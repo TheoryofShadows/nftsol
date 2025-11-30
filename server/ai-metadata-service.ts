@@ -1,6 +1,9 @@
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('aiMetadataService');
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -123,7 +126,7 @@ Format as JSON:
       return result as AIAnalysisResult;
 
     } catch (error) {
-      console.error('AI metadata analysis failed:', error);
+      log.error('AI metadata analysis failed:', error);
       throw new Error(`Failed to analyze image: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -170,7 +173,7 @@ Create compelling, market-ready metadata that would appeal to NFT collectors and
       return result as AIAnalysisResult;
 
     } catch (error) {
-      console.error('AI text metadata generation failed:', error);
+      log.error('AI text metadata generation failed:', error);
       throw new Error(`Failed to generate metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -236,7 +239,7 @@ Create compelling, market-ready metadata that would appeal to NFT collectors and
       return result as AIAnalysisResult;
 
     } catch (error) {
-      console.error('AI metadata enhancement failed:', error);
+      log.error('AI metadata enhancement failed:', error);
       throw new Error(`Failed to enhance metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -304,7 +307,7 @@ Create compelling, market-ready metadata that would appeal to NFT collectors and
       return result as AIAnalysisResult;
 
     } catch (error) {
-      console.error('AI collection metadata generation failed:', error);
+      log.error('AI collection metadata generation failed:', error);
       throw new Error(`Failed to generate collection metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -341,7 +344,7 @@ Create compelling, market-ready metadata that would appeal to NFT collectors and
 
       return true;
     } catch (error) {
-      console.error('OpenAI service health check failed:', error);
+      log.error('OpenAI service health check failed:', error);
       return false;
     }
   }

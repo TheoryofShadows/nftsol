@@ -4,6 +4,9 @@ import compression from 'compression';
 import morgan from 'morgan';
 import fs from 'fs';
 import path from 'path';
+import { createModuleLogger } from './utils/logger';
+
+const log = createModuleLogger('app');
 
 // Ensure logs directory exists
 const logDir = path.join(__dirname, '..', 'logs');
@@ -74,30 +77,21 @@ app.use(morgan('combined', { stream: accessLogStream }));
 
 // Log all requests
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  console.log('Cookies:', req.cookies);
-  console.log('Session:', req.session);
-  next();
-});
-
-// Log all incoming requests
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  console.log('Headers:', req.headers);
-  console.log('Cookies:', req.cookies);
-  console.log('Session ID:', req.sessionID);
-  console.log('Session:', req.session);
+  log.debug(`Request: ${req.method} ${req.url}`, {
+    headers: req.headers,
+    cookies: req.cookies,
+    sessionId: (req as any).sessionID
+  });
   next();
 });
 
 // API routes
 app.use('/api/auth', authRouter);
-console.log('Auth routes mounted at /api/auth');
+log.info('Auth routes mounted at /api/auth');
 
 // Protected API routes with CSRF protection
 app.use('/api/nfts', validateCSRFToken, nftRouter);
-console.log('NFT routes mounted at /api/nfts');
+log.info('NFT routes mounted at /api/nfts');
 
 // Debug route to list all routes
 app.get('/api/routes', (req, res) => {
@@ -131,7 +125,7 @@ app.use((req: any, res: any, next: any) => {
 
     // Log slow requests
     if (duration > 1000) {
-      console.warn(`🐌 Slow request: ${req.method} ${req.path} took ${duration}ms`);
+      log.warn(`🐌 Slow request: ${req.method} ${req.path} took ${duration}ms`);
     }
   });
 

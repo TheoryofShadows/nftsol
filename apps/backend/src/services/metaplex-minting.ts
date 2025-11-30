@@ -13,6 +13,9 @@ import { createSignerFromKeypair, signerIdentity, generateSigner, percentAmount 
 import { solanaConfig } from '../config';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('metaplexMinting');
 
 interface MetaplexMintParams {
   name: string;
@@ -38,7 +41,7 @@ export class MetaplexMintingService {
   private platformSigner: any;
 
   constructor() {
-    console.log('[Metaplex] Initializing Metaplex minting service...');
+    log.info('[Metaplex] Initializing Metaplex minting service...');
 
     // Initialize UMI
     this.umi = createUmi(solanaConfig.rpcUrl)
@@ -47,7 +50,7 @@ export class MetaplexMintingService {
     // Load platform wallet for signing
     this.initializePlatformSigner();
 
-    console.log('[Metaplex] Service initialized successfully');
+    log.info('[Metaplex] Service initialized successfully');
   }
 
   /**
@@ -58,7 +61,7 @@ export class MetaplexMintingService {
       const secretKeyBase58 = process.env.PLATFORM_SECRET_KEY_BASE58;
       
       if (!secretKeyBase58) {
-        console.warn('[Metaplex] No PLATFORM_SECRET_KEY_BASE58 found - minting will not work');
+        log.warn('[Metaplex] No PLATFORM_SECRET_KEY_BASE58 found - minting will not work');
         return;
       }
 
@@ -73,9 +76,9 @@ export class MetaplexMintingService {
       // Set as identity
       this.umi.use(signerIdentity(this.platformSigner));
 
-      console.log('[Metaplex] Platform signer initialized:', keypair.publicKey.toBase58());
+      log.info('[Metaplex] Platform signer initialized', { publicKey: keypair.publicKey.toBase58() });
     } catch (error) {
-      console.error('[Metaplex] Failed to initialize platform signer:', error);
+      log.error('[Metaplex] Failed to initialize platform signer', error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -93,8 +96,8 @@ export class MetaplexMintingService {
         };
       }
 
-      console.log(`[Metaplex] Minting NFT: ${params.name}`);
-      console.log(`[Metaplex] Image URL: ${params.imageUrl}`);
+      log.info(`[Metaplex] Minting NFT: ${params.name}`);
+      log.info(`[Metaplex] Image URL: ${params.imageUrl}`);
 
       // Generate new mint keypair
       const mint = generateSigner(this.umi);
@@ -122,7 +125,7 @@ export class MetaplexMintingService {
       // Build metadata URI (already uploaded to IPFS/Arweave)
       const metadataUri = params.imageUrl; // Assuming this is the full metadata URI
 
-      console.log('[Metaplex] Creating NFT transaction...');
+      log.info('[Metaplex] Creating NFT transaction...');
 
       // Mint NFT with Metaplex standard
       const result = await createNft(this.umi, {
@@ -138,9 +141,9 @@ export class MetaplexMintingService {
       const mintAddress = mint.publicKey.toString();
       const signature = bs58.encode(result.signature);
 
-      console.log(`[Metaplex] ✅ NFT minted successfully!`);
-      console.log(`[Metaplex] Mint Address: ${mintAddress}`);
-      console.log(`[Metaplex] Signature: ${signature}`);
+      log.info(`[Metaplex] ✅ NFT minted successfully!`);
+      log.info(`[Metaplex] Mint Address: ${mintAddress}`);
+      log.info(`[Metaplex] Signature: ${signature}`);
 
       return {
         success: true,
@@ -149,7 +152,7 @@ export class MetaplexMintingService {
         signature,
       };
     } catch (error) {
-      console.error('[Metaplex] Mint NFT error:', error);
+      log.error('[Metaplex] Mint NFT error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to mint NFT',
@@ -174,7 +177,7 @@ export class MetaplexMintingService {
         isMetaplex: true,
       };
     } catch (error) {
-      console.error('[Metaplex] Verify standard error:', error);
+      log.error('[Metaplex] Verify standard error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Verification failed',
@@ -192,13 +195,13 @@ export class MetaplexMintingService {
   }): Promise<{ success: boolean; error?: string }> {
     try {
       // TODO: Implement metadata update
-      console.log('[Metaplex] Metadata update not yet implemented');
+      log.info('[Metaplex] Metadata update not yet implemented');
       return {
         success: false,
         error: 'Update metadata not yet implemented',
       };
     } catch (error) {
-      console.error('[Metaplex] Update metadata error:', error);
+      log.error('[Metaplex] Update metadata error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Update failed',
@@ -239,7 +242,7 @@ export class MetaplexMintingService {
         },
       };
     } catch (error) {
-      console.error('[Metaplex] Estimate cost error:', error);
+      log.error('[Metaplex] Estimate cost error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Cost estimation failed',
@@ -271,8 +274,8 @@ export class MetaplexMintingService {
       const requiredBalance = costEstimate.costSOL || 0.01;
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log(`[Metaplex] Platform wallet balance: ${balanceSOL} SOL`);
-        console.log(`[Metaplex] Required for mint: ${requiredBalance} SOL`);
+        log.info(`[Metaplex] Platform wallet balance: ${balanceSOL} SOL`);
+        log.info(`[Metaplex] Required for mint: ${requiredBalance} SOL`);
       }
 
       return {
@@ -281,7 +284,7 @@ export class MetaplexMintingService {
         canMint: balanceSOL >= requiredBalance,
       };
     } catch (error) {
-      console.error('[Metaplex] Check balance error:', error);
+      log.error('[Metaplex] Check balance error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Balance check failed',

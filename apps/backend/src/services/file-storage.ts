@@ -6,6 +6,9 @@
 
 import FormData from 'form-data';
 import fetch from 'node-fetch';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('fileStorage');
 
 interface StorageResponse {
   success: boolean;
@@ -22,7 +25,7 @@ export class FileStorageService {
     this.pinataJwt = process.env.PINATA_JWT;
 
     if (!this.pinataJwt) {
-      console.warn('⚠️ PINATA_JWT not configured. File uploads will use fallback storage.');
+      log.warn('⚠️ PINATA_JWT not configured. File uploads will use fallback storage.');
     }
   }
 
@@ -44,7 +47,7 @@ export class FileStorageService {
       // Fallback: Use data URL (good for small images during development)
       return this.createDataUrl(fileBuffer, mimeType);
     } catch (error) {
-      console.error('File upload error:', error);
+      log.error('File upload error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'File upload failed',
@@ -114,7 +117,7 @@ export class FileStorageService {
 
       const ipfsUrl = `https://gateway.pinata.cloud/ipfs/${result.IpfsHash}`;
 
-      console.log(`✅ File uploaded to IPFS: ${ipfsUrl}`);
+      log.info(`✅ File uploaded to IPFS: ${ipfsUrl}`);
 
       return {
         success: true,
@@ -122,10 +125,10 @@ export class FileStorageService {
         hash: result.IpfsHash,
       };
     } catch (error) {
-      console.error('Pinata upload failed:', error);
+      log.error('Pinata upload failed:', error);
 
       // Fallback to data URL if Pinata fails
-      console.log('Falling back to data URL for image storage');
+      log.info('Falling back to data URL for image storage');
       return this.createDataUrl(fileBuffer, mimeType);
     }
   }
@@ -148,7 +151,7 @@ export class FileStorageService {
         };
       }
 
-      console.log('📦 Using data URL for image storage (development/fallback)');
+      log.info('📦 Using data URL for image storage (development/fallback)');
 
       return {
         success: true,

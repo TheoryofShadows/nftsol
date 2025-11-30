@@ -5,6 +5,9 @@
 
 import { Router, Request, Response } from 'express';
 import { grokRealService } from '../services/grok-real.service';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('verificationReal');
 
 const router = Router();
 
@@ -40,7 +43,7 @@ router.post('/text', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[Verification Error]:', error);
+    log.error('[Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Verification failed',
@@ -78,7 +81,7 @@ router.post('/creator', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[Creator Verification Error]:', error);
+    log.error('[Creator Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Creator verification failed',
@@ -117,7 +120,7 @@ router.post('/collection', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[Collection Verification Error]:', error);
+    log.error('[Collection Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Collection verification failed',
@@ -155,7 +158,7 @@ router.post('/deal', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[Deal Verification Error]:', error);
+    log.error('[Deal Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Deal verification failed',
@@ -194,7 +197,7 @@ router.post('/community', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[Community Verification Error]:', error);
+    log.error('[Community Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Community verification failed',
@@ -233,7 +236,7 @@ router.post('/nft', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[NFT Verification Error]:', error);
+    log.error('[NFT Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'NFT verification failed',
@@ -267,7 +270,7 @@ router.post('/url', async (req: Request, res: Response) => {
       data: result
     } as ApiResponse);
   } catch (error) {
-    console.error('[URL Verification Error]:', error);
+    log.error('[URL Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'URL verification failed',
@@ -308,7 +311,7 @@ router.post('/batch', async (req: Request, res: Response) => {
       }
     } as ApiResponse);
   } catch (error) {
-    console.error('[Batch Verification Error]:', error);
+    log.error('[Batch Verification Error]:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Batch verification failed',

@@ -17,6 +17,9 @@
  */
 
 import { createHash } from 'crypto';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('cloudflareAi');
 
 const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
 const CLOUDFLARE_AI_TOKEN = process.env.CLOUDFLARE_AI_TOKEN;
@@ -46,7 +49,7 @@ export async function verifyWithCloudflareAI(
   model: keyof typeof MODELS = 'llama3'
 ): Promise<CloudflareAIResult> {
   if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_AI_TOKEN) {
-    console.warn('⚠️ Cloudflare AI not configured, using fallback');
+    log.warn('⚠️ Cloudflare AI not configured, using fallback');
     return fallbackVerification(content);
   }
 
@@ -80,7 +83,7 @@ export async function verifyWithCloudflareAI(
     );
 
     if (!response.ok) {
-      console.error('Cloudflare AI error:', await response.text());
+      log.error('Cloudflare AI error:', { status: response.status, text: await response.text() });
       return fallbackVerification(content);
     }
 
@@ -100,7 +103,7 @@ export async function verifyWithCloudflareAI(
       model: MODELS[model],
     };
   } catch (error) {
-    console.error('Cloudflare AI verification error:', error);
+    log.error('Cloudflare AI verification error:', error);
     return fallbackVerification(content);
   }
 }
@@ -169,7 +172,7 @@ function parseAIResponse(aiResponse: string): {
       flags: [],
     };
   } catch (error) {
-    console.error('Failed to parse AI response:', error);
+    log.error('Failed to parse AI response:', error);
     return {
       score: 70,
       summary: 'Unable to fully parse AI response',

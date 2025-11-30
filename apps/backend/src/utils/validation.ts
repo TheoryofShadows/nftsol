@@ -2,6 +2,9 @@ import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { PublicKey, Connection, Cluster } from '@solana/web3.js';
 import { appConfig } from '../config';
 import csrf from 'csurf';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('validation');
 
 // Type for Multer file
 type MulterFile = {
@@ -235,7 +238,7 @@ export const validateUpload = (req: Request, res: Response, next: NextFunction):
 
     next();
   } catch (error) {
-    console.error('Upload validation error:', error);
+    log.error('Upload validation error:', error);
     return res.status(500).json({
       success: false,
       error: 'An error occurred during file validation'
@@ -887,7 +890,7 @@ export const validateWallet = (options: WalletValidationOptions = {}): RequestHa
             });
           }
         } catch (error) {
-          console.error('Error checking wallet existence:', error);
+          log.error('Error checking wallet existence:', error);
           return res.status(500).json({
             success: false,
             error: 'Failed to validate wallet address',
@@ -901,7 +904,7 @@ export const validateWallet = (options: WalletValidationOptions = {}): RequestHa
       
       next();
     } catch (error) {
-      console.error('Wallet validation error:', error);
+      log.error('Wallet validation error:', error);
       res.status(500).json({
         success: false,
         error: 'Internal server error during wallet validation',
@@ -927,6 +930,6 @@ export const validateWallet = (options: WalletValidationOptions = {}): RequestHa
  * @returns Express middleware function
  */
 export const createWalletValidator = (options: WalletValidationOptions = {}): RequestHandler => {
-  console.warn('createWalletValidator is deprecated. Use validateWallet instead.');
+  log.warn('createWalletValidator is deprecated. Use validateWallet instead.');
   return validateWallet(options);
 };

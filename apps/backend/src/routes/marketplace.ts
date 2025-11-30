@@ -11,6 +11,9 @@ import { onChainTransactions } from '../services/on-chain-transactions';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { solanaConfig } from '../config';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('marketplace');
 
 const router = Router();
 
@@ -330,7 +333,7 @@ router.get('/all', async (req: Request, res: Response) => {
     const maxPrice = req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined;
     const collection = req.query.collection as string | undefined;
 
-    console.log('[Marketplace] Fetching cross-platform listings...');
+    log.info('[Marketplace] Fetching cross-platform listings...');
 
     const result = await crossPlatformMarketplace.getAllListings({
       limit,
@@ -388,7 +391,7 @@ router.get('/search', async (req: Request, res: Response) => {
 
     const limit = parseInt(req.query.limit as string) || 50;
 
-    console.log(`[Marketplace] Searching for: "${query}"`);
+    log.info(`[Marketplace] Searching for: "${query}"`);
 
     const result = await crossPlatformMarketplace.searchNFTs(query, { limit });
 
@@ -449,7 +452,7 @@ router.post('/create-buy-transaction', validateWallet, async (req: Request, res:
       return res.status(400).json(response);
     }
 
-    console.log('[Marketplace] Creating on-chain buy transaction...');
+    log.info('[Marketplace] Creating on-chain buy transaction...');
 
     // Verify seller owns the NFT
     const ownershipCheck = await onChainTransactions.verifyOwnership(mintAddress, seller);
@@ -505,7 +508,7 @@ router.post('/create-buy-transaction', validateWallet, async (req: Request, res:
       return res.status(500).json(response);
     }
   } catch (error) {
-    console.error('[Marketplace] Create buy transaction error:', error);
+    log.error('[Marketplace] Create buy transaction error:', error);
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',
@@ -533,7 +536,7 @@ router.post('/confirm-sale', async (req: Request, res: Response) => {
       return res.status(400).json(response);
     }
 
-    console.log(`[Marketplace] Confirming sale for NFT ${mintAddress}`);
+    log.info(`[Marketplace] Confirming sale for NFT ${mintAddress}`);
 
     // Check transaction status
     const statusCheck = await onChainTransactions.getTransactionStatus(signature);
@@ -588,7 +591,7 @@ router.post('/confirm-sale', async (req: Request, res: Response) => {
       return res.status(500).json(response);
     }
   } catch (error) {
-    console.error('[Marketplace] Confirm sale error:', error);
+    log.error('[Marketplace] Confirm sale error:', error);
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',

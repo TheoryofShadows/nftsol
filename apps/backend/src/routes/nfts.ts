@@ -3,6 +3,9 @@ import { mintNFT, getWalletBalance, accountExists, connection } from '../lib/sol
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { getPlatformKeypair } from '../lib/platformKeypair';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('nfts');
 
 const router = Router();
 
@@ -63,7 +66,7 @@ router.post('/mint', validateWallet, async (req, res) => {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('NFT minting error:', error);
+      log.error('NFT minting error:', error);
     }
 
     const response: ApiResponse = {
@@ -109,7 +112,7 @@ router.get('/balance/:address', async (req, res) => {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('Balance check error:', error);
+      log.error('Balance check error:', error);
     }
 
     const response: ApiResponse = {
@@ -153,7 +156,7 @@ router.get('/verify/:address', async (req, res) => {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('Wallet verification error:', error);
+      log.error('Wallet verification error:', error);
     }
 
     const response: ApiResponse = {

@@ -4,6 +4,9 @@ import { withClient } from '../lib/db';
 import { getWalletBalance as _getWalletBalance, accountExists } from '../lib/solana';
 import { ApiResponse } from '../types';
 import { isValidSolanaAddress } from '../utils/validation';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('withdrawals');
 
 const router = express.Router();
 const LAMPORTS_PER_SOL = 1_000_000_000;
@@ -45,7 +48,7 @@ router.post('/', async (req, res) => {
         return res.status(409).json(response);
       }
     } catch (err) {
-      console.error('Idempotency check error:', err);
+      log.error('Idempotency check error:', err);
     }
   }
   if (!amount_sol || !to_address) {
@@ -88,7 +91,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json(response);
     }
   } catch (error) {
-    console.error('Wallet validation error:', error);
+    log.error('Wallet validation error:', error);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to validate destination wallet',
@@ -149,7 +152,7 @@ router.post('/', async (req, res) => {
     };
     return res.json(response);
   } catch (err: any) {
-    console.error('create withdrawal error', err);
+    log.error('create withdrawal error', err);
     const response: ApiResponse = {
       success: false,
       error:
@@ -185,7 +188,7 @@ router.get('/', async (req, res) => {
     };
     return res.json(response);
   } catch (err) {
-    console.error('Get withdrawals error:', err);
+    log.error('Get withdrawals error:', err);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get withdrawals',
@@ -229,7 +232,7 @@ router.get('/:id', async (req, res) => {
     };
     return res.json(response);
   } catch (err) {
-    console.error('Get withdrawal error:', err);
+    log.error('Get withdrawal error:', err);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get withdrawal',

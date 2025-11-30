@@ -1,5 +1,8 @@
 
 import Moralis from 'moralis';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('moralisApi');
 
 type AccountNFTsResponse = Awaited<ReturnType<typeof Moralis.SolApi.account.getNFTs>>;
 export type MoralisAccountNFT = AccountNFTsResponse['result'][number];
@@ -35,7 +38,7 @@ class MoralisService {
 
       return response.result;
     } catch (error) {
-      console.error('Moralis wallet NFTs fetch error:', error);
+      log.error('Moralis wallet NFTs fetch error:', error);
       return [];
     }
   }
@@ -51,7 +54,7 @@ class MoralisService {
 
       return response.result;
     } catch (error) {
-      console.error('Moralis NFT metadata fetch error:', error);
+      log.error('Moralis NFT metadata fetch error:', error);
       return null;
     }
   }
@@ -67,7 +70,7 @@ class MoralisService {
 
       return response.result.tokens;
     } catch (error) {
-      console.error('Moralis token balances fetch error:', error);
+      log.error('Moralis token balances fetch error:', error);
       return [];
     }
   }
@@ -83,7 +86,7 @@ class MoralisService {
 
       return response.toJSON();
     } catch (error) {
-      console.error('Moralis token price fetch error:', error);
+      log.error('Moralis token price fetch error:', error);
       return null;
     }
   }

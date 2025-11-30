@@ -5,6 +5,9 @@
 
 import { Router, Request, Response } from 'express';
 import { heliusService } from '../services/helius';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('transactions');
 
 const router = Router();
 
@@ -73,7 +76,7 @@ router.get('/:address', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Transactions API] Error:', error);
+    log.error('[Transactions API] Error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch transactions',
@@ -129,7 +132,7 @@ router.get('/:address/all', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Transactions API] Error (all):', error);
+    log.error('[Transactions API] Error (all):', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch all transactions',
@@ -196,7 +199,7 @@ router.get('/:address/summary', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Transactions API] Error (summary):', error);
+    log.error('[Transactions API] Error (summary):', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to generate summary',

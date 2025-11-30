@@ -6,6 +6,9 @@
  */
 
 import fs from 'fs';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('secretsLoader');
 
 /**
  * Load a secret from file or environment variable
@@ -24,7 +27,7 @@ export function loadSecret(secretName: string, envVarName: string = secretName):
       if (fs.existsSync(secretPath)) {
         const secretValue = fs.readFileSync(secretPath, 'utf-8').trim();
         if (secretValue) {
-          console.log(`[Secrets] ✅ Loaded ${envVarName} from ${secretPath}`);
+          log.info(`[Secrets] ✅ Loaded ${envVarName} from ${secretPath}`);
           return secretValue;
         }
       }
@@ -36,11 +39,11 @@ export function loadSecret(secretName: string, envVarName: string = secretName):
   // Fall back to environment variable
   const envValue = process.env[envVarName];
   if (envValue) {
-    console.log(`[Secrets] ✅ Loaded ${envVarName} from environment variable`);
+    log.info(`[Secrets] ✅ Loaded ${envVarName} from environment variable`);
     return envValue;
   }
 
-  console.warn(`[Secrets] ⚠️ Could not find ${secretName} (env: ${envVarName})`);
+  log.warn(`[Secrets] ⚠️ Could not find ${secretName} (env: ${envVarName})`);
   return undefined;
 }
 
@@ -76,7 +79,7 @@ export function loadAllSecrets(): {
  * This ensures they're available via process.env throughout the app
  */
 export function initializeSecrets(): void {
-  console.log('[Secrets] 🔐 Initializing secrets from environment variables and secret files...');
+  log.info('[Secrets] 🔐 Initializing secrets from environment variables and secret files...');
   
   const secrets = loadAllSecrets();
   let loadedCount = 0;
@@ -119,5 +122,5 @@ export function initializeSecrets(): void {
     loadedCount++;
   }
 
-  console.log(`[Secrets] ✅ Successfully initialized ${loadedCount} secrets`);
+  log.info(`[Secrets] ✅ Successfully initialized ${loadedCount} secrets`);
 }

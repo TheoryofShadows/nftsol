@@ -15,6 +15,9 @@ import {
   batchGrokVerify as _batchGrokVerify,
 } from '../utils/grokpedia-free';
 import expressRateLimit from 'express-rate-limit';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('echoOptimized');
 
 const router = Router();
 
@@ -131,7 +134,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       docs: enriched,
     });
   } catch (error: any) {
-    console.error('Search error:', error.message);
+    log.error('Search error:', error.message);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -238,7 +241,7 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
       // irysUri, // Uncomment when Irys integration added
     });
   } catch (error: any) {
-    console.error('Mint preparation error:', error.message);
+    log.error('Mint preparation error:', error.message);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({

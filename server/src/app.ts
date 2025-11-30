@@ -7,6 +7,9 @@ import health from "./routes/health.js";
 import nfts from "./routes/nfts.js";
 import market from './routes/market';
 import corsAllowed from './cors-allowed';
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('app');
 
 const app = express();
 app.use("/market", market);
@@ -28,7 +31,7 @@ app.get("/", (_req, res) => res.json({ ok: true }));
 
 // Error handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Unhandled", err);
+  log.error("Unhandled", err);
   res.status(500).json({ error: "Internal Server Error" });
 });
 

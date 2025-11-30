@@ -1,6 +1,9 @@
 import { pool } from '../lib/db';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('tenant.service');
 
 /**
  * Tenant Service
@@ -95,7 +98,7 @@ export async function createTenant(req: CreateTenantRequest): Promise<{ id: stri
       apiKey: initialApiKey, // Return unhashed key only once
     };
   } catch (error) {
-    console.error('Error creating tenant:', error);
+    log.error('Error creating tenant:', error);
     throw error;
   }
 }
@@ -126,7 +129,7 @@ export async function getTenantDetails(tenantId: string): Promise<TenantDetails 
 
     return result.rows[0] || null;
   } catch (error) {
-    console.error('Error getting tenant details:', error);
+    log.error('Error getting tenant details:', error);
     throw error;
   }
 }
@@ -149,7 +152,7 @@ export async function updateTenantConfig(
       [tenantId, JSON.stringify(config)]
     );
   } catch (error) {
-    console.error('Error updating tenant config:', error);
+    log.error('Error updating tenant config:', error);
     throw error;
   }
 }
@@ -189,7 +192,7 @@ export async function createTenantApiKey(
       preview: keyPreview,
     };
   } catch (error) {
-    console.error('Error creating API key:', error);
+    log.error('Error creating API key:', error);
     throw error;
   }
 }
@@ -218,7 +221,7 @@ export async function listTenantApiKeys(tenantId: string): Promise<any[]> {
 
     return result.rows;
   } catch (error) {
-    console.error('Error listing API keys:', error);
+    log.error('Error listing API keys:', error);
     throw error;
   }
 }
@@ -237,7 +240,7 @@ export async function revokeTenantApiKey(keyId: string): Promise<void> {
       [keyId]
     );
   } catch (error) {
-    console.error('Error revoking API key:', error);
+    log.error('Error revoking API key:', error);
     throw error;
   }
 }
@@ -267,7 +270,7 @@ export async function getTenantUsage(tenantId: string): Promise<any> {
 
     return result.rows[0] || null;
   } catch (error) {
-    console.error('Error getting tenant usage:', error);
+    log.error('Error getting tenant usage:', error);
     throw error;
   }
 }
@@ -294,7 +297,7 @@ export async function recordApiCall(
     );
   } catch (error) {
     // Don't throw on logging errors
-    console.warn('Error logging API call:', error);
+    log.warn('Error logging API call', { error: error instanceof Error ? error.message : String(error) });
   }
 }
 
@@ -321,7 +324,7 @@ export async function getTenantAnalytics(tenantId: string, days: number = 30): P
 
     return result.rows;
   } catch (error) {
-    console.error('Error getting tenant analytics:', error);
+    log.error('Error getting tenant analytics:', error);
     throw error;
   }
 }
@@ -340,7 +343,7 @@ export async function updateTenantPlan(tenantId: string, planId: string): Promis
       [planId, tenantId]
     );
   } catch (error) {
-    console.error('Error updating tenant plan:', error);
+    log.error('Error updating tenant plan:', error);
     throw error;
   }
 }
@@ -361,10 +364,10 @@ export async function suspendTenant(tenantId: string, reason?: string): Promise<
 
     // Log suspension
     if (reason) {
-      console.log(`Tenant ${tenantId} suspended: ${reason}`);
+      log.info(`Tenant ${tenantId} suspended: ${reason}`);
     }
   } catch (error) {
-    console.error('Error suspending tenant:', error);
+    log.error('Error suspending tenant:', error);
     throw error;
   }
 }
@@ -383,7 +386,7 @@ export async function deleteTenant(tenantId: string): Promise<void> {
       [tenantId]
     );
   } catch (error) {
-    console.error('Error deleting tenant:', error);
+    log.error('Error deleting tenant:', error);
     throw error;
   }
 }

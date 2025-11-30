@@ -4,6 +4,9 @@
  */
 
 import crypto from 'crypto';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('grokpediaFree');
 
 // Type definitions
 export interface GrokVerificationResult {
@@ -36,7 +39,7 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
       const result = await grokVerifyWithAPI(input);
       return result;
     } catch (error: any) {
-      console.warn('⚠️ xAI API failed, using fallback:', error.message);
+      log.warn('⚠️ xAI API failed, using fallback:', error.message);
     }
   }
 

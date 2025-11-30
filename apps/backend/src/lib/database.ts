@@ -1,5 +1,8 @@
 import { Pool, PoolClient, PoolConfig, QueryResult, QueryResultRow } from 'pg';
 import { databaseConfig } from '../config/index';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('database');
 
 // Types
 type _QueryFunction = <T extends QueryResultRow = any>(
@@ -25,7 +28,7 @@ const pool = new Pool(poolConfig);
 
 // Handle connection errors
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+  log.error('Unexpected error on idle client', err);
   process.exit(-1);
 });
 
@@ -69,19 +72,19 @@ const query = async <T extends QueryResultRow = any>(
   try {
     const res = await pool.query<T>(text, params);
     const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
+    log.info('Executed query', { text, duration, rows: res.rowCount });
     return res;
   } catch (error) {
-    console.error('Query error', { text, params, error });
+    log.error('Query error', { text, params, error });
     throw error;
   }
 };
 
 // Graceful shutdown
 const shutdown = async () => {
-  console.log('Shutting down database pool...');
+  log.info('Shutting down database pool...');
   await pool.end();
-  console.log('Database pool has been shut down');};
+  log.info('Database pool has been shut down');};
 
 // Handle process termination
 process.on('SIGTERM', shutdown);

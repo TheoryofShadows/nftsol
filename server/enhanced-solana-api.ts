@@ -1,6 +1,9 @@
 ﻿import { Connection, PublicKey } from '@solana/web3.js';
 import { quickNodeService } from './quicknode-api';
 import { simpleHashService } from './simplehash-api';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('enhancedSolanaApi');
 // Enhanced RPC endpoints including Alchemy
 const RPC_ENDPOINTS = [
   process.env.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
@@ -244,7 +247,7 @@ class EnhancedSolanaNFTService {
     const collections = Object.keys(COLLECTION_DATA);
     const allNFTs: EnhancedNFT[] = [];
 
-    console.log(`Fetching NFTs from ${collections.length} collections using multiple APIs...`);
+    log.info(`Fetching NFTs from ${collections.length} collections using multiple APIs...`);
 
     for (const collection of collections) {
       try {
@@ -294,7 +297,7 @@ class EnhancedSolanaNFTService {
       return b.price - a.price;
     });
 
-    console.log(`Successfully prepared ${sortedNFTs.length} enhanced NFTs`);
+    log.info(`Successfully prepared ${sortedNFTs.length} enhanced NFTs`);
     return sortedNFTs.slice(0, 48); // Limit for performance
   }
 

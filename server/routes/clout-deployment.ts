@@ -3,6 +3,9 @@ import { Router } from "express";
 import fs from 'fs';
 import path from 'path';
 import { deployCLOUTToken } from '../scripts/deploy-clout-token';
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('cloutDeployment');
 const router = Router();
 
 /**
@@ -10,7 +13,7 @@ const router = Router();
  */
 router.post('/deploy', async (req, res) => {
   try {
-    console.log('Starting CLOUT token deployment via API...');
+    log.info('Starting CLOUT token deployment via API...');
     
     // Dynamic import to avoid TypeScript rootDir issues
     const deploymentInfo = await deployCLOUTToken();
@@ -23,7 +26,7 @@ router.post('/deploy', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('CLOUT deployment failed:', error);
+    log.error('CLOUT deployment failed:', error);
     
     res.status(500).json({
       success: false,

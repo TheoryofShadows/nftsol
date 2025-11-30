@@ -5,6 +5,9 @@ import cors from 'cors';
 import { body, validationResult, param, query } from 'express-validator';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('securityMiddleware');
 
 // Rate limiting configurations
 export const generalLimiter = rateLimit({
@@ -164,7 +167,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   const requestId = crypto.randomUUID();
   
   // Log request details
-  console.log(`[${new Date().toISOString()}] ${requestId} ${req.method} ${req.url} - IP: ${req.ip}`);
+  log.info(`[${new Date().toISOString()}] ${requestId} ${req.method} ${req.url} - IP: ${req.ip}`);
   
   // Add request ID to response headers
   res.setHeader('X-Request-ID', requestId);
@@ -172,7 +175,7 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
   // Log response when finished
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-    console.log(`[${new Date().toISOString()}] ${requestId} ${res.statusCode} - ${duration}ms`);
+    log.info(`[${new Date().toISOString()}] ${requestId} ${res.statusCode} - ${duration}ms`);
   });
   
   next();
@@ -189,7 +192,7 @@ export const adminIPWhitelist = (req: Request, res: Response, next: NextFunction
   }
   
   if (allowedIPs.length > 0 && !allowedIPs.includes(clientIP || '')) {
-    console.warn(`[SECURITY] Unauthorized admin access attempt from IP: ${clientIP}`);
+    log.warn(`[SECURITY] Unauthorized admin access attempt from IP: ${clientIP}`);
     return res.status(403).json({ error: 'Access denied' });
   }
   
@@ -213,7 +216,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
   };
   
   if (checkForSQLInjection(req.body) || checkForSQLInjection(req.query) || checkForSQLInjection(req.params)) {
-    console.warn(`[SECURITY] Potential SQL injection attempt from IP: ${req.ip}`);
+    log.warn(`[SECURITY] Potential SQL injection attempt from IP: ${req.ip}`);
     return res.status(400).json({ error: 'Invalid input detected' });
   }
   

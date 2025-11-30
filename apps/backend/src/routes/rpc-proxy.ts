@@ -8,6 +8,9 @@
 import { Router, Request, Response } from 'express';
 import axios, { AxiosError } from 'axios';
 import rateLimit from 'express-rate-limit';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('rpcProxy');
 
 const router = Router();
 
@@ -119,7 +122,7 @@ router.post('/', rpcLimiter, async (req: Request, res: Response) => {
     };
 
     // Log the request (without sensitive data)
-    console.log(`RPC Proxy: ${method}`, {
+    log.info(`RPC Proxy: ${method}`, {
       hasParams: !!params,
       paramCount: params?.length || 0,
     });
@@ -215,7 +218,7 @@ router.post('/batch', rpcLimiter, async (req: Request, res: Response) => {
 
     res.json(response.data);
   } catch (error: any) {
-    console.error('RPC Batch Error:', error.message);
+    log.error('RPC Batch Error:', error.message);
 
     if (error.code === 'ECONNABORTED') {
       return res.status(504).json({

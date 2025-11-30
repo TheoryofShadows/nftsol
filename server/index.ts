@@ -30,6 +30,9 @@ const uploadsDir = path.join(process.cwd(), "uploads");
 const app = express();
 import corsAllowed from './cors-allowed';
 import market from './routes/market';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('index');
 app.use(corsAllowed);
 app.use('/api', market);
 
@@ -80,7 +83,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const requiredEnvVars = ["DATABASE_URL"];
   const missing = requiredEnvVars.filter((env) => !process.env[env]);
   if (missing.length > 0) {
-    console.error("Missing required environment variables:", missing);
+    log.error("Missing required environment variables:", missing);
     process.exit(1);
   }
 
@@ -103,10 +106,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const { setupHeliusRoutes } = await import("./helius-api");
   const { setupMagicEdenRoutes } = await import("./magic-eden-api");
 
-  console.log("Setting up Magic Eden API routes...");
+  log.info("Setting up Magic Eden API routes...");
   setupMagicEdenRoutes(app);
 
-  console.log("Setting up Helius API routes...");
+  log.info("Setting up Helius API routes...");
   setupHeliusRoutes(app);
 
   const { getWalletConfig, updateWalletConfig } = await import("./routes/wallet-config");
@@ -155,17 +158,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   app.get("/api/security/dashboard", getSecurityDashboard);
 
   app.get("/health", (req: Request, res: Response) => {
-    console.log("Health check accessed");
+    log.info("Health check accessed");
     res.json({ status: "healthy", timestamp: new Date().toISOString() });
   });
 
   app.get("/api/health", (req: Request, res: Response) => {
-    console.log("API health check accessed");
+    log.info("API health check accessed");
     res.json({ status: "ok", timestamp: new Date().toISOString(), database: "connected" });
   });
 
   app.post("/api/webhook/test", (req: Request, res: Response) => {
-    console.log("Webhook test received:", {
+    log.info("Webhook test received:", {
       timestamp: new Date().toISOString(),
       headers: req.headers,
       body: req.body,
@@ -180,7 +183,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   });
 
   app.get("/api/webhook/test", (req: Request, res: Response) => {
-    console.log("Webhook GET test accessed");
+    log.info("Webhook GET test accessed");
     res.json({
       message: "Webhook endpoint is active",
       status: "ready",
@@ -210,9 +213,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   const PORT = parseInt(process.env.PORT || "3001", 10);
   const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://0.0.0.0:${PORT}`);
-    console.log(`Access your app at: http://localhost:${PORT}`);
-    console.log("WebSocket server initialized for real-time updates");
+    log.info(`Server running on http://0.0.0.0:${PORT}`);
+    log.info(`Access your app at: http://localhost:${PORT}`);
+    log.info("WebSocket server initialized for real-time updates");
   });
 
   setupWebSocketAPI(server);

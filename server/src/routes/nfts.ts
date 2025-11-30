@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { getAssetsByOwner } from "../helius-api.js";
+import { createModuleLogger } from '../../../../../utils/logger';
+
+const log = createModuleLogger('nfts');
 
 const r = Router();
 
@@ -15,7 +18,7 @@ r.get("/", async (req, res) => {
     const items = await getAssetsByOwner(owner);
     return res.json({ items });
   } catch (e:any) {
-    console.error("nfts route error:", e);
+    log.error("nfts route error:", e);
     return res.status(500).json({ items: [], error: e?.message || "unknown" });
   }
 });

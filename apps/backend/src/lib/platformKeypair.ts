@@ -1,5 +1,8 @@
 import { Keypair as Web3Keypair } from "@solana/web3.js";
 import bs58 from "bs58";
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('platformKeypair');
 
 let cachedKeypair: Web3Keypair | null = null;
 
@@ -34,7 +37,7 @@ export function getPlatformKeypair(): Web3Keypair {
       secretBytes = bs58.decode(secret);
     }
   } catch (error: unknown) {
-    console.error('Error parsing platform keypair:', error);
+    log.error('Error parsing platform keypair:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Invalid platform keypair format: ${errorMessage}`);
   }

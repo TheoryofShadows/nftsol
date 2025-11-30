@@ -4,6 +4,9 @@
  */
 
 import axios from 'axios';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('grokpediaProduction');
 
 export interface GrokVerificationResult {
   verified: boolean;
@@ -37,7 +40,7 @@ export async function verifyWithGrok(
     const xaiApiKey = process.env.XAI_API_KEY;
 
     if (!xaiApiKey) {
-      console.warn('[Grok] XAI_API_KEY not set, using Cloudflare AI fallback');
+      log.warn('[Grok] XAI_API_KEY not set, using Cloudflare AI fallback');
       return await verifyWithCloudflareAI(videoUri, nftId);
     }
 
@@ -121,7 +124,7 @@ Respond with: VERIFIED or NEEDS_REVIEW
         : `Content verification score: ${score}/100. This content requires additional verification.`,
     };
   } catch (error: any) {
-    console.warn('[Grok] xAI API failed, using Cloudflare AI fallback:', error.message);
+    log.warn('[Grok] xAI API failed, using Cloudflare AI fallback:', error.message);
     return await verifyWithCloudflareAI(videoUri, nftId);
   }
 }
@@ -168,7 +171,7 @@ async function verifyWithCloudflareAI(
       }`,
     };
   } catch (error) {
-    console.error('[Grok] Cloudflare AI fallback failed:', error);
+    log.error('[Grok] Cloudflare AI fallback failed:', error);
     // Ultimate fallback: return neutral verification
     return {
       verified: false,

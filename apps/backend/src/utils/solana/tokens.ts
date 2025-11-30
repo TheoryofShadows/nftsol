@@ -1,6 +1,9 @@
 import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { getConnection } from './connection';
+import { createModuleLogger } from '../../utils/logger';
+
+const log = createModuleLogger('tokens');
 
 // Token Metadata Program ID (Metaplex)
 const TOKEN_METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
@@ -106,7 +109,7 @@ export async function getTokenInfo(mintAddress: string) {
       metadata = accountInfo.data;
     }
   } catch (error) {
-    console.error('Error fetching token metadata:', error);
+    log.error('Error fetching token metadata:', error);
   }
 
   return {

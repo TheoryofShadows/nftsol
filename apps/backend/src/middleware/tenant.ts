@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { pool } from '../lib/db';
 import crypto from 'crypto';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('tenant');
 
 /**
  * Tenant context - Attached to each request for isolation
@@ -102,7 +105,7 @@ export async function authenticateApiKey(req: Request): Promise<TenantContext | 
       permissions: row.permissions || [],
     };
   } catch (error) {
-    console.error('Error authenticating API key:', error);
+    log.error('Error authenticating API key:', error);
     return null;
   }
 }
@@ -129,7 +132,7 @@ export async function tenantMiddleware(req: Request, res: Response, next: NextFu
 
     next();
   } catch (error) {
-    console.error('Tenant middleware error:', error);
+    log.error('Tenant middleware error:', error);
     res.status(500).json({
       error: 'Internal Server Error',
       message: 'Failed to authenticate tenant',
@@ -227,7 +230,7 @@ export async function enforceRateLimit(req: Request, res: Response, next: NextFu
 
     next();
   } catch (error) {
-    console.error('Rate limit error:', error);
+    log.error('Rate limit error:', error);
     // Don't block on rate limit errors, just log
     next();
   }

@@ -10,6 +10,9 @@ const { validationResult: _validationResult, body: _body, param: _param, query: 
 import env from '../../config';
 import { SecurityConfig as _SecurityConfig, RedisConfig } from '../../types/config';
 import _logger from '../../utils/logger';
+import { createModuleLogger } from '../../utils/logger';
+
+const log = createModuleLogger('index');
 
 // Rate limiting tiers (requests per 15 minutes)
 const _RATE_LIMIT_TIERS = {
@@ -55,18 +58,18 @@ try {
       return delay;
     },
     reconnectOnError: (err: Error) => {
-      console.error('Redis connection error:', err.message);
+      log.error('Redis connection error:', err.message);
       return true; // Reconnect on error
     }
   });
 
   // Set up event handlers
   redisClient.on('error', (err: Error) => {
-    console.error('Redis error:', err);
+    log.error('Redis error:', err);
   });
 
   redisClient.on('connect', () => {
-    console.log('Connected to Redis');
+    log.info('Connected to Redis');
   });
 
   // Rate limiting configuration
@@ -80,7 +83,7 @@ try {
     inMemoryBlockDuration: 60, // Block for 1 minute when in-memory blocking
   });
 } catch (error) {
-  console.error('Failed to initialize Redis:', error);
+  log.error('Failed to initialize Redis:', error);
   rateLimiter = null;
 }
 
@@ -88,7 +91,7 @@ try {
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
   // Skip rate limiting if Redis is not available
   if (!rateLimiter) {
-    console.warn('Rate limiter not available, skipping rate limiting');
+    log.warn('Rate limiter not available, skipping rate limiting');
     return next();
   }
 
@@ -100,7 +103,7 @@ export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFun
       next();
     })
     .catch((err) => {
-      console.warn(`Rate limit exceeded for IP: ${clientIp}`, err);
+      log.warn(`Rate limit exceeded for IP: ${clientIp}`, err);
       res.status(429).json({
         status: 'error',
         message: 'Too many requests, please try again later.',

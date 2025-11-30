@@ -9,6 +9,9 @@
  */
 
 import crypto from 'crypto';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('grokpedia');
 
 export interface GrokVerificationResult {
   summary: string;
@@ -36,7 +39,7 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
 
   // Fallback to mock if no API key configured
   if (!apiKey) {
-    console.warn('⚠️ XAI_API_KEY not set, using fallback verification');
+    log.warn('⚠️ XAI_API_KEY not set, using fallback verification');
     return grokVerifyMock(input);
   }
 
@@ -96,10 +99,10 @@ Score scale (0-100):
       sources: parsed.sources || ['xAI Grok Analysis'],
     };
   } catch (error: any) {
-    console.error('xAI Grok API Error:', error.message);
+    log.error('xAI Grok API Error:', error.message);
 
     // Graceful fallback to mock on error
-    console.warn('⚠️ Falling back to heuristic verification');
+    log.warn('⚠️ Falling back to heuristic verification');
     return grokVerifyMock(input);
   }
 }

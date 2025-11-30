@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { aiFeaturesService } from "../ai-features-service";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('aiFeatures');
 
 const router = Router();
 
@@ -49,7 +52,7 @@ router.post('/enhance-description', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Description enhancement error:', error);
+    log.error('Description enhancement error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Enhancement failed'
@@ -85,7 +88,7 @@ router.post('/analyze-pricing', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Pricing analysis error:', error);
+    log.error('Pricing analysis error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Analysis failed'
@@ -120,7 +123,7 @@ router.post('/collection-insights', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Collection insights error:', error);
+    log.error('Collection insights error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Insights generation failed'
@@ -158,7 +161,7 @@ router.post('/chatbot', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Chatbot processing error:', error);
+    log.error('Chatbot processing error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Chatbot processing failed'
@@ -195,7 +198,7 @@ router.post('/social-content', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Social content generation error:', error);
+    log.error('Social content generation error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Content generation failed'
@@ -274,7 +277,7 @@ router.post('/batch-analyze', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Batch analysis error:', error);
+    log.error('Batch analysis error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Batch analysis failed'

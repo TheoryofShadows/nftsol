@@ -4,6 +4,9 @@ import { Server as SocketIOServer } from "socket.io";
 import { db } from "./db";
 import { nfts, nftTransactions } from "@shared/nft-schema";
 import { desc, eq } from "drizzle-orm";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('websocketApi');
 
 export function setupWebSocketAPI(httpServer: Server) {
   const io = new SocketIOServer(httpServer, {
@@ -17,7 +20,7 @@ export function setupWebSocketAPI(httpServer: Server) {
   const connectedClients = new Map();
 
   io.on('connection', (socket) => {
-    console.log(`✅ Client connected: ${socket.id}`);
+    log.info(`✅ Client connected: ${socket.id}`);
     connectedClients.set(socket.id, {
       connectedAt: new Date(),
       subscriptions: new Set()
@@ -27,14 +30,14 @@ export function setupWebSocketAPI(httpServer: Server) {
     socket.on('subscribe:nft-updates', () => {
       socket.join('nft-updates');
       connectedClients.get(socket.id)?.subscriptions.add('nft-updates');
-      console.log(`📡 Client ${socket.id} subscribed to NFT updates`);
+      log.info(`📡 Client ${socket.id} subscribed to NFT updates`);
     });
 
     // Subscribe to specific collection updates
     socket.on('subscribe:collection', (collectionName) => {
       socket.join(`collection:${collectionName}`);
       connectedClients.get(socket.id)?.subscriptions.add(`collection:${collectionName}`);
-      console.log(`📡 Client ${socket.id} subscribed to collection: ${collectionName}`);
+      log.info(`📡 Client ${socket.id} subscribed to collection: ${collectionName}`);
     });
 
     // Subscribe to price alerts
@@ -42,14 +45,14 @@ export function setupWebSocketAPI(httpServer: Server) {
       const { mintAddress, targetPrice, direction } = params;
       socket.join(`price-alert:${mintAddress}`);
       connectedClients.get(socket.id)?.subscriptions.add(`price-alert:${mintAddress}`);
-      console.log(`💰 Client ${socket.id} subscribed to price alerts for ${mintAddress}`);
+      log.info(`💰 Client ${socket.id} subscribed to price alerts for ${mintAddress}`);
     });
 
     // Subscribe to wallet activity
     socket.on('subscribe:wallet', (walletAddress) => {
       socket.join(`wallet:${walletAddress}`);
       connectedClients.get(socket.id)?.subscriptions.add(`wallet:${walletAddress}`);
-      console.log(`👛 Client ${socket.id} subscribed to wallet: ${walletAddress}`);
+      log.info(`👛 Client ${socket.id} subscribed to wallet: ${walletAddress}`);
     });
 
     // Get live marketplace stats
@@ -58,14 +61,14 @@ export function setupWebSocketAPI(httpServer: Server) {
         const stats = await getLiveMarketplaceStats();
         socket.emit('live-stats', stats);
       } catch (error) {
-        console.error('Live stats error:', error);
+        log.error('Live stats error:', error);
         socket.emit('error', { message: 'Failed to fetch live stats' });
       }
     });
 
     // Handle disconnection
     socket.on('disconnect', () => {
-      console.log(`❌ Client disconnected: ${socket.id}`);
+      log.info(`❌ Client disconnected: ${socket.id}`);
       connectedClients.delete(socket.id);
     });
   });
@@ -154,7 +157,7 @@ export function setupWebSocketAPI(httpServer: Server) {
       const stats = await getLiveMarketplaceStats();
       broadcast.marketStats(stats);
     } catch (error) {
-      console.error('Periodic stats update error:', error);
+      log.error('Periodic stats update error:', error);
     }
   }, 30000); // Update every 30 seconds
 

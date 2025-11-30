@@ -16,6 +16,9 @@
  */
 
 import axios from 'axios';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('archiveAdvancedSearch');
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -145,7 +148,7 @@ export class ArchiveAdvancedSearchService {
         facets: response.data.facets,
       };
     } catch (error) {
-      console.error('Advanced search failed:', error);
+      log.error('Advanced search failed:', error);
       throw new Error(`Advanced search failed: ${error}`);
     }
   }

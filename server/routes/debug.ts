@@ -1,5 +1,8 @@
 import { Router } from "express";
 import { aiFeaturesService } from "../ai-features-service";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('debug');
 
 type ServiceStatus = Record<string, unknown>;
 
@@ -148,7 +151,7 @@ router.post('/ai-test', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('AI test error:', error);
+    log.error('AI test error:', error);
     res.status(500).json({
       timestamp: new Date().toISOString(),
       success: false,

@@ -1,4 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('solanaNftApi');
 
 // Multiple Solana RPC endpoints for redundancy
 const RPC_ENDPOINTS = [

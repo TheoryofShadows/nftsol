@@ -12,6 +12,9 @@
 
 import { createHash } from 'crypto';
 import NodeCache from 'node-cache';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('grokpediaOptimized');
 
 // Initialize cache with 24-hour TTL
 const cache = new NodeCache({ stdTTL: 86400 }); // 24 hours
@@ -36,7 +39,7 @@ export async function grokVerify(content: string): Promise<GrokVerificationResul
   // 2. Check cache first (optimization from Grok)
   const cached = cache.get<GrokVerificationResult>(cacheKey);
   if (cached) {
-    console.log('✅ Cache hit:', cacheKey);
+    log.info('✅ Cache hit', { cacheKey });
     return cached;
   }
 
@@ -84,11 +87,11 @@ export async function grokVerify(content: string): Promise<GrokVerificationResul
 
     // 5. Cache the result (optimization from Grok)
     cache.set(cacheKey, result);
-    console.log('💾 Cached result:', cacheKey);
+    log.info('💾 Cached result', { cacheKey });
 
     return result;
   } catch (error) {
-    console.warn('⚠️ Grok API failed, using fallback:', error);
+    log.warn('⚠️ Grok API failed, using fallback', { error: error instanceof Error ? error.message : String(error) });
     return grokVerifyFallback(content);
   }
 }
@@ -184,7 +187,7 @@ export function getCacheStats() {
  */
 export function clearCache() {
   cache.flushAll();
-  console.log('🗑️ Cache cleared');
+  log.info('🗑️ Cache cleared');
 }
 
 /**
@@ -198,15 +201,15 @@ export async function warmCache() {
     'Public domain video archive',
   ];
 
-  console.log('🔥 Warming cache with common queries...');
+  log.info('🔥 Warming cache with common queries...');
 
   for (const query of commonQueries) {
     try {
       await grokVerify(query);
     } catch (error) {
-      console.warn(`Failed to warm cache for: ${query}`);
+      log.warn('Failed to warm cache', { query, error: error instanceof Error ? error.message : String(error) });
     }
   }
 
-  console.log('✅ Cache warmed');
+  log.info('✅ Cache warmed');
 }

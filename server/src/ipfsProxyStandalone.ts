@@ -1,4 +1,7 @@
 import express from "express";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('ipfsProxyStandalone');
 
 const app = express();
 
@@ -133,8 +136,8 @@ if (process.env.RUN_STANDALONE) { // app.listen DISABLED (PORT, () => { }
 // RUN_STANDALONE gate:
 if (process.env.RUN_STANDALONE) {
   // app.listen DISABLED (PORT, () => {
-    console.log(`✅ IPFS proxy listening on http://localhost:${PORT}`);
+    log.info(`✅ IPFS proxy listening on http://localhost:${PORT}`);
   });
 }
-  console.log(`✅ IPFS proxy listening on http://localhost:${PORT}`);
+  log.info(`✅ IPFS proxy listening on http://localhost:${PORT}`);
 });

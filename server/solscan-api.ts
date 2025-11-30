@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('solscanApi');
 
 // Solscan API configuration
 const SOLSCAN_API_BASE = 'https://api.solscan.io';
@@ -44,7 +47,7 @@ async function makeRequest(endpoint: string, params: Record<string, string> = {}
 
     return await response.json();
   } catch (error) {
-    console.error('Solscan API request failed:', error);
+    log.error('Solscan API request failed:', error);
     throw error;
   }
 }
@@ -57,7 +60,7 @@ export function setupSolscanRoutes(app: any) {
       const accountInfo = await makeRequest(ENDPOINTS.account, { address });
       res.json(accountInfo);
     } catch (error) {
-      console.error("Failed to fetch account info:", error);
+      log.error("Failed to fetch account info:", error);
       res.status(500).json({ error: "Failed to fetch account information" });
     }
   });
@@ -69,7 +72,7 @@ export function setupSolscanRoutes(app: any) {
       const transactionInfo = await makeRequest(ENDPOINTS.transaction, { signature });
       res.json(transactionInfo);
     } catch (error) {
-      console.error("Failed to fetch transaction info:", error);
+      log.error("Failed to fetch transaction info:", error);
       res.status(500).json({ error: "Failed to fetch transaction information" });
     }
   });
@@ -81,7 +84,7 @@ export function setupSolscanRoutes(app: any) {
       const tokens = await makeRequest(ENDPOINTS.tokens, { address });
       res.json(tokens);
     } catch (error) {
-      console.error("Failed to fetch account tokens:", error);
+      log.error("Failed to fetch account tokens:", error);
       res.status(500).json({ error: "Failed to fetch account tokens" });
     }
   });
@@ -98,7 +101,7 @@ export function setupSolscanRoutes(app: any) {
       });
       res.json(transfers);
     } catch (error) {
-      console.error("Failed to fetch account transfers:", error);
+      log.error("Failed to fetch account transfers:", error);
       res.status(500).json({ error: "Failed to fetch account transfers" });
     }
   });
@@ -110,7 +113,7 @@ export function setupSolscanRoutes(app: any) {
       const nfts = await makeRequest(ENDPOINTS.nft, { address });
       res.json(nfts);
     } catch (error) {
-      console.error("Failed to fetch account NFTs:", error);
+      log.error("Failed to fetch account NFTs:", error);
       res.status(500).json({ error: "Failed to fetch account NFTs" });
     }
   });
@@ -141,7 +144,7 @@ export function setupSolscanRoutes(app: any) {
 
       res.json(analytics);
     } catch (error) {
-      console.error("Failed to fetch wallet analytics:", error);
+      log.error("Failed to fetch wallet analytics:", error);
       res.status(500).json({ error: "Failed to fetch wallet analytics" });
     }
   });
@@ -164,7 +167,7 @@ export function setupSolscanRoutes(app: any) {
 
       res.json(verification);
     } catch (error) {
-      console.error("Failed to verify transaction:", error);
+      log.error("Failed to verify transaction:", error);
       res.status(500).json({ 
         signature: req.params.signature,
         verified: false,
@@ -185,7 +188,7 @@ export function setupSolscanRoutes(app: any) {
         lastChecked: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Failed to get Solscan status:", error);
+      log.error("Failed to get Solscan status:", error);
       res.status(500).json({ error: "Failed to get Solscan API status" });
     }
   });

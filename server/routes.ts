@@ -45,7 +45,7 @@ const isAdmin = async (req: any, res: any, next: any) => {
     }
 
     if (allowedSet.size > 0 && !allowedSet.has(rawClientIP) && !allowedSet.has(normalizedClientIP)) {
-      console.warn(`[SECURITY] Admin access denied from unauthorized IP: ${rawClientIP}`);
+      log.warn(`[SECURITY] Admin access denied from unauthorized IP: ${rawClientIP}`);
       return res.status(403).json({ error: "Access denied: Unauthorized IP address" });
     }
 
@@ -56,7 +56,7 @@ const isAdmin = async (req: any, res: any, next: any) => {
     }
 
     if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET is not defined in environment variables.");
+      log.error("JWT_SECRET is not defined in environment variables.");
       return res.status(500).json({ error: "Server configuration error" });
     }
 
@@ -64,15 +64,15 @@ const isAdmin = async (req: any, res: any, next: any) => {
     const user = await storage.getUser(decoded.userId);
 
     if (!user || user.role !== "admin") {
-      console.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${rawClientIP}`);
+      log.warn(`[SECURITY] Admin access denied for user: ${user?.username} from IP: ${rawClientIP}`);
       return res.status(403).json({ error: "Forbidden: Insufficient privileges" });
     }
 
-    console.log(`[SECURITY] Admin access granted to: ${user.username} from IP: ${rawClientIP}`);
+    log.info(`[SECURITY] Admin access granted to: ${user.username} from IP: ${rawClientIP}`);
     req.user = user;
     next();
   } catch (error) {
-    console.error("Admin guard error:", error);
+    log.error("Admin guard error:", error);
     return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
 };
@@ -119,7 +119,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.error("Registration error:", error);
+      log.error("Registration error:", error);
       res.status(500).json({ 
         error: "Internal server error" 
       });
@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         token: token
       });
     } catch (error) {
-      console.error("Login error:", error);
+      log.error("Login error:", error);
       res.status(500).json({ 
         error: "Internal server error" 
       });
@@ -201,7 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { password, ...userResponse } = user;
       res.json({ user: userResponse });
     } catch (error) {
-      console.error("Get user error:", error);
+      log.error("Get user error:", error);
       res.status(500).json({ 
         error: "Internal server error" 
       });
@@ -219,7 +219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const { category, search } = req.query;
-      console.log("Fetching enhanced Solana NFTs...", { category, search });
+      log.info("Fetching enhanced Solana NFTs...", { category, search });
 
       let nfts = await enhancedSolanaNFTService.fetchAllEnhancedNFTs();
 
@@ -233,10 +233,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         nfts = enhancedSolanaNFTService.searchNFTs(nfts, search as string);
       }
 
-      console.log(`Successfully fetched ${nfts.length} enhanced NFTs`);
+      log.info(`Successfully fetched ${nfts.length} enhanced NFTs`);
       res.json(nfts);
     } catch (error) {
-      console.error("Error fetching enhanced NFTs:", error);
+      log.error("Error fetching enhanced NFTs:", error);
       res.status(500).json({ message: "Failed to fetch NFTs" });
     }
   });
@@ -247,7 +247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = enhancedSolanaNFTService.getCollectionStats();
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching collection stats:", error);
+      log.error("Error fetching collection stats:", error);
       res.status(500).json({ message: "Failed to fetch collection stats" });
     }
   });
@@ -289,7 +289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalUsers = userStats.totalUsers;
         }
       } catch (dbError) {
-        console.warn("Database stats unavailable, using defaults:", dbError?.message);
+        log.warn("Database stats unavailable, using defaults:", dbError?.message);
       }
 
       // Generate dynamic stats with real user data
@@ -306,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(stats);
     } catch (error) {
-      console.error("Failed to fetch platform stats:", error);
+      log.error("Failed to fetch platform stats:", error);
       res.status(500).json({ 
         error: "Failed to fetch platform stats",
         fallbackStats: {
@@ -368,18 +368,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       };
 
-      console.log('🎯 Test NFT Purchase Transaction Created:');
-      console.log(`💰 NFT Price: ${price} SOL`);
-      console.log(`✅ Seller receives: ${sellerAmount.toFixed(4)} SOL (95.5%)`);
-      console.log(`🎨 Creator royalty: ${creatorRoyalty.toFixed(4)} SOL (2.5%)`);
-      console.log(`🏛️ Platform fee: ${platformFee.toFixed(4)} SOL (2.0%)`);
-      console.log(`🔧 Developer wallet: ${developerFee.toFixed(4)} SOL`);
-      console.log(`🪙 CLOUT treasury: ${cloutTreasuryFee.toFixed(4)} SOL`);
-      console.log(`🎖️ CLOUT reward: ${transactionResult.cloutReward} tokens`);
+      log.info('🎯 Test NFT Purchase Transaction Created:');
+      log.info(`💰 NFT Price: ${price} SOL`);
+      log.info(`✅ Seller receives: ${sellerAmount.toFixed(4)} SOL (95.5%)`);
+      log.info(`🎨 Creator royalty: ${creatorRoyalty.toFixed(4)} SOL (2.5%)`);
+      log.info(`🏛️ Platform fee: ${platformFee.toFixed(4)} SOL (2.0%)`);
+      log.info(`🔧 Developer wallet: ${developerFee.toFixed(4)} SOL`);
+      log.info(`🪙 CLOUT treasury: ${cloutTreasuryFee.toFixed(4)} SOL`);
+      log.info(`🎖️ CLOUT reward: ${transactionResult.cloutReward} tokens`);
 
       res.json(transactionResult);
     } catch (error) {
-      console.error('Test purchase error:', error);
+      log.error('Test purchase error:', error);
       res.status(500).json({ error: 'Failed to create test transaction' });
     }
   });
@@ -393,6 +393,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
  *  GET /ipfs-img?u=ipfs://... or https://...
  */
 import type { Request, Response } from 'express';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('routes');
 const { fetchWithIpfs } = require('./utils/ipfs');
 
 app.get?.('/ipfs-img', async (req: Request, res: Response) => {

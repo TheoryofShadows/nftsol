@@ -3,6 +3,9 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { getSolanaRewardsService } from "../solana-rewards-provider";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('solanaRewards');
 
 const router = Router();
 
@@ -34,7 +37,7 @@ router.get("/staking/:cloutMint", async (req, res) => {
       position,
     });
   } catch (error: any) {
-    console.error("[solana-rewards] staking GET failed:", error);
+    log.error("[solana-rewards] staking GET failed:", error);
     res.status(400).json({ error: error.message ?? "failed_to_fetch_staking_pool" });
   }
 });
@@ -62,7 +65,7 @@ router.post("/staking/transactions/stake", async (req, res) => {
       transaction: serializeTransaction(tx),
     });
   } catch (error: any) {
-    console.error("[solana-rewards] stake transaction build failed:", error);
+    log.error("[solana-rewards] stake transaction build failed:", error);
     res.status(400).json({ error: error.message ?? "stake_transaction_failed" });
   }
 });
@@ -90,7 +93,7 @@ router.post("/staking/transactions/unstake", async (req, res) => {
       transaction: serializeTransaction(tx),
     });
   } catch (error: any) {
-    console.error("[solana-rewards] unstake transaction build failed:", error);
+    log.error("[solana-rewards] unstake transaction build failed:", error);
     res.status(400).json({ error: error.message ?? "unstake_transaction_failed" });
   }
 });
@@ -119,7 +122,7 @@ router.post("/staking/transactions/harvest", async (req, res) => {
       partialSigners: ["authority"],
     });
   } catch (error: any) {
-    console.error("[solana-rewards] harvest transaction build failed:", error);
+    log.error("[solana-rewards] harvest transaction build failed:", error);
     res.status(400).json({ error: error.message ?? "harvest_transaction_failed" });
   }
 });
@@ -147,7 +150,7 @@ router.post("/loyalty/transactions/record", async (req, res) => {
       partialSigners: ["authority"],
     });
   } catch (error: any) {
-    console.error("[solana-rewards] loyalty transaction build failed:", error);
+    log.error("[solana-rewards] loyalty transaction build failed:", error);
     res.status(400).json({ error: error.message ?? "loyalty_transaction_failed" });
   }
 });
@@ -206,7 +209,7 @@ router.post("/market/transactions/settle", async (req, res) => {
       partialSigners: ["authority"],
     });
   } catch (error: any) {
-    console.error("[solana-rewards] settlement transaction build failed:", error);
+    log.error("[solana-rewards] settlement transaction build failed:", error);
     res.status(400).json({ error: error.message ?? "settlement_transaction_failed" });
   }
 });

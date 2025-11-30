@@ -1,4 +1,7 @@
 import express, { Request, Response } from 'express';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('saas');
 import {
   createTenant,
   getTenantDetails,
@@ -68,7 +71,7 @@ router.post('/tenants', async (req: Request, res: Response) => {
       message: 'Tenant created successfully. Save your API key - it will not be shown again!',
     });
   } catch (error: any) {
-    console.error('Error creating tenant:', error);
+    log.error('Error creating tenant:', error);
 
     // Handle unique constraint violations
     if (error.code === '23505') {

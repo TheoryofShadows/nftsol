@@ -27,6 +27,9 @@ import {
 import { getPlatformKeypair } from '../lib/platformKeypair';
 import { programConfig, solanaConfig } from '../config/index';
 import { getOrCreateCloutVault } from '../utils/clout-vault';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('cloutToken');
 
 export interface CloutRewardResult {
   success: boolean;
@@ -61,10 +64,10 @@ export class CloutTokenService {
     this.mint = new PublicKey(mintAddress);
     this.connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
 
-    console.log(`[CLOUT] Service initialized`);
-    console.log(`[CLOUT] Mint address: ${this.mint.toBase58()}`);
-    console.log(`[CLOUT] RPC URL: ${solanaConfig.rpcUrl}`);
-    console.log(`[CLOUT] Cluster: ${solanaConfig.cluster}`);
+    log.info(`[CLOUT] Service initialized`);
+    log.info(`[CLOUT] Mint address: ${this.mint.toBase58()}`);
+    log.info(`[CLOUT] RPC URL: ${solanaConfig.rpcUrl}`);
+    log.info(`[CLOUT] Cluster: ${solanaConfig.cluster}`);
   }
 
   /**
@@ -109,7 +112,7 @@ export class CloutTokenService {
       } catch (error: any) {
         // Vault doesn't exist - create it
         if (error.name === 'TokenAccountNotFoundError' || error.message?.includes('not found')) {
-          console.log('[CLOUT] Creating rewards vault ATA...');
+          log.info('[CLOUT] Creating rewards vault ATA...');
 
           const vaultATA = await getAssociatedTokenAddress(this.mint, platformKeypair.publicKey);
 
@@ -136,8 +139,8 @@ export class CloutTokenService {
             }
           );
 
-          console.log(`[CLOUT] ✓ Rewards vault created: ${vaultATA.toBase58()}`);
-          console.log(`[CLOUT] Transaction: https://solscan.io/tx/${signature}`);
+          log.info(`[CLOUT] ✓ Rewards vault created: ${vaultATA.toBase58()}`);
+          log.info(`[CLOUT] Transaction: https://solscan.io/tx/${signature}`);
 
           return vaultATA;
         }
@@ -251,7 +254,7 @@ export class CloutTokenService {
       }
 
       // Transfer CLOUT
-      console.log(
+      log.info(
         `[CLOUT] Transferring ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`
       );
 
@@ -264,10 +267,10 @@ export class CloutTokenService {
         amountLamports // amount
       );
 
-      console.log(
+      log.info(
         `[CLOUT] ✓ Successfully sent ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`
       );
-      console.log(`[CLOUT] Transaction: https://solscan.io/tx/${txSignature}`);
+      log.info(`[CLOUT] Transaction: https://solscan.io/tx/${txSignature}`);
 
       return {
         success: true,
@@ -276,7 +279,7 @@ export class CloutTokenService {
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('[CLOUT] Reward distribution error:', errorMessage);
+      log.error('[CLOUT] Reward distribution error:', errorMessage);
       return { success: false, error: errorMessage };
     }
   }
@@ -297,19 +300,19 @@ export class CloutTokenService {
         const mintInfo = await this.getMintInfo();
         const balance = Number(account.amount) / Number(BigInt(10 ** mintInfo.decimals));
         
-        console.log(`[CLOUT] Balance for ${walletAddress.slice(0, 8)}...: ${balance} CLOUT`);
+        log.info(`[CLOUT] Balance for ${walletAddress.slice(0, 8)}...: ${balance} CLOUT`);
         return balance;
       } catch (error: any) {
         // Log the error for debugging
         if (error.name === 'TokenAccountNotFoundError' || error.message?.includes('not found')) {
-          console.log(`[CLOUT] No token account found for ${walletAddress.slice(0, 8)}... (ATA: ${ata.toBase58()})`);
+          log.info(`[CLOUT] No token account found for ${walletAddress.slice(0, 8)}... (ATA: ${ata.toBase58()})`);
         } else {
-          console.error('[CLOUT] Error fetching balance for %s...:', walletAddress.slice(0, 8), error.message || error);
+          log.error(`[CLOUT] Error fetching balance for ${walletAddress.slice(0, 8)}...`, error.message || error);
         }
         return 0; // ATA doesn't exist, balance is 0
       }
     } catch (error: any) {
-      console.error('[CLOUT] Error in getCloutBalance for %s:', walletAddress, error.message || error);
+      log.error('[CLOUT] Error in getCloutBalance for %s:', walletAddress, error.message || error);
       return 0;
     }
   }

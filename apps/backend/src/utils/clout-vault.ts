@@ -10,6 +10,9 @@ import {
   getAccount,
 } from '@solana/spl-token';
 import { programConfig } from '../config/index';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('cloutVault');
 
 /**
  * Calculate the rewards vault ATA address (deterministic)
@@ -29,7 +32,7 @@ export async function getRewardsVaultAddress(): Promise<PublicKey | null> {
     const owner = new PublicKey(ownerAddress);
     return await getAssociatedTokenAddress(mint, owner);
   } catch (error) {
-    console.warn('Could not calculate rewards vault address:', error instanceof Error ? error.message : error);
+    log.warn('Could not calculate rewards vault address', { error: error instanceof Error ? error.message : String(error) });
     return null;
   }
 }
@@ -65,12 +68,12 @@ export async function getOrCreateCloutVault(
   const accountInfo = await connection.getAccountInfo(ata);
 
   if (accountInfo) {
-    console.log(`Rewards vault ATA already exists: ${ata.toBase58()}`);
+    log.info(`Rewards vault ATA already exists: ${ata.toBase58()}`);
     return ata;
   }
 
   // ATA doesn't exist - create it
-  console.log(`Creating rewards vault ATA: ${ata.toBase58()}`);
+  log.info(`Creating rewards vault ATA: ${ata.toBase58()}`);
 
   // Prepare the instruction (not sent here; actual creation happens when sending rewards)
   createAssociatedTokenAccountInstruction(
@@ -80,7 +83,7 @@ export async function getOrCreateCloutVault(
     mint // mint
   );
 
-  console.log(`ATA creation instruction prepared. Will create on first reward send.`);
+  log.info(`ATA creation instruction prepared. Will create on first reward send.`);
 
   return ata;
 }
@@ -94,12 +97,12 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
   const ownerAddress = process.env.REWARDS_OWNER || process.env.PLATFORM_WALLET || '';
 
   if (!mintAddress) {
-    console.warn('CLOUT_PROGRAM_ID not set in config');
+    log.warn('CLOUT_PROGRAM_ID not set in config');
     return false;
   }
 
   if (!ownerAddress) {
-    console.warn('REWARDS_OWNER or PLATFORM_WALLET not configured');
+    log.warn('REWARDS_OWNER or PLATFORM_WALLET not configured');
     return false;
   }
 
@@ -115,15 +118,15 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
     try {
       const tokenAccount = await getAccount(connection, vaultPubkey);
       if (tokenAccount.mint.equals(mint)) {
-        console.log(`Rewards vault verified and active: ${rewardsVault.toBase58()}`);
-        console.log(`Balance: ${tokenAccount.amount.toString()}`);
+        log.info(`Rewards vault verified and active: ${rewardsVault.toBase58()}`);
+        log.info(`Balance: ${tokenAccount.amount.toString()}`);
         return true;
       }
     } catch (err: any) {
       // Token account doesn't exist
       if (err.name === 'TokenAccountNotFoundError' || err.message?.includes('not found')) {
-        console.warn(`Rewards vault does not exist yet: ${rewardsVault.toBase58()}`);
-        console.warn('This is OK - it will be created automatically when first CLOUT reward is sent');
+        log.warn(`Rewards vault does not exist yet: ${rewardsVault.toBase58()}`);
+        log.warn('This is OK - it will be created automatically when first CLOUT reward is sent');
         return false;
       }
       throw err;
@@ -131,8 +134,8 @@ export async function verifyCloutVault(connection: Connection): Promise<boolean>
 
     return false;
   } catch (error) {
-    console.warn('Could not verify rewards vault:', error instanceof Error ? error.message : error);
-    console.warn('Will attempt to create when first reward is sent');
+    log.warn('Could not verify rewards vault', { error: error instanceof Error ? error.message : String(error) });
+    log.warn('Will attempt to create when first reward is sent');
     return false;
   }
 }

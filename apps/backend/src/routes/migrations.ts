@@ -9,6 +9,9 @@ import { join, normalize, resolve, sep } from 'path';
 import jwt from 'jsonwebtoken';
 import { pool } from '../lib/db';
 import { ApiResponse } from '../types';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('migrations');
 
 /**
  * Validate migration file path to prevent directory traversal attacks
@@ -322,7 +325,7 @@ async function getAppliedMigrations(): Promise<string[]> {
     const result = await pool.query('SELECT name FROM schema_migrations');
     return result.rows.map(row => row.name);
   } catch (error) {
-    console.error('Failed to get applied migrations:', error);
+    log.error('Failed to get applied migrations:', error);
     return [];
   }
 }

@@ -1,5 +1,8 @@
 
 import fetch from 'node-fetch';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('quicknodeApi');
 interface QuickNodeNFT {
   mint: string;
   name: string;
@@ -52,7 +55,7 @@ class QuickNodeNFTService {
       const data = await response.json() as QuickNodeCollectionResponse;
       return data.result?.nfts || [];
     } catch (error) {
-      console.error('QuickNode NFT fetch error:', error);
+      log.error('QuickNode NFT fetch error:', error);
       return [];
     }
   }
@@ -74,7 +77,7 @@ class QuickNodeNFTService {
       const data = await response.json() as QuickNodeMetadataResponse;
       return data.result || null;
     } catch (error) {
-      console.error('QuickNode metadata fetch error:', error);
+      log.error('QuickNode metadata fetch error:', error);
       return null;
     }
   }
@@ -96,7 +99,7 @@ class QuickNodeNFTService {
       const data = await response.json() as QuickNodeCollectionResponse;
       return data.result?.nfts || [];
     } catch (error) {
-      console.error('QuickNode wallet NFTs fetch error:', error);
+      log.error('QuickNode wallet NFTs fetch error:', error);
       return [];
     }
   }

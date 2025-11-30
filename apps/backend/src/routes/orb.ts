@@ -6,6 +6,9 @@
 import { Router, Request, Response } from 'express';
 import { OrbService } from '../services/orbService';
 import expressRateLimit from 'express-rate-limit';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('orb');
 
 const router = Router();
 const orbService = new OrbService(process.env.HELIUS_API_KEY);
@@ -39,7 +42,7 @@ router.get('/history/:ledgerId', orbLimiter, async (req: Request, res: Response)
       ...history,
     });
   } catch (error: any) {
-    console.error('Orb history error:', error);
+    log.error('Orb history error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch transaction history',
@@ -63,7 +66,7 @@ router.get('/embed/:ledgerId', orbLimiter, async (req: Request, res: Response) =
       embedUrl,
     });
   } catch (error: any) {
-    console.error('Orb embed error:', error);
+    log.error('Orb embed error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate embed URL',
@@ -86,7 +89,7 @@ router.get('/explain/:signature', orbLimiter, async (req: Request, res: Response
       explanation,
     });
   } catch (error: any) {
-    console.error('Orb explain error:', error);
+    log.error('Orb explain error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to explain transaction',
@@ -109,7 +112,7 @@ router.get('/heatmap/:ledgerId', orbLimiter, async (req: Request, res: Response)
       heatmap,
     });
   } catch (error: any) {
-    console.error('Orb heatmap error:', error);
+    log.error('Orb heatmap error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate heatmap',
@@ -136,7 +139,7 @@ router.get('/timeline/:ledgerId', orbLimiter, async (req: Request, res: Response
       timeline,
     });
   } catch (error: any) {
-    console.error('Orb timeline error:', error);
+    log.error('Orb timeline error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch timeline',

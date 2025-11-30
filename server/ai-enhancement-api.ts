@@ -3,6 +3,9 @@ import { Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('aiEnhancementApi');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -166,7 +169,7 @@ export function setupAIEnhancementRoutes(app: any) {
 
       res.json(result);
     } catch (error: any) {
-      console.error('AI enhancement error:', error);
+      log.error('AI enhancement error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -181,7 +184,7 @@ export function setupAIEnhancementRoutes(app: any) {
       const metadata = await AIEnhancementService.generateMetadata(req.file.path);
       res.json(metadata);
     } catch (error: any) {
-      console.error('Metadata generation error:', error);
+      log.error('Metadata generation error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -196,7 +199,7 @@ export function setupAIEnhancementRoutes(app: any) {
       const analysis = await AIEnhancementService.analyzeImageQuality(req.file.path);
       res.json(analysis);
     } catch (error: any) {
-      console.error('Quality analysis error:', error);
+      log.error('Quality analysis error:', error);
       res.status(500).json({ error: error.message });
     }
   });
@@ -220,7 +223,7 @@ export function setupAIEnhancementRoutes(app: any) {
 
       res.json(mockHistory);
     } catch (error: any) {
-      console.error('Enhancement history error:', error);
+      log.error('Enhancement history error:', error);
       res.status(500).json({ error: error.message });
     }
   });

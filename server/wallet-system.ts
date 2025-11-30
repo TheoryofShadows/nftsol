@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import * as crypto from "crypto";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('walletSystem');
 import {
   PLATFORM_WALLETS as PLATFORM_WALLET_CONFIG,
   ensurePlatformWallets,
@@ -202,13 +205,13 @@ export async function validateCloutDistribution(amount: number): Promise<boolean
   const todaysDistributions = await getDailyCloutDistributions(today);
   
   if (todaysDistributions + amount > treasury.maxDailyDistribution) {
-    console.log(`CLOUT distribution blocked: Would exceed daily limit of ${treasury.maxDailyDistribution}`);
+    log.info(`CLOUT distribution blocked: Would exceed daily limit of ${treasury.maxDailyDistribution}`);
     return false;
   }
   
   // Check emergency lock
   if (treasury.emergencyLock) {
-    console.log('CLOUT distribution blocked: Emergency lock active');
+    log.info('CLOUT distribution blocked: Emergency lock active');
     return false;
   }
   
@@ -236,7 +239,7 @@ export async function awardCloutTokens(userId: string, amount: number, reason: s
   // Security validation before awarding CLOUT
   const isValid = await validateCloutDistribution(amount);
   if (!isValid) {
-    console.log(`CLOUT award blocked for user ${userId}: Security validation failed`);
+    log.info(`CLOUT award blocked for user ${userId}: Security validation failed`);
     return;
   }
   
@@ -255,7 +258,7 @@ export async function awardCloutTokens(userId: string, amount: number, reason: s
   };
   
   wallet.transactionHistory.push(transaction);
-  console.log(`Awarded ${amount} CLOUT to user ${userId}: ${reason}`);
+  log.info(`Awarded ${amount} CLOUT to user ${userId}: ${reason}`);
 }
 
 type PlatformWalletStat = {
@@ -405,10 +408,10 @@ export async function processNFTPurchase(
     buyerWallet.transactionHistory.push(purchaseTransaction, commissionTransaction);
     sellerWallet.transactionHistory.push(purchaseTransaction);
     
-    console.log(`NFT Purchase processed: ${priceSOL} SOL`);
-    console.log(`- Developer commission: ${platformCommission} SOL (${(PLATFORM_WALLETS.developer.commissionRate * 100).toFixed(1)}%)`);
-    console.log(`- Creator royalty: ${creatorRoyalty} SOL (${(creatorRoyaltyRate * 100).toFixed(1)}%)`);
-    console.log(`- Seller receives: ${sellerAmount} SOL (${((sellerAmount / priceSOL) * 100).toFixed(1)}%)`);
+    log.info(`NFT Purchase processed: ${priceSOL} SOL`);
+    log.info(`- Developer commission: ${platformCommission} SOL (${(PLATFORM_WALLETS.developer.commissionRate * 100).toFixed(1)}%)`);
+    log.info(`- Creator royalty: ${creatorRoyalty} SOL (${(creatorRoyaltyRate * 100).toFixed(1)}%)`);
+    log.info(`- Seller receives: ${sellerAmount} SOL (${((sellerAmount / priceSOL) * 100).toFixed(1)}%)`);
     
     return { success: true, transactionId, breakdown };
   } catch (error: any) {

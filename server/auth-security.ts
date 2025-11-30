@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('authSecurity');
 const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = '24h';
 
@@ -53,7 +56,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     req.user = decoded;
     next();
   } catch (error) {
-    console.warn(`[AUTH] Invalid token attempt from IP: ${req.ip}`);
+    log.warn(`[AUTH] Invalid token attempt from IP: ${req.ip}`);
     return res.status(403).json({ error: 'Invalid or expired token' });
   }
 };
@@ -61,7 +64,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 // Admin role middleware
 export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user || req.user.role !== 'admin') {
-    console.warn(`[AUTH] Unauthorized admin access attempt from IP: ${req.ip}, User: ${req.user?.id}`);
+    log.warn(`[AUTH] Unauthorized admin access attempt from IP: ${req.ip}, User: ${req.user?.id}`);
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();

@@ -9,6 +9,9 @@ import { ultraCheapMintService } from '../services/ultra-cheap-mint';
 import { fileStorageService } from '../services/file-storage';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('mint');
 
 const router = Router();
 
@@ -115,7 +118,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
       return res.status(400).json(response);
     }
 
-    console.log(`📤 Processing file upload: ${file.originalname} (${file.size} bytes)`);
+    log.info(`📤 Processing file upload: ${file.originalname} (${file.size} bytes)`);
 
     // Validate file before storage
     const validation = fileStorageService.validateFile(
@@ -134,7 +137,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
     }
 
     // Upload file to storage
-    console.log('☁️ Uploading file to storage...');
+    log.info('☁️ Uploading file to storage...');
     const storageResult = await fileStorageService.uploadFile(
       file.buffer,
       file.originalname,
@@ -150,10 +153,10 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
       return res.status(500).json(response);
     }
 
-    console.log(`✅ File stored successfully: ${storageResult.url}`);
+    log.info(`✅ File stored successfully: ${storageResult.url}`);
 
     // Mint NFT using the uploaded image URL
-    console.log('🚀 Starting NFT mint...');
+    log.info('🚀 Starting NFT mint...');
     const mintResult = await ultraCheapMintService.mint({
       toAddress: creatorWallet,
       name: name,
@@ -190,7 +193,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
 
     return res.json(response);
   } catch (error) {
-    console.error('🔴 Mint error:', error);
+    log.error('🔴 Mint error:', error);
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',

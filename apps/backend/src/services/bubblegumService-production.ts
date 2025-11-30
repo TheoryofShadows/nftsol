@@ -11,6 +11,9 @@ import {
 } from '@metaplex-foundation/umi';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { uploadMetadata } from '../utils/irysUpload';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('bubblegumServiceProduction');
 
 export interface CompressedNFTMetadata {
   name: string;
@@ -120,7 +123,7 @@ export class BubblegumService {
         );
         metadataUri = uploadResult.uri;
       } catch (error) {
-        console.error('Irys upload failed, using fallback IPFS URI:', error);
+        log.error('Irys upload failed, using fallback IPFS URI:', error);
         // Fallback to IPFS or local gateway
         // Use a fallback URI if metadata.uri is not available
         // Use a fallback URI if metadata.uri is not available
@@ -156,7 +159,7 @@ export class BubblegumService {
         metadataUri,
       };
     } catch (error: any) {
-      console.error('Mint error:', error);
+      log.error('Mint error:', error);
       return {
         success: false,
         error: error.message || 'Mint failed',

@@ -5,6 +5,9 @@ import { nfts, nftTransactions, userNftStats } from "@shared/nft-schema";
 import { eq, desc, sql, and, gte, like, or, lte } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import type { ParsedQs } from "qs";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('publicApis');
 
 // Rate limiting for public APIs
 const rateLimitMap = new Map();
@@ -156,7 +159,7 @@ export function setupPublicAPIRoutes(app: Express) {
         filters: { q, collection, creator, minPrice, maxPrice, category, sortBy }
       });
     } catch (error) {
-      console.error("Public NFT search error:", error);
+      log.error("Public NFT search error:", error);
       res.status(500).json({ error: "Search failed" });
     }
   });
@@ -185,7 +188,7 @@ export function setupPublicAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Collections API error:", error);
+      log.error("Collections API error:", error);
       res.status(500).json({ error: "Failed to fetch collections" });
     }
   });
@@ -239,7 +242,7 @@ export function setupPublicAPIRoutes(app: Express) {
         }
       });
     } catch (error) {
-      console.error("Collection details error:", error);
+      log.error("Collection details error:", error);
       res.status(500).json({ error: "Failed to fetch collection details" });
     }
   });
@@ -287,7 +290,7 @@ export function setupPublicAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Trending API error:", error);
+      log.error("Trending API error:", error);
       res.status(500).json({ error: "Failed to fetch trending NFTs" });
     }
   });
@@ -327,7 +330,7 @@ export function setupPublicAPIRoutes(app: Express) {
         }
       });
     } catch (error) {
-      console.error("Creator profile error:", error);
+      log.error("Creator profile error:", error);
       res.status(500).json({ error: "Failed to fetch creator profile" });
     }
   });
@@ -367,7 +370,7 @@ export function setupPublicAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Platform stats error:", error);
+      log.error("Platform stats error:", error);
       res.status(500).json({ error: "Failed to fetch platform statistics" });
     }
   });
@@ -396,7 +399,7 @@ export function setupPublicAPIRoutes(app: Express) {
         totalTransactions: priceHistory.length
       });
     } catch (error) {
-      console.error("Price history error:", error);
+      log.error("Price history error:", error);
       res.status(500).json({ error: "Failed to fetch price history" });
     }
   });

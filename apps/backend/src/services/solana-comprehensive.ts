@@ -28,6 +28,9 @@ import {
   // AccountInfo,
 } from '@solana/web3.js';
 import axios, { AxiosInstance } from 'axios';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('solanaComprehensive');
 
 interface PriorityFeesData {
   percentile_5: number;
@@ -107,7 +110,7 @@ class SolanaComprehensiveService {
     this.blockhashCache = new Map();
     this.accountMonitors = new Map();
 
-    console.log('✓ Solana Comprehensive Service initialized');
+    log.info('✓ Solana Comprehensive Service initialized');
   }
 
   /**
@@ -202,7 +205,7 @@ class SolanaComprehensiveService {
         networkCongestion: congestion,
       };
     } catch (error: any) {
-      console.error('Failed to fetch priority fees:', error);
+      log.error('Failed to fetch priority fees:', error);
       return {
         recommendedFee: 1000, // Fallback
         breakdown: {
@@ -230,7 +233,7 @@ class SolanaComprehensiveService {
     pollInterval: number = 5000
   ): Promise<void> {
     if (this.accountMonitors.has(address)) {
-      console.warn(`Already monitoring ${address}`);
+      log.warn(`Already monitoring ${address}`);
       return;
     }
 
@@ -269,7 +272,7 @@ class SolanaComprehensiveService {
     }, pollInterval);
 
     this.accountMonitors.set(address, monitor);
-    console.log(`Started monitoring account: ${address}`);
+    log.info(`Started monitoring account: ${address}`);
   }
 
   /**
@@ -280,7 +283,7 @@ class SolanaComprehensiveService {
     if (monitor) {
       clearInterval(monitor);
       this.accountMonitors.delete(address);
-      console.log(`Stopped monitoring account: ${address}`);
+      log.info(`Stopped monitoring account: ${address}`);
     }
   }
 
@@ -561,7 +564,7 @@ class SolanaComprehensiveService {
     }
     this.accountMonitors.clear();
     this.blockhashCache.clear();
-    console.log('✓ Solana Comprehensive Service shutdown');
+    log.info('✓ Solana Comprehensive Service shutdown');
   }
 }
 

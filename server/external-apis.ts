@@ -1,6 +1,9 @@
 
 import { Express, Request, Response } from "express";
 import { OPENAI_LIMITS, openaiCallTracker } from "./ai-features-service";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('externalApis');
 
 // API Limits per service (conservative estimates)
 const API_LIMITS = {
@@ -91,7 +94,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Solscan API error:", error);
+      log.error("Solscan API error:", error);
       res.status(500).json({ error: "Failed to fetch account data" });
     }
   });
@@ -138,7 +141,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("OpenSea API error:", error);
+      log.error("OpenSea API error:", error);
       res.status(500).json({ error: "Failed to fetch OpenSea data" });
     }
   });
@@ -174,7 +177,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("CoinGecko API error:", error);
+      log.error("CoinGecko API error:", error);
       res.status(500).json({ error: "Failed to fetch SOL price" });
     }
   });
@@ -216,7 +219,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Metaplex API error:", error);
+      log.error("Metaplex API error:", error);
       res.status(500).json({ error: "Failed to fetch Metaplex data" });
     }
   });
@@ -235,7 +238,7 @@ export function setupExternalAPIRoutes(app: Express) {
         phantomDeepLink: "https://phantom.app/ul/browse/https://nftsol.app?ref=nftsol"
       });
     } catch (error) {
-      console.error("Phantom integration error:", error);
+      log.error("Phantom integration error:", error);
       res.status(500).json({ error: "Failed to provide Phantom integration" });
     }
   });
@@ -254,7 +257,7 @@ export function setupExternalAPIRoutes(app: Express) {
         solflareDeepLink: "https://solflare.com/access-wallet"
       });
     } catch (error) {
-      console.error("Solflare integration error:", error);
+      log.error("Solflare integration error:", error);
       res.status(500).json({ error: "Failed to provide Solflare integration" });
     }
   });
@@ -279,7 +282,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Jupiter API error:", error);
+      log.error("Jupiter API error:", error);
       res.status(500).json({ error: "Failed to fetch swap quote" });
     }
   });
@@ -306,7 +309,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Birdeye API error:", error);
+      log.error("Birdeye API error:", error);
       res.status(500).json({ error: "Failed to fetch token data" });
     }
   });
@@ -333,7 +336,7 @@ export function setupExternalAPIRoutes(app: Express) {
         }
       });
     } catch (error) {
-      console.error("Market overview error:", error);
+      log.error("Market overview error:", error);
       res.status(500).json({ error: "Failed to fetch market overview" });
     }
   });
@@ -395,7 +398,7 @@ export function setupExternalAPIRoutes(app: Express) {
         lastChecked: new Date().toISOString()
       });
     } catch (error) {
-      console.error("API status error:", error);
+      log.error("API status error:", error);
       res.status(500).json({ error: "Failed to check API status" });
     }
   });

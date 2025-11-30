@@ -7,6 +7,9 @@
 import axios, { AxiosInstance } from 'axios';
 import { pool } from '../lib/db';
 import { heliusService as _heliusService } from './helius';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('crossPlatformMarketplace');
 
 interface NFTListing {
   mintAddress: string;
@@ -64,7 +67,7 @@ export class CrossPlatformMarketplaceService {
     });
 
     this.cache = new Map();
-    console.log('[CrossPlatform] Marketplace service initialized');
+    log.info('[CrossPlatform] Marketplace service initialized');
   }
 
   /**
@@ -77,13 +80,13 @@ export class CrossPlatformMarketplaceService {
     collection?: string;
   }): Promise<{ success: boolean; listings?: NFTListing[]; total?: number; error?: string }> {
     try {
-      console.log('[CrossPlatform] Fetching listings from all platforms...');
+      log.info('[CrossPlatform] Fetching listings from all platforms...');
 
       // Check cache first
       const cacheKey = JSON.stringify(options || {});
       const cached = this.cache.get(cacheKey);
       if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-        console.log('[CrossPlatform] Returning cached listings');
+        log.info('[CrossPlatform] Returning cached listings');
         return {
           success: true,
           listings: cached.data,
@@ -103,19 +106,19 @@ export class CrossPlatformMarketplaceService {
       // Add local listings
       if (localListings.status === 'fulfilled' && localListings.value.success) {
         allListings.push(...(localListings.value.listings || []));
-        console.log(`[CrossPlatform] Added ${localListings.value.listings?.length || 0} local listings`);
+        log.info(`[CrossPlatform] Added ${localListings.value.listings?.length || 0} local listings`);
       }
 
       // Add Magic Eden listings
       if (magicEdenListings.status === 'fulfilled' && magicEdenListings.value.success) {
         allListings.push(...(magicEdenListings.value.listings || []));
-        console.log(`[CrossPlatform] Added ${magicEdenListings.value.listings?.length || 0} Magic Eden listings`);
+        log.info(`[CrossPlatform] Added ${magicEdenListings.value.listings?.length || 0} Magic Eden listings`);
       }
 
       // Add Tensor listings
       if (tensorListings.status === 'fulfilled' && tensorListings.value.success) {
         allListings.push(...(tensorListings.value.listings || []));
-        console.log(`[CrossPlatform] Added ${tensorListings.value.listings?.length || 0} Tensor listings`);
+        log.info(`[CrossPlatform] Added ${tensorListings.value.listings?.length || 0} Tensor listings`);
       }
 
       // Remove duplicates (same mint address)
@@ -149,7 +152,7 @@ export class CrossPlatformMarketplaceService {
       // Cache results
       this.cache.set(cacheKey, { data: filteredListings, timestamp: Date.now() });
 
-      console.log(`[CrossPlatform] Total listings: ${filteredListings.length}`);
+      log.info(`[CrossPlatform] Total listings: ${filteredListings.length}`);
 
       return {
         success: true,
@@ -157,7 +160,7 @@ export class CrossPlatformMarketplaceService {
         total: filteredListings.length,
       };
     } catch (error) {
-      console.error('[CrossPlatform] Get all listings error:', error);
+      log.error('[CrossPlatform] Get all listings error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch listings',
@@ -204,7 +207,7 @@ export class CrossPlatformMarketplaceService {
         listings,
       };
     } catch (error) {
-      console.error('[CrossPlatform] Get local listings error:', error);
+      log.error('[CrossPlatform] Get local listings error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to fetch local listings',
@@ -249,7 +252,7 @@ export class CrossPlatformMarketplaceService {
             allListings.push(...listings);
           }
         } catch (collectionError) {
-          console.warn(`[CrossPlatform] Failed to fetch Magic Eden collection ${collection}:`, collectionError);
+          log.warn(`[CrossPlatform] Failed to fetch Magic Eden collection ${collection}`, { error: collectionError instanceof Error ? collectionError.message : String(collectionError) });
           // Continue with other collections
         }
       }
@@ -259,7 +262,7 @@ export class CrossPlatformMarketplaceService {
         listings: allListings.slice(0, limit),
       };
     } catch (error) {
-      console.error('[CrossPlatform] Get Magic Eden listings error:', error);
+      log.error('[CrossPlatform] Get Magic Eden listings error:', error);
       // Return empty instead of error (non-critical)
       return {
         success: true,
@@ -320,7 +323,7 @@ export class CrossPlatformMarketplaceService {
         listings: [],
       };
     } catch (error) {
-      console.error('[CrossPlatform] Get Tensor listings error:', error);
+      log.error('[CrossPlatform] Get Tensor listings error:', error);
       // Return empty instead of error (non-critical)
       return {
         success: true,
@@ -375,7 +378,7 @@ export class CrossPlatformMarketplaceService {
         results: limited,
       };
     } catch (error) {
-      console.error('[CrossPlatform] Search NFTs error:', error);
+      log.error('[CrossPlatform] Search NFTs error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Search failed',
@@ -388,7 +391,7 @@ export class CrossPlatformMarketplaceService {
    */
   clearCache(): void {
     this.cache.clear();
-    console.log('[CrossPlatform] Cache cleared');
+    log.info('[CrossPlatform] Cache cleared');
   }
 }
 

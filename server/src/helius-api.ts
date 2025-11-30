@@ -1,5 +1,8 @@
 import fetch from "node-fetch";
 import { HELIUS_RPC_URL } from "./config";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('heliusApi');
 
 export type SimpleItem = {
   mint: string;
@@ -60,7 +63,7 @@ export async function getAssetsByOwner(ownerAddress: string) {
 
   const json = await res.json();
   if (json.error) {
-    console.warn("⚠️ Helius error:", json.error);
+    log.warn("⚠️ Helius error:", json.error);
     return [];
   }
   const items = json.result?.items ?? [];

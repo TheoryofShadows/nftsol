@@ -8,6 +8,9 @@ import { db } from "./db";
 import { nfts, nftTransactions, userNftStats, insertNFTSchema, insertNFTTransactionSchema } from "@shared/nft-schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { fromZodError } from "zod-validation-error";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('nftRoutes');
 import {
   nftMintLimiter,
   uploadLimiter,
@@ -82,7 +85,7 @@ export function setupNFTRoutes(app: Express) {
           message: "File uploaded successfully"
         });
       } catch (error) {
-        console.error("File upload error:", error);
+        log.error("File upload error:", error);
         res.status(500).json({ error: "File upload failed" });
       }
     }
@@ -123,7 +126,7 @@ export function setupNFTRoutes(app: Express) {
         hasMore: marketplaceNFTs.length === limitNum
       });
     } catch (error) {
-      console.error("Failed to fetch marketplace NFTs:", error);
+      log.error("Failed to fetch marketplace NFTs:", error);
       res.status(500).json({ error: "Failed to fetch marketplace NFTs" });
     }
   });
@@ -139,7 +142,7 @@ export function setupNFTRoutes(app: Express) {
         .orderBy(desc(nfts.createdAt));
       res.json(userNFTs);
     } catch (error) {
-      console.error("Failed to fetch user NFTs:", error);
+      log.error("Failed to fetch user NFTs:", error);
       res.status(500).json({ error: "Failed to fetch user NFTs" });
     }
   });
@@ -165,7 +168,7 @@ export function setupNFTRoutes(app: Express) {
         .returning();
       res.json(updatedNFT);
     } catch (error) {
-      console.error("Failed to unlist NFT:", error);
+      log.error("Failed to unlist NFT:", error);
       res.status(500).json({ error: "Failed to unlist NFT" });
     }
   });
@@ -183,7 +186,7 @@ export function setupNFTRoutes(app: Express) {
       }
       res.json(nft);
     } catch (error) {
-      console.error("Failed to fetch NFT:", error);
+      log.error("Failed to fetch NFT:", error);
       res.status(500).json({ error: "Failed to fetch NFT" });
     }
   });
@@ -244,7 +247,7 @@ export function setupNFTRoutes(app: Express) {
           nft
         });
       } catch (error) {
-        console.error("Failed to mint NFT:", error);
+        log.error("Failed to mint NFT:", error);
         res.status(500).json({ error: "Failed to mint NFT" });
       }
     }
@@ -267,7 +270,7 @@ export function setupNFTRoutes(app: Express) {
         const validationError = fromZodError(error);
         return res.status(400).json({ error: "Validation failed", details: validationError.message });
       }
-      console.error("Failed to create NFT:", error);
+      log.error("Failed to create NFT:", error);
       res.status(500).json({ error: "Failed to create NFT" });
     }
   });
@@ -298,7 +301,7 @@ export function setupNFTRoutes(app: Express) {
         .returning();
       res.json(updatedNFT);
     } catch (error) {
-      console.error("Failed to list NFT:", error);
+      log.error("Failed to list NFT:", error);
       res.status(500).json({ error: "Failed to list NFT" });
     }
   });
@@ -344,7 +347,7 @@ export function setupNFTRoutes(app: Express) {
         await updateUserStats(sellerWallet, "sale", parseFloat(price));
         res.json({ success: true, nft: updatedNFT, message: "NFT purchase completed successfully" });
       } catch (error) {
-        console.error("Failed to process NFT purchase:", error);
+        log.error("Failed to process NFT purchase:", error);
         res.status(500).json({ error: "Failed to process NFT purchase" });
       }
     }
@@ -361,7 +364,7 @@ export function setupNFTRoutes(app: Express) {
         .orderBy(desc(nftTransactions.createdAt));
       res.json(transactions);
     } catch (error) {
-      console.error("Failed to fetch NFT transactions:", error);
+      log.error("Failed to fetch NFT transactions:", error);
       res.status(500).json({ error: "Failed to fetch NFT transactions" });
     }
   });
@@ -380,7 +383,7 @@ export function setupNFTRoutes(app: Express) {
       }
       res.json(stats);
     } catch (error) {
-      console.error("Failed to fetch user stats:", error);
+      log.error("Failed to fetch user stats:", error);
       res.status(500).json({ error: "Failed to fetch user stats" });
     }
   });
@@ -392,7 +395,7 @@ export function setupNFTRoutes(app: Express) {
       if (!creatorWallet || !feeAmount || !timestamp) {
         return res.status(400).json({ error: "Missing required fields: creatorWallet, feeAmount, timestamp" });
       }
-      console.log(`Minting fee processed: ${feeAmount} SOL from ${creatorWallet}`);
+      log.info(`Minting fee processed: ${feeAmount} SOL from ${creatorWallet}`);
       res.json({
         success: true,
         message: "Minting fee processed successfully",
@@ -400,7 +403,7 @@ export function setupNFTRoutes(app: Express) {
         timestamp
       });
     } catch (error) {
-      console.error("Failed to process minting fee:", error);
+      log.error("Failed to process minting fee:", error);
       res.status(500).json({ error: "Failed to process minting fee" });
     }
   });
@@ -411,7 +414,7 @@ export function setupNFTRoutes(app: Express) {
       const allNfts = await db.select().from(nfts).orderBy(desc(nfts.createdAt));
       res.json(allNfts || []);
     } catch (error) {
-      console.error("Error fetching NFTs:", error);
+      log.error("Error fetching NFTs:", error);
       res.status(500).json({ error: "Failed to fetch NFTs", nfts: [] });
     }
   });
@@ -465,7 +468,7 @@ export function setupNFTRoutes(app: Express) {
         .set(updates)
         .where(eq(userNftStats.walletAddress, walletAddress));
     } catch (error) {
-      console.error("Failed to update user stats:", error);
+      log.error("Failed to update user stats:", error);
       // Non-critical, so don't throw
     }
   }

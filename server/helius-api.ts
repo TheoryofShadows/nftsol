@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('heliusApi');
 
 // Helius API configuration
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY || 'demo';
@@ -100,7 +103,7 @@ async function makeHeliusRequest(endpoint: string, params: Record<string, any> =
 
     return await response.json();
   } catch (error) {
-    console.error('Helius API request failed:', error);
+    log.error('Helius API request failed:', error);
     throw error;
   }
 }
@@ -132,7 +135,7 @@ async function makeHeliusRPCRequest(method: string, params: any[] = []): Promise
 
     return data.result;
   } catch (error) {
-    console.error('Helius RPC request failed:', error);
+    log.error('Helius RPC request failed:', error);
     throw error;
   }
 }
@@ -157,7 +160,7 @@ export function setupHeliusRoutes(app: any) {
         limit: parseInt(limit as string)
       });
     } catch (error) {
-      console.error("Failed to fetch NFTs from Helius:", error);
+      log.error("Failed to fetch NFTs from Helius:", error);
       res.status(500).json({ error: "Failed to fetch NFTs" });
     }
   });
@@ -171,7 +174,7 @@ export function setupHeliusRoutes(app: any) {
 
       res.json(nftData);
     } catch (error) {
-      console.error("Failed to fetch NFT metadata from Helius:", error);
+      log.error("Failed to fetch NFT metadata from Helius:", error);
       res.status(500).json({ error: "Failed to fetch NFT metadata" });
     }
   });
@@ -203,7 +206,7 @@ export function setupHeliusRoutes(app: any) {
       const nfts = await response.json();
       res.json(nfts);
     } catch (error) {
-      console.error("Failed to fetch NFTs batch from Helius:", error);
+      log.error("Failed to fetch NFTs batch from Helius:", error);
       res.status(500).json({ error: "Failed to fetch NFTs batch" });
     }
   });
@@ -221,7 +224,7 @@ export function setupHeliusRoutes(app: any) {
         solBalance: balance.value / 1000000000 // Convert lamports to SOL
       });
     } catch (error) {
-      console.error("Failed to fetch balance from Helius:", error);
+      log.error("Failed to fetch balance from Helius:", error);
       res.status(500).json({ error: "Failed to fetch balance" });
     }
   });
@@ -245,7 +248,7 @@ export function setupHeliusRoutes(app: any) {
         count: transactions?.length || 0
       });
     } catch (error) {
-      console.error("Failed to fetch transactions from Helius:", error);
+      log.error("Failed to fetch transactions from Helius:", error);
       res.status(500).json({ error: "Failed to fetch transactions" });
     }
   });
@@ -276,7 +279,7 @@ export function setupHeliusRoutes(app: any) {
 
       res.json(results);
     } catch (error) {
-      console.error("Failed to search NFTs via Helius:", error);
+      log.error("Failed to search NFTs via Helius:", error);
       res.status(500).json({ error: "Failed to search NFTs" });
     }
   });
@@ -290,7 +293,7 @@ export function setupHeliusRoutes(app: any) {
 
       res.json(collection);
     } catch (error) {
-      console.error("Failed to fetch collection from Helius:", error);
+      log.error("Failed to fetch collection from Helius:", error);
       res.status(500).json({ error: "Failed to fetch collection data" });
     }
   });
@@ -310,7 +313,7 @@ export function setupHeliusRoutes(app: any) {
         lastChecked: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Helius status check failed:", error);
+      log.error("Helius status check failed:", error);
       res.status(500).json({ 
         status: 'error',
         error: "Failed to connect to Helius API",

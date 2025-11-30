@@ -11,6 +11,10 @@
  * - Embedded explorer UI
  */
 
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('orbService');
+
 interface Transaction {
   signature: string;
   timestamp: number;
@@ -68,7 +72,7 @@ export class OrbService {
       // const { HeliusOrb } = require('@helius-labs/orb-sdk');
       // this.mockMode = false;
     } catch {
-      console.log('⚠️ Helius Orb SDK not available, using mock mode');
+      log.info('⚠️ Helius Orb SDK not available, using mock mode');
     }
   }
 

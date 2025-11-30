@@ -7,6 +7,9 @@ import type { RewardsVault } from "../anchor/solana_rewards/generated/types/rewa
 import type { CloutStaking } from "../anchor/solana_rewards/generated/types/clout_staking.ts";
 import type { MarketEscrow } from "../anchor/solana_rewards/generated/types/market_escrow.ts";
 import type { LoyaltyRegistry } from "../anchor/solana_rewards/generated/types/loyalty_registry.ts";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('solanaRewardsProvider');
 
 let servicePromise: Promise<SolanaRewardsService> | null = null;
 
@@ -26,7 +29,7 @@ function loadKeypair(): Keypair | undefined {
     ? keypairPath
     : path.join(process.cwd(), keypairPath);
   if (!fs.existsSync(absolute)) {
-    console.warn(`[solana-rewards] Keypair not found at ${absolute}`);
+    log.warn(`[solana-rewards] Keypair not found at ${absolute}`);
     return undefined;
   }
   const secret = JSON.parse(fs.readFileSync(absolute, "utf-8"));

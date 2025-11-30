@@ -8,6 +8,9 @@
 import { Router, Request, Response } from 'express';
 import SolanaComprehensiveService from '../services/solana-comprehensive';
 import expressRateLimit from 'express-rate-limit';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('solanaTools');
 
 const router = Router();
 
@@ -178,7 +181,7 @@ router.post('/monitor-account', toolsLimiter, async (req: Request, res: Response
       address,
       (event) => {
         // In production, would send to WebSocket or store event
-        console.log('Account change event:', event);
+        log.info('Account change event:', event);
       },
       pollInterval || 5000
     );
@@ -426,7 +429,7 @@ router.get('/docs', (req: Request, res: Response) => {
  * Cleanup on shutdown
  */
 process.on('SIGTERM', async () => {
-  console.log('Shutting down Solana tools service...');
+  log.info('Shutting down Solana tools service...');
   await solanaTools.shutdown();
   process.exit(0);
 });

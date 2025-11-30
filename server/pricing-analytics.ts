@@ -2,6 +2,9 @@ import type { Express } from "express";
 import { db } from "./db";
 import { nfts, nftTransactions } from "@shared/nft-schema";
 import { eq, desc, and, sql, gte, lte, avg, count, max, min } from "drizzle-orm";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('pricingAnalytics');
 interface PricingAnalytics {
   averagePrice: number;
   medianPrice: number;
@@ -38,7 +41,7 @@ export function setupPricingRoutes(app: Express) {
 
       res.json(analytics);
     } catch (error) {
-      console.error("Failed to generate pricing suggestions:", error);
+      log.error("Failed to generate pricing suggestions:", error);
       res.status(500).json({ error: "Failed to analyze market trends" });
     }
   });
@@ -62,7 +65,7 @@ export function setupPricingRoutes(app: Express) {
 
       res.json(analysis);
     } catch (error) {
-      console.error("Failed to analyze specific NFT pricing:", error);
+      log.error("Failed to analyze specific NFT pricing:", error);
       res.status(500).json({ error: "Failed to analyze NFT pricing" });
     }
   });
@@ -74,7 +77,7 @@ export function setupPricingRoutes(app: Express) {
       const trends = await getMarketTrends(timeframe as string);
       res.json(trends);
     } catch (error) {
-      console.error("Failed to get market trends:", error);
+      log.error("Failed to get market trends:", error);
       res.status(500).json({ error: "Failed to get market trends" });
     }
   });

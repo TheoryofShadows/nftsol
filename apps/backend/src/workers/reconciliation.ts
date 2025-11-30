@@ -1,6 +1,9 @@
 // src/workers/reconciliation.ts
 import { pool } from '../lib/db';
 import { connection } from '../lib/solana';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('reconciliation');
 
 interface ReconciliationIssue {
   type: string;
@@ -14,7 +17,7 @@ class ReconciliationWorker {
 
   async runReconciliation(): Promise<ReconciliationIssue[]> {
     if (this.isRunning) {
-      console.log('Reconciliation already running, skipping...');
+      log.info('Reconciliation already running, skipping...');
       return [];
     }
 
@@ -22,7 +25,7 @@ class ReconciliationWorker {
     const issues: ReconciliationIssue[] = [];
 
     try {
-      console.log('🔍 Starting reconciliation check...');
+      log.info('🔍 Starting reconciliation check...');
 
       // Check 1: Negative balances
       const negativeBalances = await this.checkNegativeBalances();
@@ -47,10 +50,10 @@ class ReconciliationWorker {
       // Process issues
       await this.processIssues(issues);
 
-      console.log(`✅ Reconciliation complete. Found ${issues.length} issues.`);
+      log.info(`✅ Reconciliation complete. Found ${issues.length} issues.`);
       return issues;
     } catch (error) {
-      console.error('❌ Reconciliation failed:', error);
+      log.error('❌ Reconciliation failed:', error);
       throw error;
     } finally {
       this.isRunning = false;
@@ -181,7 +184,7 @@ class ReconciliationWorker {
 
   private async processIssues(issues: ReconciliationIssue[]): Promise<void> {
     for (const issue of issues) {
-      console.log(`🚨 ${issue.severity}: ${issue.description}`);
+      log.info(`🚨 ${issue.severity}: ${issue.description}`);
 
       // Log to monitoring system
       await this.logIssue(issue);
@@ -206,7 +209,7 @@ class ReconciliationWorker {
 
   private async sendAlert(issue: ReconciliationIssue): Promise<void> {
     // Send to monitoring system (PagerDuty, Slack, etc.)
-    console.log(`🚨 ALERT: ${issue.type} - ${issue.description}`);
+    log.info(`🚨 ALERT: ${issue.type} - ${issue.description}`);
 
     // TODO: Integrate with your alerting system
     // Example: await sendSlackAlert(issue);

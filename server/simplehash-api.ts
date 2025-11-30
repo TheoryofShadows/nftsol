@@ -1,4 +1,7 @@
 import fetch from 'node-fetch';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('simplehashApi');
 
 interface SimpleHashNFT {
   nft_id: string;
@@ -61,7 +64,7 @@ class SimpleHashService {
       const data = (await response.json()) as SimpleHashCollectionResponse;
       return data.nfts || [];
     } catch (error) {
-      console.error('SimpleHash collection fetch error:', error);
+      log.error('SimpleHash collection fetch error:', error);
       return [];
     }
   }
@@ -84,7 +87,7 @@ class SimpleHashService {
 
       return (await response.json()) as SimpleHashNFT;
     } catch (error) {
-      console.error('SimpleHash metadata fetch error:', error);
+      log.error('SimpleHash metadata fetch error:', error);
       return null;
     }
   }
@@ -108,7 +111,7 @@ class SimpleHashService {
       const data = (await response.json()) as SimpleHashCollectionResponse;
       return data.nfts || [];
     } catch (error) {
-      console.error('SimpleHash wallet NFTs fetch error:', error);
+      log.error('SimpleHash wallet NFTs fetch error:', error);
       return [];
     }
   }
@@ -119,19 +122,19 @@ class SimpleHashService {
 
       switch (event_type) {
         case 'nft.transfer':
-          console.log('NFT transferred:', data);
+          log.info('NFT transferred:', data);
           break;
         case 'nft.sale':
-          console.log('NFT sold:', data);
+          log.info('NFT sold:', data);
           break;
         case 'nft.listing':
-          console.log('NFT listed:', data);
+          log.info('NFT listed:', data);
           break;
         default:
-          console.log('Unhandled SimpleHash webhook event:', event_type);
+          log.info('Unhandled SimpleHash webhook event:', event_type);
       }
     } catch (error) {
-      console.error('Webhook processing error:', error);
+      log.error('Webhook processing error:', error);
     }
   }
 }

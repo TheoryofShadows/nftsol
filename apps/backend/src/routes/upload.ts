@@ -2,6 +2,9 @@ import { Router } from 'express';
 import multer from 'multer';
 import { validateUpload } from '../utils/validation';
 import { fileUpload } from '../middleware/file-upload';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('upload');
 
 const router = Router();
 const upload = multer({ 
@@ -30,7 +33,7 @@ router.post(
         }
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      log.error('Upload error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Failed to process file upload' 

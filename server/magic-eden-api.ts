@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('magicEdenApi');
 const MAGIC_EDEN_BASE_URL = 'https://api-mainnet.magiceden.dev/v2';
 const MAGIC_EDEN_API_KEY = process.env.MAGIC_EDEN_API_KEY;
 const HELIUS_RPC_URL = process.env.HELIUS_API_KEY 
@@ -24,7 +27,7 @@ const toErrorMessage = (error: unknown): string => (error instanceof Error ? err
 async function makeRequest(endpoint: string): Promise<any> {
   try {
     const url = `${MAGIC_EDEN_BASE_URL}${endpoint}`;
-    console.log(`Making Magic Eden request to: ${url}`);
+    log.info(`Making Magic Eden request to: ${url}`);
 
     const headers = {
       'Accept': 'application/json',
@@ -38,7 +41,7 @@ async function makeRequest(endpoint: string): Promise<any> {
       headers: headers,
     });
 
-    console.log(`Magic Eden response: ${response.status} ${response.statusText}`);
+    log.info(`Magic Eden response: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -47,11 +50,11 @@ async function makeRequest(endpoint: string): Promise<any> {
     }
 
     const data = await response.json();
-    console.log(`Magic Eden data received:`, Object.keys(data));
+    log.info(`Magic Eden data received:`, Object.keys(data));
     return data;
   } catch (error) {
     const message = toErrorMessage(error);
-    console.error('Magic Eden API request failed:', message);
+    log.error('Magic Eden API request failed:', message);
     throw new Error(message);
   }
 }
@@ -64,7 +67,7 @@ export function setupMagicEdenRoutes(app: any) {
       const stats = await makeRequest(`/collections/${symbol}/stats`);
       res.json(stats);
     } catch (error) {
-      console.error("Failed to fetch collection stats:", error);
+      log.error("Failed to fetch collection stats:", error);
       res.status(500).json({ error: "Failed to fetch collection stats" });
     }
   });
@@ -78,7 +81,7 @@ export function setupMagicEdenRoutes(app: any) {
       const activities = await makeRequest(`/collections/${symbol}/activities?offset=${offset}&limit=${limit}`);
       res.json(activities);
     } catch (error) {
-      console.error("Failed to fetch collection activities:", error);
+      log.error("Failed to fetch collection activities:", error);
       res.status(500).json({ error: "Failed to fetch collection activities" });
     }
   });
@@ -104,13 +107,13 @@ export function setupMagicEdenRoutes(app: any) {
             });
           }
         } catch (error) {
-          console.log(`Failed to fetch ${symbol}:`, error);
+          log.info(`Failed to fetch ${symbol}:`, error);
         }
       }
 
       res.json(collectionsData);
     } catch (error) {
-      console.error("Failed to fetch popular collections:", error);
+      log.error("Failed to fetch popular collections:", error);
       res.status(500).json({ error: "Failed to fetch popular collections" });
     }
   });
@@ -168,7 +171,7 @@ export function setupMagicEdenRoutes(app: any) {
             }
           }
         } catch (error) {
-          console.log(`Failed to process ${symbol}:`, error);
+          log.info(`Failed to process ${symbol}:`, error);
         }
       }
 
@@ -184,7 +187,7 @@ export function setupMagicEdenRoutes(app: any) {
         lastUpdated: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Failed to generate marketplace NFTs:", error);
+      log.error("Failed to generate marketplace NFTs:", error);
       res.status(500).json({ error: "Failed to generate marketplace NFTs" });
     }
   });
@@ -192,13 +195,13 @@ export function setupMagicEdenRoutes(app: any) {
   // Direct API test endpoint
   app.get("/api/magiceden/test-direct", async (req: Request, res: Response) => {
     try {
-      console.log('Testing direct Magic Eden API connection...');
+      log.info('Testing direct Magic Eden API connection...');
 
       // Test multiple collections
       const results = [];
       for (const collection of POPULAR_COLLECTIONS.slice(0, 3)) {
         try {
-          console.log(`Testing collection: ${collection}`);
+          log.info(`Testing collection: ${collection}`);
           const stats = await makeRequest(`/collections/${collection}/stats`);
           const activities = await makeRequest(`/collections/${collection}/activities?limit=5`);
 
@@ -233,7 +236,7 @@ export function setupMagicEdenRoutes(app: any) {
         }
       });
     } catch (error) {
-      console.error("Direct API test failed:", error);
+      log.error("Direct API test failed:", error);
       res.status(500).json({ 
         error: "Direct API test failed",
         message: toErrorMessage(error)
@@ -244,10 +247,10 @@ export function setupMagicEdenRoutes(app: any) {
   // Health check
   app.get("/api/magiceden/status", async (req: Request, res: Response) => {
     try {
-      console.log('Magic Eden health check...');
+      log.info('Magic Eden health check...');
       // Test connection to Magic Eden
       const testStats = await makeRequest('/collections/mad_lads/stats').catch((error) => {
-        console.log('Health check failed:', toErrorMessage(error));
+        log.info('Health check failed:', toErrorMessage(error));
         return null;
       });
 
@@ -263,7 +266,7 @@ export function setupMagicEdenRoutes(app: any) {
         lastChecked: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Magic Eden status check failed:", error);
+      log.error("Magic Eden status check failed:", error);
       res.status(500).json({ 
         status: 'error',
         error: "Failed to connect to Magic Eden API",

@@ -23,6 +23,9 @@ import {
 } from '@solana/spl-token';
 import { solanaConfig, programConfig as _programConfig } from '../config';
 import { pool } from '../lib/db';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('onChainTransactions');
 
 interface CreateBuyTransactionParams {
   buyer: string; // Buyer's wallet address
@@ -49,7 +52,7 @@ export class OnChainTransactionService {
       commitment: solanaConfig.commitment,
       confirmTransactionInitialTimeout: 60000,
     });
-    console.log('[OnChain] Transaction service initialized');
+    log.info('[OnChain] Transaction service initialized');
   }
 
   /**
@@ -62,8 +65,8 @@ export class OnChainTransactionService {
     const { buyer, seller, mintAddress, price, royaltyPercent = 0, creatorAddress } = params;
 
     try {
-      console.log(`[OnChain] Creating buy transaction for NFT ${mintAddress}`);
-      console.log(`[OnChain] Buyer: ${buyer}, Seller: ${seller}, Price: ${price} SOL`);
+      log.info(`[OnChain] Creating buy transaction for NFT ${mintAddress}`);
+      log.info(`[OnChain] Buyer: ${buyer}, Seller: ${seller}, Price: ${price} SOL`);
 
       // Convert addresses to PublicKeys
       const buyerPubkey = new PublicKey(buyer);
@@ -79,10 +82,10 @@ export class OnChainTransactionService {
           : 0;
       const sellerAmount = priceInLamports - platformFee - royaltyFee;
 
-      console.log(`[OnChain] Price: ${priceInLamports} lamports`);
-      console.log(`[OnChain] Platform fee: ${platformFee} lamports (${this.platformFeePercent}%)`);
-      console.log(`[OnChain] Royalty fee: ${royaltyFee} lamports (${royaltyPercent}%)`);
-      console.log(`[OnChain] Seller gets: ${sellerAmount} lamports`);
+      log.info(`[OnChain] Price: ${priceInLamports} lamports`);
+      log.info(`[OnChain] Platform fee: ${platformFee} lamports (${this.platformFeePercent}%)`);
+      log.info(`[OnChain] Royalty fee: ${royaltyFee} lamports (${royaltyPercent}%)`);
+      log.info(`[OnChain] Seller gets: ${sellerAmount} lamports`);
 
       // Create transaction
       const transaction = new Transaction();
@@ -139,14 +142,14 @@ export class OnChainTransactionService {
 
       transaction.add(nftTransferIx);
 
-      console.log('[OnChain] Transaction created successfully');
+      log.info('[OnChain] Transaction created successfully');
 
       return {
         success: true,
         transaction,
       };
     } catch (error) {
-      console.error('[OnChain] Create buy transaction error:', error);
+      log.error('[OnChain] Create buy transaction error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create transaction',
@@ -173,7 +176,7 @@ export class OnChainTransactionService {
 
     // If destination doesn't exist, create it first
     if (!destAccountInfo) {
-      console.log('[OnChain] Creating destination token account for buyer');
+      log.info('[OnChain] Creating destination token account for buyer');
       return createAssociatedTokenAccountInstruction(
         fromOwner, // Payer (seller pays for account creation)
         destinationTokenAccount,
@@ -216,7 +219,7 @@ export class OnChainTransactionService {
 
       return { success: true };
     } catch (error) {
-      console.error('[OnChain] Verify ownership error:', error);
+      log.error('[OnChain] Verify ownership error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to verify ownership',
@@ -257,11 +260,11 @@ export class OnChainTransactionService {
         [params.mintAddress]
       );
 
-      console.log(`[OnChain] Sale recorded: ${params.mintAddress}`);
+      log.info(`[OnChain] Sale recorded: ${params.mintAddress}`);
 
       return { success: true };
     } catch (error) {
-      console.error('[OnChain] Record sale error:', error);
+      log.error('[OnChain] Record sale error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to record sale',
@@ -289,7 +292,7 @@ export class OnChainTransactionService {
 
       return { success: true, confirmed: false };
     } catch (error) {
-      console.error('[OnChain] Get transaction status error:', error);
+      log.error('[OnChain] Get transaction status error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to check status',
@@ -317,7 +320,7 @@ export class OnChainTransactionService {
         error: 'Failed to estimate fee',
       };
     } catch (error) {
-      console.error('[OnChain] Estimate fee error:', error);
+      log.error('[OnChain] Estimate fee error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to estimate fee',

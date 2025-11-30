@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('aiFeaturesService');
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
@@ -152,7 +155,7 @@ export class AIFeaturesService {
       return JSON.parse(response.choices[0].message.content!);
 
     } catch (error) {
-      console.error('AI description enhancement failed:', error);
+      log.error('AI description enhancement failed:', error);
       
       // Provide fallback when AI is unavailable
       if (error instanceof Error && error.message.includes('quota')) {
@@ -251,7 +254,7 @@ export class AIFeaturesService {
       return JSON.parse(response.choices[0].message.content!);
 
     } catch (error) {
-      console.error('AI pricing analysis failed:', error);
+      log.error('AI pricing analysis failed:', error);
       throw new Error(`Failed to analyze pricing: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -314,7 +317,7 @@ export class AIFeaturesService {
       return JSON.parse(response.choices[0].message.content!);
 
     } catch (error) {
-      console.error('AI collection insights failed:', error);
+      log.error('AI collection insights failed:', error);
       throw new Error(`Failed to generate collection insights: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -374,7 +377,7 @@ export class AIFeaturesService {
       return JSON.parse(response.choices[0].message.content!);
 
     } catch (error) {
-      console.error('AI chatbot processing failed:', error);
+      log.error('AI chatbot processing failed:', error);
       throw new Error(`Failed to process chatbot query: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -420,7 +423,7 @@ export class AIFeaturesService {
       return JSON.parse(response.choices[0].message.content!);
 
     } catch (error) {
-      console.error('AI social content generation failed:', error);
+      log.error('AI social content generation failed:', error);
       throw new Error(`Failed to generate social content: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -442,7 +445,7 @@ export class AIFeaturesService {
 
       return true;
     } catch (error) {
-      console.error('AI features service health check failed:', error);
+      log.error('AI features service health check failed:', error);
       return false;
     }
   }

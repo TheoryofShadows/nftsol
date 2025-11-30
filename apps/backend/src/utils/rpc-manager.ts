@@ -4,6 +4,9 @@
  */
 
 import { Connection, PublicKey as _PublicKey } from '@solana/web3.js';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('rpcManager');
 
 interface RPCProvider {
   url: string;
@@ -85,7 +88,7 @@ class SolanaRPCManager {
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
       this.lastBlockhash = { hash: blockhash, lastValidBlockHeight, timestamp: Date.now() };
     } catch (error) {
-      console.error('Failed to refresh blockhash:', error);
+      log.error('Failed to refresh blockhash:', error);
     }
   }
 
@@ -100,11 +103,11 @@ class SolanaRPCManager {
         provider.isHealthy = true;
         provider.responseTime = Date.now() - start;
         if (process.env.DEBUG_RPC) {
-          console.log(`✅ RPC healthy: ${provider.url} (${provider.responseTime}ms)`);
+          log.info(`✅ RPC healthy: ${provider.url} (${provider.responseTime}ms)`);
         }
       } catch (error) {
         provider.isHealthy = false;
-        console.warn(`❌ RPC unhealthy: ${provider.url}`);
+        log.warn(`❌ RPC unhealthy: ${provider.url}`);
       }
     }
   }

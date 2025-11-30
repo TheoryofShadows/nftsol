@@ -17,6 +17,9 @@ import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types/index';
 import { programConfig } from '../config/index';
 import { sensitiveOpLimiter, dataLimiter as _dataLimiter } from '../middleware/rate-limiting';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('clout');
 
 const router = express.Router();
 const cloutService = new CloutTokenService();
@@ -91,7 +94,7 @@ router.post('/reward', sensitiveOpLimiter, validateWallet, async (req, res) => {
     const err = error as Error;
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('CLOUT reward endpoint error:', err);
+      log.error('CLOUT reward endpoint error:', err);
     }
 
     const response: ApiResponse = {
@@ -123,7 +126,7 @@ router.get('/balance/:address', async (req, res) => {
       return res.status(400).json(response);
     }
 
-    console.log(`[CLOUT] Fetching balance for: ${address}`);
+    log.info(`[CLOUT] Fetching balance for: ${address}`);
     const balance = await cloutService.getCloutBalance(address);
 
     const response: ApiResponse = {
@@ -137,7 +140,7 @@ router.get('/balance/:address', async (req, res) => {
     };
     res.json(response);
   } catch (error: any) {
-    console.error('CLOUT balance endpoint error:', error);
+    log.error('CLOUT balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: error.message || 'Failed to get CLOUT balance',
@@ -169,7 +172,7 @@ router.get('/vault-balance', async (req, res) => {
         vaultAddress = vault.toBase58();
       }
     } catch (err) {
-      console.warn('Could not calculate vault address:', err);
+      log.warn('Could not calculate vault address', { error: err instanceof Error ? err.message : String(err) });
     }
 
     const response: ApiResponse = {
@@ -182,7 +185,7 @@ router.get('/vault-balance', async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    console.error('CLOUT vault balance endpoint error:', error);
+    log.error('CLOUT vault balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get vault balance',

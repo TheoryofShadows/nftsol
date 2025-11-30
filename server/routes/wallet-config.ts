@@ -1,5 +1,8 @@
 import { Request, Response } from 'express';
 import { getWalletConfigStatus, generateEnvironmentConfig } from '../wallet-config';
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('walletConfig');
 
 // Get current wallet configuration status
 export async function getWalletConfig(req: Request, res: Response) {
@@ -15,7 +18,7 @@ export async function getWalletConfig(req: Request, res: Response) {
       totalWallets: Object.keys(status).length
     });
   } catch (error) {
-    console.error('Error getting wallet config:', error);
+    log.error('Error getting wallet config:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get wallet configuration'
@@ -46,7 +49,7 @@ export async function updateWalletConfig(req: Request, res: Response) {
       wallets: status
     });
   } catch (error) {
-    console.error('Error updating wallet config:', error);
+    log.error('Error updating wallet config:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to update wallet configuration'

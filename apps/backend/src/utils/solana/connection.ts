@@ -1,5 +1,8 @@
 import { Connection, clusterApiUrl } from '@solana/web3.js';
 import config from '../../config';
+import { createModuleLogger } from '../../utils/logger';
+
+const log = createModuleLogger('connection');
 
 // Create and export a singleton connection instance
 let connection: Connection | null = null;
@@ -23,7 +26,7 @@ export function getConnection(): Connection {
     });
     
     // Log connection info
-    console.log(`Connected to Solana ${getNetwork()} at ${rpcUrl}`);
+    log.info(`Connected to Solana ${getNetwork()} at ${rpcUrl}`);
   }
   return connection;
 }

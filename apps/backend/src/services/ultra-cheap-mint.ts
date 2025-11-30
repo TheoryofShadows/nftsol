@@ -40,6 +40,9 @@ import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { solanaConfig } from '../config';
 import { getPlatformKeypair } from '../lib/platformKeypair';
 import bs58 from 'bs58';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('ultraCheapMint');
 // UMI publicKey is already imported above
 
 // Merkle tree configuration
@@ -124,12 +127,12 @@ export class UltraCheapMintService {
       // Store the UMI instance
       this.umi = umi as UmiInstance;
       
-      console.log('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
+      log.info('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
       
       return this.umi;
       
     } catch (error) {
-      console.error('[UltraCheapMint] Initialization failed:', error);
+      log.error('[UltraCheapMint] Initialization failed:', error);
       throw error; // Re-throw to prevent silent failures
     }
   }
@@ -173,10 +176,10 @@ export class UltraCheapMintService {
         commitment: 'confirmed',
       });
       
-      console.log(`[UltraCheapMint] Created new merkle tree: ${merkleTree.publicKey}`);
+      log.info(`[UltraCheapMint] Created new merkle tree: ${merkleTree.publicKey}`);
       return [merkleTree];
     } catch (error) {
-      console.error('[UltraCheapMint] Failed to create merkle tree:', error);
+      log.error('[UltraCheapMint] Failed to create merkle tree:', error);
       throw error;
     }
   }
@@ -284,7 +287,7 @@ export class UltraCheapMintService {
       const uri = await umi.uploader.uploadJson(metadata);
       return uri;
     } catch (error) {
-      console.error('Failed to upload metadata:', error);
+      log.error('Failed to upload metadata:', error);
       throw new Error(`Failed to upload metadata: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -311,7 +314,7 @@ export class UltraCheapMintService {
         throw new Error('Failed to initialize merkle tree');
       }
 
-      console.log('[UltraCheapMint] Starting compressed NFT mint...');
+      log.info('[UltraCheapMint] Starting compressed NFT mint...');
       // Upload metadata to Irys
       const metadataUri = await this.uploadMetadata(params);
       
@@ -346,7 +349,7 @@ export class UltraCheapMintService {
         throw new Error('Transaction failed: No signature returned');
       }
       
-      console.log('[UltraCheapMint] Mint transaction confirmed');
+      log.info('[UltraCheapMint] Mint transaction confirmed');
       
       // Get the signature as base58
       const signature = bs58.encode(result.signature);
@@ -367,7 +370,7 @@ export class UltraCheapMintService {
         treeAddress: merkleTreePublicKey.toString(),
       };
     } catch (error) {
-      console.error('[UltraCheapMint] Mint failed:', error);
+      log.error('[UltraCheapMint] Mint failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Compressed NFT minting failed',

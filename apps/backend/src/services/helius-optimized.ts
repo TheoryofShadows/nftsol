@@ -9,6 +9,9 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { PublicKey, Connection, Commitment as _Commitment } from '@solana/web3.js';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('heliusOptimized');
 
 interface HeliusConfig {
   apiKey: string;
@@ -126,7 +129,7 @@ class HeliusOptimizedService {
       (response) => response,
       async (error) => {
         if (error.response?.status === 429) {
-          console.warn('⚠️ Rate limit hit, backing off...');
+          log.warn('⚠️ Rate limit hit, backing off...');
           const retryAfter =
             parseInt(error.response.headers['retry-after'] || '60', 10) * 1000;
           await this.delay(retryAfter);
@@ -178,7 +181,7 @@ class HeliusOptimizedService {
 
       return result;
     } catch (error) {
-      console.error('Error fetching assets by owner:', error);
+      log.error('Error fetching assets by owner:', error);
       throw error;
     }
   }
@@ -224,7 +227,7 @@ class HeliusOptimizedService {
 
       return result;
     } catch (error) {
-      console.error('Error fetching assets by collection:', error);
+      log.error('Error fetching assets by collection:', error);
       throw error;
     }
   }
@@ -258,7 +261,7 @@ class HeliusOptimizedService {
 
       return result;
     } catch (error) {
-      console.error('Error fetching asset:', error);
+      log.error('Error fetching asset:', error);
       throw error;
     }
   }
@@ -288,7 +291,7 @@ class HeliusOptimizedService {
 
       return results;
     } catch (error) {
-      console.error('Error fetching assets batch:', error);
+      log.error('Error fetching assets batch:', error);
       throw error;
     }
   }
@@ -351,7 +354,7 @@ class HeliusOptimizedService {
 
       return result;
     } catch (error) {
-      console.error('Error searching assets:', error);
+      log.error('Error searching assets:', error);
       throw error;
     }
   }
@@ -409,7 +412,7 @@ class HeliusOptimizedService {
         latency,
       };
     } catch (error) {
-      console.error('Health check failed:', error);
+      log.error('Health check failed:', error);
       return {
         helius: false,
         solana: false,
@@ -436,7 +439,7 @@ class HeliusOptimizedService {
           error.code === 'ETIMEDOUT')
       ) {
         const delay = this.retryDelay * Math.pow(2, attempt);
-        console.warn(
+        log.warn(
           `Retrying after ${delay}ms (attempt ${attempt + 1}/${this.retryAttempts})`
         );
         await this.delay(delay);

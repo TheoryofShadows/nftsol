@@ -3,6 +3,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { aiMetadataService } from "../ai-metadata-service";
+import { createModuleLogger } from '../../../../utils/logger';
+
+const log = createModuleLogger('aiMetadata');
 
 const router = Router();
 
@@ -91,7 +94,7 @@ router.post('/analyze-image', upload.single('image'), async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Image analysis error:', error);
+    log.error('Image analysis error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Analysis failed'
@@ -119,7 +122,7 @@ router.post('/generate-from-text', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Text generation error:', error);
+    log.error('Text generation error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Generation failed'
@@ -170,7 +173,7 @@ router.post('/enhance-metadata', upload.single('image'), async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Metadata enhancement error:', error);
+    log.error('Metadata enhancement error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Enhancement failed'
@@ -223,7 +226,7 @@ router.post('/generate-collection', upload.single('image'), async (req, res) => 
     }
 
   } catch (error) {
-    console.error('Collection metadata generation error:', error);
+    log.error('Collection metadata generation error:', error);
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Collection generation failed'
@@ -278,7 +281,7 @@ router.get('/category-suggestions/:category', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Category suggestions error:', error);
+    log.error('Category suggestions error:', error);
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Failed to get suggestions'
     });

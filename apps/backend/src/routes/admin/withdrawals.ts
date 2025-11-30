@@ -4,6 +4,9 @@ import { withClient } from '../../lib/db';
 import { sendSOL } from '../../lib/solana';
 import { ApiResponse } from '../../types';
 import { auditLogger, securityLogger } from '../../utils/logger';
+import { createModuleLogger } from '../../utils/logger';
+
+const log = createModuleLogger('withdrawals');
 
 const router = express.Router();
 
@@ -54,7 +57,7 @@ router.get('/', async (req, res) => {
     };
     return res.json(response);
   } catch (err) {
-    console.error('Get withdrawals error:', err);
+    log.error('Get withdrawals error:', err);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get withdrawals',
@@ -91,7 +94,7 @@ router.post('/:id/approve', async (req, res) => {
     };
     return res.json(response);
   } catch (err: any) {
-    console.error('Approval error:', err);
+    log.error('Approval error:', err);
     const response: ApiResponse = {
       success: false,
       error:
@@ -196,7 +199,7 @@ router.post('/:id/process', async (req, res) => {
     };
     return res.json(response);
   } catch (err: any) {
-    console.error('Process error:', err);
+    log.error('Process error:', err);
 
     securityLogger(
       'WITHDRAWAL_PROCESS_FAILED',
@@ -227,7 +230,7 @@ router.post('/:id/process', async (req, res) => {
         await client.query('COMMIT');
       });
     } catch (rollbackErr) {
-      console.error('Rollback error:', rollbackErr);
+      log.error('Rollback error:', rollbackErr);
     }
 
     const response: ApiResponse = {
@@ -288,7 +291,7 @@ router.post('/:id/reject', async (req, res) => {
     };
     return res.json(response);
   } catch (err: any) {
-    console.error('Rejection error:', err);
+    log.error('Rejection error:', err);
     const response: ApiResponse = {
       success: false,
       error:

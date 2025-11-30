@@ -11,6 +11,9 @@
 
 import axios from 'axios';
 import { PublicKey as _PublicKey, Connection as _Connection } from '@solana/web3.js';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('archiveGrokEchoIntegration');
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -144,7 +147,7 @@ export class InternetArchiveService {
 
       return docs.map((doc: any) => this.transformArchiveDoc(doc));
     } catch (error) {
-      console.error('Archive search failed:', error);
+      log.error('Archive search failed:', error);
       throw new Error(`Failed to search Internet Archive: ${error}`);
     }
   }
@@ -184,7 +187,7 @@ export class InternetArchiveService {
         metadata: item.metadata || {},
       };
     } catch (error) {
-      console.error('Failed to get archive metadata:', error);
+      log.error('Failed to get archive metadata:', error);
       throw new Error(`Failed to retrieve archive item: ${error}`);
     }
   }
@@ -220,7 +223,7 @@ export class InternetArchiveService {
         duration: f.length ? parseInt(f.length) : undefined,
       }));
     } catch (error) {
-      console.error('Failed to get media files:', error);
+      log.error('Failed to get media files:', error);
       return [];
     }
   }
@@ -247,7 +250,7 @@ export class InternetArchiveService {
         },
       };
     } catch (error) {
-      console.error('Failed to create archive proof:', error);
+      log.error('Failed to create archive proof:', error);
       throw error;
     }
   }
@@ -427,7 +430,7 @@ IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
         timestamp: Date.now(),
       };
     } catch (error) {
-      console.error('Grok verification failed:', error);
+      log.error('Grok verification failed:', error);
       // Fallback for public domain archive items
       return {
         contentHash: this.hashContent(JSON.stringify(archiveItem)),
@@ -521,7 +524,7 @@ Return JSON:
         timestamp: Date.now(),
       };
     } catch (error) {
-      console.error('Echo derivation verification failed:', error);
+      log.error('Echo derivation verification failed:', error);
       throw error;
     }
   }
@@ -566,19 +569,19 @@ export class ArchiveGrokEchoIntegration {
     creatorWallet: string,
     _grokApiKey?: string
   ): Promise<VerifiedMediaPackage> {
-    console.log(`🌍 Preparing ${archiveIdentifier} for minting...`);
+    log.info(`🌍 Preparing ${archiveIdentifier} for minting...`);
 
     // Step 1: Get archive metadata
     const archiveItem = await this.archiveService.getArchiveMetadata(archiveIdentifier);
-    console.log(`✓ Retrieved: ${archiveItem.title}`);
+    log.info(`✓ Retrieved: ${archiveItem.title}`);
 
     // Step 2: Create archive proof
     const archiveProof = await this.archiveService.createArchiveProof(archiveIdentifier);
-    console.log(`✓ Archive proof created`);
+    log.info(`✓ Archive proof created`);
 
     // Step 3: Grok verification
     const grokVerification = await this.grokService.verifyArchiveContent(archiveItem);
-    console.log(`✓ Grok verification: ${grokVerification.truthScore}%`);
+    log.info(`✓ Grok verification: ${grokVerification.truthScore}%`);
 
     // Step 4: Create permanent metadata on Arweave
     const permanentMetadataUri = await this.savePermanentMetadata({
@@ -587,7 +590,7 @@ export class ArchiveGrokEchoIntegration {
       grokVerification,
       creatorWallet,
     });
-    console.log(`✓ Permanent metadata: ${permanentMetadataUri}`);
+    log.info(`✓ Permanent metadata: ${permanentMetadataUri}`);
 
     return {
       archiveProof,
@@ -617,7 +620,7 @@ export class ArchiveGrokEchoIntegration {
     // Generate unique ledger ID
     const ledgerId = `archive-${verifiedPackage.archiveProof.archiveIdentifier}-${Date.now()}`;
 
-    console.log(`🎪 Creating Echo ledger: ${ledgerId}`);
+    log.info(`🎪 Creating Echo ledger: ${ledgerId}`);
 
     // Initialize with archive base
     const _baseEcho: EchoLayerWithArchive = {
@@ -702,7 +705,7 @@ export class ArchiveGrokEchoIntegration {
       },
     };
 
-    console.log(`✓ Echo layer added: ${layerId} (${grokResult.truthScore}%)`);
+    log.info(`✓ Echo layer added: ${layerId} (${grokResult.truthScore}%)`);
     return layer;
   }
 
@@ -732,7 +735,7 @@ export class ArchiveGrokEchoIntegration {
     // TODO: Implement Irys/Arweave upload
     // For now, return mock URI
     const mockUri = `ar://${Math.random().toString(36).substring(7)}`;
-    console.log(`📦 Metadata saved to permanent storage: ${mockUri}`);
+    log.info(`📦 Metadata saved to permanent storage: ${mockUri}`);
     return mockUri;
   }
 

@@ -1,5 +1,8 @@
 
 import { Request, Response } from 'express';
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('securityMonitoring');
 
 interface SecurityEvent {
   type: 'suspicious_activity' | 'rate_limit_exceeded' | 'invalid_auth' | 'sql_injection_attempt' | 'file_upload_violation';

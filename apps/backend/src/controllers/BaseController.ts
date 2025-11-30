@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { Pool, PoolClient } from 'pg';
 import { pool } from '../lib/db';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('BaseController');
 
 export abstract class BaseController {
   protected tableName: string;

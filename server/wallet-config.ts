@@ -62,7 +62,7 @@ function resolveWallet(spec: WalletSpec): ResolvedWallet {
     );
   }
 
-  console.warn(
+  log.warn(
     `[wallet-config] Environment variable ${spec.envVar} not set. ` +
       `Falling back to placeholder address for ${spec.label}. ` +
       "Update your .env file with the real Phantom wallet as soon as possible.",

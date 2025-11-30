@@ -2,6 +2,9 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import cors from 'cors';
 import type { Request, Response, NextFunction } from 'express';
+import { createModuleLogger } from '../utils/logger';
+
+const log = createModuleLogger('security');
 
 // CORS configuration - RESTRICTED in production
 export const corsConfig = cors({
@@ -34,7 +37,7 @@ export const corsConfig = cors({
     }
 
     // Block the request with specific error
-    console.warn(`CORS request blocked from unauthorized origin: ${origin}`);
+    log.warn(`CORS request blocked from unauthorized origin: ${origin}`);
     return cb(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
@@ -64,7 +67,7 @@ export function securityHeaders(_req: Request, res: Response, next: NextFunction
 export function securityLogger(req: Request, _res: Response, next: NextFunction) {
   // Keep minimal to avoid PII
   // eslint-disable-next-line no-console
-  console.log(`[SEC] ${req.method} ${req.path}`);
+  log.info(`[SEC] ${req.method} ${req.path}`);
   next();
 }
 

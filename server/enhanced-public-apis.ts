@@ -1,5 +1,8 @@
 
 import { Express, Request, Response } from "express";
+import { createModuleLogger } from '../../../utils/logger';
+
+const log = createModuleLogger('enhancedPublicApis');
 
 // Rate limiting for public APIs
 const rateLimitMap = new Map();
@@ -50,7 +53,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
         source: 'DeFi Aggregator'
       });
     } catch (error) {
-      console.error("Jupiter price error:", error);
+      log.error("Jupiter price error:", error);
       res.json({
         solPrice: 100, // Fallback
         provider: 'Fallback',
@@ -77,7 +80,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error("CoinGecko error:", error);
+      log.error("CoinGecko error:", error);
       res.status(500).json({ error: "Failed to fetch market data" });
     }
   });
@@ -100,7 +103,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
       
       res.json(networkStats);
     } catch (error) {
-      console.error("Solana Beach error:", error);
+      log.error("Solana Beach error:", error);
       res.json({
         networkHealth: 'unknown',
         provider: 'Fallback',
@@ -133,7 +136,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Magic Eden collections error:", error);
+      log.error("Magic Eden collections error:", error);
       res.status(500).json({ error: "Failed to fetch collections" });
     }
   });
@@ -161,7 +164,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
 
       res.json(marketOverview);
     } catch (error) {
-      console.error("Market overview error:", error);
+      log.error("Market overview error:", error);
       res.status(500).json({ 
         error: "Failed to fetch market overview",
         fallback: {
@@ -203,7 +206,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error("Solana account verification error:", error);
+      log.error("Solana account verification error:", error);
       res.status(500).json({ 
         error: "Failed to verify account",
         address: req.params.address,
@@ -239,7 +242,7 @@ export function setupEnhancedPublicAPIRoutes(app: Express) {
 
       res.json(trends);
     } catch (error) {
-      console.error("NFT trends error:", error);
+      log.error("NFT trends error:", error);
       res.status(500).json({ error: "Failed to fetch NFT trends" });
     }
   });
