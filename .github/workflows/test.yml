@@ -29,13 +29,12 @@ jobs:
 
       - name: Run tests
         working-directory: apps/backend
-        run: npm test || echo "No tests defined"
+        run: npm test
         env:
           NODE_ENV: test
           PINATA_JWT: test-jwt
           XAI_API_KEY: test-key
           PLATFORM_SECRET_KEY_BASE58: test-secret
-        continue-on-error: true
 
       - name: Upload coverage
         if: always()
@@ -65,10 +64,9 @@ jobs:
 
       - name: Run tests
         working-directory: client
-        run: npm test -- --run || echo "No tests defined"
+        run: npm test -- --run
         env:
           VITE_API_BASE: http://localhost:3001
-        continue-on-error: true
 
       - name: Upload coverage
         if: always()
