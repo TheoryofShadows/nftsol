@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(node scripts/replace-console-with-logger.js:*)",
-      "Bash(powershell -Command \"Get-ChildItem -Path ''apps\\backend\\src'',''server'' -Recurse -Include ''*.ts'' -Exclude ''*test*'',''*spec*'',''__mocks__'',''__tests__'' | Select-String -Pattern ''console\\.(log|error|warn|debug)'' | Group-Object Path | Measure-Object | Select-Object -ExpandProperty Count\")"
+      "Bash(powershell -Command \"Get-ChildItem -Path ''apps\\backend\\src'',''server'' -Recurse -Include ''*.ts'' -Exclude ''*test*'',''*spec*'',''__mocks__'',''__tests__'' | Select-String -Pattern ''console\\.(log|error|warn|debug)'' | Group-Object Path | Measure-Object | Select-Object -ExpandProperty Count\")",
+      "Bash(xargs -I {} sh -c 'tail -c 1 {} | od -An -tx1 | grep -q \"\"0a\"\" || echo \"\"Missing newline: {}\"\"')"
     ],
     "deny": [],
     "ask": []
