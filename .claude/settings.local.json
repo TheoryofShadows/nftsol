@@ -88,7 +88,9 @@
       "Bash(cargo update:*)",
       "Bash(rustup show:*)",
       "Bash(npm update:*)",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "Bash(gh api:*)",
+      "Bash(npm list:*)"
     ],
     "deny": [],
     "ask": []
