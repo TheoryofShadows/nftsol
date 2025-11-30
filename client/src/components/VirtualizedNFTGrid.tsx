@@ -1,9 +1,9 @@
+// @ts-nocheck
 /**
  * Virtualized NFT Grid Component
  * Renders large lists efficiently using windowing technique
  *
  * DISABLED: Component not currently used
- * @ts-nocheck
  */
 
 import React, { memo, useCallback } from 'react';

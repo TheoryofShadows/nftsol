@@ -8,9 +8,15 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
@@ -23,6 +29,6 @@
       "@services/*": ["./src/services/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "../shared"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

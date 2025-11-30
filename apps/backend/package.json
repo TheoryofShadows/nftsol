@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.540.0",
-    "@coral-xyz/anchor": "^0.32.1",
+    "@coral-xyz/anchor": "^0.29.0",
     "@dr.pogodin/csurf": "^1.16.6",
     "@hapi/boom": "^10.0.1",
     "@hapi/iron": "^7.0.1",

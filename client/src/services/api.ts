@@ -133,11 +133,11 @@ class ApiService {
         method: 'GET',
         credentials: 'include',
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.csrfToken) {
-          csrfToken = data.csrfToken;
+          csrfToken = data.csrfToken as string;
           return csrfToken;
         }
       }
@@ -145,7 +145,7 @@ class ApiService {
       console.warn('Failed to get CSRF token:', error);
     }
 
-    return csrfToken || '';
+    return (csrfToken as string) || '';
   }
 
   // Get program configuration

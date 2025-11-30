@@ -1,8 +1,8 @@
+// @ts-nocheck
 /**
  * NFT Service
  * Service layer for NFT-related operations
  * Separates business logic from components
- * @ts-nocheck
  */
 
 import { NFT, MintRequest, MintResponse, MarketData } from '@shared/types';

@@ -1,0 +1,19 @@
+[features]
+seeds = false
+skip-lint = false
+
+[programs.devnet]
+eternal_echoes = "EchoE1KF7qzVNQYfKJ5E5J5j2EEm9FzHxdP8PK2J8Hxb"
+
+[programs.mainnet]
+eternal_echoes = "EchoE1KF7qzVNQYfKJ5E5J5j2EEm9FzHxdP8PK2J8Hxb"
+
+[registry]
+url = "https://api.github.com/repos/coral-xyz/anchor/releases/download"
+
+[provider]
+cluster = "Devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha --timeout 1000000 tests/**/*.ts"

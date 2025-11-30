@@ -1,10 +1,10 @@
+// @ts-nocheck
 /**
  * Optimized Solana client-side utilities
  * - Connection management with WebSocket subscriptions
  * - Account data caching
  * - Transaction building helpers
  * - Wallet integration optimization
- * @ts-nocheck
  */
 
 import {

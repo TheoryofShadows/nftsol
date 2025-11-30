@@ -17,6 +17,5 @@ default = []
 
 [dependencies]
 anchor-lang = "0.29.0"
-anchor-spl = "0.29.0"
-solana-program = "~1.16"
-spl-account-compression = "0.3.0"
+anchor-spl = { version = "0.29.0", features = [] }
+solana-program = "1.18"

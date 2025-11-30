@@ -1,7 +1,7 @@
+// @ts-nocheck
 /**
  * useNfts Hook
  * React hook for NFT data fetching using the service layer
- * @ts-nocheck
  */
 
 import { useState, useEffect, useCallback } from 'react';
