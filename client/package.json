@@ -52,7 +52,7 @@
     "@vitest/coverage-v8": "^4.0.10",
     "autoprefixer": "^10.4.21",
     "buffer": "^6.0.3",
-    "cross-env": "^7.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^7.0.1",
