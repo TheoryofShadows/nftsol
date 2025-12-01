@@ -167,7 +167,7 @@
     "@types/express-serve-static-core": "^4.19.7",
     "@types/express-session": "^1.18.0",
     "@types/express-validator": "^2.20.33",
-    "@types/helmet": "^0.0.48",
+    "@types/helmet": "^4.0.0",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.5",
