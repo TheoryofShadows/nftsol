@@ -26,6 +26,18 @@ interface CollectionsTableProps {
 type SortField = 'floorPrice' | 'volume24h' | 'priceChange24h' | 'listedCount' | 'salesCount24h';
 type SortDirection = 'asc' | 'desc';
 
+// Sort icon component (moved outside to avoid recreation on render)
+const SortIcon: React.FC<{
+  field: SortField;
+  currentField: SortField;
+  direction: SortDirection
+}> = ({ field, currentField, direction }) => {
+  if (currentField !== field) {
+    return <span className="text-gray-500">⇅</span>;
+  }
+  return <span className="text-purple-400">{direction === 'desc' ? '↓' : '↑'}</span>;
+};
+
 export const CollectionsTable: React.FC<CollectionsTableProps> = ({
   collections,
   onCollectionClick,
@@ -51,13 +63,6 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
       setSortField(field);
       setSortDirection('desc');
     }
-  };
-
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) {
-      return <span className="text-gray-500">⇅</span>;
-    }
-    return <span className="text-purple-400">{sortDirection === 'desc' ? '↓' : '↑'}</span>;
   };
 
   if (loading) {
@@ -87,7 +92,7 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
               onClick={() => handleSort('floorPrice')}
             >
               <div className="flex items-center justify-end gap-2">
-                Floor Price <SortIcon field="floorPrice" />
+                Floor Price <SortIcon field="floorPrice" currentField={sortField} direction={sortDirection} />
               </div>
             </th>
             <th
@@ -95,7 +100,7 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
               onClick={() => handleSort('volume24h')}
             >
               <div className="flex items-center justify-end gap-2">
-                24h Volume <SortIcon field="volume24h" />
+                24h Volume <SortIcon field="volume24h" currentField={sortField} direction={sortDirection} />
               </div>
             </th>
             <th
@@ -103,7 +108,7 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
               onClick={() => handleSort('priceChange24h')}
             >
               <div className="flex items-center justify-end gap-2">
-                24h Change <SortIcon field="priceChange24h" />
+                24h Change <SortIcon field="priceChange24h" currentField={sortField} direction={sortDirection} />
               </div>
             </th>
             <th
@@ -111,7 +116,7 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
               onClick={() => handleSort('listedCount')}
             >
               <div className="flex items-center justify-end gap-2">
-                Listed <SortIcon field="listedCount" />
+                Listed <SortIcon field="listedCount" currentField={sortField} direction={sortDirection} />
               </div>
             </th>
             <th
@@ -119,7 +124,7 @@ export const CollectionsTable: React.FC<CollectionsTableProps> = ({
               onClick={() => handleSort('salesCount24h')}
             >
               <div className="flex items-center justify-end gap-2">
-                Sales <SortIcon field="salesCount24h" />
+                Sales <SortIcon field="salesCount24h" currentField={sortField} direction={sortDirection} />
               </div>
             </th>
           </tr>

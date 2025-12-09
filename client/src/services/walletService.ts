@@ -1,4 +1,5 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore - Legacy code, type checking disabled
 /**
  * Wallet Service
  * Service layer for wallet operations

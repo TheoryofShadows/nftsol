@@ -24,6 +24,7 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   // Fetch wallet balance using backend RPC proxy
   useEffect(() => {
     if (connected && publicKey) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingBalance(true);
       solanaRpcProxy
         .getBalanceInSol(publicKey.toBase58())

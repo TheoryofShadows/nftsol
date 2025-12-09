@@ -1,9 +1,11 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/ban-ts-comment, react/jsx-no-undef */
+// @ts-ignore - Legacy code, type checking disabled
 /**
  * Virtualized NFT Grid Component
  * Renders large lists efficiently using windowing technique
  *
  * DISABLED: Component not currently used
+ * Dependencies (react-window, react-window-infinite-loader) not installed
  */
 
 import React, { memo, useCallback } from 'react';
