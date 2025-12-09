@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Floor Price Chart Component
  * Uses TradingView Lightweight Charts for floor price history
@@ -7,7 +6,10 @@
  * npm install lightweight-charts
  *
  * DISABLED: Component not currently used
+ * TypeScript checking disabled below due to missing lightweight-charts dependency
  */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-ignore - Component disabled, lightweight-charts not installed
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { API_BASE } from '../config/api';

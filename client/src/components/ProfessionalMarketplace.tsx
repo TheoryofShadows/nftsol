@@ -42,6 +42,7 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
           description: `${c.listedCount.toLocaleString()} listed • ${c.holders.toLocaleString()} holders`,
         }));
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrendingCollections(featured);
 
       // Top movers: collections with biggest price changes (both up and down)
@@ -60,6 +61,7 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
           description: `Floor: ◎${c.floorPrice.toFixed(2)}`,
         }));
 
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTopMovers(movers);
     }
   }, [collections]);

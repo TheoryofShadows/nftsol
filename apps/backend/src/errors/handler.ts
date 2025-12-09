@@ -4,7 +4,7 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { ERROR_CODES, getErrorMetadata } from './codes';
 
 export class AppError extends Error {
@@ -80,7 +80,9 @@ export const errorHandler = (
  * Async wrapper for route handlers
  * Catches errors and passes to error handler
  */
-export const asyncHandler = (fn: Function) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<any>
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     return Promise.resolve(fn(req, res, next)).catch(next);
   };

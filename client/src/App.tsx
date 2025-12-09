@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { getRpcUrl, getWalletAdapters } from './config/wallet';
@@ -54,9 +54,9 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
 };
 
 const Hero = lazyWithErrorBoundary(() => import('./components/Hero'));
-const PhantomConnect = lazyWithErrorBoundary(() => import('./components/PhantomConnect'));
+const _PhantomConnect = lazyWithErrorBoundary(() => import('./components/PhantomConnect'));
 const MintForm = lazyWithErrorBoundary(() => import('./components/MintForm'));
-const NftGrid = lazyWithErrorBoundary(() => import('./components/NftGrid'));
+const _NftGrid = lazyWithErrorBoundary(() => import('./components/NftGrid'));
 const WithdrawalForm = lazyWithErrorBoundary(() => import('./components/WithdrawalForm'));
 const ReferralSystem = lazyWithErrorBoundary(() => import('./components/ReferralSystem'));
 const WaitlistSignup = lazyWithErrorBoundary(() => import('./components/WaitlistSignup'));
@@ -90,7 +90,7 @@ function AppContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
-  const { metrics, getPerformanceReport } = usePerformance();
+  const { metrics: _metrics, getPerformanceReport } = usePerformance();
   const { connected, publicKey } = useWallet();
   const { startOnboarding, isStepCompleted, completeStep } = useOnboarding();
   
@@ -253,6 +253,25 @@ function AppContent() {
       sessionStorage.setItem('wallet_was_connected', 'true');
     }
   }, [connected, publicKey, addNotification]);
+
+  // Memoize collections data with stable random values
+  const collectionsData = useMemo(() => {
+    return nfts.map((nft, index) => {
+      // Use index as seed for consistent random values per NFT
+      const seed = index + 1;
+      return {
+        id: nft.id || 'unknown',
+        name: nft.name || 'Unknown NFT',
+        image: nft.imageUrl || '/placeholder-nft.png',
+        floorPrice: parseFloat(nft.price || '0'),
+        volume24h: (seed * 123.45) % 1000, // Stable pseudo-random value
+        priceChange24h: ((seed * 67.89) % 40) - 20, // Range: -20 to 20
+        listedCount: (seed * 7) % 100 + 1,
+        salesCount24h: (seed * 13) % 50 + 1,
+        holders: (seed * 37) % 1000 + 100,
+      };
+    });
+  }, [nfts]);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -501,17 +520,7 @@ function AppContent() {
                 }
               >
                 <ProfessionalMarketplace
-                  collections={nfts.map((nft) => ({
-                    id: nft.id || 'unknown',
-                    name: nft.name || 'Unknown NFT',
-                    image: nft.imageUrl || '/placeholder-nft.png',
-                    floorPrice: parseFloat(nft.price || '0'),
-                    volume24h: Math.random() * 1000, // Sample data
-                    priceChange24h: (Math.random() - 0.5) * 20,
-                    listedCount: Math.floor(Math.random() * 100) + 1,
-                    salesCount24h: Math.floor(Math.random() * 50) + 1,
-                    holders: Math.floor(Math.random() * 1000) + 100,
-                  }))}
+                  collections={collectionsData}
                   loading={loading}
                 />
               </Suspense>
