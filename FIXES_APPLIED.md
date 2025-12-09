@@ -16,10 +16,11 @@ WebSocket connection failed
 
 **Fix Applied:**
 - ✅ Updated `apps/backend/.env`:
-  - Changed `SOLANA_RPC_URL` to Helius with API key: `f40b1ccb-9fba-4b1b-82cb-a63f73c24daf`
-  - Updated to: `https://mainnet.helius-rpc.com/?api-key=f40b1ccb-9fba-4b1b-82cb-a63f73c24daf`
+  - Changed `SOLANA_RPC_URL` to Helius with API key
+  - Updated to: `https://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_API_KEY`
+  - **NOTE:** API key redacted for security. Get your key from https://www.helius.dev/
 - ✅ Created `client/.env`:
-  - Added `VITE_HELIUS_API_KEY=f40b1ccb-9fba-4b1b-82cb-a63f73c24daf`
+  - Added `VITE_HELIUS_API_KEY=YOUR_HELIUS_API_KEY`
   - App now uses Helius for RPC calls
 
 **Result:** RPC calls will now complete successfully without 403 errors

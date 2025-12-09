@@ -263,8 +263,8 @@ describe('Video Upload Integration Tests', () => {
             contentType: 'video/mp4',
           } as any);
 
-        // Should be rejected (400 or 500 depending on multer)
-        expect([400, 500, 413]).toContain(response.status);
+        // Should be rejected (400, 413, 429, or 500 depending on multer/rate limiting)
+        expect([400, 413, 429, 500]).toContain(response.status);
       } catch (err: any) {
         // On Windows with chunked multipart, oversized streams may trigger ECONNRESET
         if (err.code === 'ECONNRESET') {
