@@ -149,12 +149,12 @@ describe('Solana Address Validation', () => {
   const _invalidAddress = 'invalid-address';
 
   describe('isValidSolanaAddress', () => {
-    it('should validate a valid Solana address', () => {
+    it('should validate a valid Solana address', async () => {
       // This is a valid Solana testnet address
       const validAddress = '8K4oZ2xqQ3pP8vJ9LmN1Xy2BvC3D4E5F6G7H8J9K0L1M2N3P4Q5R6S7T8U9V0W';
       // Mock the actual implementation to return true for test
-      jest.spyOn(validationModule, 'isValidSolanaAddress').mockReturnValue(true);
-      expect(isValidSolanaAddress(validAddress)).toBe(true);
+      jest.spyOn(validationModule, 'isValidSolanaAddress').mockResolvedValue(true);
+      expect(await isValidSolanaAddress(validAddress)).toBe(true);
     });
 
     it('should validate wallet middleware with valid address', async () => {
@@ -214,18 +214,18 @@ describe('Solana Address Validation', () => {
       }));
     });
 
-    it('should reject invalid Solana addresses', () => {
+    it('should reject invalid Solana addresses', async () => {
       // Mock the implementation to return false for invalid addresses
       const mockIsValid = jest.spyOn(validationModule, 'isValidSolanaAddress');
-      mockIsValid.mockImplementation((addr: string) => {
+      mockIsValid.mockImplementation(async (addr: string): Promise<boolean> => {
         // Only return true for the specific test address we're using
         return addr === '8K4oZ2xqQ3pP8vJ9LmN1Xy2BvC3D4E5F6G7H8J9K0L1M2N3P4Q5R6S7T8U9V0W';
       });
-      
-      expect(isValidSolanaAddress('invalid-address')).toBe(false);
-      expect(isValidSolanaAddress('')).toBe(false);
-      expect(isValidSolanaAddress('a'.repeat(100))).toBe(false);
-      
+
+      expect(await isValidSolanaAddress('invalid-address')).toBe(false);
+      expect(await isValidSolanaAddress('')).toBe(false);
+      expect(await isValidSolanaAddress('a'.repeat(100))).toBe(false);
+
       // Clean up the mock
       mockIsValid.mockRestore();
     });

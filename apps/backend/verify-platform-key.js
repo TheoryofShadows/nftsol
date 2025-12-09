@@ -1,9 +1,16 @@
 ﻿const { Keypair } = require('@solana/web3.js');
 const bs58 = require('bs58');
+require('dotenv').config();
 
-// Your secret key from .env
-const secretKeyBase58 = '345FDNvMFEoVjhs2mTYPrBJDLGNPJWD8p4EkA9kjpasTMxqwXwERZ7fHofRjkwWjes7ccKbzPGh8JnQ9wnyzSobn';
-const expectedPublicKey = 'D5s9G8JBTBDENiozN5ZhgozQoZbb9iuzbtM5yZ6EEVmr';
+// Read secret key from environment variable for security
+const secretKeyBase58 = process.env.PLATFORM_SECRET_KEY_BASE58;
+const expectedPublicKey = process.env.PLATFORM_PUBLIC_KEY || 'D5s9G8JBTBDENiozN5ZhgozQoZbb9iuzbtM5yZ6EEVmr';
+
+if (!secretKeyBase58) {
+  console.error('❌ ERROR: PLATFORM_SECRET_KEY_BASE58 not found in environment variables');
+  console.error('   Please set it in your .env file');
+  process.exit(1);
+}
 
 console.log('🔍 Verifying Platform Keypair...\n');
 

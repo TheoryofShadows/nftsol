@@ -18,7 +18,7 @@ const client: AxiosInstance = axios.create({
 // Test data
 let testTenantId: string;
 let testApiKey: string;
-let _testApiKeyId: string;
+let testApiKeyId: string;
 let authenticatedClient: AxiosInstance;
 
 // ============================================
