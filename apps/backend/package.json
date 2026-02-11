@@ -33,7 +33,7 @@
     "check-licenses": "license-checker --production --onlyAllow='MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0'"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.540.0",
+    "@aws-sdk/client-s3": "^3.987.0",
     "@coral-xyz/anchor": "^0.29.0",
     "@dr.pogodin/csurf": "^1.16.6",
     "@hapi/boom": "^10.0.1",
