@@ -26,7 +26,6 @@ export default function ModernWalletConnect() {
         })
         .finally(() => setIsLoading(false));
 
-      // Subscribe to balance changes
       const subscription = connection.onAccountChange(
         publicKey,
         (accountInfo) => {
@@ -50,30 +49,32 @@ export default function ModernWalletConnect() {
     return (
       <div className="relative" data-tour="wallet-connect">
         <div
-          className="glass-card-hover p-4 cursor-pointer min-w-[200px]"
+          className="bg-[#111111] border border-[#1e1e1e] rounded-lg p-4 cursor-pointer min-w-[200px] hover:border-[#c9a84c]/20 transition-colors"
           onClick={() => setShowDropdown(!showDropdown)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
-                <span className="text-xl">👛</span>
+              <div className="w-9 h-9 bg-[#c9a84c]/15 rounded-md flex items-center justify-center">
+                <svg className="w-4 h-4 text-[#c9a84c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
               </div>
               <div className="text-left">
-                <div className="text-sm font-semibold text-white">{walletName}</div>
-                <div className="text-xs text-gray-400 font-mono">{shortAddress}</div>
+                <div className="text-sm font-medium text-white">{walletName}</div>
+                <div className="text-xs text-zinc-500 font-mono">{shortAddress}</div>
               </div>
             </div>
             {isLoading ? (
-              <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-3.5 h-3.5 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin" />
             ) : balance !== null ? (
               <div className="text-right">
-                <div className="text-sm font-bold gradient-text-primary">
+                <div className="text-sm font-semibold text-[#c9a84c]">
                   {balance.toFixed(4)} SOL
                 </div>
               </div>
             ) : null}
             <svg
-              className={`w-5 h-5 text-gray-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 text-zinc-500 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -91,20 +92,20 @@ export default function ModernWalletConnect() {
         {showDropdown && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)} />
-            <div className="absolute right-0 mt-2 w-64 glass-card z-50 p-2 animate-fade-in">
-              <div className="p-3 border-b border-white/10">
-                <div className="text-xs text-gray-400 mb-1">Connected Wallet</div>
-                <div className="font-mono text-sm text-white break-all">{publicKey.toBase58()}</div>
+            <div className="absolute right-0 mt-2 w-64 bg-[#111111] border border-[#1e1e1e] rounded-lg z-50 p-2 animate-fade-in shadow-xl">
+              <div className="p-3 border-b border-[#1e1e1e]">
+                <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Connected Wallet</div>
+                <div className="font-mono text-xs text-zinc-400 break-all">{publicKey.toBase58()}</div>
               </div>
 
-              <div className="p-3 border-b border-white/10">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-400">Balance</span>
+              <div className="p-3 border-b border-[#1e1e1e]">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Balance</span>
                   {isLoading && (
-                    <div className="w-3 h-3 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3 h-3 border-2 border-[#c9a84c] border-t-transparent rounded-full animate-spin" />
                   )}
                 </div>
-                <div className="text-lg font-bold gradient-text-primary">
+                <div className="text-lg font-bold text-[#c9a84c]">
                   {balance !== null ? `${balance.toFixed(4)} SOL` : 'Loading...'}
                 </div>
               </div>
@@ -114,7 +115,7 @@ export default function ModernWalletConnect() {
                   setShowDropdown(false);
                   disconnect();
                 }}
-                className="w-full px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold transition-all duration-200 mt-2"
+                className="w-full px-4 py-2 rounded-md bg-red-500/10 hover:bg-red-500/15 text-red-400 font-medium text-sm transition-colors mt-2"
               >
                 Disconnect
               </button>
@@ -129,11 +130,11 @@ export default function ModernWalletConnect() {
     <div className="relative">
       <button
         onClick={() => setVisible(true)}
-        className="btn-primary-modern px-6 py-3 text-base font-semibold"
+        className="bg-[#c9a84c] hover:bg-[#b8973f] text-black px-6 py-3 text-sm font-semibold rounded-lg transition-colors"
       >
         <span className="flex items-center space-x-2">
           <span>Connect Wallet</span>
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

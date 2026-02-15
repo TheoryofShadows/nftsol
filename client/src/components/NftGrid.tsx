@@ -1,5 +1,4 @@
 /* eslint-disable react/forbid-dom-props */
-// Microsoft Edge Tools: All inline styles have been moved to external CSS file (NftGrid.css)
 import React, { useState, memo } from 'react';
 import { NFTCardSkeleton } from './SkeletonLoader';
 import NftDetailModal from './NftDetailModal';
@@ -30,6 +29,32 @@ interface NftGridProps {
   error?: string | null;
 }
 
+const getRarityBadgeClasses = (rarity?: string) => {
+  switch (rarity) {
+    case 'legendary':
+      return 'text-gold bg-gold/10 border border-gold/20';
+    case 'epic':
+      return 'text-purple-300 bg-purple-500/10 border border-purple-500/20';
+    case 'rare':
+      return 'text-blue-300 bg-blue-500/10 border border-blue-500/20';
+    default:
+      return 'text-zinc-400 bg-zinc-500/10 border border-zinc-500/20';
+  }
+};
+
+const getRarityLabel = (rarity?: string) => {
+  switch (rarity) {
+    case 'legendary':
+      return 'Legendary';
+    case 'epic':
+      return 'Epic';
+    case 'rare':
+      return 'Rare';
+    default:
+      return 'Common';
+  }
+};
+
 const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,12 +67,14 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
   if (error) {
     return (
       <div className="text-center py-20">
-        <div className="card-modern max-w-md mx-auto p-12">
-          <div className="text-6xl mb-6">❌</div>
-          <h3 className="text-heading text-white mb-4">Error Loading NFTs</h3>
-          <p className="text-body mb-6">{error}</p>
-          <button className="btn-modern" onClick={() => window.location.reload()}>
-            <span className="relative z-10">Try Again</span>
+        <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg max-w-md mx-auto p-12">
+          <h3 className="text-xl font-semibold text-white mb-3">Error Loading NFTs</h3>
+          <p className="text-zinc-400 text-sm mb-6 leading-relaxed">{error}</p>
+          <button
+            className="px-6 py-2.5 bg-gold text-black font-semibold rounded-md hover:bg-gold-light transition-colors text-sm"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
           </button>
         </div>
       </div>
@@ -57,159 +84,128 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
   if (!nfts?.length) {
     return (
       <div className="text-center py-20">
-        <div className="card-modern max-w-md mx-auto p-12">
-          <div className="text-6xl mb-6">🎨</div>
-          <h3 className="text-heading text-white mb-4">No NFTs Yet</h3>
-          <p className="text-body mb-6">
+        <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg max-w-md mx-auto p-12">
+          <h3 className="text-xl font-semibold text-white mb-3">No NFTs Yet</h3>
+          <p className="text-zinc-400 text-sm mb-6 leading-relaxed">
             Be the first to mint an NFT and start the marketplace!
           </p>
-          <button className="btn-modern">
-            <span className="relative z-10">Start Minting</span>
+          <button className="px-6 py-2.5 bg-gold text-black font-semibold rounded-md hover:bg-gold-light transition-colors text-sm">
+            Start Minting
           </button>
         </div>
       </div>
     );
   }
 
-  const getRarityColor = (rarity?: string) => {
-    switch (rarity) {
-      case 'legendary':
-        return 'from-yellow-400 to-orange-500';
-      case 'epic':
-        return 'from-purple-400 to-pink-500';
-      case 'rare':
-        return 'from-blue-400 to-cyan-500';
-      default:
-        return 'from-gray-400 to-gray-500';
-    }
-  };
-
-  const getRarityBadge = (rarity?: string) => {
-    switch (rarity) {
-      case 'legendary':
-        return '👑 Legendary';
-      case 'epic':
-        return '💎 Epic';
-      case 'rare':
-        return '⭐ Rare';
-      default:
-        return '📦 Common';
-    }
-  };
-
   return (
-    <div className="grid-modern">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {nfts.map((nft, index) => (
         <div
           key={nft.id}
-          className="card-modern glow-border scroll-reveal overflow-hidden cursor-pointer nft-grid-card"
+          className="group relative bg-[#111111] border border-[#1e1e1e] rounded-lg overflow-hidden cursor-pointer hover:border-gold/25 transition-colors duration-300 nft-grid-card"
           data-animation-delay={Math.round((index * 50) / 50) * 50}
           onClick={() => {
             setSelectedNft(nft);
             setIsModalOpen(true);
           }}
         >
-          {/* Rarity indicator */}
+          {/* Rarity badge */}
           {nft.rarity && (
             <div
-              className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-bold bg-gradient-to-r ${getRarityColor(nft.rarity)} text-white z-10`}
+              className={`absolute top-3 right-3 px-2.5 py-1 rounded-md text-xs font-medium z-10 ${getRarityBadgeClasses(nft.rarity)}`}
             >
-              {getRarityBadge(nft.rarity)}
+              {getRarityLabel(nft.rarity)}
             </div>
           )}
 
           {/* NFT Image */}
-          <div className="relative overflow-hidden rounded-xl mb-4 aspect-square">
+          <div className="relative overflow-hidden aspect-square">
             <img
               src={nft.imageUrl}
               alt={nft.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               onError={(e) => {
                 e.currentTarget.src =
                   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNTBMMTUwIDEwMEgxMDBWNTBaIiBmaWxsPSIjOUI5QjlCIi8+CjxwYXRoIGQ9Ik0xMDAgMTUwTDUwIDEwMEgxMDBWMTUwWiIgZmlsbD0iIzlCOUI5QiIvPgo8L3N2Zz4K';
               }}
             />
 
-            {/* Overlay on hover - Modern */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-purple-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4 backdrop-blur-sm">
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end p-4">
               <div className="w-full space-y-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedNft(nft);
                     setIsModalOpen(true);
                   }}
-                  className="w-full glass-modern px-4 py-2.5 text-white font-semibold hover:bg-white/20 transition-all text-sm flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2.5 bg-white/10 border border-white/20 text-white text-sm font-medium rounded-md hover:bg-white/20 transition-colors"
                 >
-                  <span className="text-lg">👁️</span> View Details
+                  View Details
                 </button>
                 {nft.price ? (
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedNft(nft);
                       setIsModalOpen(true);
                     }}
-                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors"
                   >
-                    <span className="text-lg">💰</span> Buy {nft.price} SOL
+                    Buy {nft.price} SOL
                   </button>
                 ) : (
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedNft(nft);
                       setIsModalOpen(true);
                     }}
-                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2.5 rounded-2xl text-white font-bold hover:shadow-2xl hover:scale-105 transition-all text-sm flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors"
                   >
-                    <span className="text-lg">📋</span> List for Sale
+                    List for Sale
                   </button>
                 )}
               </div>
             </div>
-
-            {/* Solana badge - Modern */}
-            <div className="absolute top-3 right-3 badge-modern text-xs">
-              SOL ◎
-            </div>
           </div>
 
-          {/* NFT Details - Modern Typography */}
-          <div className="space-y-3 p-4">
+          {/* NFT Details */}
+          <div className="p-4 space-y-3">
             <div>
-              <h3 className="text-lg font-bold text-white mb-1 truncate font-display">{nft.name}</h3>
-              <p className="text-sm text-gray-400 line-clamp-2 text-body">{nft.description}</p>
+              <h3 className="text-sm font-semibold text-white truncate">{nft.name}</h3>
+              <p className="text-xs text-zinc-500 line-clamp-2 mt-1 leading-relaxed">{nft.description}</p>
             </div>
 
-            {/* Creator info - Modern */}
-            <div className="flex items-center justify-between text-sm">
+            {/* Creator and price */}
+            <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">
+                <div className="w-7 h-7 bg-gold/20 text-gold rounded-md flex items-center justify-center text-xs font-semibold">
                   {nft.creator.slice(0, 2).toUpperCase()}
                 </div>
-                <span className="text-gray-400 font-mono text-xs">
+                <span className="text-zinc-500 font-mono text-xs">
                   {nft.creator.slice(0, 6)}...{nft.creator.slice(-4)}
                 </span>
               </div>
-              {nft.price && <div className="gradient-text-modern font-bold text-lg">{nft.price} ◎</div>}
+              {nft.price && (
+                <div className="text-gold font-semibold text-sm">
+                  {nft.price} SOL
+                </div>
+              )}
             </div>
 
-            {/* Mint address (collapsible) */}
+            {/* Mint address */}
             {nft.mintAddress && (
               <details className="text-xs">
-                <summary className="text-gray-500 cursor-pointer hover:text-gray-300">
+                <summary className="text-zinc-600 cursor-pointer hover:text-zinc-400 transition-colors">
                   View Mint Address
                 </summary>
-                <div className="mt-2 p-2 bg-black/30 rounded text-gray-400 font-mono break-all">
+                <div className="mt-2 p-2 bg-black/40 rounded-md text-zinc-500 font-mono break-all text-[11px] leading-relaxed">
                   {nft.mintAddress}
                 </div>
               </details>
             )}
           </div>
-
-          {/* Hover effect border */}
-          <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-cyan-400/50 transition-colors duration-300 pointer-events-none"></div>
         </div>
       ))}
 
