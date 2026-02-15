@@ -63,32 +63,18 @@ export default defineConfig({
             '@solana/wallet-adapter-react-ui',
           ],
           'query-vendor': ['@tanstack/react-query'],
-          'ui-vendor': ['@radix-ui/themes'],
-          'utility-vendor': ['lodash-es', 'date-fns'],
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash].[ext]',
       },
     },
-    chunkSizeWarningLimit: 500, // Warn on chunks > 500KB
+    chunkSizeWarningLimit: 500,
     reportCompressedSize: true,
     cssCodeSplit: true,
-    // Ensure proper module resolution
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true,
-    },
-    // Reduce output size
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.debug'],
-      },
-      output: {
-        comments: false,
-      },
     },
   },
   esbuild: {

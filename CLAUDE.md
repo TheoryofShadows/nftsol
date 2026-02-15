@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Guide for NFTSol
 
-**Version:** 1.0
-**Last Updated:** November 2025
+**Version:** 2.0
+**Last Updated:** February 2026
 **Purpose:** Guide for AI assistants working on the NFTSol codebase
 
 ---
@@ -37,7 +37,7 @@
 - **Modern UI**: 2026-style dashboard with glassmorphism effects
 
 ### Production URLs
-- **Frontend**: https://nftsolmarket.netlify.app
+- **App**: https://nftsol.app (custom domain on Netlify)
 - **Backend API**: https://nftsol.onrender.com
 - **GitHub**: https://github.com/TheoryofShadows/nftsol
 
@@ -945,9 +945,7 @@ npm run dev:debug
 - **TECHNICAL-DOCS.md** - API and database details
 - **CONTRIBUTING.md** - How to contribute
 - **SECURITY.md** - Security policies
-- **SAAS_ONBOARDING_GUIDE.md** - SaaS features
-- **REAL_DATA_INTEGRATION_GUIDE.md** - Data integration
-- **TESTING_COMPLETE.md** - Testing guide
+- **CHANGELOG.md** - Version history
 
 ### External Resources
 - [Solana Docs](https://docs.solana.com/)
@@ -1006,6 +1004,6 @@ When working on a new feature:
 
 **Remember:** This is a production application handling real assets on Solana mainnet. Always test thoroughly, especially when dealing with blockchain transactions, token transfers, or wallet operations.
 
-**Last Updated:** November 2025
+**Last Updated:** February 2026
 **Maintainer:** NFTSol Team
 **License:** MIT

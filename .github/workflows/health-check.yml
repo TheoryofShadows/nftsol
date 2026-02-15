@@ -38,7 +38,7 @@ jobs:
 
       - name: 🩺 Check API health endpoint
         run: |
-          curl -sSf http://localhost:3001/healthz | grep '"ok":true'
+          curl -sSf http://localhost:3001/health | grep '"status":"ok"'
 
       - name: ✅ Summary
         run: echo "✅ NFTSol CI passed on \${{ github.ref_name }}"

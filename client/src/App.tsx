@@ -801,7 +801,7 @@ function AppContent() {
           </div>
 
           <div className="border-t border-white/10 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">© 2024 NFTSol. Built on Solana with ❤️</p>
+            <p className="text-gray-400 text-sm">© 2025 NFTSol. Built on Solana with ❤️</p>
             <div className="flex items-center space-x-4 mt-4 md:mt-0">
               <span className="text-xs text-gray-500">Powered by</span>
               <div className="flex items-center space-x-2">

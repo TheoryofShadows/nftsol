@@ -152,10 +152,14 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow Netlify deployments only if they match expected production domain
-      // DO NOT allow all *.netlify.app subdomains - only the specific one we use
+      // Allow the specific Netlify deployment domain
       const allowedNetlifyDomain = process.env.ALLOWED_NETLIFY_DOMAIN || 'nftsolmarket.netlify.app';
       if (origin === `https://${allowedNetlifyDomain}`) {
+        return callback(null, true);
+      }
+
+      // Allow nftsol.app production domain
+      if (origin === 'https://nftsol.app' || origin === 'https://www.nftsol.app') {
         return callback(null, true);
       }
 
@@ -392,14 +396,6 @@ app.get('/healthz', async (req, res) => {
       error: 'Health check failed',
     });
   }
-});
-
-app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    status: 'ok',
-    timestamp: Date.now(),
-  });
 });
 
 // Root API documentation endpoint

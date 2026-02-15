@@ -1,3 +1,0 @@
-VITE_API_BASE=https://nftsol.onrender.com
-NODE_ENV=production
-
