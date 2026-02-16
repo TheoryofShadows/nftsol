@@ -19,19 +19,17 @@ export default function MintForm() {
     try {
       const { API_ENDPOINTS } = await import('../config/api');
 
-      console.log('🚀 Starting NFT mint...');
+      console.log('Starting NFT mint...');
       console.log('  Name:', name);
       console.log('  File:', file.name, `(${(file.size / 1024).toFixed(2)}KB)`);
       console.log('  Wallet:', publicKey?.toBase58());
 
-      // Fetch CSRF token from a GET endpoint (CSRF middleware doesn't protect GET)
-      console.log('🔐 Fetching CSRF token...');
+      console.log('Fetching CSRF token...');
       const csrfRes = await fetch(API_ENDPOINTS.mint, {
         method: 'GET',
         credentials: 'include',
       });
 
-      // Get CSRF token from cookie (set by generateCSRFToken middleware)
       const csrfToken = document.cookie
         .split('; ')
         .find(row => row.startsWith('XSRF-TOKEN='))
@@ -41,9 +39,8 @@ export default function MintForm() {
         throw new Error('Failed to obtain CSRF token');
       }
 
-      console.log('✅ CSRF token obtained');
+      console.log('CSRF token obtained');
 
-      // Create form data with all required fields
       const formData = new FormData();
       formData.append('name', name);
       formData.append('description', `Minted NFT: ${name}`);
@@ -51,8 +48,7 @@ export default function MintForm() {
       formData.append('file', file, file.name);
       formData.append('_csrf', csrfToken);
 
-      // Mint NFT using real Solana blockchain
-      console.log('📤 Sending to:', API_ENDPOINTS.mint);
+      console.log('Sending to:', API_ENDPOINTS.mint);
 
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
@@ -63,31 +59,27 @@ export default function MintForm() {
       const mintData = await mintRes.json();
 
       if (mintData.success) {
-        // Trigger confetti celebration
         confetti({
           particleCount: 150,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D'],
+          colors: ['#c9a84c', '#dbb85a', '#a88a3a', '#f5f5f5'],
         });
 
-        // Show success notification
         const mintAddress = mintData.data?.mintAddress || mintData.data?.mint;
         addNotification({
           type: 'success',
-          title: '🎉 NFT Minted Successfully!',
+          title: 'NFT Minted Successfully!',
           message: mintAddress
             ? `Your NFT "${name}" has been minted on Solana. Mint Address: ${mintAddress.slice(0, 8)}...`
             : `Your NFT "${name}" has been minted on Solana.`,
           duration: 6000,
         });
 
-        // Auto-navigate to "My NFTs" tab after a short delay
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('change-tab', { detail: 'my-nfts' }));
         }, 1500);
 
-        // Reset form
         setFile(null);
         setName('');
       } else {
@@ -112,63 +104,57 @@ export default function MintForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="card-glass p-8">
+      <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg p-8">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">✨</div>
-          <h3 className="text-3xl font-bold gradient-text font-display mb-2">Mint Your NFT</h3>
-          <p className="text-gray-300 mb-4">Create your unique digital asset on Solana</p>
-          
-          {/* Ultra-Cheap Badge */}
+          <h3 className="text-2xl font-bold text-white font-display mb-2">Mint Your NFT</h3>
+          <p className="text-zinc-400 text-sm mb-5">Create your unique digital asset on Solana</p>
+
+          {/* Cost badge */}
           {!costLoading && estimate && (
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/50 rounded-full px-6 py-3">
-              <span className="text-2xl">💰</span>
+            <div className="inline-flex items-center gap-2.5 bg-[#c9a84c]/10 border border-[#c9a84c]/20 rounded-md px-5 py-2.5">
               <div className="text-left">
-                <div className="text-xs text-green-300 font-semibold uppercase tracking-wider">Ultra-Cheap</div>
-                <div className="text-lg font-bold text-white">Only ${estimate.usdCost.toFixed(4)}</div>
+                <div className="text-[10px] text-[#c9a84c] font-medium uppercase tracking-wider">Mint Cost</div>
+                <div className="text-base font-bold text-white">${estimate.usdCost.toFixed(4)}</div>
               </div>
-              <span className="text-2xl">🚀</span>
             </div>
           )}
         </div>
-        
-        {/* Cost Comparison Banner */}
+
+        {/* Cost Comparison */}
         {!costLoading && comparison && (
-          <div className="mb-8 p-6 glass rounded-xl border border-cyan-400/30">
-            <h4 className="text-center text-sm font-semibold text-cyan-300 mb-4 uppercase tracking-wider">
-              💎 Why Choose NFTSol?
+          <div className="mb-8 p-5 bg-[#0c0c0c] border border-[#1e1e1e] rounded-lg">
+            <h4 className="text-center text-xs font-medium text-zinc-400 mb-4 uppercase tracking-wider">
+              Why Choose NFTSol?
             </h4>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-xs text-gray-400 mb-1">NFTSol</div>
-                <div className="text-2xl font-bold text-green-400">${comparison.nftSol.cost.toFixed(4)}</div>
-                <div className="text-xs text-gray-500">{comparison.nftSol.time}</div>
+                <div className="text-[10px] text-zinc-500 mb-1">NFTSol</div>
+                <div className="text-xl font-bold text-[#c9a84c]">${comparison.nftSol.cost.toFixed(4)}</div>
+                <div className="text-[10px] text-zinc-600">{comparison.nftSol.time}</div>
               </div>
               <div>
-                <div className="text-xs text-gray-400 mb-1">OpenSea + ETH</div>
-                <div className="text-2xl font-bold text-red-400">${comparison.openSea.cost.toFixed(2)}</div>
-                <div className="text-xs text-gray-500">{comparison.openSea.time}</div>
+                <div className="text-[10px] text-zinc-500 mb-1">OpenSea + ETH</div>
+                <div className="text-xl font-bold text-zinc-400">${comparison.openSea.cost.toFixed(2)}</div>
+                <div className="text-[10px] text-zinc-600">{comparison.openSea.time}</div>
               </div>
               <div>
-                <div className="text-xs text-gray-400 mb-1">pump.fun</div>
-                <div className="text-2xl font-bold text-yellow-400">${comparison.pumpFun.cost.toFixed(2)}</div>
-                <div className="text-xs text-gray-500">{comparison.pumpFun.time}</div>
+                <div className="text-[10px] text-zinc-500 mb-1">pump.fun</div>
+                <div className="text-xl font-bold text-zinc-400">${comparison.pumpFun.cost.toFixed(2)}</div>
+                <div className="text-[10px] text-zinc-600">{comparison.pumpFun.time}</div>
               </div>
             </div>
-            <div className="mt-4 pt-4 border-t border-white/10 text-center">
-              <span className="text-green-400 font-bold text-lg">
-                {comparison.savings.vsOpenSea}% cheaper than Ethereum NFTs! 
-              </span>
-              <span className="ml-2 text-cyan-300">
-                {comparison.savings.vsPumpFun === 'Cheaper!' && '🔥 Even cheaper than meme coins!'}
+            <div className="mt-4 pt-3 border-t border-[#1e1e1e] text-center">
+              <span className="text-[#c9a84c] font-semibold text-sm">
+                {comparison.savings.vsOpenSea}% cheaper than Ethereum NFTs
               </span>
             </div>
           </div>
         )}
 
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* File Upload */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">Upload Image</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">Upload Image</label>
             <div className="relative">
               <input
                 type="file"
@@ -179,17 +165,21 @@ export default function MintForm() {
               />
               <label
                 htmlFor="file-upload"
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-cyan-400/50 rounded-xl cursor-pointer hover:border-cyan-400 transition-colors"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-[#2a2a2a] hover:border-[#c9a84c]/40 rounded-lg cursor-pointer bg-[#0c0c0c] transition-colors"
               >
                 {file ? (
                   <div className="text-center">
-                    <div className="text-2xl mb-2">📁</div>
-                    <p className="text-sm text-cyan-300">{file.name}</p>
+                    <svg className="w-6 h-6 mx-auto mb-2 text-[#c9a84c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-[#c9a84c] font-medium">{file.name}</p>
                   </div>
                 ) : (
                   <div className="text-center">
-                    <div className="text-4xl mb-2">📸</div>
-                    <p className="text-sm text-gray-400">Click to upload image</p>
+                    <svg className="w-8 h-8 mx-auto mb-2 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-xs text-zinc-500">Click to upload image</p>
                   </div>
                 )}
               </label>
@@ -198,12 +188,12 @@ export default function MintForm() {
 
           {/* NFT Name */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3">NFT Name</label>
+            <label className="block text-xs font-medium text-zinc-400 mb-2 uppercase tracking-wider">NFT Name</label>
             <input
               placeholder="Enter your NFT name..."
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="input"
+              className="w-full px-4 py-3 bg-[#0c0c0c] border border-[#1e1e1e] rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
             />
           </div>
 
@@ -211,59 +201,56 @@ export default function MintForm() {
           <button
             onClick={mint}
             disabled={!connected || loading || !file || !name}
-            className="w-full btn-primary py-4 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[#c9a84c] hover:bg-[#b8973f] text-black py-3.5 text-sm font-semibold rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
-                <div className="loading-spinner w-5 h-5"></div>
+                <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
                 <span>Minting on Solana...</span>
               </div>
             ) : (
-              '🚀 Mint NFT'
+              'Mint NFT'
             )}
           </button>
 
           {/* Status Messages */}
           {!connected && (
             <div className="text-center">
-              <div className="glass px-4 py-3 rounded-lg border border-red-400/30">
-                <p className="text-red-400 text-sm">⚠️ Connect your wallet to start minting</p>
+              <div className="bg-red-500/5 border border-red-500/10 px-4 py-2.5 rounded-md">
+                <p className="text-red-400 text-xs">Connect your wallet to start minting</p>
               </div>
             </div>
           )}
 
           {connected && !file && (
             <div className="text-center">
-              <p className="text-gray-400 text-sm">📸 Please upload an image to continue</p>
+              <p className="text-zinc-500 text-xs">Please upload an image to continue</p>
             </div>
           )}
 
           {connected && file && !name && (
             <div className="text-center">
-              <p className="text-gray-400 text-sm">✏️ Please enter a name for your NFT</p>
+              <p className="text-zinc-500 text-xs">Please enter a name for your NFT</p>
             </div>
           )}
         </div>
 
         {/* Info Section */}
-        <div className="mt-8 pt-6 border-t border-white/10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="glass p-4 rounded-lg">
-              <div className="text-2xl mb-2">⚡</div>
-              <h4 className="font-semibold text-white mb-1">Lightning Fast</h4>
-              <p className="text-xs text-gray-400">Mint in seconds on Solana</p>
+        <div className="mt-8 pt-6 border-t border-[#1e1e1e]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
+            <div className="bg-[#0c0c0c] border border-[#1e1e1e] p-4 rounded-lg">
+              <h4 className="font-medium text-white text-xs mb-1">Lightning Fast</h4>
+              <p className="text-[10px] text-zinc-500">Mint in seconds on Solana</p>
             </div>
-            <div className="glass p-4 rounded-lg">
-              <div className="text-2xl mb-2">🔒</div>
-              <h4 className="font-semibold text-white mb-1">Secure</h4>
-              <p className="text-xs text-gray-400">Blockchain verified</p>
+            <div className="bg-[#0c0c0c] border border-[#1e1e1e] p-4 rounded-lg">
+              <h4 className="font-medium text-white text-xs mb-1">Secure</h4>
+              <p className="text-[10px] text-zinc-500">Blockchain verified</p>
             </div>
-            <div className="glass p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-400/20">
-              <div className="text-2xl mb-2">💰</div>
-              <h4 className="font-semibold text-green-400 mb-1">Ultra-Cheap</h4>
-              <p className="text-xs text-green-300">
-                {!costLoading && estimate 
-                  ? `Only $${estimate.usdCost.toFixed(4)}`
+            <div className="bg-[#0c0c0c] border border-[#c9a84c]/10 p-4 rounded-lg">
+              <h4 className="font-medium text-[#c9a84c] text-xs mb-1">Ultra-Cheap</h4>
+              <p className="text-[10px] text-[#c9a84c]/60">
+                {!costLoading && estimate
+                  ? `$${estimate.usdCost.toFixed(4)} per mint`
                   : 'Pennies per mint'
                 }
               </p>

@@ -17,7 +17,7 @@ services:
           name: nftsol-db
           property: connectionString
       # CRITICAL: Must set ALLOWED_ORIGINS or server will fail to start
-      ALLOWED_ORIGINS: https://nftsol.app,https://www.nftsol.app,https://market.nftsol.app
+      ALLOWED_ORIGINS: https://nftsol.app,https://www.nftsol.app,https://nftsolmarket.netlify.app
       SOLANA_RPC_URL: https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}
       # IMPORTANT: Set HELIUS_API_KEY in Render dashboard environment variables
       SOLANA_RPC_DEVNET: https://api.devnet.solana.com

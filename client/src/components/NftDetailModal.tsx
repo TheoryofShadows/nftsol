@@ -36,7 +36,6 @@ export default function NftDetailModal({
 }: NftDetailModalProps) {
   const { addNotification } = useNotification();
 
-  // Handle escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -47,7 +46,6 @@ export default function NftDetailModal({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
-  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -61,29 +59,25 @@ export default function NftDetailModal({
 
   if (!isOpen || !nft) return null;
 
-  const getRarityColor = (rarity?: string) => {
+  const getRarityClasses = (rarity?: string) => {
     switch (rarity) {
       case 'legendary':
-        return 'from-yellow-400 to-orange-500';
+        return 'text-[#c9a84c] bg-[#c9a84c]/10 border border-[#c9a84c]/20';
       case 'epic':
-        return 'from-purple-400 to-pink-500';
+        return 'text-purple-300 bg-purple-500/10 border border-purple-500/20';
       case 'rare':
-        return 'from-blue-400 to-cyan-500';
+        return 'text-blue-300 bg-blue-500/10 border border-blue-500/20';
       default:
-        return 'from-gray-400 to-gray-500';
+        return 'text-zinc-400 bg-zinc-500/10 border border-zinc-500/20';
     }
   };
 
-  const getRarityBadge = (rarity?: string) => {
+  const getRarityLabel = (rarity?: string) => {
     switch (rarity) {
-      case 'legendary':
-        return '👑 Legendary';
-      case 'epic':
-        return '💎 Epic';
-      case 'rare':
-        return '⭐ Rare';
-      default:
-        return '📦 Common';
+      case 'legendary': return 'Legendary';
+      case 'epic': return 'Epic';
+      case 'rare': return 'Rare';
+      default: return 'Common';
     }
   };
 
@@ -143,13 +137,13 @@ export default function NftDetailModal({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/85 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div
-        className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto glass-modern rounded-2xl p-6 md:p-8 transform transition-all"
+        className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-[#111111] border border-[#1e1e1e] rounded-lg p-6 md:p-8 transform transition-all"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -158,16 +152,18 @@ export default function NftDetailModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-md bg-[#1e1e1e] hover:bg-[#2a2a2a] text-zinc-400 hover:text-white transition-colors"
           aria-label="Close modal"
         >
-          <span className="text-2xl">×</span>
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           {/* Image Section */}
           <div className="relative">
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br from-purple-500/20 to-cyan-500/20">
+            <div className="relative aspect-square rounded-lg overflow-hidden bg-[#0c0c0c]">
               <img
                 src={nft.imageUrl}
                 alt={nft.name}
@@ -178,31 +174,27 @@ export default function NftDetailModal({
                 }}
               />
               {nft.rarity && (
-                <div
-                  className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-bold bg-gradient-to-r ${getRarityColor(nft.rarity)} text-white shadow-lg`}
-                >
-                  {getRarityBadge(nft.rarity)}
+                <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-md text-xs font-medium ${getRarityClasses(nft.rarity)}`}>
+                  {getRarityLabel(nft.rarity)}
                 </div>
               )}
               {nft.price && (
-                <div className="absolute top-4 right-4 glass-modern px-4 py-2 rounded-xl">
-                  <div className="text-xs text-gray-400 mb-1">Price</div>
-                  <div className="text-2xl font-bold text-yellow-400">
-                    {nft.price} SOL
-                  </div>
+                <div className="absolute top-3 right-3 bg-[#111111] border border-[#1e1e1e] px-3 py-1.5 rounded-md">
+                  <div className="text-[10px] text-zinc-500 mb-0.5">Price</div>
+                  <div className="text-lg font-bold text-[#c9a84c]">{nft.price} SOL</div>
                 </div>
               )}
             </div>
           </div>
 
           {/* Details Section */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Title */}
             <div>
-              <h2 id="nft-detail-title" className="text-3xl md:text-4xl font-bold gradient-text-modern font-display mb-2">
+              <h2 id="nft-detail-title" className="text-2xl md:text-3xl font-bold text-white font-display mb-2">
                 {nft.name}
               </h2>
-              <p className="text-gray-300 text-base leading-relaxed">
+              <p className="text-zinc-400 text-sm leading-relaxed">
                 {nft.description || 'No description available'}
               </p>
             </div>
@@ -210,19 +202,12 @@ export default function NftDetailModal({
             {/* Attributes */}
             {nft.attributes && nft.attributes.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-3">Attributes</h3>
-                <div className="grid grid-cols-2 gap-3">
+                <h3 className="text-sm font-semibold text-white mb-2.5">Attributes</h3>
+                <div className="grid grid-cols-2 gap-2.5">
                   {nft.attributes.map((attr, idx) => (
-                    <div
-                      key={idx}
-                      className="glass-modern p-3 rounded-xl text-center"
-                    >
-                      <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">
-                        {attr.trait_type}
-                      </div>
-                      <div className="text-sm font-semibold text-white">
-                        {attr.value}
-                      </div>
+                    <div key={idx} className="bg-[#0c0c0c] border border-[#1e1e1e] p-2.5 rounded-md text-center">
+                      <div className="text-[10px] text-zinc-500 mb-0.5 uppercase tracking-wider">{attr.trait_type}</div>
+                      <div className="text-xs font-semibold text-white">{attr.value}</div>
                     </div>
                   ))}
                 </div>
@@ -232,19 +217,15 @@ export default function NftDetailModal({
             {/* Addresses */}
             <div className="space-y-3">
               <div>
-                <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">
-                  Creator
-                </div>
+                <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Creator</div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-cyan-400 rounded-full flex items-center justify-center text-xs font-bold">
+                  <div className="w-7 h-7 bg-[#c9a84c]/15 rounded-md flex items-center justify-center text-[10px] font-semibold text-[#c9a84c]">
                     {nft.creator.slice(0, 2).toUpperCase()}
                   </div>
-                  <code className="text-sm text-gray-300 font-mono flex-1">
-                    {nft.creator}
-                  </code>
+                  <code className="text-xs text-zinc-400 font-mono flex-1 truncate">{nft.creator}</code>
                   <button
                     onClick={() => copyToClipboard(nft.creator, 'Creator address')}
-                    className="px-3 py-1 text-xs glass-modern rounded-lg hover:bg-white/20 transition-colors"
+                    className="px-2.5 py-1 text-[10px] bg-[#1e1e1e] hover:bg-[#2a2a2a] text-zinc-400 rounded-md transition-colors"
                     aria-label="Copy creator address to clipboard"
                   >
                     Copy
@@ -253,19 +234,15 @@ export default function NftDetailModal({
               </div>
 
               <div>
-                <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">
-                  Owner
-                </div>
+                <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Owner</div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-green-400 rounded-full flex items-center justify-center text-xs font-bold">
+                  <div className="w-7 h-7 bg-[#c9a84c]/15 rounded-md flex items-center justify-center text-[10px] font-semibold text-[#c9a84c]">
                     {nft.owner.slice(0, 2).toUpperCase()}
                   </div>
-                  <code className="text-sm text-gray-300 font-mono flex-1 truncate">
-                    {nft.owner}
-                  </code>
+                  <code className="text-xs text-zinc-400 font-mono flex-1 truncate">{nft.owner}</code>
                   <button
                     onClick={() => copyToClipboard(nft.owner, 'Owner address')}
-                    className="px-3 py-1 text-xs glass-modern rounded-lg hover:bg-white/20 transition-colors"
+                    className="px-2.5 py-1 text-[10px] bg-[#1e1e1e] hover:bg-[#2a2a2a] text-zinc-400 rounded-md transition-colors"
                     aria-label="Copy owner address to clipboard"
                   >
                     Copy
@@ -275,18 +252,12 @@ export default function NftDetailModal({
 
               {nft.mintAddress && (
                 <div>
-                  <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">
-                    Mint Address
-                  </div>
+                  <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Mint Address</div>
                   <div className="flex items-center space-x-2">
-                    <code className="text-xs text-gray-300 font-mono flex-1 truncate">
-                      {nft.mintAddress}
-                    </code>
+                    <code className="text-[11px] text-zinc-400 font-mono flex-1 truncate">{nft.mintAddress}</code>
                     <button
-                      onClick={() =>
-                        copyToClipboard(nft.mintAddress, 'Mint address')
-                      }
-                      className="px-3 py-1 text-xs glass-modern rounded-lg hover:bg-white/20 transition-colors"
+                      onClick={() => copyToClipboard(nft.mintAddress, 'Mint address')}
+                      className="px-2.5 py-1 text-[10px] bg-[#1e1e1e] hover:bg-[#2a2a2a] text-zinc-400 rounded-md transition-colors"
                       aria-label="Copy mint address to clipboard"
                     >
                       Copy
@@ -297,10 +268,8 @@ export default function NftDetailModal({
 
               {nft.createdAt && (
                 <div>
-                  <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">
-                    Created
-                  </div>
-                  <div className="text-sm text-gray-300">
+                  <div className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider">Created</div>
+                  <div className="text-xs text-zinc-400">
                     {new Date(nft.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
@@ -312,24 +281,22 @@ export default function NftDetailModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/10">
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-4 border-t border-[#1e1e1e]">
               {nft.price ? (
                 <button
                   onClick={handleBuy}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-6 rounded-xl transition-all hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#c9a84c] hover:bg-[#b8973f] text-black font-semibold py-3 px-5 rounded-md transition-colors flex items-center justify-center gap-2"
                   aria-label={`Buy ${nft.name} for ${nft.price} SOL`}
                 >
-                  <span className="text-xl" aria-hidden="true">💰</span>
-                  <span>Buy for {nft.price} SOL</span>
+                  Buy for {nft.price} SOL
                 </button>
               ) : (
                 <button
                   onClick={handleList}
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition-all hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#c9a84c] hover:bg-[#b8973f] text-black font-semibold py-3 px-5 rounded-md transition-colors flex items-center justify-center gap-2"
                   aria-label={`List ${nft.name} for sale`}
                 >
-                  <span className="text-xl" aria-hidden="true">📋</span>
-                  <span>List for Sale</span>
+                  List for Sale
                 </button>
               )}
               <button
@@ -342,11 +309,10 @@ export default function NftDetailModal({
                     );
                   }
                 }}
-                className="flex-1 glass-modern hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl transition-all hover:scale-105 flex items-center justify-center gap-2"
+                className="flex-1 bg-[#1e1e1e] hover:bg-[#2a2a2a] border border-[#1e1e1e] hover:border-[#c9a84c]/20 text-white font-medium py-3 px-5 rounded-md transition-colors flex items-center justify-center gap-2"
                 aria-label={`View ${nft.name} on Solscan`}
               >
-                <span className="text-xl" aria-hidden="true">🔍</span>
-                <span>View on Solscan</span>
+                View on Solscan
               </button>
             </div>
           </div>
@@ -355,4 +321,3 @@ export default function NftDetailModal({
     </div>
   );
 }
-

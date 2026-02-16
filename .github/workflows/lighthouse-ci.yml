@@ -155,4 +155,4 @@ ${badge(seo)} **SEO:** ${seo}/100
         run: |
           echo "Lighthouse CI results available at:"
           echo "https://app.netlify.com"
-          echo "Performance dashboard: https://nftsolmarket.netlify.app/lighthouse"
+          echo "Performance dashboard: https://nftsol.app"

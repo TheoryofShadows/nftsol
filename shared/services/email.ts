@@ -127,7 +127,7 @@ export class EmailService {
           <li><strong>Current Price:</strong> ${alert.currentPrice} SOL</li>
           <li><strong>Target Price:</strong> ${alert.targetPrice} SOL</li>
         </ul>
-        <p><a href="${process.env.FRONTEND_URL || 'https://nftsolmarket.netlify.app'}">View NFT</a></p>
+        <p><a href="${process.env.FRONTEND_URL || 'https://nftsol.app'}">View NFT</a></p>
       </div>
     `;
 
@@ -156,7 +156,7 @@ export class EmailService {
           <li>🏪 Exploring the marketplace</li>
           <li>⭐ Earning CLOUT tokens</li>
         </ul>
-        <p><a href="${process.env.FRONTEND_URL || 'https://nftsolmarket.netlify.app'}">Start Exploring</a></p>
+        <p><a href="${process.env.FRONTEND_URL || 'https://nftsol.app'}">Start Exploring</a></p>
       </div>
     `;
 

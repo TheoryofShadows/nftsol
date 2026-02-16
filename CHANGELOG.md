@@ -2,6 +2,18 @@
 
 All notable changes to NFTSol will be documented in this file.
 
+## [2.1.0] - February 2026
+
+### Cleanup & Production Readiness
+- **Custom domain**: nftsol.app configured for production frontend
+- **Security**: Removed committed secrets (keypair files, wallet files) from repository
+- **Documentation**: Removed 60+ redundant/stale documentation files from root
+- **Build fixes**: Fixed vite.config.ts (removed invalid terser options, removed missing lodash-es dep)
+- **Backend fixes**: Fixed duplicate health route, cross-platform dev script
+- **CI/CD**: Removed empty main.yml workflow, fixed health check assertions
+- **CORS**: Properly configured for nftsol.app domain across all services
+- **SEO**: Updated robots.txt and sitemap.xml with nftsol.app domain
+
 ## [2.0.0] - November 2025
 
 ### 🚀 Major Performance Optimizations
@@ -41,9 +53,8 @@ All notable changes to NFTSol will be documented in this file.
 - Improved input validation
 - Better error handling
 
-### 📚 Documentation
+### Documentation
 - Comprehensive README update
-- New OPTIMIZATION_GUIDE.md
 - Updated TECHNICAL-DOCS.md
 - Consolidated documentation
 

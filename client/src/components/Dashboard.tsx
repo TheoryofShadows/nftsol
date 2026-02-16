@@ -37,13 +37,15 @@ export default function Dashboard() {
   if (!connected) {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
-        <div className="glass-card max-w-2xl w-full p-12 text-center">
+        <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg max-w-2xl w-full p-12 text-center">
           <div className="mb-6">
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center text-4xl mb-4 shadow-lg">
-              👛
+            <div className="w-20 h-20 mx-auto bg-[#c9a84c]/15 rounded-lg flex items-center justify-center mb-5">
+              <svg className="w-8 h-8 text-[#c9a84c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
             </div>
-            <h2 className="text-3xl font-bold gradient-text-primary mb-2">Connect Your Wallet</h2>
-            <p className="text-gray-300 text-lg">
+            <h2 className="text-2xl font-bold text-white mb-2 font-display">Connect Your Wallet</h2>
+            <p className="text-zinc-400 text-sm">
               Connect your Solana wallet to access your dashboard and manage your NFTs
             </p>
           </div>
@@ -59,8 +61,8 @@ export default function Dashboard() {
       <div className="dashboard-section">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-bold gradient-text-primary mb-2">Dashboard</h1>
-            <p className="text-gray-300">Welcome back! Here&apos;s your portfolio overview</p>
+            <h1 className="text-3xl font-bold text-white mb-1 font-display">Dashboard</h1>
+            <p className="text-zinc-400 text-sm">Welcome back! Here&apos;s your portfolio overview</p>
           </div>
           <ModernWalletConnect />
         </div>

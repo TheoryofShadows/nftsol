@@ -1,6 +1,6 @@
 /**
  * Professional NFT Marketplace
- * Magic Eden-style marketplace with collections table, featured carousel, and filters
+ * Premium luxury design with gold accents
  */
 
 import React, { useState, useEffect } from 'react';
@@ -25,10 +25,8 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
   const [trendingCollections, setTrendingCollections] = useState<FeaturedCollection[]>([]);
   const [topMovers, setTopMovers] = useState<Metric[]>([]);
 
-  // Generate sample featured collections and trending data from available collections
   useEffect(() => {
     if (collections.length > 0) {
-      // Featured collections: top 5 by volume
       const featured = [...collections]
         .sort((a, b) => b.volume24h - a.volume24h)
         .slice(0, 5)
@@ -39,26 +37,25 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
           floorPrice: c.floorPrice,
           volume24h: c.volume24h,
           priceChange24h: c.priceChange24h,
-          description: `${c.listedCount.toLocaleString()} listed • ${c.holders.toLocaleString()} holders`,
+          description: `${c.listedCount.toLocaleString()} listed \u2022 ${c.holders.toLocaleString()} holders`,
         }));
 
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTrendingCollections(featured);
 
-      // Top movers: collections with biggest price changes (both up and down)
       const movers = [...collections]
         .sort((a, b) => Math.abs(b.priceChange24h) - Math.abs(a.priceChange24h))
         .slice(0, 8)
         .map((c) => ({
           id: c.id,
           name: c.name,
-          icon: c.priceChange24h >= 0 ? '📈' : '📉',
+          icon: c.priceChange24h >= 0 ? '\u2191' : '\u2193',
           value: c.floorPrice,
           change: c.priceChange24h,
           trend: (
             c.priceChange24h > 5 ? 'up' : c.priceChange24h < -5 ? 'down' : 'stable'
           ) as 'up' | 'down' | 'stable',
-          description: `Floor: ◎${c.floorPrice.toFixed(2)}`,
+          description: `Floor: \u25CE${c.floorPrice.toFixed(2)}`,
         }));
 
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -69,34 +66,33 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-        <span className="ml-4 text-gray-300 text-lg">Loading marketplace...</span>
+        <div className="w-10 h-10 border-2 border-[#1e1e1e] border-t-[#c9a84c] rounded-full animate-spin"></div>
+        <span className="ml-4 text-zinc-400 text-sm">Loading marketplace...</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-12">
-      {/* Header with Search and Filters */}
+      {/* Header */}
       <div className="space-y-4">
-        {/* Title and Description */}
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">NFT Marketplace</h1>
-          <p className="text-gray-400">
+          <h1 className="text-3xl font-bold text-white mb-1.5 font-display">NFT Marketplace</h1>
+          <p className="text-zinc-500 text-sm">
             Browse and trade {collections.length.toLocaleString()} professional NFT collections
           </p>
         </div>
 
-        {/* Time Filter Buttons */}
+        {/* Time Filter */}
         <div className="flex flex-wrap gap-2">
           {(['1h', '6h', '24h', '7d', '30d'] as TimeFilter[]).map((time) => (
             <button
               key={time}
               onClick={() => setSelectedTimeFilter(time)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-md font-medium text-xs transition-all ${
                 selectedTimeFilter === time
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/25'
-                  : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                  ? 'bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/20'
+                  : 'bg-[#111111] border border-[#1e1e1e] text-zinc-400 hover:text-white hover:border-[#2a2a2a]'
               }`}
             >
               {time}
@@ -104,15 +100,15 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
           ))}
         </div>
 
-        {/* Search Bar */}
+        {/* Search */}
         <div className="relative">
           <input
             type="text"
             placeholder="Search collections..."
-            className="w-full px-6 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:bg-white/15 transition-all"
+            className="w-full px-5 py-3 bg-[#111111] border border-[#1e1e1e] rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
           />
           <svg
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -127,7 +123,7 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
         </div>
       </div>
 
-      {/* Featured Collections Carousel */}
+      {/* Featured Carousel */}
       {trendingCollections.length > 0 && (
         <section>
           <FeaturedCarousel
@@ -139,11 +135,11 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
         </section>
       )}
 
-      {/* Top Movers Section */}
+      {/* Top Movers */}
       {topMovers.length > 0 && (
-        <section className="border-t border-white/10 pt-12">
+        <section className="border-t border-[#1e1e1e] pt-12">
           <MarketMetrics
-            title="🔥 Biggest Movers"
+            title="Biggest Movers"
             subtitle="Collections with the most significant price changes"
             metrics={topMovers}
             variant="movers"
@@ -152,10 +148,10 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
       )}
 
       {/* Collections Table */}
-      <section className="border-t border-white/10 pt-12">
+      <section className="border-t border-[#1e1e1e] pt-12">
         <div className="mb-6">
-          <h2 className="text-3xl font-bold text-white mb-2">All Collections</h2>
-          <p className="text-gray-400">
+          <h2 className="text-2xl font-bold text-white mb-1.5 font-display">All Collections</h2>
+          <p className="text-zinc-500 text-sm">
             Sorted by {selectedTimeFilter} trading volume
           </p>
         </div>
@@ -168,35 +164,35 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
           />
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-400 text-lg">No collections available</p>
+            <p className="text-zinc-500 text-sm">No collections available</p>
           </div>
         )}
       </section>
 
       {/* Market Stats Footer */}
-      <section className="border-t border-white/10 pt-12 pb-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-gray-400 text-sm mb-1">Total Volume (24h)</div>
-            <div className="text-2xl font-bold text-white">
-              ◎ {collections.reduce((sum, c) => sum + c.volume24h, 0).toLocaleString()}
+      <section className="border-t border-[#1e1e1e] pt-12 pb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="p-4 bg-[#111111] border border-[#1e1e1e] rounded-lg">
+            <div className="text-zinc-500 text-[10px] mb-1 uppercase tracking-wider">Total Volume (24h)</div>
+            <div className="text-xl font-bold text-white">
+              {collections.reduce((sum, c) => sum + c.volume24h, 0).toLocaleString()} SOL
             </div>
           </div>
-          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-gray-400 text-sm mb-1">Total Sales (24h)</div>
-            <div className="text-2xl font-bold text-white">
+          <div className="p-4 bg-[#111111] border border-[#1e1e1e] rounded-lg">
+            <div className="text-zinc-500 text-[10px] mb-1 uppercase tracking-wider">Total Sales (24h)</div>
+            <div className="text-xl font-bold text-white">
               {collections.reduce((sum, c) => sum + c.salesCount24h, 0).toLocaleString()}
             </div>
           </div>
-          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-gray-400 text-sm mb-1">Total Listed</div>
-            <div className="text-2xl font-bold text-white">
+          <div className="p-4 bg-[#111111] border border-[#1e1e1e] rounded-lg">
+            <div className="text-zinc-500 text-[10px] mb-1 uppercase tracking-wider">Total Listed</div>
+            <div className="text-xl font-bold text-white">
               {collections.reduce((sum, c) => sum + c.listedCount, 0).toLocaleString()}
             </div>
           </div>
-          <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-gray-400 text-sm mb-1">Active Holders</div>
-            <div className="text-2xl font-bold text-white">
+          <div className="p-4 bg-[#111111] border border-[#1e1e1e] rounded-lg">
+            <div className="text-zinc-500 text-[10px] mb-1 uppercase tracking-wider">Active Holders</div>
+            <div className="text-xl font-bold text-white">
               {collections.reduce((sum, c) => sum + c.holders, 0).toLocaleString()}
             </div>
           </div>
