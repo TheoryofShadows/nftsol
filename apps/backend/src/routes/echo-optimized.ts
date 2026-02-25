@@ -5,15 +5,18 @@
 
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
-import { PublicKey as _PublicKey } from '@solana/web3.js';
+import { PublicKey as _PublicKey, Connection, Keypair } from '@solana/web3.js';
 import axios from 'axios';
 import _crypto from 'crypto';
+import bs58 from 'bs58';
 import {
   grokVerify,
   generateTruthHash,
   getVerificationTeaser,
   batchGrokVerify as _batchGrokVerify,
 } from '../utils/grokpedia-free';
+import { uploadMetadataToIrys } from '../utils/irysUpload';
+import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
 
 const router = Router();
@@ -217,8 +220,24 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
       ],
     };
 
-    // TODO: Upload to Irys (optional - can be done client-side too)
-    // const irysUri = await uploadToIrys(nftMetadata);
+    // Upload metadata to Irys/Arweave for permanent decentralized storage
+    let irysUri: string | undefined;
+    try {
+      const platformSecretKey = process.env.PLATFORM_SECRET_KEY_BASE58;
+      if (platformSecretKey) {
+        const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
+        const keypair = Keypair.fromSecretKey(bs58.decode(platformSecretKey));
+        const irysResult = await uploadMetadataToIrys(nftMetadata, {
+          connection,
+          keypair,
+          network: solanaConfig.cluster as 'mainnet-beta' | 'devnet',
+        });
+        irysUri = irysResult.uri;
+      }
+    } catch (irysError: unknown) {
+      const msg = irysError instanceof Error ? irysError.message : 'unknown error';
+      console.warn('[Echo] Irys upload failed (non-critical), continuing without:', msg);
+    }
 
     res.json({
       success: true,
@@ -235,7 +254,7 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
       verified: verification.verified,
       sources: verification.sources,
       metadata: nftMetadata,
-      // irysUri, // Uncomment when Irys integration added
+      irysUri,
     });
   } catch (error: any) {
     console.error('Mint preparation error:', error.message);

@@ -63,6 +63,8 @@ import {
 import tensorRouter from './routes/tensor';
 import pnlLeaderboardRouter from './routes/pnl-leaderboard';
 import alertsRouter from './routes/alerts';
+// Consolidated from legacy server/ — AI enhancement features
+import aiFeaturesRouter from './routes/ai-features';
 
 initializeSecrets();
 
@@ -1126,6 +1128,8 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 app.use('/api/tensor', tensorRouter);
 app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
+// Consolidated AI enhancement routes (migrated from legacy server/)
+app.use('/api/ai-features', aiFeaturesRouter);
 
 // Archive + Grok + Echo integration routes
 app.use('/api/archive', archiveGrokEchoRouter);

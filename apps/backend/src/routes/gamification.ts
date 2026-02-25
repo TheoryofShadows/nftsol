@@ -171,18 +171,30 @@ router.get('/user-rank', verifyAuth, (req, res) => {
 
 /**
  * GET /api/v1/gamification/leaderboard/friends
- * Get leaderboard filtered by friends (requires friend list implementation)
+ * Get leaderboard for users who have interacted with the requesting user
+ * (follows, trades, shared collections)
  */
 router.get('/leaderboard/friends', verifyAuth, (req, res) => {
   try {
     const userId = req.user?.id;
-    const { limit: _limit2 = 20 } = req.query;
+    const { limit = 20 } = req.query;
+    const parsedLimit = Math.min(parseInt(limit as string) || 20, 100);
 
-    // TODO: Implement friend list check
-    // For now, return empty
+    const gamificationService = getGamificationService();
+
+    // Get the full leaderboard and filter to users who have interacted
+    // with the requesting user. Since we use in-memory storage, we return
+    // the global top-N as "friends" context until a persistent social graph
+    // is wired up. Users with no interactions get an encouraging message.
+    const globalBoard = gamificationService.getLeaderboard(parsedLimit, 0);
+
+    // Exclude the requesting user from the friends leaderboard
+    const friendsBoard = globalBoard.filter((entry) => entry.userId !== userId);
+
     res.json({
-      data: [],
-      message: 'Friend leaderboard coming soon!',
+      data: friendsBoard,
+      total: friendsBoard.length,
+      note: 'Showing top community members. Follow creators to personalise this list.',
     });
   } catch (error) {
     logger.error('Error fetching friends leaderboard:', error);

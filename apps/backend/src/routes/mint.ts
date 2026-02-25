@@ -9,6 +9,8 @@ import { ultraCheapMintService } from '../services/ultra-cheap-mint';
 import { fileStorageService } from '../services/file-storage';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
+import { sensitiveOpLimiter } from '../middleware/rate-limiting';
+import logger from '../utils/logger';
 
 const router = Router();
 
@@ -86,11 +88,8 @@ router.get('/compare', async (_req: Request, res: Response) => {
  * POST /api/mint/simple-mint
  * Mint NFT with file upload
  * Uploads image file to IPFS (via Pinata) and mints compressed NFT
- *
- * Note: CSRF protection disabled for development (localhost)
- * In production, should validate CSRF token from request headers
  */
-router.post('/simple-mint', upload.single('file'), async (req: Request, res: Response) => {
+router.post('/simple-mint', sensitiveOpLimiter, upload.single('file'), async (req: Request, res: Response) => {
   try {
     const { name, description, creatorWallet } = req.body;
     const file = (req as any).file;
@@ -115,7 +114,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
       return res.status(400).json(response);
     }
 
-    console.log(`📤 Processing file upload: ${file.originalname} (${file.size} bytes)`);
+    logger.info(`Processing file upload: ${file.originalname} (${file.size} bytes)`);
 
     // Validate file before storage
     const validation = fileStorageService.validateFile(
@@ -134,7 +133,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
     }
 
     // Upload file to storage
-    console.log('☁️ Uploading file to storage...');
+    logger.info('Uploading file to storage...');
     const storageResult = await fileStorageService.uploadFile(
       file.buffer,
       file.originalname,
@@ -150,10 +149,10 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
       return res.status(500).json(response);
     }
 
-    console.log(`✅ File stored successfully: ${storageResult.url}`);
+    logger.info(`File stored successfully: ${storageResult.url}`);
 
     // Mint NFT using the uploaded image URL
-    console.log('🚀 Starting NFT mint...');
+    logger.info('Starting NFT mint...');
     const mintResult = await ultraCheapMintService.mint({
       toAddress: creatorWallet,
       name: name,
@@ -190,7 +189,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
 
     return res.json(response);
   } catch (error) {
-    console.error('🔴 Mint error:', error);
+    logger.error('Mint error:', error);
     const response: ApiResponse = {
       success: false,
       error: error instanceof Error ? error.message : 'Internal server error',
@@ -204,7 +203,7 @@ router.post('/simple-mint', upload.single('file'), async (req: Request, res: Res
  * POST /api/mint/ultra-cheap
  * Mint NFT with ultra-low cost optimization
  */
-router.post('/ultra-cheap', validateWallet, async (req: Request, res: Response) => {
+router.post('/ultra-cheap', sensitiveOpLimiter, validateWallet, async (req: Request, res: Response) => {
   try {
     const { toAddress, name, symbol, description, imageUrl, externalUrl } = req.body;
 

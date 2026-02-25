@@ -322,7 +322,10 @@ async function getAppliedMigrations(): Promise<string[]> {
     const result = await pool.query('SELECT name FROM schema_migrations');
     return result.rows.map(row => row.name);
   } catch (error) {
-    console.error('Failed to get applied migrations:', error);
+    // Log non-critically — table may not exist yet on first run
+    if (process.env.NODE_ENV !== 'test') {
+      process.stderr.write(`[migrations] Failed to get applied migrations: ${error}\n`);
+    }
     return [];
   }
 }
