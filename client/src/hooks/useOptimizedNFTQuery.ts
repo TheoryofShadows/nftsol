@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore - Legacy code, type checking disabled
+// @ts-nocheck - Legacy code, type checking disabled
 /**
  * Optimized React Query hook for NFTs with pagination and caching
  * React Query v5 API compatibility

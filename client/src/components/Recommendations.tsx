@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore - Legacy code, type checking disabled
+// @ts-nocheck - Legacy code, type checking disabled
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useNotification } from './NotificationSystem';

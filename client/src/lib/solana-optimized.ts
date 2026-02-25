@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore - Legacy code, type checking disabled
+// @ts-nocheck - Legacy code, type checking disabled
 /**
  * Optimized Solana client-side utilities
  * - Connection management with WebSocket subscriptions
