@@ -11,6 +11,10 @@
     "src/__tests__",
     "src/__mocks__",
     "**/*.test.ts",
-    "**/*.spec.ts"
+    "**/*.spec.ts",
+    "src/app.ts",
+    "src/config.ts",
+    "src/app-production.ts",
+    "src/server-production.ts"
   ]
 }

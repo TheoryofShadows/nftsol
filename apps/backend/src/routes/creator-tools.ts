@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getCreatorToolsService } from '../services/creator-tools.service';
 import logger from '../utils/logger';
-import { authenticate as verifyAuth } from '../middlewares/auth';
+import { authenticate as verifyAuth, isAdmin } from '../middlewares/auth';
 
 const router = Router();
 
@@ -185,12 +185,10 @@ router.get('/dashboard', verifyAuth, (req, res) => {
  * GET /api/v1/creators/verify/:creatorId
  * Verify a creator (admin only)
  */
-router.get('/verify/:creatorId', verifyAuth, (req, res) => {
+router.get('/verify/:creatorId', verifyAuth, isAdmin, (req, res) => {
   try {
     const { creatorId } = req.params;
     const { badgeLevel = 'silver' } = req.query;
-
-    // TODO: Check if user is admin
 
     const creatorService = getCreatorToolsService();
     const success = creatorService.verifyCreator(creatorId, badgeLevel as 'silver' | 'gold' | 'platinum');

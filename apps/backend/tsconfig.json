@@ -23,20 +23,17 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types"
+    ]
   },
-  "typeRoots": [
-    "./node_modules/@types",
-    "./src/@types"
-  ],
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
   "exclude": [
     "src/__tests__/**/*",
     "src/**/*.test.ts",
     "src/app-production.ts",
-    "src/server-production.ts",
-    "src/services/bubblegumService-production.ts",
-    "src/routes/echo-optimized.ts",
-    "src/services/eternalEchoesService.ts"
+    "src/server-production.ts"
   ]
 }

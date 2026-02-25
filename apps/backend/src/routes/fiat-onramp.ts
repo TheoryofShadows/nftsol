@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import crypto from 'crypto';
 import { getFiatOnrampService, PaymentProvider } from '../services/fiat-onramp.service';
 import logger from '../utils/logger';
 import { authenticate as verifyAuth } from '../middlewares/auth';
+import { webhookLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -138,14 +140,60 @@ router.get('/exchange-rates', async (req, res) => {
  * POST /api/v1/fiat/webhook/:provider
  * Handle payment provider webhooks
  */
-router.post('/webhook/:provider', (req, res) => {
+router.post('/webhook/:provider', webhookLimiter, (req, res) => {
   try {
     const { provider } = req.params;
+    const rawBody = JSON.stringify(req.body);
+
+    // Verify webhook signature per provider
+    if (provider === PaymentProvider.STRIPE) {
+      const stripeSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      const signature = req.headers['stripe-signature'] as string;
+      if (stripeSecret && signature) {
+        // Stripe uses HMAC-SHA256 with timestamp to prevent replay attacks
+        const [tPart, v1Part] = signature.split(',');
+        const timestamp = tPart?.split('=')[1];
+        const receivedSig = v1Part?.split('=')[1];
+        if (timestamp && receivedSig) {
+          const expectedSig = crypto
+            .createHmac('sha256', stripeSecret)
+            .update(`${timestamp}.${rawBody}`)
+            .digest('hex');
+          if (!crypto.timingSafeEqual(Buffer.from(receivedSig, 'hex'), Buffer.from(expectedSig, 'hex'))) {
+            logger.warn('Invalid Stripe webhook signature');
+            return res.status(400).json({ error: 'Invalid webhook signature' });
+          }
+        }
+      }
+    } else if (provider === PaymentProvider.MOONPAY) {
+      const moonpaySecret = process.env.MOONPAY_WEBHOOK_SECRET;
+      const signature = req.headers['moonpay-signature-v2'] as string;
+      if (moonpaySecret && signature) {
+        const expectedSig = crypto
+          .createHmac('sha256', moonpaySecret)
+          .update(rawBody)
+          .digest('hex');
+        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+          logger.warn('Invalid MoonPay webhook signature');
+          return res.status(400).json({ error: 'Invalid webhook signature' });
+        }
+      }
+    } else if (provider === PaymentProvider.ALCHEMY_PAY) {
+      const alchemySecret = process.env.ALCHEMY_PAY_WEBHOOK_SECRET;
+      const signature = req.headers['x-api-signature'] as string;
+      if (alchemySecret && signature) {
+        const expectedSig = crypto
+          .createHmac('sha256', alchemySecret)
+          .update(rawBody)
+          .digest('hex');
+        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
+          logger.warn('Invalid AlchemyPay webhook signature');
+          return res.status(400).json({ error: 'Invalid webhook signature' });
+        }
+      }
+    }
+
     const fiatService = getFiatOnrampService();
-
-    // Verify webhook signature (provider-specific)
-    // TODO: Implement webhook verification
-
     fiatService.handlePaymentWebhook(provider as PaymentProvider, req.body);
     res.json({ received: true });
   } catch (error) {

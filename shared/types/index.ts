@@ -72,7 +72,7 @@ export type TransactionStatus = 'pending' | 'confirmed' | 'failed';
 // API Response Types
 // ============================================================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   message?: string;
@@ -207,7 +207,7 @@ export type CloutRewardType =
 export interface AppError {
   code: string;
   message: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
   stack?: string;
 }
