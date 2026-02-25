@@ -34,12 +34,12 @@ jobs:
         run: npm ci || npm install
 
       - name: Type check
-        run: npm run type-check || echo "Type check skipped"
-        continue-on-error: true
+        run: npm run type-check
+        continue-on-error: false
 
       - name: Lint
-        run: npm run lint || echo "Lint skipped"
-        continue-on-error: true
+        run: npm run lint
+        continue-on-error: false
 
       - name: Build
         run: npm run build
@@ -73,8 +73,8 @@ jobs:
         run: npm ci || npm install
 
       - name: Lint
-        run: npm run lint || echo "Lint skipped"
-        continue-on-error: true
+        run: npm run lint
+        continue-on-error: false
 
       - name: Build
         run: npm run build

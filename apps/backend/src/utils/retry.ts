@@ -25,6 +25,19 @@ export async function withRetry<T>(
       if (error?.status >= 500) {
         return true;
       }
+      // Retry on Solana-specific transient errors
+      const msg: string = error?.message || '';
+      if (
+        msg.includes('BlockhashNotFound') ||
+        msg.includes('Transaction was not confirmed') ||
+        msg.includes('block height exceeded') ||
+        msg.includes('429') || // RPC rate limit
+        msg.includes('Too Many Requests') ||
+        msg.includes('Service Unavailable') ||
+        msg.includes('Gateway Timeout')
+      ) {
+        return true;
+      }
       return false;
     },
   } = options;
