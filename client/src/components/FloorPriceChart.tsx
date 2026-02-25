@@ -9,7 +9,7 @@
  * TypeScript checking disabled below due to missing lightweight-charts dependency
  */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore - Component disabled, lightweight-charts not installed
+// @ts-nocheck - Component disabled, lightweight-charts not installed
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { API_BASE } from '../config/api';

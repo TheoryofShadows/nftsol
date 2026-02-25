@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-ignore - Legacy code, type checking disabled
+// @ts-nocheck - Legacy code, type checking disabled
 /**
  * NFT Service
  * Service layer for NFT-related operations

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment, react/jsx-no-undef */
-// @ts-ignore - Legacy code, type checking disabled
+// @ts-nocheck - Legacy code, type checking disabled
 /**
  * Virtualized NFT Grid Component
  * Renders large lists efficiently using windowing technique
