@@ -85,6 +85,7 @@ temp/
 tmp/
 *.tmp
 *.bak
+*.bak.*
 *.backup
 
 # === OS ===
@@ -95,7 +96,8 @@ desktop.ini
 *.swo
 *~
 
-# === IDE ===
+# === IDE & Local Tool Config ===
+.claude/
 .vscode/*
 !.vscode/extensions.json
 .idea/
