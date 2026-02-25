@@ -9,6 +9,28 @@ config({ path: path.resolve(__dirname, '../../.env') });
 // Initialize any secrets if needed
 initializeSecrets();
 
+// Validate required environment variables at startup (fail fast in production)
+const REQUIRED_PROD_ENV_VARS = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'SOLANA_RPC_URL',
+] as const;
+
+if (process.env.NODE_ENV === 'production') {
+  const missing = REQUIRED_PROD_ENV_VARS.filter(
+    (key) => !process.env[key] || process.env[key] === ''
+  );
+  if (missing.length > 0) {
+    throw new Error(
+      `[Config] Missing required environment variables for production: ${missing.join(', ')}`
+    );
+  }
+  // Warn if using default insecure JWT secret
+  if (process.env.JWT_SECRET === 'your-jwt-secret-minimum-32-characters') {
+    throw new Error('[Config] JWT_SECRET must be changed from the default value in production');
+  }
+}
+
 // Helper to safely parse environment variables
 const getEnv = (key: string, defaultValue: string): string => 
   process.env[key] !== undefined ? process.env[key]! : defaultValue;

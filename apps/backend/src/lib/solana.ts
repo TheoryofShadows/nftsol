@@ -6,6 +6,7 @@ import {
   SystemProgram,
   sendAndConfirmTransaction,
   Commitment,
+  ComputeBudgetProgram,
 } from '@solana/web3.js';
 import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
 import { getPlatformKeypair } from './platformKeypair';
@@ -14,6 +15,25 @@ import { ensurePlatformBalance } from './checkBalance';
 const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
 export const SOLANA_COMMITMENT: Commitment = 'confirmed';
 export const connection = new Connection(RPC_URL, SOLANA_COMMITMENT);
+
+// Blockhash cache - Solana blockhashes are valid ~60 seconds; cache for 30s to reduce RPC calls
+interface BlockhashCache {
+  blockhash: string;
+  lastValidBlockHeight: number;
+  timestamp: number;
+}
+let _blockhashCache: BlockhashCache | null = null;
+const BLOCKHASH_CACHE_TTL_MS = 30_000;
+
+export async function getCachedBlockhash(): Promise<{ blockhash: string; lastValidBlockHeight: number }> {
+  const now = Date.now();
+  if (_blockhashCache && now - _blockhashCache.timestamp < BLOCKHASH_CACHE_TTL_MS) {
+    return { blockhash: _blockhashCache.blockhash, lastValidBlockHeight: _blockhashCache.lastValidBlockHeight };
+  }
+  const result = await connection.getLatestBlockhash(SOLANA_COMMITMENT);
+  _blockhashCache = { blockhash: result.blockhash, lastValidBlockHeight: result.lastValidBlockHeight, timestamp: now };
+  return result;
+}
 
 let _metaplex: any = null;
 
@@ -143,6 +163,10 @@ export async function sendSOL(toAddress: string, amountSol: number) {
     }
 
     const tx = new Transaction().add(
+      // Priority fee: 1000 microLamports/compute unit for reliable inclusion
+      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1000 }),
+      // Explicit compute limit for SOL transfer (minimal units needed)
+      ComputeBudgetProgram.setComputeUnitLimit({ units: 300 }),
       SystemProgram.transfer({
         fromPubkey: keypair.publicKey,
         toPubkey: toPublicKey,
@@ -150,9 +174,10 @@ export async function sendSOL(toAddress: string, amountSol: number) {
       })
     );
 
-    // Get recent blockhash and set fee payer
-    const { blockhash } = await connection.getLatestBlockhash();
+    // Use cached blockhash to reduce RPC calls; set fee payer
+    const { blockhash, lastValidBlockHeight } = await getCachedBlockhash();
     tx.recentBlockhash = blockhash;
+    tx.lastValidBlockHeight = lastValidBlockHeight;
     tx.feePayer = keypair.publicKey;
 
     const txSig = await sendAndConfirmTransaction(connection, tx, [keypair], {

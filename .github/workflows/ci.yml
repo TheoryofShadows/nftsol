@@ -45,17 +45,17 @@ jobs:
       - name: Lint Client
         working-directory: client
         run: npm run lint
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Lint Backend
         working-directory: apps/backend
         run: npm run lint
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Type Check
         working-directory: apps/backend
         run: npm run type-check
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Upload Build Artifacts
         if: always()
