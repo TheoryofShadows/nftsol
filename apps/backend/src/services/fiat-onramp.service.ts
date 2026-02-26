@@ -28,11 +28,11 @@ export interface FiatOnrampSession {
 
 export class FiatOnrampService {
   private sessions: Map<string, FiatOnrampSession> = new Map();
-  private stripeApiKey = process.env.STRIPE_SECRET_KEY;
-  private moonpayApiKey = process.env.MOONPAY_SECRET_KEY;
-  private moonpaySecretKey = process.env.MOONPAY_SECRET_KEY;
-  private alchemyPayApiKey = process.env.ALCHEMY_PAY_API_KEY;
-  private alchemyPaySecret = process.env.ALCHEMY_PAY_SECRET_KEY;
+  private get stripeApiKey() { return process.env.STRIPE_SECRET_KEY; }
+  private get moonpayApiKey() { return process.env.MOONPAY_SECRET_KEY; }
+  private get moonpaySecretKey() { return process.env.MOONPAY_SECRET_KEY; }
+  private get alchemyPayApiKey() { return process.env.ALCHEMY_PAY_API_KEY; }
+  private get alchemyPaySecret() { return process.env.ALCHEMY_PAY_SECRET_KEY; }
 
   /**
    * Create fiat onramp session with Stripe Crypto Onramp

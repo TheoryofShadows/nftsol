@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 import crypto from 'crypto';
 import { getFiatOnrampService, PaymentProvider } from '../services/fiat-onramp.service';
 import logger from '../utils/logger';
@@ -8,16 +9,16 @@ import { webhookLimiter } from '../middleware/rate-limiting';
 const router = Router();
 
 /**
- * POST /api/v1/fiat/create-session
+ * POST /api/v1/fiat/session (also /create-session for backwards compat)
  * Create a new fiat onramp session
  */
-router.post('/create-session', verifyAuth, async (req, res) => {
+async function handleCreateSession(req: express.Request, res: express.Response) {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const { provider, amount, currency, walletAddress, cryptoCurrency = 'SOL' } = req.body;
 
     if (!provider || !amount || !currency || !walletAddress) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
     const fiatService = getFiatOnrampService();
@@ -52,19 +53,22 @@ router.post('/create-session', verifyAuth, async (req, res) => {
         );
         break;
       default:
-        return res.status(400).json({ error: 'Invalid payment provider' });
+        return res.status(400).json({ success: false, error: 'Invalid payment provider' });
     }
 
     if (!session) {
-      return res.status(500).json({ error: 'Failed to create session' });
+      return res.status(500).json({ success: false, error: 'Failed to create session' });
     }
 
-    res.json({ session });
+    res.json({ success: true, data: session });
   } catch (error) {
     logger.error('Error creating fiat session:', error);
-    res.status(500).json({ error: 'Failed to create fiat session' });
+    res.status(500).json({ success: false, error: 'Failed to create fiat session' });
   }
-});
+}
+
+router.post('/session', verifyAuth, handleCreateSession);
+router.post('/create-session', verifyAuth, handleCreateSession);
 
 /**
  * GET /api/v1/fiat/session/:sessionId
@@ -77,13 +81,13 @@ router.get('/session/:sessionId', (req, res) => {
     const session = fiatService.getSessionStatus(sessionId);
 
     if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
+      return res.status(404).json({ success: false, error: 'Session not found' });
     }
 
-    res.json({ session });
+    res.json({ success: true, data: session });
   } catch (error) {
     logger.error('Error fetching session:', error);
-    res.status(500).json({ error: 'Failed to fetch session' });
+    res.status(500).json({ success: false, error: 'Failed to fetch session' });
   }
 });
 
@@ -93,14 +97,14 @@ router.get('/session/:sessionId', (req, res) => {
  */
 router.get('/user-sessions', verifyAuth, (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = (req as any).user?.id;
     const fiatService = getFiatOnrampService();
     const sessions = fiatService.getUserSessions(userId);
 
-    res.json({ data: sessions, total: sessions.length });
+    res.json({ success: true, data: sessions, total: sessions.length });
   } catch (error) {
     logger.error('Error fetching user sessions:', error);
-    res.status(500).json({ error: 'Failed to fetch user sessions' });
+    res.status(500).json({ success: false, error: 'Failed to fetch user sessions' });
   }
 });
 
@@ -113,28 +117,31 @@ router.get('/supported-currencies', (req, res) => {
     const fiatService = getFiatOnrampService();
     const currencies = fiatService.getSupportedCurrencies();
 
-    res.json({ currencies });
+    res.json({ success: true, data: currencies });
   } catch (error) {
     logger.error('Error fetching supported currencies:', error);
-    res.status(500).json({ error: 'Failed to fetch supported currencies' });
+    res.status(500).json({ success: false, error: 'Failed to fetch supported currencies' });
   }
 });
 
 /**
- * GET /api/v1/fiat/exchange-rates
+ * GET /api/v1/fiat/exchange-rates (also /rates alias)
  * Get real-time exchange rates
  */
-router.get('/exchange-rates', async (req, res) => {
+async function handleExchangeRates(req: express.Request, res: express.Response) {
   try {
     const fiatService = getFiatOnrampService();
     const rates = await fiatService.getExchangeRates();
 
-    res.json({ rates, updatedAt: new Date().toISOString() });
+    res.json({ success: true, data: rates, updatedAt: new Date().toISOString() });
   } catch (error) {
     logger.error('Error fetching exchange rates:', error);
-    res.status(500).json({ error: 'Failed to fetch exchange rates' });
+    res.status(500).json({ success: false, error: 'Failed to fetch exchange rates' });
   }
-});
+}
+
+router.get('/exchange-rates', handleExchangeRates);
+router.get('/rates', handleExchangeRates);
 
 /**
  * POST /api/v1/fiat/webhook/:provider
@@ -159,8 +166,15 @@ router.post('/webhook/:provider', webhookLimiter, (req, res) => {
             .createHmac('sha256', stripeSecret)
             .update(`${timestamp}.${rawBody}`)
             .digest('hex');
-          if (!crypto.timingSafeEqual(Buffer.from(receivedSig, 'hex'), Buffer.from(expectedSig, 'hex'))) {
-            logger.warn('Invalid Stripe webhook signature');
+          try {
+            const receivedBuf = Buffer.from(receivedSig, 'hex');
+            const expectedBuf = Buffer.from(expectedSig, 'hex');
+            if (receivedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(receivedBuf, expectedBuf)) {
+              logger.warn('Invalid Stripe webhook signature');
+              return res.status(400).json({ error: 'Invalid webhook signature' });
+            }
+          } catch {
+            logger.warn('Invalid Stripe webhook signature format');
             return res.status(400).json({ error: 'Invalid webhook signature' });
           }
         }
@@ -173,8 +187,15 @@ router.post('/webhook/:provider', webhookLimiter, (req, res) => {
           .createHmac('sha256', moonpaySecret)
           .update(rawBody)
           .digest('hex');
-        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-          logger.warn('Invalid MoonPay webhook signature');
+        try {
+          const sigBuf = Buffer.from(signature);
+          const expectedBuf = Buffer.from(expectedSig);
+          if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+            logger.warn('Invalid MoonPay webhook signature');
+            return res.status(400).json({ error: 'Invalid webhook signature' });
+          }
+        } catch {
+          logger.warn('Invalid MoonPay webhook signature format');
           return res.status(400).json({ error: 'Invalid webhook signature' });
         }
       }
@@ -186,8 +207,15 @@ router.post('/webhook/:provider', webhookLimiter, (req, res) => {
           .createHmac('sha256', alchemySecret)
           .update(rawBody)
           .digest('hex');
-        if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSig))) {
-          logger.warn('Invalid AlchemyPay webhook signature');
+        try {
+          const sigBuf = Buffer.from(signature);
+          const expectedBuf = Buffer.from(expectedSig);
+          if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
+            logger.warn('Invalid AlchemyPay webhook signature');
+            return res.status(400).json({ error: 'Invalid webhook signature' });
+          }
+        } catch {
+          logger.warn('Invalid AlchemyPay webhook signature format');
           return res.status(400).json({ error: 'Invalid webhook signature' });
         }
       }
@@ -238,10 +266,10 @@ router.get('/providers', (req, res) => {
       },
     ];
 
-    res.json({ providers });
+    res.json({ success: true, data: providers });
   } catch (error) {
     logger.error('Error fetching providers:', error);
-    res.status(500).json({ error: 'Failed to fetch providers' });
+    res.status(500).json({ success: false, error: 'Failed to fetch providers' });
   }
 });
 
