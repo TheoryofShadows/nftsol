@@ -15,7 +15,8 @@
     "format": "prettier -w .",
     "format:check": "prettier -c .",
     "type-check": "tsc --noEmit",
-    "optimize": "npm run build && npm run type-check"
+    "optimize": "npm run build && npm run type-check",
+    "test:contracts": "echo 'Contract tests not yet configured' && exit 0"
   },
   "dependencies": {
     "@radix-ui/themes": "^3.2.1",
