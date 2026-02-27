@@ -26,7 +26,7 @@ router.post('/init', verifyAuth, (req, res) => {
 
 /**
  * GET /api/v1/gamification/achievements
- * Get all available achievements
+ * Get all available achievements (public)
  */
 router.get('/achievements', (req, res) => {
   try {
@@ -41,8 +41,26 @@ router.get('/achievements', (req, res) => {
 });
 
 /**
+ * GET /api/v1/gamification/achievements/:userId
+ * Get achievements for a specific user
+ */
+router.get('/achievements/:userId', verifyAuth, (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const gamificationService = getGamificationService();
+    const achievements = gamificationService.getAchievements(userId);
+
+    res.json({ success: true, data: achievements });
+  } catch (error) {
+    logger.error('Error fetching user achievements:', error);
+    res.status(500).json({ error: 'Failed to fetch achievements' });
+  }
+});
+
+/**
  * GET /api/v1/gamification/user-achievements
- * Get user's achievements and stats
+ * Get authenticated user's achievements and stats
  */
 router.get('/user-achievements', verifyAuth, (req, res) => {
   try {
@@ -85,10 +103,8 @@ router.post('/track-activity', verifyAuth, (req, res) => {
 
     const gamificationService = getGamificationService();
 
-    // Update streak
     gamificationService.updateStreak(userId);
 
-    // Add points based on action
     const pointsMap: Record<string, number> = {
       nft_viewed: 1,
       nft_favorited: 5,
@@ -105,7 +121,6 @@ router.post('/track-activity', verifyAuth, (req, res) => {
       gamificationService.addPoints(userId, points, action);
     }
 
-    // Check and unlock milestones
     gamificationService.checkAndUnlockMilestones(userId, stats);
 
     const userAchievements = gamificationService.getUserAchievements(userId);
@@ -123,9 +138,9 @@ router.post('/track-activity', verifyAuth, (req, res) => {
 
 /**
  * GET /api/v1/gamification/leaderboard
- * Get global leaderboard
+ * Get global leaderboard (requires auth)
  */
-router.get('/leaderboard', (req, res) => {
+router.get('/leaderboard', verifyAuth, (req, res) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
 
@@ -144,6 +159,28 @@ router.get('/leaderboard', (req, res) => {
   } catch (error) {
     logger.error('Error fetching leaderboard:', error);
     res.status(500).json({ error: 'Failed to fetch leaderboard' });
+  }
+});
+
+/**
+ * GET /api/v1/gamification/profile/:userId
+ * Get a user's gamification profile
+ */
+router.get('/profile/:userId', verifyAuth, (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const gamificationService = getGamificationService();
+    const profile = gamificationService.getUserProfile(userId);
+
+    if (!profile) {
+      return res.status(404).json({ success: false, error: 'Profile not found' });
+    }
+
+    res.json({ success: true, data: profile });
+  } catch (error) {
+    logger.error('Error fetching gamification profile:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
   }
 });
 
@@ -172,7 +209,6 @@ router.get('/user-rank', verifyAuth, (req, res) => {
 /**
  * GET /api/v1/gamification/leaderboard/friends
  * Get leaderboard for users who have interacted with the requesting user
- * (follows, trades, shared collections)
  */
 router.get('/leaderboard/friends', verifyAuth, (req, res) => {
   try {
@@ -182,10 +218,6 @@ router.get('/leaderboard/friends', verifyAuth, (req, res) => {
 
     const gamificationService = getGamificationService();
 
-    // Get the full leaderboard and filter to users who have interacted
-    // with the requesting user. Since we use in-memory storage, we return
-    // the global top-N as "friends" context until a persistent social graph
-    // is wired up. Users with no interactions get an encouraging message.
     const globalBoard = gamificationService.getLeaderboard(parsedLimit, 0);
 
     // Exclude the requesting user from the friends leaderboard

@@ -3,7 +3,7 @@
  * Validates that all limiters are correctly configured
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
 // Minimal express mock for testing rate limiter config
 const mockRateLimit = (config: Record<string, unknown>) => config;
@@ -70,7 +70,7 @@ describe('Rate Limiter Key Generation', () => {
     const keyGenerator = (r: typeof req) => {
       const ip = (r.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
         r.socket.remoteAddress || 'unknown';
-      const wallet = r.body?.walletAddress || ip;
+      const wallet = (r.body as Record<string, string>)?.walletAddress || ip;
       return `${ip}:${wallet}`;
     };
 
@@ -81,7 +81,7 @@ describe('Rate Limiter Key Generation', () => {
 
   it('falls back to IP when wallet address is not in body', () => {
     const req = {
-      body: {},
+      body: {} as Record<string, string>,
       headers: { 'x-forwarded-for': '10.0.0.1' },
       socket: { remoteAddress: '127.0.0.1' },
     };
@@ -89,7 +89,7 @@ describe('Rate Limiter Key Generation', () => {
     const keyGenerator = (r: typeof req) => {
       const ip = (r.headers['x-forwarded-for'] as string)?.split(',')[0].trim() ||
         r.socket.remoteAddress || 'unknown';
-      const wallet = r.body?.walletAddress || ip;
+      const wallet = (r.body as Record<string, string>)?.walletAddress || ip;
       return `${ip}:${wallet}`;
     };
 

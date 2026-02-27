@@ -378,6 +378,21 @@ export class GamificationService {
   public getAllAchievements(): Achievement[] {
     return Array.from(this.achievements.values());
   }
+
+  /**
+   * Get user gamification profile (alias for getUserAchievements)
+   */
+  public getUserProfile(userId: string): UserAchievements | null {
+    return this.userAchievements.get(userId) || null;
+  }
+
+  /**
+   * Get achievements for a specific user
+   */
+  public getAchievements(userId: string): Achievement[] {
+    const userAch = this.userAchievements.get(userId);
+    return userAch ? userAch.achievements : [];
+  }
 }
 
 let gamificationService: GamificationService;

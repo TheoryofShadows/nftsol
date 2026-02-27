@@ -334,6 +334,21 @@ export class CreatorToolsService {
   }
 
   /**
+   * Get creator stats summary
+   */
+  public getCreatorStats(creatorId: string): { totalNFTs: number; totalSales: number; totalVolume: number; followers: number } | null {
+    const creator = this.creators.get(creatorId);
+    if (!creator) return null;
+
+    return {
+      totalNFTs: creator.totalNFTsMinted,
+      totalSales: Math.floor(creator.totalVolume / 0.5), // rough estimate
+      totalVolume: creator.totalVolume,
+      followers: creator.followers,
+    };
+  }
+
+  /**
    * Get dashboard summary
    */
   public getCreatorDashboard(creatorId: string): Record<string, any> {
