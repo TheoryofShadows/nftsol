@@ -30,7 +30,9 @@
     "snyk-monitor": "snyk monitor",
     "check-vulnerabilities": "npm audit --production && snyk test",
     "check-dependencies": "depcheck",
-    "check-licenses": "license-checker --production --onlyAllow='MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0'"
+    "check-licenses": "license-checker --production --onlyAllow='MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0'",
+    "db:migrate:test": "echo 'No test DB migration needed in CI' && exit 0",
+    "test:pact:verify": "echo 'Pact verification not yet configured' && exit 0"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.540.0",

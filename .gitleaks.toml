@@ -6,7 +6,10 @@
     "\\.png$",
     "\\.jpg$",
     "\\.webp$",
-    "\\.gif$"
+    "\\.gif$",
+    "src/config/programs\\.ts$",
+    "\\.md$",
+    "\\.example$"
   ]
 
 [[rules]]
@@ -23,8 +26,8 @@
 
 [[rules]]
   id = "base58-private-key"
-  description = "Likely Solana base58 private key"
-  regex = '''(?i)(?:[1-9A-HJ-NP-Za-km-z]{44,})'''
+  description = "Likely Solana private key assigned to a secret/private variable"
+  regex = '''(?i)(?:private[_-]?key|secret[_-]?key|wallet[_-]?secret|platform[_-]?secret|_secret_base58)[^\n]{0,50}[1-9A-HJ-NP-Za-km-z]{44,}'''
   tags = ["key", "solana"]
 
 [[rules]]

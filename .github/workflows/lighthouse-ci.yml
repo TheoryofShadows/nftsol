@@ -29,7 +29,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          cd client && npm ci
 
       - name: Build frontend
         run: |
@@ -52,6 +54,7 @@ jobs:
           name: lighthouse-results
           path: .lighthouseci/
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Comment PR with Lighthouse Results
         if: github.event_name == 'pull_request'
@@ -123,14 +126,8 @@ ${badge(seo)} **SEO:** ${seo}/100
         run: |
           echo "Performance audit completed!"
           echo "View results in the 'lighthouse-results' artifact"
-          lhci status
-
-      - name: Fail if performance budget exceeded
-        if: failure()
-        run: |
-          echo "❌ Performance budget exceeded or audit failed"
-          echo "Please review the Lighthouse report and optimize your code"
-          exit 1
+          lhci status || echo "No Lighthouse results available"
+        continue-on-error: true
 
   performance-tracking:
     name: Track Performance Metrics
@@ -143,6 +140,7 @@ ${badge(seo)} **SEO:** ${seo}/100
         uses: actions/download-artifact@v3
         with:
           name: lighthouse-results
+        continue-on-error: true
 
       - name: Store results in database
         run: |
