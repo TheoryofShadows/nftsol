@@ -1,8 +1,11 @@
 /* eslint-disable react/forbid-dom-props */
 import React, { useState, memo } from 'react';
+import { useWallet, useConnection } from '@solana/wallet-adapter-react';
+import { Transaction } from '@solana/web3.js';
 import { NFTCardSkeleton } from './SkeletonLoader';
 import NftDetailModal from './NftDetailModal';
 import { useNotification } from './NotificationSystem';
+import { API_ENDPOINTS } from '../config/api';
 import '../styles/NftGrid.css';
 
 interface NFT {
@@ -58,7 +61,157 @@ const getRarityLabel = (rarity?: string) => {
 const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: NftGridProps) {
   const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
+  const [isListing, setIsListing] = useState(false);
   const { addNotification } = useNotification();
+  const { publicKey, signTransaction, connected } = useWallet();
+  const { connection } = useConnection();
+
+  const handleBuy = async (nft: NFT) => {
+    if (!connected || !publicKey || !signTransaction) {
+      addNotification({
+        type: 'error',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your wallet to buy NFTs.',
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!nft.price) {
+      addNotification({
+        type: 'error',
+        title: 'No Price Set',
+        message: 'This NFT is not listed for sale.',
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsBuying(true);
+    try {
+      // Step 1: Create unsigned buy transaction
+      const prepareRes = await fetch(API_ENDPOINTS.marketplace.createBuyTransaction, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyer: publicKey.toBase58(),
+          seller: nft.owner,
+          mintAddress: nft.mintAddress,
+          price: parseFloat(nft.price),
+        }),
+      });
+      const prepareData = await prepareRes.json();
+
+      if (!prepareData.success || !prepareData.data?.transaction) {
+        throw new Error(prepareData.error || 'Failed to prepare buy transaction');
+      }
+
+      // Step 2: Deserialize and sign the transaction
+      const txBuffer = Buffer.from(prepareData.data.transaction, 'base64');
+      const transaction = Transaction.from(txBuffer);
+      const signedTx = await signTransaction(transaction);
+
+      // Step 3: Submit to blockchain
+      const signature = await connection.sendRawTransaction(signedTx.serialize(), {
+        skipPreflight: false,
+        preflightCommitment: 'confirmed',
+      });
+
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      // Step 4: Record the sale
+      await fetch(API_ENDPOINTS.marketplace.confirmSale, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintAddress: nft.mintAddress,
+          buyer: publicKey.toBase58(),
+          seller: nft.owner,
+          price: parseFloat(nft.price),
+          signature,
+        }),
+      });
+
+      addNotification({
+        type: 'success',
+        title: '🎉 Purchase Successful!',
+        message: `You bought "${nft.name}" for ${nft.price} SOL`,
+        duration: 6000,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Purchase failed';
+      addNotification({
+        type: 'error',
+        title: 'Purchase Failed',
+        message,
+        duration: 5000,
+      });
+    } finally {
+      setIsBuying(false);
+    }
+  };
+
+  const handleList = async (nft: NFT) => {
+    if (!connected || !publicKey) {
+      addNotification({
+        type: 'error',
+        title: 'Wallet Not Connected',
+        message: 'Please connect your wallet to list NFTs.',
+        duration: 4000,
+      });
+      return;
+    }
+
+    const priceInput = window.prompt(`Enter listing price in SOL for "${nft.name}":`);
+    if (!priceInput) return;
+
+    const price = parseFloat(priceInput);
+    if (isNaN(price) || price <= 0) {
+      addNotification({
+        type: 'error',
+        title: 'Invalid Price',
+        message: 'Please enter a valid price greater than 0.',
+        duration: 4000,
+      });
+      return;
+    }
+
+    setIsListing(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.marketplace.list, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mintAddress: nft.mintAddress,
+          seller: publicKey.toBase58(),
+          price,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        addNotification({
+          type: 'success',
+          title: '✅ NFT Listed!',
+          message: `"${nft.name}" is now listed for ${price} SOL`,
+          duration: 5000,
+        });
+      } else {
+        throw new Error(data.error || 'Failed to list NFT');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Listing failed';
+      addNotification({
+        type: 'error',
+        title: 'Listing Failed',
+        message,
+        duration: 5000,
+      });
+    } finally {
+      setIsListing(false);
+    }
+  };
 
   if (loading) {
     return <NFTCardSkeleton count={8} />;
@@ -147,23 +300,23 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedNft(nft);
-                      setIsModalOpen(true);
+                      handleBuy(nft);
                     }}
-                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors"
+                    disabled={isBuying}
+                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors disabled:opacity-50"
                   >
-                    Buy {nft.price} SOL
+                    {isBuying ? 'Buying...' : `Buy ${nft.price} SOL`}
                   </button>
                 ) : (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setSelectedNft(nft);
-                      setIsModalOpen(true);
+                      handleList(nft);
                     }}
-                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors"
+                    disabled={isListing}
+                    className="w-full px-4 py-2.5 bg-gold text-black text-sm font-semibold rounded-md hover:bg-gold-light transition-colors disabled:opacity-50"
                   >
-                    List for Sale
+                    {isListing ? 'Listing...' : 'List for Sale'}
                   </button>
                 )}
               </div>
@@ -217,22 +370,8 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
           setIsModalOpen(false);
           setSelectedNft(null);
         }}
-        onBuy={(nft) => {
-          addNotification({
-            type: 'info',
-            title: 'Purchase NFT',
-            message: `Buy functionality for "${nft.name}" will be implemented soon.`,
-            duration: 4000,
-          });
-        }}
-        onList={(nft) => {
-          addNotification({
-            type: 'info',
-            title: 'List NFT',
-            message: `Listing functionality for "${nft.name}" will be implemented soon.`,
-            duration: 4000,
-          });
-        }}
+        onBuy={handleBuy}
+        onList={handleList}
       />
     </div>
   );

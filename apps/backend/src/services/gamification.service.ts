@@ -38,7 +38,7 @@ export interface UserAchievements {
 export interface Leaderboard {
   rank: number;
   userId: string;
-  _username: string;
+  username: string;
   totalPoints: number;
   level: number;
   achievementCount: number;
@@ -320,7 +320,7 @@ export class GamificationService {
       .map((userAch, idx) => ({
         rank: idx + 1,
         userId: userAch.userId,
-        _username: userAch.userId, // TODO: Get from database
+        username: `${userAch.userId.slice(0, 4)}...${userAch.userId.slice(-4)}`,
         totalPoints: userAch.totalPoints,
         level: userAch.level,
         achievementCount: userAch.achievements.length,
