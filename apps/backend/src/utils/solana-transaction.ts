@@ -13,6 +13,7 @@ import {
   SystemProgram,
   Keypair,
 } from '@solana/web3.js';
+import { createTransferInstruction as splCreateTransferInstruction } from '@solana/spl-token';
 import { optimizedSolanaService } from '../services/solana-optimized';
 
 /**
@@ -131,15 +132,13 @@ export async function batchSendTransactions(
  * Create token transfer instruction (SPL Token)
  */
 export function createTokenTransferInstruction(
-  _source: PublicKey,
-  _destination: PublicKey,
-  _amount: number,
+  source: PublicKey,
+  destination: PublicKey,
+  amount: number,
   _mint: PublicKey,
-  _owner: PublicKey
+  owner: PublicKey
 ): TransactionInstruction {
-  // This is a placeholder - implement actual SPL token transfer
-  // You would use @solana/spl-token library
-  throw new Error('SPL Token transfer not implemented - use @solana/spl-token');
+  return splCreateTransferInstruction(source, destination, owner, amount);
 }
 
 /**

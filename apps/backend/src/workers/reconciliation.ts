@@ -1,6 +1,7 @@
 // src/workers/reconciliation.ts
 import { pool } from '../lib/db';
 import { connection } from '../lib/solana';
+import logger from '../utils/logger';
 
 interface ReconciliationIssue {
   type: string;
@@ -205,12 +206,12 @@ class ReconciliationWorker {
   }
 
   private async sendAlert(issue: ReconciliationIssue): Promise<void> {
-    // Send to monitoring system (PagerDuty, Slack, etc.)
-    console.log(`🚨 ALERT: ${issue.type} - ${issue.description}`);
+    // Log the alert through structured logger
+    const logFn = issue.severity === 'HIGH' ? logger.error.bind(logger)
+      : issue.severity === 'MEDIUM' ? logger.warn.bind(logger)
+      : logger.info.bind(logger);
 
-    // TODO: Integrate with your alerting system
-    // Example: await sendSlackAlert(issue);
-    // Example: await sendPagerDutyAlert(issue);
+    logFn(`[RECONCILIATION ALERT] ${issue.type}: ${issue.description}`, { data: issue.data });
   }
 }
 

@@ -1,4 +1,5 @@
 import logger from '../utils/logger';
+import { metaplexMinting } from './metaplex-minting';
 
 
 export interface CreatorProfile {
@@ -319,15 +320,22 @@ export class CreatorToolsService {
     let successful = 0;
     let failed = 0;
 
-    nfts.forEach(({ mint, metadata: _metadata }) => {
-      try {
-        // TODO: Update on-chain metadata via Metaplex
-        logger.debug(`Updated metadata for NFT: ${mint}`);
-        successful += 1;
-      } catch (error) {
-        logger.error(`Failed to update metadata for NFT ${mint}:`, error);
-        failed += 1;
-      }
+    nfts.forEach(({ mint, metadata }) => {
+      metaplexMinting
+        .updateMetadata({ mintAddress: mint, newName: metadata.name, newUri: metadata.image })
+        .then((result) => {
+          if (result.success) {
+            logger.debug(`Updated on-chain metadata for NFT: ${mint}`);
+            successful += 1;
+          } else {
+            logger.error(`Failed to update on-chain metadata for NFT ${mint}: ${result.error}`);
+            failed += 1;
+          }
+        })
+        .catch((error) => {
+          logger.error(`Error updating metadata for NFT ${mint}:`, error);
+          failed += 1;
+        });
     });
 
     return { successful, failed };

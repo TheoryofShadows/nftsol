@@ -103,6 +103,14 @@ export const API_ENDPOINTS = {
   waitlist: {
     subscribe: buildApiUrl('api/waitlist/subscribe'),
   },
+  marketplace: {
+    list: buildApiUrl('api/marketplace/list'),
+    delist: buildApiUrl('api/marketplace/delist'),
+    listings: buildApiUrl('api/marketplace/listings'),
+    createBuyTransaction: buildApiUrl('api/marketplace/create-buy-transaction'),
+    confirmSale: buildApiUrl('api/marketplace/confirm-sale'),
+    listing: (mintAddress: string) => buildApiUrl(`api/marketplace/listing/${mintAddress}`),
+  },
   // Sprint 1: New feature endpoints
   tensor: {
     orderbook: (collection: string) => buildApiUrl(`api/tensor/orderbook/${collection}`),

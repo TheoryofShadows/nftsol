@@ -7,9 +7,12 @@
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import {
   createNft,
+  fetchMetadata,
+  findMetadataPda,
   mplTokenMetadata,
+  updateV1,
 } from '@metaplex-foundation/mpl-token-metadata';
-import { createSignerFromKeypair, signerIdentity, generateSigner, percentAmount } from '@metaplex-foundation/umi';
+import { createSignerFromKeypair, publicKey as umiPublicKey, signerIdentity, generateSigner, percentAmount } from '@metaplex-foundation/umi';
 import { solanaConfig } from '../config';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
@@ -160,24 +163,39 @@ export class MetaplexMintingService {
   /**
    * Verify an NFT follows Metaplex standard
    */
-  async verifyMetaplexStandard(_mintAddress: string): Promise<{
+  async verifyMetaplexStandard(mintAddress: string): Promise<{
     success: boolean;
     isMetaplex?: boolean;
     metadata?: any;
     error?: string;
   }> {
     try {
-      // TODO: Implement verification by fetching token metadata account
-      // For now, return success
+      const mintPubkey = umiPublicKey(mintAddress);
+      const metadataPda = findMetadataPda(this.umi, { mint: mintPubkey });
+      const metadata = await fetchMetadata(this.umi, metadataPda);
+
       return {
         success: true,
         isMetaplex: true,
+        metadata: {
+          name: metadata.name,
+          symbol: metadata.symbol,
+          uri: metadata.uri,
+          sellerFeeBasisPoints: metadata.sellerFeeBasisPoints,
+          isMutable: metadata.isMutable,
+        },
       };
     } catch (error) {
+      // If metadata account doesn't exist, the NFT is not Metaplex-standard
+      const msg = error instanceof Error ? error.message : 'Verification failed';
+      const notFound = msg.includes('Account does not exist') || msg.includes('could not be found');
+      if (notFound) {
+        return { success: true, isMetaplex: false };
+      }
       console.error('[Metaplex] Verify standard error:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Verification failed',
+        error: msg,
       };
     }
   }
@@ -185,18 +203,35 @@ export class MetaplexMintingService {
   /**
    * Update NFT metadata (if mutable)
    */
-  async updateMetadata(_params: {
+  async updateMetadata(params: {
     mintAddress: string;
     newName?: string;
     newUri?: string;
   }): Promise<{ success: boolean; error?: string }> {
     try {
-      // TODO: Implement metadata update
-      console.log('[Metaplex] Metadata update not yet implemented');
-      return {
-        success: false,
-        error: 'Update metadata not yet implemented',
-      };
+      if (!this.platformSigner) {
+        return { success: false, error: 'Platform signer not initialized' };
+      }
+
+      const mintPubkey = umiPublicKey(params.mintAddress);
+
+      // Fetch existing metadata to preserve unchanged fields
+      const metadataPda = findMetadataPda(this.umi, { mint: mintPubkey });
+      const existing = await fetchMetadata(this.umi, metadataPda);
+
+      await updateV1(this.umi, {
+        mint: mintPubkey,
+        authority: this.platformSigner,
+        data: {
+          name: params.newName ?? existing.name,
+          symbol: existing.symbol,
+          uri: params.newUri ?? existing.uri,
+          sellerFeeBasisPoints: existing.sellerFeeBasisPoints,
+          creators: existing.creators,
+        },
+      }).sendAndConfirm(this.umi);
+
+      return { success: true };
     } catch (error) {
       console.error('[Metaplex] Update metadata error:', error);
       return {
