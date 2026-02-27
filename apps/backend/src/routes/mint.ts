@@ -203,7 +203,7 @@ router.post('/simple-mint', sensitiveOpLimiter, upload.single('file'), async (re
  * POST /api/mint/ultra-cheap
  * Mint NFT with ultra-low cost optimization
  */
-router.post('/ultra-cheap', sensitiveOpLimiter, validateWallet, async (req: Request, res: Response) => {
+router.post('/ultra-cheap', sensitiveOpLimiter, validateWallet(), async (req: Request, res: Response) => {
   try {
     const { toAddress, name, symbol, description, imageUrl, externalUrl } = req.body;
 

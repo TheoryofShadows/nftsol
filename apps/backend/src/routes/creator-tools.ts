@@ -26,7 +26,7 @@ router.post('/profile/init', verifyAuth, (req, res) => {
 
 /**
  * GET /api/v1/creators/profile
- * Get creator's profile
+ * Get authenticated creator's profile
  */
 router.get('/profile', verifyAuth, (req, res) => {
   try {
@@ -65,6 +65,28 @@ router.patch('/profile', verifyAuth, (req, res) => {
   } catch (error) {
     logger.error('Error updating creator profile:', error);
     res.status(500).json({ error: 'Failed to update creator profile' });
+  }
+});
+
+/**
+ * GET /api/v1/creators/stats/:creatorId
+ * Get creator stats (requires auth)
+ */
+router.get('/stats/:creatorId', verifyAuth, (req, res) => {
+  try {
+    const { creatorId } = req.params;
+
+    const creatorService = getCreatorToolsService();
+    const stats = creatorService.getCreatorStats(creatorId);
+
+    if (!stats) {
+      return res.status(404).json({ success: false, error: 'Creator not found' });
+    }
+
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    logger.error('Error fetching creator stats:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch creator stats' });
   }
 });
 
@@ -208,7 +230,7 @@ router.get('/verify/:creatorId', verifyAuth, isAdmin, (req, res) => {
  * GET /api/v1/creators/top
  * Get top creators by volume or followers
  */
-router.get('/top', (req, res) => {
+router.get('/top', verifyAuth, (req, res) => {
   try {
     const { limit = 10, sort = 'volume' } = req.query;
 
@@ -218,10 +240,10 @@ router.get('/top', (req, res) => {
         ? creatorService.getTopCreatorsByFollowers(parseInt(limit as string))
         : creatorService.getTopCreators(parseInt(limit as string));
 
-    res.json({ data: creators, sort, limit });
+    res.json({ success: true, data: creators });
   } catch (error) {
     logger.error('Error fetching top creators:', error);
-    res.status(500).json({ error: 'Failed to fetch top creators' });
+    res.status(500).json({ success: false, error: 'Failed to fetch top creators' });
   }
 });
 

@@ -71,9 +71,9 @@ describe('ErrorBoundary Component', () => {
       </ErrorBoundary>
     );
 
-    const retryButton = screen.queryByRole('button');
-    if (retryButton) {
-      expect(retryButton).toBeInTheDocument();
+    const buttons = screen.queryAllByRole('button');
+    if (buttons.length > 0) {
+      expect(buttons[0]).toBeInTheDocument();
     }
   });
 });

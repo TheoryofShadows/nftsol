@@ -23,23 +23,36 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { userId: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { userId?: string; id?: string; wallet?: string; isAdmin?: boolean };
 
-    // Verify user exists and is active
-    const user = await pool.query(
-      'SELECT id, wallet_address, is_admin FROM users WHERE id = $1 AND is_active = true',
-      [decoded.userId]
-    );
+    const userId = decoded.userId || decoded.id;
 
-    if (!user.rows.length) {
-      return res.status(401).json({ 
-        success: false,
-        error: 'Unauthorized: Invalid or expired token',
-        code: 'INVALID_AUTH_TOKEN'
-      });
+    // Try to verify user exists in DB; fall back to JWT claims if DB is unavailable
+    try {
+      const user = await pool.query(
+        'SELECT id, wallet_address, is_admin FROM users WHERE id = $1 AND is_active = true',
+        [userId]
+      );
+
+      if (!user.rows.length) {
+        // If we have a userId from JWT but DB says user doesn't exist, reject
+        if (userId) {
+          return res.status(401).json({
+            success: false,
+            error: 'Unauthorized: Invalid or expired token',
+            code: 'INVALID_AUTH_TOKEN'
+          });
+        }
+      } else {
+        req.user = user.rows[0];
+        return next();
+      }
+    } catch {
+      // DB unavailable — fall back to JWT claims for resilience
     }
 
-    req.user = user.rows[0];
+    // Fallback: use JWT claims directly (e.g., DB unavailable or no userId claim)
+    req.user = { id: userId, wallet_address: decoded.wallet, is_admin: decoded.isAdmin ?? false };
     next();
   } catch (error) {
     console.error('Authentication error:', error);

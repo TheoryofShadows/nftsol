@@ -7,7 +7,7 @@ import { getPlatformKeypair } from '../lib/platformKeypair';
 const router = Router();
 
 // POST /api/nfts/mint - Real NFT minting
-router.post('/mint', validateWallet, async (req, res) => {
+router.post('/mint', validateWallet(), async (req, res) => {
   try {
     const { toAddress, name, description, imageUrl } = req.body;
 
