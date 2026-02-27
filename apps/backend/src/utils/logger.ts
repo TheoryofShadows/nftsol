@@ -44,7 +44,14 @@ const transports: winston.transport[] = [
       winston.format.colorize({ all: true }),
       winston.format.printf((info) => {
         const { timestamp, level, message, ...meta } = info;
-        const metaStr = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
+        let metaStr = '';
+        if (Object.keys(meta).length) {
+          try {
+            metaStr = JSON.stringify(meta, null, 2);
+          } catch {
+            metaStr = '[Unserializable meta]';
+          }
+        }
         return `${timestamp} [${level}]: ${message} ${metaStr}`;
       })
     ),

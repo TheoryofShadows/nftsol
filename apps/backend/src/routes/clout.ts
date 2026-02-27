@@ -31,7 +31,7 @@ const cloutService = new CloutTokenService();
  *   multiplier?: number (optional, default: 1.0)
  * }
  */
-router.post('/reward', sensitiveOpLimiter, validateWallet, async (req, res) => {
+router.post('/reward', sensitiveOpLimiter, validateWallet(), async (req, res) => {
   try {
     const { recipientAddress, amount, multiplier = 1.0 } = req.body;
 

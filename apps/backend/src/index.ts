@@ -65,6 +65,11 @@ import pnlLeaderboardRouter from './routes/pnl-leaderboard';
 import alertsRouter from './routes/alerts';
 // Consolidated from legacy server/ — AI enhancement features
 import aiFeaturesRouter from './routes/ai-features';
+// Feature routers
+import gamificationRouter from './routes/gamification';
+import creatorToolsRouter from './routes/creator-tools';
+import fiatOnrampRouter from './routes/fiat-onramp';
+import activityFeedRouter from './routes/activity-feed';
 
 initializeSecrets();
 
@@ -1130,6 +1135,15 @@ app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
 // Consolidated AI enhancement routes (migrated from legacy server/)
 app.use('/api/ai-features', aiFeaturesRouter);
+
+// Mint routes (compressed NFT minting, cost estimation)
+app.use('/api/mint', mintRouter);
+
+// Feature routes
+app.use('/api/gamification', gamificationRouter);
+app.use('/api/creator-tools', creatorToolsRouter);
+app.use('/api/fiat', fiatOnrampRouter);
+app.use('/api/activity', activityFeedRouter);
 
 // Archive + Grok + Echo integration routes
 app.use('/api/archive', archiveGrokEchoRouter);
