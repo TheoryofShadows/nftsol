@@ -1,9 +1,10 @@
 /* eslint-disable react/forbid-dom-props */
-import React, { useState, memo } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { Transaction } from '@solana/web3.js';
 import { NFTCardSkeleton } from './SkeletonLoader';
 import NftDetailModal from './NftDetailModal';
+import NftPreviewCard from './NftPreviewCard';
 import { useNotification } from './NotificationSystem';
 import { API_ENDPOINTS } from '../config/api';
 import '../styles/NftGrid.css';
@@ -63,9 +64,27 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
   const [isListing, setIsListing] = useState(false);
+  const [previewNft, setPreviewNft] = useState<NFT | null>(null);
+  const [previewRect, setPreviewRect] = useState<DOMRect | null>(null);
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { addNotification } = useNotification();
   const { publicKey, signTransaction, connected } = useWallet();
   const { connection } = useConnection();
+
+  const handleCardMouseEnter = useCallback((nft: NFT, e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+    hoverTimerRef.current = setTimeout(() => {
+      setPreviewNft(nft);
+      setPreviewRect(rect);
+    }, 450);
+  }, []);
+
+  const handleCardMouseLeave = useCallback(() => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
 
   const handleBuy = async (nft: NFT) => {
     if (!connected || !publicKey || !signTransaction) {
@@ -261,6 +280,8 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
             setSelectedNft(nft);
             setIsModalOpen(true);
           }}
+          onMouseEnter={(e) => handleCardMouseEnter(nft, e)}
+          onMouseLeave={handleCardMouseLeave}
         >
           {/* Rarity badge */}
           {nft.rarity && (
@@ -373,6 +394,26 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
         onBuy={handleBuy}
         onList={handleList}
       />
+
+      {/* NFT Quick Preview */}
+      {previewNft && previewRect && (
+        <NftPreviewCard
+          nft={previewNft}
+          anchorRect={previewRect}
+          onClose={() => {
+            setPreviewNft(null);
+            setPreviewRect(null);
+          }}
+          onViewDetails={() => {
+            setSelectedNft(previewNft);
+            setIsModalOpen(true);
+            setPreviewNft(null);
+            setPreviewRect(null);
+          }}
+          onBuy={handleBuy}
+          onList={handleList}
+        />
+      )}
     </div>
   );
 });
