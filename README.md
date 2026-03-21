@@ -9,8 +9,8 @@
 
 ## 🚀 Production URLs
 
-- **Frontend**: https://nftsolmarket.netlify.app
-- **Backend API**: https://nftsol.onrender.com
+- **Frontend**: https://nftsol.app
+- **Backend API**: https://api.nftsol.app
 - **GitHub**: https://github.com/TheoryofShadows/nftsol
 
 ## ✨ Core Features
@@ -230,8 +230,8 @@ See **[SECURITY.md](SECURITY.md)** for complete security policy.
 See **[DEPLOYMENT.md](DEPLOYMENT.md)** for step-by-step guide.
 
 **Current Production:**
-- Frontend: https://nftsolmarket.netlify.app
-- Backend: https://nftsol.onrender.com
+- Frontend: https://nftsol.app
+- Backend: https://api.nftsol.app
 
 ## 📚 Documentation
 

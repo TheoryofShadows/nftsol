@@ -20,7 +20,7 @@ export function loadSwaggerDocs(): Record<string, any> {
       },
       servers: [
         {
-          url: 'https://nftsol.onrender.com',
+          url: 'https://api.nftsol.app',
           description: 'Production API'
         },
         {

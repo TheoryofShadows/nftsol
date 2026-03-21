@@ -79,7 +79,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://nftsol.onrender.com' }}
+          VITE_API_BASE: ${{ secrets.VITE_API_BASE || 'https://api.nftsol.app' }}
           VITE_SOLANA_RPC_URL: ${{ secrets.VITE_SOLANA_RPC_URL }}
           VITE_SOLANA_CLUSTER: mainnet-beta
           VITE_HELIUS_API_KEY: ${{ secrets.VITE_HELIUS_API_KEY }}

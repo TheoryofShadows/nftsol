@@ -13,7 +13,7 @@ const getApiBase = (): string => {
   // Priority 2: Production environment - use production backend
   if (import.meta.env.MODE === 'production' || import.meta.env.PROD) {
     // Production backend URL
-    return 'https://nftsol.onrender.com';
+    return 'https://api.nftsol.app';
   }
 
   // Priority 3: Development - use localhost
@@ -68,7 +68,7 @@ export const API_ENDPOINTS = {
   csrf: buildApiUrl(`${API_PREFIX}/csrf-token`),
   programs: buildApiUrl(`${API_PREFIX}/programs`),
   solanaStatus: buildApiUrl(`${API_PREFIX}/solana/status`),
-  mint: buildApiUrl(`${API_PREFIX}/simple-mint`),
+  mint: buildApiUrl('api/mint/simple-mint'),
   nft: (mintAddress: string) => buildApiUrl(`${API_PREFIX}/nft/${mintAddress}`),
   nfts: (owner?: string) => 
     owner 

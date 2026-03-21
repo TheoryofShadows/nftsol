@@ -5,6 +5,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import multer from 'multer';
+import { randomBytes } from 'crypto';
 import { ultraCheapMintService } from '../services/ultra-cheap-mint';
 import { fileStorageService } from '../services/file-storage';
 import { validateWallet } from '../utils/validation';
@@ -30,6 +31,42 @@ const upload = multer({
       cb(new Error(`Invalid file type. Allowed: ${allowedMimeTypes.join(', ')}`));
     }
   },
+});
+
+/**
+ * GET /api/mint/simple-mint
+ * Generate CSRF token for the mint form and set it as a cookie
+ */
+router.get('/simple-mint', (req: Request, res: Response) => {
+  try {
+    const token = randomBytes(32).toString('hex');
+
+    if ((req as any).session) {
+      (req as any).session.csrfToken = token;
+    }
+
+    res.cookie('XSRF-TOKEN', token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    res.json({
+      success: true,
+      message: 'CSRF token generated and set in cookie',
+      code: 'CSRF_TOKEN_READY',
+      csrfToken: token,
+    });
+  } catch (error) {
+    log.error('Error generating CSRF token', error as Error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate CSRF token',
+      code: 'CSRF_TOKEN_ERROR',
+    });
+  }
 });
 
 /**

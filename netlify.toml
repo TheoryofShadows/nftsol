@@ -35,7 +35,7 @@
 # Frontend environment variables
 [context.production.environment]
   NODE_ENV = "production"
-  VITE_API_BASE = "https://nftsol.onrender.com"
+  VITE_API_BASE = "https://api.nftsol.app"
   # IMPORTANT: Use Netlify env var directly - don't nest with ${}
   # Set VITE_SOLANA_RPC_URL as a Netlify environment variable
   VITE_SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
@@ -44,14 +44,14 @@
 
 [context.develop.environment]
   NODE_ENV = "development"
-  VITE_API_BASE = "https://nftsol.onrender.com"
+  VITE_API_BASE = "https://api.nftsol.app"
   VITE_SOLANA_CLUSTER = "devnet"
   VITE_SOLANA_RPC_URL = "https://api.devnet.solana.com"
   VITE_HELIUS_API_KEY = "$HELIUS_API_KEY"
 
 [context.deploy-preview.environment]
   NODE_ENV = "development"
-  VITE_API_BASE = "https://nftsol.onrender.com"
+  VITE_API_BASE = "https://api.nftsol.app"
   VITE_HELIUS_API_KEY = "$HELIUS_API_KEY"
 
 # Functions configuration

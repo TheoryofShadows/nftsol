@@ -1,6 +1,6 @@
 # NFTSol API Examples
 
-Complete code examples for integrating with the NFTSol API. All examples use the production endpoint `https://nftsol.onrender.com`.
+Complete code examples for integrating with the NFTSol API. All examples use the production endpoint `https://api.nftsol.app`.
 
 ## Table of Contents
 
@@ -22,19 +22,19 @@ Complete code examples for integrating with the NFTSol API. All examples use the
 
 #### cURL
 ```bash
-curl -X GET https://nftsol.onrender.com/healthz
+curl -X GET https://api.nftsol.app/healthz
 ```
 
 #### JavaScript (Node.js)
 ```javascript
-const response = await fetch('https://nftsol.onrender.com/healthz');
+const response = await fetch('https://api.nftsol.app/healthz');
 const data = await response.json();
 console.log('API Status:', data);
 ```
 
 #### JavaScript (Browser/Fetch)
 ```javascript
-fetch('https://nftsol.onrender.com/healthz')
+fetch('https://api.nftsol.app/healthz')
   .then(res => res.json())
   .then(data => console.log('Health:', data))
   .catch(err => console.error('Error:', err));
@@ -44,7 +44,7 @@ fetch('https://nftsol.onrender.com/healthz')
 ```python
 import requests
 
-response = requests.get('https://nftsol.onrender.com/healthz')
+response = requests.get('https://api.nftsol.app/healthz')
 data = response.json()
 print(f"API Status: {data}")
 ```
@@ -55,12 +55,12 @@ Get platform statistics for display on your landing page.
 
 #### cURL
 ```bash
-curl -X GET https://nftsol.onrender.com/api/public/stats
+curl -X GET https://api.nftsol.app/api/public/stats
 ```
 
 #### JavaScript
 ```javascript
-const stats = await fetch('https://nftsol.onrender.com/api/public/stats')
+const stats = await fetch('https://api.nftsol.app/api/public/stats')
   .then(res => res.json());
 
 console.log(`Total NFTs: ${stats.platform.totalNFTs}`);
@@ -72,7 +72,7 @@ console.log(`Volume: ${stats.platform.totalVolume} SOL`);
 ```python
 import requests
 
-stats = requests.get('https://nftsol.onrender.com/api/public/stats').json()
+stats = requests.get('https://api.nftsol.app/api/public/stats').json()
 print(f"Total NFTs: {stats['platform']['totalNFTs']}")
 print(f"Listed: {stats['platform']['listedNFTs']}")
 print(f"Total Volume: {stats['platform']['totalVolume']} SOL")
@@ -88,14 +88,14 @@ Get wallet balance and existence status on-chain.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/wallet/11111111111111111111111111111111"
+curl -X GET "https://api.nftsol.app/api/wallet/11111111111111111111111111111111"
 ```
 
 #### JavaScript
 ```javascript
 async function getWalletInfo(walletAddress) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/wallet/${walletAddress}`
+    `https://api.nftsol.app/api/wallet/${walletAddress}`
   );
   const data = await response.json();
 
@@ -114,7 +114,7 @@ const info = await getWalletInfo('11111111111111111111111111111111');
 import requests
 
 def get_wallet_info(wallet_address):
-    url = f'https://nftsol.onrender.com/api/wallet/{wallet_address}'
+    url = f'https://api.nftsol.app/api/wallet/{wallet_address}'
     response = requests.get(url)
     data = response.json()
 
@@ -137,13 +137,13 @@ Get NFTs from the marketplace with optional filtering.
 #### cURL
 ```bash
 # Get all NFTs
-curl -X GET "https://nftsol.onrender.com/api/nfts"
+curl -X GET "https://api.nftsol.app/api/nfts"
 
 # Get NFTs by owner
-curl -X GET "https://nftsol.onrender.com/api/nfts?owner=11111111111111111111111111111111"
+curl -X GET "https://api.nftsol.app/api/nfts?owner=11111111111111111111111111111111"
 
 # Get listed NFTs
-curl -X GET "https://nftsol.onrender.com/api/nfts?status=listed"
+curl -X GET "https://api.nftsol.app/api/nfts?status=listed"
 ```
 
 #### JavaScript
@@ -151,7 +151,7 @@ curl -X GET "https://nftsol.onrender.com/api/nfts?status=listed"
 async function listNFTs(filters = {}) {
   const params = new URLSearchParams(filters);
   const response = await fetch(
-    `https://nftsol.onrender.com/api/nfts?${params}`
+    `https://api.nftsol.app/api/nfts?${params}`
   );
   return await response.json();
 }
@@ -173,7 +173,7 @@ const listed = await listNFTs({ status: 'listed' });
 import requests
 
 def list_nfts(filters=None):
-    url = 'https://nftsol.onrender.com/api/nfts'
+    url = 'https://api.nftsol.app/api/nfts'
     params = filters or {}
     response = requests.get(url, params=params)
     return response.json()
@@ -194,14 +194,14 @@ Get detailed information about a specific NFT.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/nft/TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV"
+curl -X GET "https://api.nftsol.app/api/nft/TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV"
 ```
 
 #### JavaScript
 ```javascript
 async function getNFTDetails(mintAddress) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/nft/${mintAddress}`
+    `https://api.nftsol.app/api/nft/${mintAddress}`
   );
   const data = await response.json();
 
@@ -224,7 +224,7 @@ const nft = await getNFTDetails('TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV');
 import requests
 
 def get_nft_details(mint_address):
-    url = f'https://nftsol.onrender.com/api/nft/{mint_address}'
+    url = f'https://api.nftsol.app/api/nft/{mint_address}'
     response = requests.get(url)
     data = response.json()
 
@@ -243,7 +243,7 @@ Create and mint a new NFT on Solana.
 
 #### cURL
 ```bash
-curl -X POST https://nftsol.onrender.com/api/v1/simple-mint \
+curl -X POST https://api.nftsol.app/api/v1/simple-mint \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: your-csrf-token" \
   -d '{
@@ -258,11 +258,11 @@ curl -X POST https://nftsol.onrender.com/api/v1/simple-mint \
 ```javascript
 async function mintNFT(nftData) {
   // Get CSRF token first
-  const csrfRes = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const csrfRes = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const { csrfToken } = await csrfRes.json();
 
   const response = await fetch(
-    'https://nftsol.onrender.com/api/v1/simple-mint',
+    'https://api.nftsol.app/api/v1/simple-mint',
     {
       method: 'POST',
       headers: {
@@ -292,12 +292,12 @@ import requests
 
 def mint_nft(nft_data):
     # Get CSRF token
-    csrf_res = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    csrf_res = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     csrf_token = csrf_res.json()['csrfToken']
 
     # Mint NFT
     response = requests.post(
-        'https://nftsol.onrender.com/api/v1/simple-mint',
+        'https://api.nftsol.app/api/v1/simple-mint',
         headers={
             'Content-Type': 'application/json',
             'X-CSRF-Token': csrf_token
@@ -329,10 +329,10 @@ Get marketplace listings with pagination and filters.
 #### cURL
 ```bash
 # Get first page
-curl -X GET "https://nftsol.onrender.com/api/v1/market?page=1&limit=50"
+curl -X GET "https://api.nftsol.app/api/v1/market?page=1&limit=50"
 
 # Filter by collection
-curl -X GET "https://nftsol.onrender.com/api/v1/market?collection=MyCollection&limit=20"
+curl -X GET "https://api.nftsol.app/api/v1/market?collection=MyCollection&limit=20"
 ```
 
 #### JavaScript
@@ -345,7 +345,7 @@ async function browseMarketplace(page = 1, limit = 50, filters = {}) {
   });
 
   const response = await fetch(
-    `https://nftsol.onrender.com/api/v1/market?${params}`
+    `https://api.nftsol.app/api/v1/market?${params}`
   );
   return await response.json();
 }
@@ -370,7 +370,7 @@ def browse_marketplace(page=1, limit=50, filters=None):
         params.update(filters)
 
     response = requests.get(
-        'https://nftsol.onrender.com/api/v1/market',
+        'https://api.nftsol.app/api/v1/market',
         params=params
     )
     return response.json()
@@ -389,7 +389,7 @@ List an NFT on the marketplace.
 
 #### cURL
 ```bash
-curl -X POST https://nftsol.onrender.com/api/marketplace/list \
+curl -X POST https://api.nftsol.app/api/marketplace/list \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: your-csrf-token" \
   -d '{
@@ -402,11 +402,11 @@ curl -X POST https://nftsol.onrender.com/api/marketplace/list \
 #### JavaScript
 ```javascript
 async function listNFTForSale(mintAddress, seller, price) {
-  const csrfRes = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const csrfRes = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const { csrfToken } = await csrfRes.json();
 
   const response = await fetch(
-    'https://nftsol.onrender.com/api/marketplace/list',
+    'https://api.nftsol.app/api/marketplace/list',
     {
       method: 'POST',
       headers: {
@@ -433,12 +433,12 @@ import requests
 
 def list_nft_for_sale(mint_address, seller, price):
     # Get CSRF token
-    csrf_res = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    csrf_res = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     csrf_token = csrf_res.json()['csrfToken']
 
     # List NFT
     response = requests.post(
-        'https://nftsol.onrender.com/api/marketplace/list',
+        'https://api.nftsol.app/api/marketplace/list',
         headers={
             'Content-Type': 'application/json',
             'X-CSRF-Token': csrf_token
@@ -465,7 +465,7 @@ Remove an NFT from marketplace listing.
 
 #### cURL
 ```bash
-curl -X POST https://nftsol.onrender.com/api/marketplace/delist \
+curl -X POST https://api.nftsol.app/api/marketplace/delist \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: your-csrf-token" \
   -d '{
@@ -477,11 +477,11 @@ curl -X POST https://nftsol.onrender.com/api/marketplace/delist \
 #### JavaScript
 ```javascript
 async function delistNFT(mintAddress, seller) {
-  const csrfRes = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const csrfRes = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const { csrfToken } = await csrfRes.json();
 
   const response = await fetch(
-    'https://nftsol.onrender.com/api/marketplace/delist',
+    'https://api.nftsol.app/api/marketplace/delist',
     {
       method: 'POST',
       headers: {
@@ -501,11 +501,11 @@ async function delistNFT(mintAddress, seller) {
 import requests
 
 def delist_nft(mint_address, seller):
-    csrf_res = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    csrf_res = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     csrf_token = csrf_res.json()['csrfToken']
 
     response = requests.post(
-        'https://nftsol.onrender.com/api/marketplace/delist',
+        'https://api.nftsol.app/api/marketplace/delist',
         headers={
             'Content-Type': 'application/json',
             'X-CSRF-Token': csrf_token
@@ -529,14 +529,14 @@ Get CLOUT token balance for a wallet.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/clout/balance/11111111111111111111111111111111"
+curl -X GET "https://api.nftsol.app/api/clout/balance/11111111111111111111111111111111"
 ```
 
 #### JavaScript
 ```javascript
 async function getCloutBalance(wallet) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/clout/balance/${wallet}`
+    `https://api.nftsol.app/api/clout/balance/${wallet}`
   );
   const data = await response.json();
 
@@ -554,7 +554,7 @@ import requests
 
 def get_clout_balance(wallet):
     response = requests.get(
-        f'https://nftsol.onrender.com/api/clout/balance/{wallet}'
+        f'https://api.nftsol.app/api/clout/balance/{wallet}'
     )
     return response.json()
 
@@ -572,7 +572,7 @@ Create a new collaborative NFT with layers.
 
 #### cURL
 ```bash
-curl -X POST https://nftsol.onrender.com/api/echo/mint \
+curl -X POST https://api.nftsol.app/api/echo/mint \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: your-csrf-token" \
   -d '{
@@ -588,11 +588,11 @@ curl -X POST https://nftsol.onrender.com/api/echo/mint \
 #### JavaScript
 ```javascript
 async function createEcho(baseMintAddress, creatorWallet, metadata) {
-  const csrfRes = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const csrfRes = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const { csrfToken } = await csrfRes.json();
 
   const response = await fetch(
-    'https://nftsol.onrender.com/api/echo/mint',
+    'https://api.nftsol.app/api/echo/mint',
     {
       method: 'POST',
       headers: {
@@ -625,11 +625,11 @@ const echo = await createEcho(
 import requests
 
 def create_echo(base_mint_address, creator_wallet, metadata):
-    csrf_res = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    csrf_res = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     csrf_token = csrf_res.json()['csrfToken']
 
     response = requests.post(
-        'https://nftsol.onrender.com/api/echo/mint',
+        'https://api.nftsol.app/api/echo/mint',
         headers={
             'Content-Type': 'application/json',
             'X-CSRF-Token': csrf_token
@@ -650,14 +650,14 @@ Get information about a specific Echo NFT.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/echo/echo-id-123"
+curl -X GET "https://api.nftsol.app/api/echo/echo-id-123"
 ```
 
 #### JavaScript
 ```javascript
 async function getEchoDetails(echoId) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/echo/${echoId}`
+    `https://api.nftsol.app/api/echo/${echoId}`
   );
   return await response.json();
 }
@@ -669,7 +669,7 @@ import requests
 
 def get_echo_details(echo_id):
     response = requests.get(
-        f'https://nftsol.onrender.com/api/echo/{echo_id}'
+        f'https://api.nftsol.app/api/echo/{echo_id}'
     )
     return response.json()
 ```
@@ -685,13 +685,13 @@ Search Internet Archive for public domain items.
 #### cURL
 ```bash
 # Basic search
-curl -X GET "https://nftsol.onrender.com/api/archive?q=jazz&limit=20"
+curl -X GET "https://api.nftsol.app/api/archive?q=jazz&limit=20"
 
 # Filter by media type
-curl -X GET "https://nftsol.onrender.com/api/archive?q=historical%20speeches&mediaType=audio"
+curl -X GET "https://api.nftsol.app/api/archive?q=historical%20speeches&mediaType=audio"
 
 # Search by year
-curl -X GET "https://nftsol.onrender.com/api/archive?q=moon%20landing&yearFrom=1950&yearTo=1980"
+curl -X GET "https://api.nftsol.app/api/archive?q=moon%20landing&yearFrom=1950&yearTo=1980"
 ```
 
 #### JavaScript
@@ -703,7 +703,7 @@ async function searchArchive(query, filters = {}) {
   });
 
   const response = await fetch(
-    `https://nftsol.onrender.com/api/archive?${params}`
+    `https://api.nftsol.app/api/archive?${params}`
   );
   return await response.json();
 }
@@ -733,7 +733,7 @@ def search_archive(query, filters=None):
         params.update(filters)
 
     response = requests.get(
-        'https://nftsol.onrender.com/api/archive',
+        'https://api.nftsol.app/api/archive',
         params=params
     )
     return response.json()
@@ -764,7 +764,7 @@ Verify NFT authenticity using Grok AI.
 
 #### cURL
 ```bash
-curl -X POST https://nftsol.onrender.com/api/grok/verify \
+curl -X POST https://api.nftsol.app/api/grok/verify \
   -H "Content-Type: application/json" \
   -H "X-CSRF-Token: your-csrf-token" \
   -d '{
@@ -776,11 +776,11 @@ curl -X POST https://nftsol.onrender.com/api/grok/verify \
 #### JavaScript
 ```javascript
 async function verifyWithGrok(mintAddress, contentUrl) {
-  const csrfRes = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const csrfRes = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const { csrfToken } = await csrfRes.json();
 
   const response = await fetch(
-    'https://nftsol.onrender.com/api/grok/verify',
+    'https://api.nftsol.app/api/grok/verify',
     {
       method: 'POST',
       headers: {
@@ -815,11 +815,11 @@ const verification = await verifyWithGrok(
 import requests
 
 def verify_with_grok(mint_address, content_url):
-    csrf_res = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    csrf_res = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     csrf_token = csrf_res.json()['csrfToken']
 
     response = requests.post(
-        'https://nftsol.onrender.com/api/grok/verify',
+        'https://api.nftsol.app/api/grok/verify',
         headers={
             'Content-Type': 'application/json',
             'X-CSRF-Token': csrf_token
@@ -851,13 +851,13 @@ Get a CSRF token for secure requests.
 
 #### cURL
 ```bash
-curl -X GET https://nftsol.onrender.com/api/v1/csrf-token
+curl -X GET https://api.nftsol.app/api/v1/csrf-token
 ```
 
 #### JavaScript
 ```javascript
 async function getCsrfToken() {
-  const response = await fetch('https://nftsol.onrender.com/api/v1/csrf-token');
+  const response = await fetch('https://api.nftsol.app/api/v1/csrf-token');
   const data = await response.json();
   return data.csrfToken;
 }
@@ -871,7 +871,7 @@ console.log('CSRF Token:', token);
 import requests
 
 def get_csrf_token():
-    response = requests.get('https://nftsol.onrender.com/api/v1/csrf-token')
+    response = requests.get('https://api.nftsol.app/api/v1/csrf-token')
     data = response.json()
     return data['csrfToken']
 
@@ -900,7 +900,7 @@ async function authenticateAsAdmin(wallet) {
 
   // Send to API
   const response = await fetch(
-    'https://nftsol.onrender.com/api/v1/auth/admin',
+    'https://api.nftsol.app/api/v1/auth/admin',
     {
       method: 'POST',
       headers: {
@@ -968,7 +968,7 @@ def authenticate_as_admin(private_key_base58):
 
     # Authenticate
     response = requests.post(
-        'https://nftsol.onrender.com/api/v1/auth/admin',
+        'https://api.nftsol.app/api/v1/auth/admin',
         json={
             'walletAddress': wallet_address,
             'signature': signature,
@@ -1040,7 +1040,7 @@ Standard rate limits:
 
 For questions or issues:
 - GitHub Issues: https://github.com/TheoryofShadows/nftsol/issues
-- API Docs: https://nftsol.onrender.com/api-docs
+- API Docs: https://api.nftsol.app/api-docs
 
 ---
 

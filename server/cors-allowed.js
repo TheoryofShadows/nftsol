@@ -8,8 +8,10 @@ export default function corsAllowed(req, res, next) {
         list.push("http://localhost:3000");
     if (!list.includes("http://localhost:5173"))
         list.push("http://localhost:5173");
-    if (!list.includes("https://nftsolmarket.netlify.app"))
-        list.push("https://nftsolmarket.netlify.app");
+    if (!list.includes("https://nftsol.app"))
+        list.push("https://nftsol.app");
+    if (!list.includes("https://www.nftsol.app"))
+        list.push("https://www.nftsol.app");
     const allowed = new Set(list);
     const origin = req.headers.origin;
     if (origin && allowed.has(origin)) {

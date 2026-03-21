@@ -48,7 +48,7 @@ info:
     url: https://github.com/TheoryofShadows/nftsol/blob/main/LICENSE
 
 servers:
-  - url: https://nftsol.onrender.com
+  - url: https://api.nftsol.app
     description: Production API
   - url: http://localhost:3001
     description: Development API

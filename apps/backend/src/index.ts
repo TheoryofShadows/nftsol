@@ -156,7 +156,7 @@ app.use(
 
       // Allow Netlify deployments only if they match expected production domain
       // DO NOT allow all *.netlify.app subdomains - only the specific one we use
-      const allowedNetlifyDomain = process.env.ALLOWED_NETLIFY_DOMAIN || 'nftsolmarket.netlify.app';
+      const allowedNetlifyDomain = process.env.ALLOWED_NETLIFY_DOMAIN || 'nftsol.app';
       if (origin === `https://${allowedNetlifyDomain}`) {
         return callback(null, true);
       }
@@ -509,9 +509,9 @@ app.get('/', (req, res) => {
     },
 
     quick_start: {
-      '1_health_check': 'curl https://nftsol.onrender.com/healthz',
-      '2_list_nfts': 'curl https://nftsol.onrender.com/api/nfts',
-      '3_wallet_info': 'curl https://nftsol.onrender.com/api/wallet/{walletAddress}',
+      '1_health_check': 'curl https://api.nftsol.app/healthz',
+      '2_list_nfts': 'curl https://api.nftsol.app/api/nfts',
+      '3_wallet_info': 'curl https://api.nftsol.app/api/wallet/{walletAddress}',
     },
   };
 
@@ -1110,6 +1110,9 @@ app.get('/api/public/stats', async (req, res) => {
     });
   }
 });
+
+// Mint routes
+app.use('/api/mint', mintRouter);
 
 // Echo routes
 app.use('/api/echo', echoRouter);
