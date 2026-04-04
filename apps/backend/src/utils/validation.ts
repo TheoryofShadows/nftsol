@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { PublicKey, Connection, Cluster } from '@solana/web3.js';
 import { appConfig } from '../config';
-import csrf from 'csurf';
+import csrf from '@dr.pogodin/csurf';
 
 // Type for Multer file
 type MulterFile = {

@@ -30,6 +30,7 @@ export default defineConfig({
       '@context': path.resolve(__dirname, './src/context'),
       '@lib': path.resolve(__dirname, './src/lib'),
       '@services': path.resolve(__dirname, './src/services'),
+      '@shared': path.resolve(__dirname, '../shared'),
     },
   },
   optimizeDeps: {
