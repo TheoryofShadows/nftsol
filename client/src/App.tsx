@@ -16,6 +16,7 @@ import CloutBadge from './components/CloutBadge';
 import ContractInfo from './components/ContractInfo';
 import CloutInfo from './components/CloutInfo';
 import MagicEdenHeader from './components/MagicEdenHeader';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load components for better performance
 // Wrap in error-handling lazy loaders
@@ -81,9 +82,6 @@ const LoadingSpinner = () => (
     <span className="ml-2 text-white">Loading...</span>
   </div>
 );
-
-// Import enhanced ErrorBoundary
-import ErrorBoundary from './components/ErrorBoundary';
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('home');

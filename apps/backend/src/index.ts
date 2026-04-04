@@ -723,7 +723,7 @@ apiV1.get(
 apiV1.post(
   '/simple-mint',
   csrfProtection,
-  validateWallet,
+  validateWallet(),
   upload.single('file'),
   async (req, res) => {
     try {
