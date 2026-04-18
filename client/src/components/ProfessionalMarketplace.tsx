@@ -24,6 +24,24 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
   const [selectedTimeFilter, setSelectedTimeFilter] = useState<TimeFilter>('24h');
   const [trendingCollections, setTrendingCollections] = useState<FeaturedCollection[]>([]);
   const [topMovers, setTopMovers] = useState<Metric[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Accept search queries broadcast from the global header search.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === 'string') {
+        setSearchQuery(detail);
+      }
+    };
+    window.addEventListener('marketplace-search', handler as EventListener);
+    return () => window.removeEventListener('marketplace-search', handler as EventListener);
+  }, []);
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredCollections = normalizedQuery
+    ? collections.filter((c) => c.name.toLowerCase().includes(normalizedQuery))
+    : collections;
 
   useEffect(() => {
     if (collections.length > 0) {
@@ -104,9 +122,21 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
         <div className="relative">
           <input
             type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search collections..."
-            className="w-full px-5 py-3 bg-[#111111] border border-[#1e1e1e] rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
+            className="w-full px-5 py-3 pr-12 bg-[#111111] border border-[#1e1e1e] rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-[#c9a84c]/50 transition-colors"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              className="absolute right-10 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-lg leading-none"
+            >
+              ×
+            </button>
+          )}
           <svg
             className="absolute right-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-500"
             fill="none"
@@ -150,21 +180,29 @@ export const ProfessionalMarketplace: React.FC<ProfessionalMarketplaceProps> = (
       {/* Collections Table */}
       <section className="border-t border-[#1e1e1e] pt-12">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-white mb-1.5 font-display">All Collections</h2>
+          <h2 className="text-2xl font-bold text-white mb-1.5 font-display">
+            {normalizedQuery ? `Results for "${searchQuery.trim()}"` : 'All Collections'}
+          </h2>
           <p className="text-zinc-500 text-sm">
-            Sorted by {selectedTimeFilter} trading volume
+            {normalizedQuery
+              ? `${filteredCollections.length} of ${collections.length} collections match`
+              : `Sorted by ${selectedTimeFilter} trading volume`}
           </p>
         </div>
 
-        {collections.length > 0 ? (
+        {filteredCollections.length > 0 ? (
           <CollectionsTable
-            collections={collections}
+            collections={filteredCollections}
             onCollectionClick={onCollectionClick}
             loading={loading}
           />
         ) : (
           <div className="text-center py-12">
-            <p className="text-zinc-500 text-sm">No collections available</p>
+            <p className="text-zinc-500 text-sm">
+              {normalizedQuery
+                ? `No collections match "${searchQuery.trim()}"`
+                : 'No collections available'}
+            </p>
           </div>
         )}
       </section>

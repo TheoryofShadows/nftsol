@@ -1,6 +1,13 @@
 import { clusterApiUrl } from '@solana/web3.js';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-phantom';
-import { SolflareWalletAdapter } from '@solana/wallet-adapter-solflare';
+import {
+  PhantomWalletAdapter,
+  SolflareWalletAdapter,
+  LedgerWalletAdapter,
+  TorusWalletAdapter,
+  CoinbaseWalletAdapter,
+  TrustWalletAdapter,
+  MathWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
 
 /**
  * Determine network based on environment
@@ -41,17 +48,25 @@ export const getRpcUrl = () => {
 };
 
 /**
- * Get wallet adapters following industry best practices
- * The wallet adapter react library now includes Phantom and Solflare as
- * standard wallets by default, so we can return an empty array to let
- * the WalletProvider handle initialization automatically.
+ * Get wallet adapters.
  *
- * If you need additional wallet adapters, add them here.
+ * Modern browser-extension wallets (Phantom, Solflare, Backpack, etc.) register
+ * themselves automatically via the Wallet Standard protocol, but that only
+ * works on desktop where the extension is installed. Mobile browsers have no
+ * extension, so we must explicitly provide adapters that know how to deep-link
+ * into the native mobile apps. Without this array the wallet modal renders
+ * empty on mobile — which is the bug the user reported.
  */
 export const getWalletAdapters = () => {
-  // Return empty array - WalletProvider now includes standard wallets automatically
-  // This suppresses the "registered as Standard Wallet" warnings
-  return [];
+  return [
+    new PhantomWalletAdapter(),
+    new SolflareWalletAdapter(),
+    new CoinbaseWalletAdapter(),
+    new TrustWalletAdapter(),
+    new LedgerWalletAdapter(),
+    new TorusWalletAdapter(),
+    new MathWalletAdapter(),
+  ];
 };
 
 /**

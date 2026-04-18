@@ -213,14 +213,16 @@ function AppContent() {
       // 1. It's a different error message, OR
       // 2. At least 10 seconds have passed since the last error
       if (error !== lastErrorRef.current || timeSinceLastError > 10000) {
-        // Normalize server unreachable errors to a single message
-        const normalizedError = error.includes('Unable to reach server') ||
-                               error.includes('Failed to load')
-          ? 'Server temporarily unavailable. Retrying in background...'
+        // By the time we surface an error the API layer has already retried
+        // several times with backoff, so don't claim we're still retrying.
+        const isNetworkError = error.includes('Unable to reach server') ||
+                               error.includes('Failed to load');
+        const normalizedError = isNetworkError
+          ? 'Could not reach the NFTSol backend. Some data may be unavailable — try refreshing in a moment.'
           : error;
 
         addNotification({
-        type: 'error',
+          type: 'error',
           title: 'Connection Issue',
           message: normalizedError,
           duration: 8000,
@@ -692,9 +694,10 @@ function AppContent() {
 }
 
 function App() {
-  // Get RPC URL and wallet adapters from config
-  const endpoint = getRpcUrl();
-  const wallets = getWalletAdapters();
+  // Get RPC URL and wallet adapters from config. Memoize the adapter array so
+  // WalletProvider sees a stable reference across renders.
+  const endpoint = useMemo(() => getRpcUrl(), []);
+  const wallets = useMemo(() => getWalletAdapters(), []);
 
   return (
       <ErrorBoundary>

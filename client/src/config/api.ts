@@ -103,7 +103,7 @@ export const API_ENDPOINTS = {
   waitlist: {
     subscribe: buildApiUrl('api/waitlist/subscribe'),
   },
-  marketplace: {
+  marketplaceActions: {
     list: buildApiUrl('api/marketplace/list'),
     delist: buildApiUrl('api/marketplace/delist'),
     listings: buildApiUrl('api/marketplace/listings'),

@@ -63,20 +63,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { publicKey, connected } = useWallet();
   const [theme] = useLocalStorage('theme', 'dark');
 
-  // Load marketplace data
+  // Load marketplace data with retry/backoff. The production backend is hosted
+  // on Render's free tier, which cold-starts after idle periods — the first
+  // request after a spin-down can take 30-60s or fail outright. Retry silently
+  // so the user doesn't see a transient "Connection Issue" toast on load.
   const loadMarketplace = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null }); // Clear previous errors
-    try {
-      const response = await apiService.getMarketplace();
-      if (response.success && response.data) {
-        dispatch({ type: 'SET_NFTS', payload: response.data.nfts });
-      } else {
-        dispatch({ type: 'SET_ERROR', payload: response.error || 'Failed to load marketplace' });
+    dispatch({ type: 'SET_ERROR', payload: null });
+
+    const delays = [0, 3000, 8000, 15000];
+    let lastError = 'Failed to load marketplace';
+
+    for (let attempt = 0; attempt < delays.length; attempt++) {
+      if (delays[attempt] > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
       }
-    } catch {
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load marketplace' });
+      try {
+        const response = await apiService.getMarketplace();
+        if (response.success && response.data) {
+          dispatch({ type: 'SET_NFTS', payload: response.data.nfts });
+          return;
+        }
+        lastError = response.error || lastError;
+      } catch {
+        lastError = 'Failed to load marketplace';
+      }
     }
+
+    dispatch({ type: 'SET_ERROR', payload: lastError });
   }, []);
 
   // Load collections
