@@ -110,7 +110,7 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
     setIsBuying(true);
     try {
       // Step 1: Create unsigned buy transaction
-      const prepareRes = await fetch(API_ENDPOINTS.marketplace.createBuyTransaction, {
+      const prepareRes = await fetch(API_ENDPOINTS.marketplaceActions.createBuyTransaction, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -140,7 +140,7 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
       await connection.confirmTransaction(signature, 'confirmed');
 
       // Step 4: Record the sale
-      await fetch(API_ENDPOINTS.marketplace.confirmSale, {
+      await fetch(API_ENDPOINTS.marketplaceActions.confirmSale, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -198,7 +198,7 @@ const NftGrid = memo(function NftGrid({ nfts, loading = false, error = null }: N
 
     setIsListing(true);
     try {
-      const res = await fetch(API_ENDPOINTS.marketplace.list, {
+      const res = await fetch(API_ENDPOINTS.marketplaceActions.list, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
