@@ -20,6 +20,17 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const submitSearch = () => {
+    const query = searchQuery.trim();
+    window.dispatchEvent(
+      new CustomEvent<string>('marketplace-search', { detail: query })
+    );
+    if (activeTab !== 'market') {
+      onTabChange('market');
+    }
+  };
 
   // Fetch wallet balance using backend RPC proxy
   useEffect(() => {
@@ -138,21 +149,35 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
           {/* Right side: Search + Wallet */}
           <div className="flex items-center gap-3 ml-auto">
             {/* Search (hidden on mobile) */}
-            <div className="hidden sm:flex items-center bg-[#111111] border border-[#1e1e1e] rounded-lg px-3 py-2 focus-within:border-[#c9a84c]/50 transition-colors">
-              <svg
-                className="w-4 h-4 text-zinc-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                submitSearch();
+              }}
+              className="hidden sm:flex items-center bg-[#111111] border border-[#1e1e1e] rounded-lg px-3 py-2 focus-within:border-[#c9a84c]/50 transition-colors"
+            >
+              <button
+                type="submit"
+                aria-label="Search"
+                className="flex items-center text-zinc-500 hover:text-[#c9a84c] transition-colors"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search collections..."
                 className="ml-2 bg-transparent text-sm text-white placeholder-zinc-600 outline-none w-32"
               />
-            </div>
+            </form>
 
             {/* Wallet Connection */}
             {connected && publicKey ? (
