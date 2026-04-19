@@ -30,10 +30,16 @@ export default function MintForm() {
         credentials: 'include',
       });
 
-      const csrfToken = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
+      if (!csrfRes.ok) {
+        throw new Error(`Failed to obtain CSRF token (HTTP ${csrfRes.status})`);
+      }
+
+      // Read the token from the JSON response. The XSRF-TOKEN cookie is set by
+      // the backend (nftsol.onrender.com), but when the frontend is on a
+      // different origin (nftsol.app) the browser will not expose that cookie
+      // via document.cookie — so we must use the response body.
+      const csrfJson = await csrfRes.json().catch(() => ({}));
+      const csrfToken: string | undefined = csrfJson?.csrfToken;
 
       if (!csrfToken) {
         throw new Error('Failed to obtain CSRF token');
@@ -53,6 +59,9 @@ export default function MintForm() {
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'X-CSRF-Token': csrfToken,
+        },
         body: formData,
       });
 
