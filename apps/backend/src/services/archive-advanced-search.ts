@@ -17,6 +17,29 @@
 
 import axios from 'axios';
 
+// archive.org serves its advanced search via a Solr-style endpoint that expects
+// repeated-array params to use bracket notation (`fl[]=a&fl[]=b`). Axios does
+// not do this by default — it emits `fl=a&fl=b` — which archive.org silently
+// ignores, and it has also been observed to gate requests from cloud provider
+// IPs without a proper User-Agent, returning an HTML error page that makes
+// `response.data.response` undefined (→ 0 results, no thrown error).
+const ARCHIVE_USER_AGENT = 'NFTSol/1.0 (+https://nftsol.app)';
+
+const archiveParamsSerializer = (params: Record<string, any>): string => {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        parts.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(String(item))}`);
+      }
+    } else {
+      parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+    }
+  }
+  return parts.join('&');
+};
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -116,7 +139,14 @@ export interface AdvancedSearchResponse {
 export class ArchiveAdvancedSearchService {
   private baseUrl = 'https://archive.org';
   private searchUrl = 'https://archive.org/advancedsearch.php';
-  private apiClient = axios.create({ timeout: 30000 });
+  private apiClient = axios.create({
+    timeout: 30000,
+    headers: {
+      'User-Agent': ARCHIVE_USER_AGENT,
+      Accept: 'application/json',
+    },
+    paramsSerializer: archiveParamsSerializer,
+  });
 
   /**
    * 🔍 MAIN: Advanced search with comprehensive filters
@@ -131,16 +161,33 @@ export class ArchiveAdvancedSearchService {
       const params = this.buildSearchParams(query, filters);
 
       const response = await this.apiClient.get(this.searchUrl, { params });
-      const docs = response.data.response?.docs || [];
 
+      // archive.org sometimes responds 200 with an HTML interstitial (string)
+      // instead of JSON. Treat that as a hard failure so the caller sees it
+      // instead of silently returning an empty result set.
+      if (!response.data || typeof response.data !== 'object' || !response.data.response) {
+        console.error('Advanced search returned unexpected payload', {
+          contentType: response.headers?.['content-type'],
+          query: params.q,
+          sample:
+            typeof response.data === 'string'
+              ? response.data.slice(0, 200)
+              : JSON.stringify(response.data).slice(0, 200),
+        });
+        throw new Error('Archive.org returned an unexpected response');
+      }
+
+      const docs = response.data.response.docs || [];
       const results = docs.map((doc: any) => this.transformSearchResult(doc));
+      const numFound = response.data.response.numFound || 0;
+      const limit = filters.limit || 20;
 
       return {
         query: keyword,
         filters,
-        totalResults: response.data.response?.numFound || 0,
-        pageCount: Math.ceil((response.data.response?.numFound || 0) / (filters.limit || 20)),
-        currentPage: Math.floor((filters.offset || 0) / (filters.limit || 20)) + 1,
+        totalResults: numFound,
+        pageCount: Math.ceil(numFound / limit),
+        currentPage: Math.floor((filters.offset || 0) / limit) + 1,
         results,
         facets: response.data.facets,
       };

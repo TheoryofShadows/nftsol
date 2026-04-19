@@ -97,10 +97,36 @@ export interface EchoLayerWithArchive {
 // INTERNET ARCHIVE SERVICE
 // ============================================================================
 
+// archive.org needs a UA + bracketed array params (see notes in
+// archive-advanced-search.ts). Without these it silently returns HTML/error
+// payloads that parse to zero results.
+const ARCHIVE_USER_AGENT = 'NFTSol/1.0 (+https://nftsol.app)';
+const archiveParamsSerializer = (params: Record<string, any>): string => {
+  const parts: string[] = [];
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        parts.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(String(item))}`);
+      }
+    } else {
+      parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`);
+    }
+  }
+  return parts.join('&');
+};
+
 export class InternetArchiveService {
   private baseUrl = 'https://archive.org';
   private searchUrl = 'https://archive.org/advancedsearch.php';
-  private apiClient = axios.create({ timeout: 30000 });
+  private apiClient = axios.create({
+    timeout: 30000,
+    headers: {
+      'User-Agent': ARCHIVE_USER_AGENT,
+      Accept: 'application/json',
+    },
+    paramsSerializer: archiveParamsSerializer,
+  });
 
   /**
    * Search Internet Archive for public domain content
@@ -124,11 +150,15 @@ export class InternetArchiveService {
         typeFilter = typeMap[mediaType] || '';
       }
 
-      // Build Advanced Search query
-      // Public domain AND (query) AND mediatype:(video|audio|image|texts)
+      // Build Advanced Search query.
+      // The previous version required `licenseurl:"public domain"` on every
+      // query, which matches only a small fraction of items and caused the
+      // search to return empty results for almost every keyword. Items that
+      // are actually public domain aren't all tagged that way — we let the
+      // caller apply licence filters through the advanced-search endpoint.
       const advancedQuery = typeFilter
-        ? `(${query}) AND mediatype:(${typeFilter}) AND licenseurl:"public domain"`
-        : `(${query}) AND licenseurl:"public domain"`;
+        ? `(${query}) AND mediatype:(${typeFilter})`
+        : `(${query})`;
 
       const response = await this.apiClient.get(this.searchUrl, {
         params: {
@@ -140,8 +170,15 @@ export class InternetArchiveService {
         },
       });
 
-      const docs = response.data.response?.docs || [];
+      if (!response.data || typeof response.data !== 'object' || !response.data.response) {
+        console.error('Archive search returned unexpected payload', {
+          contentType: response.headers?.['content-type'],
+          query: advancedQuery,
+        });
+        throw new Error('Archive.org returned an unexpected response');
+      }
 
+      const docs = response.data.response.docs || [];
       return docs.map((doc: any) => this.transformArchiveDoc(doc));
     } catch (error) {
       console.error('Archive search failed:', error);

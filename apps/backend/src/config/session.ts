@@ -38,8 +38,10 @@ const sessionConfig = {
   store: store,
   cookie: {
     httpOnly: true,
-    secure: isProduction ? true : false, // Use secure cookies in production
-    sameSite: 'lax',
+    // Cross-site (nftsol.app → nftsol.onrender.com) requires SameSite=None + Secure
+    // so the browser sends the session cookie on cross-origin fetches.
+    secure: isProduction ? true : false,
+    sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     path: '/'
   }

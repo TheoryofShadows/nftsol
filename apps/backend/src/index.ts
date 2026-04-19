@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { sessionMiddleware } from './config/session';
 import compression from 'compression';
 import multer from 'multer';
@@ -89,6 +90,9 @@ console.log('✓ RPC failover service initialized');
 // const PORT = parseInt(process.env.PORT || '3001', 10); // Not used, commented out
 
 const app = express();
+
+// Cookie parser (needed so req.cookies is populated for CSRF double-submit check)
+app.use(cookieParser());
 
 // Session middleware
 app.use(sessionMiddleware);
@@ -679,24 +683,26 @@ apiV1.get('/solana/status', async (req, res) => {
 });
 
 // Initialize CSRF token for mint endpoint (GET request, no CSRF check needed)
-// This generates and sets the XSRF-TOKEN cookie that will be used in the POST request
+// This generates and sets the XSRF-TOKEN cookie that will be used in the POST request.
+// Also returns the token in the JSON body so the cross-origin frontend (nftsol.app)
+// can send it back as a header — cross-site cookies set by the backend are not readable
+// from document.cookie on the frontend origin.
+const isProd = process.env.NODE_ENV === 'production';
 apiV1.get(
   '/simple-mint',
   (req, res) => {
     try {
-      // Generate a CSRF token directly using cryptography
       const token = randomBytes(32).toString('hex');
 
-      // Store in session for validation on POST
       if (req.session) {
         req.session.csrfToken = token;
       }
 
-      // Set as cookie for JavaScript access
       res.cookie('XSRF-TOKEN', token, {
-        httpOnly: false, // Allow JavaScript to read
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        httpOnly: false, // Allow JavaScript to read on same-origin
+        secure: isProd,
+        // Cross-site POST from nftsol.app → nftsol.onrender.com requires SameSite=None.
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         path: '/'
       });
@@ -718,13 +724,48 @@ apiV1.get(
   }
 );
 
+// Mint CSRF validator. Accepts the token from header, body (_csrf), or cookie and
+// requires it to match either the session token or the XSRF-TOKEN cookie
+// (double-submit). Matching against the cookie lets the flow work even when the
+// session cookie is dropped by a browser/tracker blocker on cross-site POSTs.
+const validateMintCsrf: express.RequestHandler = (req, res, next) => {
+  const headerToken =
+    (req.headers['x-csrf-token'] as string | undefined) ||
+    (req.headers['x-xsrf-token'] as string | undefined);
+  const bodyToken =
+    req.body && typeof (req.body as any)._csrf === 'string'
+      ? ((req.body as any)._csrf as string)
+      : undefined;
+  const cookieToken =
+    req.cookies && typeof req.cookies['XSRF-TOKEN'] === 'string'
+      ? (req.cookies['XSRF-TOKEN'] as string)
+      : undefined;
+
+  const submitted = headerToken || bodyToken || cookieToken;
+  const sessionToken = req.session?.csrfToken;
+
+  const matchesSession = !!(submitted && sessionToken && submitted === sessionToken);
+  const matchesCookie = !!(submitted && cookieToken && submitted === cookieToken);
+
+  if (!submitted || (!matchesSession && !matchesCookie)) {
+    return res.status(403).json({
+      success: false,
+      error: 'Invalid or missing CSRF token',
+      code: 'CSRF_TOKEN_INVALID',
+    });
+  }
+
+  next();
+};
+
 // Enhanced mint endpoint with full validation
-// CSRF protection enabled with support for FormData file uploads
+// CSRF protection enabled with support for FormData file uploads.
+// Multer runs first so `req.body._csrf` is populated before validateMintCsrf.
 apiV1.post(
   '/simple-mint',
-  csrfProtection,
-  validateWallet(),
   upload.single('file'),
+  validateMintCsrf,
+  validateWallet(),
   async (req, res) => {
     try {
       const mintRequest: MintRequest = {
