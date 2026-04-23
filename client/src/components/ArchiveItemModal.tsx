@@ -166,22 +166,65 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
           </div>
 
           {/* Verify Result */}
-          {verifyResult && (
-            <div className="p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
-              <h4 className="font-semibold text-green-300 mb-2">✓ Verification Complete</h4>
-              <p className="text-sm text-green-200">
-                {verifyResult.message || 'Item verified successfully with Grok AI'}
-              </p>
-            </div>
-          )}
+          {verifyResult && (() => {
+            const v = verifyResult.verification ?? verifyResult;
+            const verified = v?.verified ?? verifyResult.readyForMinting;
+            const score =
+              typeof v?.truthScore === 'number'
+                ? v.truthScore
+                : typeof v?.confidence === 'number'
+                  ? v.confidence
+                  : undefined;
+            const concerns: string[] = Array.isArray(v?.concerns) ? v.concerns : [];
+            const palette = verified
+              ? { bg: 'bg-green-500/20', border: 'border-green-500/50', head: 'text-green-300', body: 'text-green-200' }
+              : { bg: 'bg-yellow-500/20', border: 'border-yellow-500/50', head: 'text-yellow-300', body: 'text-yellow-200' };
+            return (
+              <div className={`p-4 ${palette.bg} border ${palette.border} rounded-lg`}>
+                <h4 className={`font-semibold ${palette.head} mb-2`}>
+                  {verified ? '✓ Verified by Grok' : '⚠ Needs manual review'}
+                  {typeof score === 'number' && (
+                    <span className="ml-2 text-xs opacity-80">({score}% confidence)</span>
+                  )}
+                </h4>
+                {v?.summary && (
+                  <p className={`text-sm ${palette.body} mb-2`}>{v.summary}</p>
+                )}
+                {concerns.length > 0 && (
+                  <ul className={`text-xs ${palette.body} list-disc list-inside space-y-1`}>
+                    {concerns.map((concern, i) => (
+                      <li key={i}>{concern}</li>
+                    ))}
+                  </ul>
+                )}
+                {!v?.summary && concerns.length === 0 && (
+                  <p className={`text-sm ${palette.body}`}>
+                    {verified
+                      ? 'Grok confirmed the archive metadata for this item.'
+                      : 'Grok could not fully verify this item. Review manually before minting.'}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Prepare Result */}
           {prepareResult && (
             <div className="p-4 bg-cyan-500/20 border border-cyan-500/50 rounded-lg">
-              <h4 className="font-semibold text-cyan-300 mb-2">✓ Prepared for Minting</h4>
-              <p className="text-sm text-cyan-200 break-all">
-                {prepareResult.message || 'Item prepared for NFT minting'}
-              </p>
+              <h4 className="font-semibold text-cyan-300 mb-2">
+                {prepareResult.readyForMinting
+                  ? '✓ Prepared for Minting'
+                  : '⚠ Preparation complete — review required'}
+              </h4>
+              {prepareResult.nextStep && (
+                <p className="text-sm text-cyan-200 mb-2">{prepareResult.nextStep}</p>
+              )}
+              {prepareResult.permanentMetadataUri && (
+                <p className="text-xs text-cyan-200/80 break-all">
+                  <span className="opacity-70">Metadata URI:</span>{' '}
+                  {prepareResult.permanentMetadataUri}
+                </p>
+              )}
             </div>
           )}
 

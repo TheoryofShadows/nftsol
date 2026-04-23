@@ -100,7 +100,16 @@ export default function OnboardingProgress() {
 
       {isExpanded && (
         <div className="absolute bottom-20 right-0 glass-card p-6 rounded-2xl w-80 animate-fade-in animate-slide-up">
-          <h3 className="text-lg font-bold gradient-text-primary mb-4">Your Progress</h3>
+          <div className="flex items-start justify-between mb-4">
+            <h3 className="text-lg font-bold gradient-text-primary">Your Progress</h3>
+            <button
+              onClick={() => setIsExpanded(false)}
+              aria-label="Close progress panel"
+              className="w-7 h-7 -mt-1 -mr-1 rounded-full bg-white/5 hover:bg-white/15 text-gray-400 hover:text-white text-lg leading-none flex items-center justify-center transition-colors"
+            >
+              ×
+            </button>
+          </div>
 
           <div className="space-y-3 mb-4">
             {[
