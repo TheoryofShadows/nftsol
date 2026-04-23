@@ -3,8 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const srcDir = path.resolve(__dirname, '..', 'src', 'public');
-const destDir = path.resolve(__dirname, '..', 'dist', 'public');
+// Runtime assets that aren't TypeScript but need to land in dist/ so the
+// compiled server can read them (e.g. swagger.ts does `require(...docs/openapi.yaml)`).
+const assets = ['public', 'docs'];
 
 function copyRecursive(src, dest) {
   if (!fs.existsSync(src)) return;
@@ -27,4 +28,8 @@ function copyRecursive(src, dest) {
   }
 }
 
-copyRecursive(srcDir, destDir);
+for (const asset of assets) {
+  const srcDir = path.resolve(__dirname, '..', 'src', asset);
+  const destDir = path.resolve(__dirname, '..', 'dist', asset);
+  copyRecursive(srcDir, destDir);
+}

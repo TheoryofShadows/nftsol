@@ -149,11 +149,17 @@ class ArchiveService {
       }
 
       const data = await response.json();
-      logger.info('Trending searches fetched', {
-        count: data.data?.length || 0,
-      });
+      // Backend wraps the array in `{ trending: string[] }`. Tolerate either
+      // shape so older deployments keep working.
+      const trending: string[] = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.trending)
+          ? data.data.trending
+          : [];
 
-      return data.data || [];
+      logger.info('Trending searches fetched', { count: trending.length });
+
+      return trending;
     } catch (error) {
       logger.error('Failed to fetch trending searches', error);
       return [];
@@ -173,12 +179,19 @@ class ArchiveService {
       }
 
       const data = await response.json();
+      // Backend wraps the array in `{ query, suggestions: string[] }`.
+      const suggestions: string[] = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.suggestions)
+          ? data.data.suggestions
+          : [];
+
       logger.info('Suggestions fetched', {
         query: partial,
-        count: data.data?.length || 0,
+        count: suggestions.length,
       });
 
-      return data.data || [];
+      return suggestions;
     } catch (error) {
       logger.error('Failed to fetch suggestions', error);
       return [];
@@ -218,12 +231,19 @@ class ArchiveService {
       }
 
       const data = await response.json();
+      // Backend wraps the array in `{ identifier, mediaCount, mediaFiles }`.
+      const mediaFiles: any[] = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.mediaFiles)
+          ? data.data.mediaFiles
+          : [];
+
       logger.info('Item media fetched', {
         identifier,
-        mediaCount: data.data?.length || 0,
+        mediaCount: mediaFiles.length,
       });
 
-      return data.data || [];
+      return mediaFiles;
     } catch (error) {
       logger.error('Failed to fetch item media', error);
       throw error;

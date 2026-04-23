@@ -3,7 +3,7 @@
  * Detailed view of archive item with action buttons
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SearchResult, archiveService } from '../services/archiveService';
 
 interface ArchiveItemModalProps {
@@ -16,6 +16,22 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
   const [preparing, setPreparing] = useState(false);
   const [verifyResult, setVerifyResult] = useState<any | null>(null);
   const [prepareResult, setPrepareResult] = useState<any | null>(null);
+
+  // Let users dismiss the modal with Escape, matching NftDetailModal.
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
 
   const handleVerifyWithGrok = async () => {
     setVerifying(true);
@@ -46,13 +62,23 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.title}
+      >
         {/* Header */}
         <div className="sticky top-0 flex justify-between items-center p-6 border-b border-white/10 bg-black/50 backdrop-blur">
           <h2 className="text-2xl font-bold text-white">{item.title}</h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-gray-400 hover:text-white transition-colors text-2xl"
           >
             ✕
@@ -140,22 +166,65 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
           </div>
 
           {/* Verify Result */}
-          {verifyResult && (
-            <div className="p-4 bg-green-500/20 border border-green-500/50 rounded-lg">
-              <h4 className="font-semibold text-green-300 mb-2">✓ Verification Complete</h4>
-              <p className="text-sm text-green-200">
-                {verifyResult.message || 'Item verified successfully with Grok AI'}
-              </p>
-            </div>
-          )}
+          {verifyResult && (() => {
+            const v = verifyResult.verification ?? verifyResult;
+            const verified = v?.verified ?? verifyResult.readyForMinting;
+            const score =
+              typeof v?.truthScore === 'number'
+                ? v.truthScore
+                : typeof v?.confidence === 'number'
+                  ? v.confidence
+                  : undefined;
+            const concerns: string[] = Array.isArray(v?.concerns) ? v.concerns : [];
+            const palette = verified
+              ? { bg: 'bg-green-500/20', border: 'border-green-500/50', head: 'text-green-300', body: 'text-green-200' }
+              : { bg: 'bg-yellow-500/20', border: 'border-yellow-500/50', head: 'text-yellow-300', body: 'text-yellow-200' };
+            return (
+              <div className={`p-4 ${palette.bg} border ${palette.border} rounded-lg`}>
+                <h4 className={`font-semibold ${palette.head} mb-2`}>
+                  {verified ? '✓ Verified by Grok' : '⚠ Needs manual review'}
+                  {typeof score === 'number' && (
+                    <span className="ml-2 text-xs opacity-80">({score}% confidence)</span>
+                  )}
+                </h4>
+                {v?.summary && (
+                  <p className={`text-sm ${palette.body} mb-2`}>{v.summary}</p>
+                )}
+                {concerns.length > 0 && (
+                  <ul className={`text-xs ${palette.body} list-disc list-inside space-y-1`}>
+                    {concerns.map((concern, i) => (
+                      <li key={i}>{concern}</li>
+                    ))}
+                  </ul>
+                )}
+                {!v?.summary && concerns.length === 0 && (
+                  <p className={`text-sm ${palette.body}`}>
+                    {verified
+                      ? 'Grok confirmed the archive metadata for this item.'
+                      : 'Grok could not fully verify this item. Review manually before minting.'}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Prepare Result */}
           {prepareResult && (
             <div className="p-4 bg-cyan-500/20 border border-cyan-500/50 rounded-lg">
-              <h4 className="font-semibold text-cyan-300 mb-2">✓ Prepared for Minting</h4>
-              <p className="text-sm text-cyan-200 break-all">
-                {prepareResult.message || 'Item prepared for NFT minting'}
-              </p>
+              <h4 className="font-semibold text-cyan-300 mb-2">
+                {prepareResult.readyForMinting
+                  ? '✓ Prepared for Minting'
+                  : '⚠ Preparation complete — review required'}
+              </h4>
+              {prepareResult.nextStep && (
+                <p className="text-sm text-cyan-200 mb-2">{prepareResult.nextStep}</p>
+              )}
+              {prepareResult.permanentMetadataUri && (
+                <p className="text-xs text-cyan-200/80 break-all">
+                  <span className="opacity-70">Metadata URI:</span>{' '}
+                  {prepareResult.permanentMetadataUri}
+                </p>
+              )}
             </div>
           )}
 
