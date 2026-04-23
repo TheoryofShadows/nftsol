@@ -3,7 +3,7 @@
  * Detailed view of archive item with action buttons
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SearchResult, archiveService } from '../services/archiveService';
 
 interface ArchiveItemModalProps {
@@ -16,6 +16,22 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
   const [preparing, setPreparing] = useState(false);
   const [verifyResult, setVerifyResult] = useState<any | null>(null);
   const [prepareResult, setPrepareResult] = useState<any | null>(null);
+
+  // Let users dismiss the modal with Escape, matching NftDetailModal.
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
 
   const handleVerifyWithGrok = async () => {
     setVerifying(true);
@@ -46,13 +62,23 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={item.title}
+      >
         {/* Header */}
         <div className="sticky top-0 flex justify-between items-center p-6 border-b border-white/10 bg-black/50 backdrop-blur">
           <h2 className="text-2xl font-bold text-white">{item.title}</h2>
           <button
             onClick={onClose}
+            aria-label="Close"
             className="text-gray-400 hover:text-white transition-colors text-2xl"
           >
             ✕

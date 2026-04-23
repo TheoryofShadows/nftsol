@@ -276,25 +276,41 @@ export default function FeatureTour() {
   if (!shouldRun) return null;
 
   return (
-    <Joyride
-      steps={steps}
-      run={shouldRun}
-      continuous
-      showProgress
-      showSkipButton
-      callback={handleJoyrideCallback}
-      styles={joyrideStyles as any}
-      floaterProps={{
-        disableAnimation: false,
-      }}
-      locale={{
-        back: 'Back',
-        close: 'Close',
-        last: 'Finish',
-        next: 'Next',
-        open: 'Open',
-        skip: 'Skip Tour',
-      }}
-    />
+    <>
+      {/* Always-visible X escape hatch. Joyride's Skip button is tucked into
+          the tooltip footer and easy to miss, so we render our own close
+          control while a tour is active. */}
+      <button
+        type="button"
+        onClick={skipOnboarding}
+        aria-label="Close tour"
+        style={{ zIndex: 10001 }}
+        className="fixed top-4 right-4 w-10 h-10 rounded-full bg-black/70 hover:bg-black/90 text-white text-xl font-bold flex items-center justify-center shadow-lg border border-white/20 transition-all"
+      >
+        ×
+      </button>
+      <Joyride
+        steps={steps}
+        run={shouldRun}
+        continuous
+        showProgress
+        showSkipButton
+        disableCloseOnEsc={false}
+        disableOverlayClose={false}
+        callback={handleJoyrideCallback}
+        styles={joyrideStyles as any}
+        floaterProps={{
+          disableAnimation: false,
+        }}
+        locale={{
+          back: 'Back',
+          close: 'Close',
+          last: 'Finish',
+          next: 'Next',
+          open: 'Open',
+          skip: 'Skip Tour',
+        }}
+      />
+    </>
   );
 }
