@@ -30,15 +30,9 @@ jobs:
           cd apps/backend && npm run build
           cd ../../client && npm run build
 
-      - name: 🚀 Start API in background
+      - name: 🧪 Run backend tests
         run: |
-          cd apps/backend
-          nohup npm start &
-          sleep 3
-
-      - name: 🩺 Check API health endpoint
-        run: |
-          curl -sSf http://localhost:3001/health | grep '"status":"ok"'
+          cd apps/backend && npm test -- --no-coverage
 
       - name: ✅ Summary
-        run: echo "✅ NFTSol CI passed on \${{ github.ref_name }}"
+        run: echo "✅ NFTSol CI passed on ${{ github.ref_name }}"
