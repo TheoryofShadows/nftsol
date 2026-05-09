@@ -1,9 +1,11 @@
 /**
  * CLOUT Service
- * Service layer for CLOUT token operations
+ * Balance reads go directly via Helius DAS — no backend needed.
+ * Reward distribution still requires the backend (vault private key).
  */
 
 import { CloutBalance, CloutReward } from '@shared/types';
+import { heliusService } from './heliusService';
 import { logger } from '@shared/utils/logger';
 import { NetworkError } from '@shared/utils/errors';
 
@@ -18,24 +20,17 @@ export interface CloutRewardRequest {
 
 export class CloutService {
   /**
-   * Get CLOUT balance for a wallet
+   * Get CLOUT balance — direct via Helius, no backend needed.
    */
   async getBalance(walletAddress: string): Promise<CloutBalance> {
     try {
-      const response = await fetch(`${API_BASE}/api/clout/balance/${walletAddress}`);
-      
-      if (!response.ok) {
-        throw new NetworkError(`Failed to fetch CLOUT balance: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      if (!data.success || !data.data) {
-        throw new NetworkError(data.error || 'Failed to fetch CLOUT balance');
-      }
-
-      logger.info('CLOUT balance fetched', { walletAddress, balance: data.data.balance });
-      return data.data;
+      const balance = await heliusService.getCloutBalance(walletAddress);
+      logger.info('CLOUT balance fetched via Helius', { walletAddress, balance });
+      return {
+        address: walletAddress,
+        balance,
+        token: 'CLOUT',
+      } as unknown as CloutBalance;
     } catch (error) {
       logger.error('Failed to fetch CLOUT balance', error, { walletAddress });
       throw error instanceof Error ? error : new NetworkError('Failed to fetch CLOUT balance');
@@ -43,23 +38,12 @@ export class CloutService {
   }
 
   /**
-   * Get vault balance (admin/public)
+   * Get vault balance — reads CLOUT token in vault wallet directly via Helius.
    */
   async getVaultBalance(): Promise<number> {
     try {
-      const response = await fetch(`${API_BASE}/api/clout/vault-balance`);
-      
-      if (!response.ok) {
-        throw new NetworkError(`Failed to fetch vault balance: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      if (!data.success || !data.data) {
-        throw new NetworkError(data.error || 'Failed to fetch vault balance');
-      }
-
-      return data.data.balance || 0;
+      const VAULT = '7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v';
+      return await heliusService.getCloutBalance(VAULT);
     } catch (error) {
       logger.error('Failed to fetch vault balance', error);
       throw error instanceof Error ? error : new NetworkError('Failed to fetch vault balance');
@@ -67,31 +51,22 @@ export class CloutService {
   }
 
   /**
-   * Request a CLOUT reward
+   * Request a CLOUT reward — requires backend (vault private key signs transfer).
    */
   async requestReward(request: CloutRewardRequest): Promise<CloutReward> {
     try {
-      logger.info('Requesting CLOUT reward', { 
-        type: request.type,
-        wallet: request.walletAddress,
-      });
-      
+      logger.info('Requesting CLOUT reward', { type: request.type, wallet: request.walletAddress });
       const response = await fetch(`${API_BASE}/api/clout/reward`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
       });
-
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new NetworkError(errorData.error || `Failed to request reward: ${response.statusText}`);
       }
-
       const data = await response.json();
-      logger.info('CLOUT reward granted', { 
-        type: request.type,
-        amount: data.amount,
-      });
+      logger.info('CLOUT reward granted', { type: request.type, amount: data.amount });
       return data;
     } catch (error) {
       logger.error('Failed to request CLOUT reward', error);
@@ -100,16 +75,14 @@ export class CloutService {
   }
 
   /**
-   * Get reward history for a wallet
+   * Get reward history — requires backend (database).
    */
   async getRewardHistory(walletAddress: string): Promise<CloutReward[]> {
     try {
       const response = await fetch(`${API_BASE}/api/clout/rewards/${walletAddress}`);
-      
       if (!response.ok) {
         throw new NetworkError(`Failed to fetch reward history: ${response.statusText}`);
       }
-
       const data = await response.json();
       return data.rewards || data || [];
     } catch (error) {
@@ -120,4 +93,3 @@ export class CloutService {
 }
 
 export const cloutService = new CloutService();
-

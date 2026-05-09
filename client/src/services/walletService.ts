@@ -2,11 +2,12 @@
 // @ts-nocheck - Legacy code, type checking disabled
 /**
  * Wallet Service
- * Service layer for wallet operations
+ * Uses Helius DAS API directly — no backend needed for read operations.
+ * Withdrawal/admin operations still require the backend.
  */
 
 import { WalletInfo } from '@shared/types';
-import { apiService } from './api';
+import { heliusService } from './heliusService';
 import { API_ENDPOINTS } from '../config/api';
 import { logger } from '@shared/utils/logger';
 import { NetworkError } from '@shared/utils/errors';
@@ -19,21 +20,21 @@ export interface WithdrawalRequest {
 
 export class WalletService {
   /**
-   * Get wallet info
+   * Get wallet info — SOL balance + NFT count via Helius.
    */
   async getWalletInfo(address: string): Promise<WalletInfo | null> {
     try {
-      const response = await apiService.getWalletInfo(address);
+      const [solBalance, nftPage] = await Promise.all([
+        heliusService.getSolBalance(address),
+        heliusService.getNFTsByOwner(address, 1, 1),
+      ]);
 
-      if (!response.success || !response.data) {
-        if (response.error?.includes('not found')) {
-          return null;
-        }
-        throw new NetworkError(response.error || 'Failed to fetch wallet info');
-      }
-
-      logger.info('Wallet info fetched', { address });
-      return response.data;
+      logger.info('Wallet info fetched via Helius', { address });
+      return {
+        address,
+        balance: solBalance,
+        nftCount: nftPage.total,
+      } as unknown as WalletInfo;
     } catch (error) {
       logger.error('Failed to fetch wallet info', error, { address });
       throw error instanceof Error ? error : new NetworkError('Failed to fetch wallet info');
@@ -41,7 +42,34 @@ export class WalletService {
   }
 
   /**
-   * Create withdrawal request
+   * Get SOL balance directly from Helius.
+   */
+  async getBalance(address: string): Promise<number> {
+    try {
+      return await heliusService.getSolBalance(address);
+    } catch (error) {
+      logger.error('Failed to fetch wallet balance', error, { address });
+      throw error instanceof Error ? error : new NetworkError('Failed to fetch wallet balance');
+    }
+  }
+
+  /**
+   * Verify wallet address — just checks if it's a valid base58 public key.
+   * Helius DAS will error on invalid addresses so we use a lightweight check.
+   */
+  async verifyAddress(address: string): Promise<boolean> {
+    try {
+      // A valid Solana address is 32-44 base58 characters
+      if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) return false;
+      await heliusService.getSolBalance(address);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Create withdrawal request — still requires backend (vault private key).
    */
   async createWithdrawal(request: WithdrawalRequest): Promise<any> {
     try {
@@ -50,7 +78,7 @@ export class WalletService {
         destination: request.destinationAddress,
       });
 
-      const response = await fetch(`${apiService['API_BASE'] || ''}/api/wallets/withdraw`, {
+      const response = await fetch(API_ENDPOINTS.withdrawals.create, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(request),
@@ -62,62 +90,13 @@ export class WalletService {
       }
 
       const data = await response.json();
-      logger.info('Withdrawal request created', {
-        amount: request.amount,
-      });
+      logger.info('Withdrawal request created', { amount: request.amount });
       return data;
     } catch (error) {
       logger.error('Failed to create withdrawal', error);
       throw error instanceof Error ? error : new NetworkError('Failed to create withdrawal');
     }
   }
-
-  /**
-   * Get wallet balance
-   */
-  async getBalance(address: string): Promise<number> {
-    try {
-      const response = await fetch(`${apiService['API_BASE'] || ''}/api/nfts/balance/${address}`);
-
-      if (!response.ok) {
-        throw new NetworkError(`Failed to fetch balance: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.balance || 0;
-    } catch (error) {
-      logger.error('Failed to fetch wallet balance', error, { address });
-      throw error instanceof Error ? error : new NetworkError('Failed to fetch wallet balance');
-    }
-  }
-
-  /**
-   * Verify wallet address
-   */
-  async verifyAddress(address: string): Promise<boolean> {
-    try {
-      const endpoint = API_ENDPOINTS.withdrawals.verify(address);
-      const response = await fetch(endpoint);
-      const data = await response.json();
-
-      if (!response.ok || data?.success === false) {
-        return false;
-      }
-
-      const isValid =
-        data?.valid ??
-        data?.data?.valid ??
-        data?.data?.exists ??
-        data?.exists ??
-        false;
-
-      return Boolean(isValid);
-    } catch (error) {
-      logger.error('Failed to verify wallet address', error, { address });
-      return false;
-    }
-  }
 }
 
 export const walletService = new WalletService();
-
