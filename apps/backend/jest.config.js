@@ -24,7 +24,12 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
   },
+  globalSetup: '<rootDir>/jest.global-setup.js',
+  setupFiles: ['<rootDir>/jest.setup-env.js'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 30000,
+  // Run serially: Node 22+ localStorage/sessionStorage globals cause
+  // SecurityError in parallel workers before setupFiles can patch them.
+  maxWorkers: 1,
 };
 

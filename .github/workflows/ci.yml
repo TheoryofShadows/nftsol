@@ -52,9 +52,19 @@ jobs:
         run: npm run lint
         continue-on-error: false
 
-      - name: Type Check
+      - name: Type Check - Backend
         working-directory: apps/backend
         run: npm run type-check
+        continue-on-error: false
+
+      - name: Type Check - Client
+        working-directory: client
+        run: npm run type-check
+        continue-on-error: false
+
+      - name: Test Backend
+        working-directory: apps/backend
+        run: npm test -- --no-coverage
         continue-on-error: false
 
       - name: Upload Build Artifacts

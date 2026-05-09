@@ -200,7 +200,7 @@ class ApiService {
 
   // Get marketplace data
   async getMarketplace(): Promise<ApiResponse<MarketData>> {
-    return this.request(API_ENDPOINTS.marketplace);
+    return this.request(API_ENDPOINTS.marketplaceV1);
   }
 
   // Get collections

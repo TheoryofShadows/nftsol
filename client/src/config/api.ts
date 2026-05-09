@@ -74,7 +74,7 @@ export const API_ENDPOINTS = {
     owner 
       ? buildApiUrl(`${API_PREFIX}/nfts/${owner}`)
       : buildApiUrl('api/nfts'), // Non-versioned endpoint for marketplace
-  marketplace: buildApiUrl(`${API_PREFIX}/market`),
+  marketplaceV1: buildApiUrl(`${API_PREFIX}/market`),
   collections: buildApiUrl(`${API_PREFIX}/collections`),
   wallet: (address: string) => buildApiUrl(`${API_PREFIX}/wallet/${address}`),
   admin: {
