@@ -1,6 +1,9 @@
 /**
  * Archive Service
- * API integration for Internet Archive advanced search with 15+ filters
+ * Calls the Internet Archive API directly from the browser — no backend needed.
+ * IA's advancedsearch.php endpoint supports CORS and is fully public.
+ * The backend proxy (/api/v1/archive/advanced-search) is used as a fallback
+ * only for verify-with-grok and prepare-for-mint which require server secrets.
  */
 
 import { API_BASE } from '../config/api';
@@ -12,17 +15,17 @@ export interface AdvancedSearchFilters {
   mediaTypes?: ('video' | 'audio' | 'image' | 'document' | 'text')[];
   yearFrom?: number;
   yearTo?: number;
-  dateAddedFrom?: string; // ISO date: YYYY-MM-DD
+  dateAddedFrom?: string;
   dateAddedTo?: string;
   creator?: string;
   creators?: string[];
   licenses?: ('public-domain' | 'cc-by' | 'cc-by-sa' | 'cc-by-nd' | 'cc-by-nc' | 'cc0')[];
   minDownloads?: number;
   maxDownloads?: number;
-  minDuration?: number; // seconds
+  minDuration?: number;
   maxDuration?: number;
-  languages?: string[]; // ISO 639-1 codes: en, es, fr, etc.
-  formats?: string[]; // mp4, pdf, jpg, etc.
+  languages?: string[];
+  formats?: string[];
   subjects?: string[];
   tags?: string[];
   collections?: string[];
@@ -30,7 +33,7 @@ export interface AdvancedSearchFilters {
   hasMetadata?: boolean;
   isVerified?: boolean;
   sortBy?: 'downloads' | 'date' | 'title' | 'relevance';
-  limit?: number; // 1-100
+  limit?: number;
   offset?: number;
 }
 
@@ -77,303 +80,277 @@ export interface FilterOptions {
   formats: string[];
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Helpers — build a Solr query string from our filter object
+// ────────────────────────────────────────────────────────────────────────────
+
+function buildQuery(keyword: string, filters: AdvancedSearchFilters): string {
+  const parts: string[] = [];
+
+  if (keyword.trim()) {
+    parts.push(filters.phraseMatch ? `"${keyword}"` : `(${keyword})`);
+  }
+
+  if (filters.mediaTypes && filters.mediaTypes.length > 0) {
+    const typeMap: Record<string, string> = {
+      video: 'movies',
+      audio: 'audio',
+      image: 'image',
+      document: 'texts',
+      text: 'texts',
+    };
+    const types = filters.mediaTypes.map(t => typeMap[t] || t).join(' OR ');
+    parts.push(`mediatype:(${types})`);
+  } else {
+    parts.push('NOT (mediatype:software OR mediatype:collection)');
+  }
+
+  if (filters.yearFrom || filters.yearTo) {
+    parts.push(`date:[${filters.yearFrom ?? '*'} TO ${filters.yearTo ?? '*'}]`);
+  }
+
+  if (filters.creator) {
+    parts.push(`creator:"${filters.creator}"`);
+  } else if (filters.creators?.length) {
+    parts.push(`creator:(${filters.creators.map(c => `"${c}"`).join(' OR ')})`);
+  }
+
+  if (filters.subjects?.length) {
+    parts.push(`subject:(${filters.subjects.join(' OR ')})`);
+  }
+
+  if (filters.collections?.length) {
+    parts.push(`collection:(${filters.collections.join(' OR ')})`);
+  }
+
+  if (filters.languages?.length) {
+    parts.push(`language:(${filters.languages.join(' OR ')})`);
+  }
+
+  return parts.join(' AND ');
+}
+
+function sortParam(sortBy?: string): string {
+  switch (sortBy) {
+    case 'downloads': return 'downloads desc';
+    case 'date':      return 'date desc';
+    case 'title':     return 'titleSorter asc';
+    default:          return '';
+  }
+}
+
+function transformDoc(doc: Record<string, unknown>): SearchResult {
+  const identifier = String(doc.identifier ?? '');
+  const mediaType  = String(doc.mediatype ?? 'unknown');
+  return {
+    identifier,
+    title:       String(doc.title ?? 'Untitled'),
+    description: String(doc.description ?? ''),
+    creator:     String(doc.creator ?? 'Unknown'),
+    year:        doc.year ? String(doc.year) : undefined,
+    publicDate:  doc.date ? String(doc.date) : undefined,
+    mediaType,
+    downloads:   Number(doc.downloads ?? 0),
+    url:         `https://archive.org/details/${identifier}`,
+    archiveUrl:  `https://archive.org/details/${identifier}`,
+    thumbnailUrl: `https://archive.org/services/img/${identifier}`,
+    licenseType: String(doc.licenseurl ?? 'public-domain'),
+    language:    doc.language ? String(doc.language) : undefined,
+  };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Main service class
+// ────────────────────────────────────────────────────────────────────────────
+
 class ArchiveService {
-  private apiBase = API_BASE;
+  private readonly IA_SEARCH = 'https://archive.org/advancedsearch.php';
+  private readonly FIELDS = [
+    'identifier','title','description','creator','mediatype',
+    'date','year','downloads','language','licenseurl','subject',
+  ];
 
   /**
-   * Advanced search with comprehensive filters
+   * Advanced search — calls Internet Archive directly from the browser.
    */
   async advancedSearch(
     keyword: string,
     filters: AdvancedSearchFilters = {}
   ): Promise<AdvancedSearchResponse> {
+    const q      = buildQuery(keyword, filters);
+    const limit  = filters.limit  ?? 20;
+    const offset = filters.offset ?? 0;
+    const sort   = sortParam(filters.sortBy);
+
+    const params = new URLSearchParams({
+      q,
+      output: 'json',
+      rows:   String(limit),
+      start:  String(offset),
+    });
+    this.FIELDS.forEach(f => params.append('fl[]', f));
+    if (sort) params.set('sort[]', sort);
+
     try {
-      const response = await fetch(`${this.apiBase}/api/v1/archive/advanced-search`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          keyword,
-          ...filters,
-        }),
-      });
+      const res  = await fetch(`${this.IA_SEARCH}?${params.toString()}`);
+      if (!res.ok) throw new Error(`Archive.org returned ${res.status}`);
 
-      if (!response.ok) {
-        throw new Error(`Archive search failed: ${response.statusText}`);
-      }
+      const json = await res.json() as {
+        response?: { numFound?: number; docs?: Record<string, unknown>[] };
+      };
 
-      const data = await response.json();
-      logger.info('Archive advanced search completed', {
-        query: keyword,
-        results: data.data?.results?.length || 0,
-      });
+      const docs     = json.response?.docs ?? [];
+      const numFound = json.response?.numFound ?? 0;
+      const results  = docs.map(transformDoc);
 
-      return data.data;
+      logger.info('Archive search completed', { query: keyword, numFound });
+
+      return {
+        query:        keyword,
+        filters,
+        totalResults: numFound,
+        pageCount:    Math.ceil(numFound / limit),
+        currentPage:  Math.floor(offset / limit) + 1,
+        results,
+      };
     } catch (error) {
-      logger.error('Archive advanced search error', error);
+      logger.error('Archive search error', error);
       throw error;
     }
   }
 
   /**
-   * Get available filter options for UI dropdowns
+   * Filter options — static, no API call needed.
    */
   async getFilterOptions(): Promise<FilterOptions> {
-    try {
-      const response = await fetch(`${this.apiBase}/api/v1/archive/filter-options`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch filter options');
-      }
-
-      const data = await response.json();
-      logger.info('Filter options fetched');
-
-      return data.data;
-    } catch (error) {
-      logger.error('Failed to fetch filter options', error);
-      throw error;
-    }
+    return {
+      mediaTypes:  ['video', 'audio', 'image', 'document', 'text'],
+      languages:   ['en', 'es', 'fr', 'de', 'pt', 'zh', 'ja', 'ar', 'ru', 'it'],
+      licenses:    ['public-domain', 'cc0', 'cc-by', 'cc-by-sa', 'cc-by-nc', 'cc-by-nd'],
+      collections: ['community_texts', 'movingimage', 'audio', 'image', 'opensource'],
+      formats:     ['mp4', 'ogv', 'mp3', 'ogg', 'jpg', 'png', 'pdf', 'epub'],
+    };
   }
 
   /**
-   * Get trending searches
+   * Trending searches — static curated list, no backend needed.
    */
   async getTrendingSearches(): Promise<string[]> {
-    try {
-      const response = await fetch(`${this.apiBase}/api/v1/archive/trending`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch trending searches');
-      }
-
-      const data = await response.json();
-      // Backend wraps the array in `{ trending: string[] }`. Tolerate either
-      // shape so older deployments keep working.
-      const trending: string[] = Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data?.data?.trending)
-          ? data.data.trending
-          : [];
-
-      logger.info('Trending searches fetched', { count: trending.length });
-
-      return trending;
-    } catch (error) {
-      logger.error('Failed to fetch trending searches', error);
-      return [];
-    }
+    return [
+      'NASA space footage',
+      'silent films 1920s',
+      'jazz recordings',
+      'public domain books',
+      'historical speeches',
+      'nature documentaries',
+      'vintage cartoons',
+      'world music',
+    ];
   }
 
   /**
-   * Get autocomplete suggestions
+   * Autocomplete suggestions via IA's suggest endpoint.
    */
   async getSuggestions(partial: string): Promise<string[]> {
+    if (!partial.trim()) return [];
     try {
-      const params = new URLSearchParams({ q: partial });
-      const response = await fetch(`${this.apiBase}/api/v1/archive/suggestions?${params}`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
-      }
-
-      const data = await response.json();
-      // Backend wraps the array in `{ query, suggestions: string[] }`.
-      const suggestions: string[] = Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data?.data?.suggestions)
-          ? data.data.suggestions
-          : [];
-
-      logger.info('Suggestions fetched', {
-        query: partial,
-        count: suggestions.length,
-      });
-
-      return suggestions;
-    } catch (error) {
-      logger.error('Failed to fetch suggestions', error);
+      const res = await fetch(
+        `https://archive.org/suggest?q=${encodeURIComponent(partial)}&output=json`
+      );
+      if (!res.ok) return [];
+      const json = await res.json() as [string, string[]];
+      return Array.isArray(json[1]) ? json[1].slice(0, 8) : [];
+    } catch {
       return [];
     }
   }
 
   /**
-   * Get full metadata for an item
+   * Full item metadata — calls backend (needs no secrets, just proxied).
+   * Falls back to direct IA metadata API if backend is down.
    */
-  async getItemMetadata(identifier: string): Promise<any> {
+  async getItemMetadata(identifier: string): Promise<Record<string, unknown>> {
     try {
-      const response = await fetch(`${this.apiBase}/api/v1/archive/${identifier}`);
+      const res = await fetch(`${API_BASE}/api/v1/archive/${identifier}`, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) return (await res.json() as { data: Record<string, unknown> }).data;
+    } catch { /* fall through */ }
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch item metadata');
-      }
-
-      const data = await response.json();
-      logger.info('Item metadata fetched', { identifier });
-
-      return data.data;
-    } catch (error) {
-      logger.error('Failed to fetch item metadata', error);
-      throw error;
-    }
+    // Direct fallback
+    const res = await fetch(`https://archive.org/metadata/${identifier}`);
+    if (!res.ok) throw new Error('Failed to fetch item metadata');
+    return res.json();
   }
 
   /**
-   * Get all media files for an item
+   * Media files for an item — same backend-then-fallback pattern.
    */
-  async getItemMedia(identifier: string): Promise<any[]> {
+  async getItemMedia(identifier: string): Promise<unknown[]> {
     try {
-      const response = await fetch(`${this.apiBase}/api/v1/archive/${identifier}/media`);
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch item media');
+      const res = await fetch(`${API_BASE}/api/v1/archive/${identifier}/media`, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const json = await res.json() as { data?: { mediaFiles?: unknown[] } };
+        return json.data?.mediaFiles ?? [];
       }
+    } catch { /* fall through */ }
 
-      const data = await response.json();
-      // Backend wraps the array in `{ identifier, mediaCount, mediaFiles }`.
-      const mediaFiles: any[] = Array.isArray(data?.data)
-        ? data.data
-        : Array.isArray(data?.data?.mediaFiles)
-          ? data.data.mediaFiles
-          : [];
-
-      logger.info('Item media fetched', {
-        identifier,
-        mediaCount: mediaFiles.length,
-      });
-
-      return mediaFiles;
-    } catch (error) {
-      logger.error('Failed to fetch item media', error);
-      throw error;
-    }
+    // Direct IA files endpoint
+    const res = await fetch(`https://archive.org/metadata/${identifier}/files`);
+    if (!res.ok) return [];
+    const json = await res.json() as { result?: unknown[] };
+    return json.result ?? [];
   }
 
   /**
-   * Verify item with Grok AI
+   * Grok verification — requires backend (uses XAI_API_KEY server-side).
    */
-  async verifyWithGrok(identifier: string): Promise<any> {
-    try {
-      const response = await fetch(
-        `${this.apiBase}/api/v1/archive/${identifier}/verify-with-grok`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to verify with Grok');
-      }
-
-      const data = await response.json();
-      logger.info('Grok verification completed', { identifier });
-
-      return data.data;
-    } catch (error) {
-      logger.error('Grok verification error', error);
-      throw error;
-    }
+  async verifyWithGrok(identifier: string): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/api/v1/archive/${identifier}/verify-with-grok`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to verify with Grok');
+    return (await res.json() as { data: Record<string, unknown> }).data;
   }
 
   /**
-   * Prepare item for minting
+   * Prepare for mint — requires backend.
    */
-  async prepareForMint(identifier: string): Promise<any> {
-    try {
-      const response = await fetch(
-        `${this.apiBase}/api/v1/archive/${identifier}/prepare-for-mint`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to prepare for mint');
-      }
-
-      const data = await response.json();
-      logger.info('Prepared for minting', { identifier });
-
-      return data.data;
-    } catch (error) {
-      logger.error('Prepare for mint error', error);
-      throw error;
-    }
+  async prepareForMint(identifier: string): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/api/v1/archive/${identifier}/prepare-for-mint`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Failed to prepare for mint');
+    return (await res.json() as { data: Record<string, unknown> }).data;
   }
 
   /**
-   * Create Echo ledger from archive item
+   * Create Echo ledger — requires backend.
    */
-  async createEchoLedger(identifier: string, walletAddress: string): Promise<any> {
-    try {
-      const response = await fetch(
-        `${this.apiBase}/api/v1/archive/${identifier}/create-echo-ledger`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ walletAddress }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to create Echo ledger');
-      }
-
-      const data = await response.json();
-      logger.info('Echo ledger created', { identifier });
-
-      return data.data;
-    } catch (error) {
-      logger.error('Create Echo ledger error', error);
-      throw error;
-    }
+  async createEchoLedger(identifier: string, walletAddress: string): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/api/v1/archive/${identifier}/create-echo-ledger`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ walletAddress }),
+    });
+    if (!res.ok) throw new Error('Failed to create Echo ledger');
+    return (await res.json() as { data: Record<string, unknown> }).data;
   }
 
   /**
-   * Add layer to Echo ledger
+   * Add Echo layer — requires backend.
    */
   async addEchoLayer(
     ledgerId: string,
-    layerData: {
-      content: string;
-      mediaHash: string;
-      creator: string;
-      metadata?: Record<string, any>;
-    }
-  ): Promise<any> {
-    try {
-      const response = await fetch(
-        `${this.apiBase}/api/v1/archive/echo/${ledgerId}/add-layer`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(layerData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to add Echo layer');
-      }
-
-      const data = await response.json();
-      logger.info('Echo layer added', { ledgerId });
-
-      return data.data;
-    } catch (error) {
-      logger.error('Add Echo layer error', error);
-      throw error;
-    }
+    layerData: { content: string; mediaHash: string; creator: string; metadata?: Record<string, unknown> }
+  ): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/api/v1/archive/echo/${ledgerId}/add-layer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(layerData),
+    });
+    if (!res.ok) throw new Error('Failed to add Echo layer');
+    return (await res.json() as { data: Record<string, unknown> }).data;
   }
 }
 
