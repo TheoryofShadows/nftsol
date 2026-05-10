@@ -9,7 +9,10 @@ import {
   createTransferInstruction,
   TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-import { solanaConfig, env } from '../config';
+import { solanaConfig } from '../config';
+
+const MARKETPLACE_WALLET = process.env.MARKETPLACE_WALLET_ADDRESS || 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs';
+const PLATFORM_WALLET = process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad';
 import { pool } from '../lib/db';
 
 interface ListNFTParams {
@@ -211,12 +214,12 @@ export class MarketplaceService {
       transaction.add(
         SystemProgram.transfer({
           fromPubkey: buyerPubkey,
-          toPubkey: new PublicKey(env.MARKETPLACE_WALLET_ADDRESS),
+          toPubkey: new PublicKey(MARKETPLACE_WALLET),
           lamports: halfFee,
         }),
         SystemProgram.transfer({
           fromPubkey: buyerPubkey,
-          toPubkey: new PublicKey(env.PLATFORM_WALLET_ADDRESS),
+          toPubkey: new PublicKey(PLATFORM_WALLET),
           lamports: platformFee - halfFee,
         }),
       );

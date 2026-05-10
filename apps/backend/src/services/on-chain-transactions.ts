@@ -21,7 +21,10 @@ import {
   getAccount,
   createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
-import { solanaConfig, programConfig as _programConfig, env } from '../config';
+import { solanaConfig, programConfig as _programConfig } from '../config';
+
+const MARKETPLACE_WALLET = process.env.MARKETPLACE_WALLET_ADDRESS || 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs';
+const PLATFORM_WALLET = process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad';
 import { pool } from '../lib/db';
 
 interface CreateBuyTransactionParams {
@@ -104,8 +107,8 @@ export class OnChainTransactionService {
 
       // 2. Platform fee — split between marketplace wallet and developer wallet
       if (platformFee > 0) {
-        const marketplacePubkey = new PublicKey(env.MARKETPLACE_WALLET_ADDRESS);
-        const developerPubkey = new PublicKey(env.PLATFORM_WALLET_ADDRESS);
+        const marketplacePubkey = new PublicKey(MARKETPLACE_WALLET);
+        const developerPubkey = new PublicKey(PLATFORM_WALLET);
         const halfFee = Math.floor(platformFee / 2);
         transaction.add(
           SystemProgram.transfer({ fromPubkey: buyerPubkey, toPubkey: marketplacePubkey, lamports: halfFee }),
