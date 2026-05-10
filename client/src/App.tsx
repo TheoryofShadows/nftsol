@@ -55,15 +55,8 @@ const lazyWithErrorBoundary = <T extends React.ComponentType<any>>(
 };
 
 const Hero = lazyWithErrorBoundary(() => import('./components/Hero'));
-const _PhantomConnect = lazyWithErrorBoundary(() => import('./components/PhantomConnect'));
 const MintForm = lazyWithErrorBoundary(() => import('./components/MintForm'));
-const _NftGrid = lazyWithErrorBoundary(() => import('./components/NftGrid'));
 const WithdrawalForm = lazyWithErrorBoundary(() => import('./components/WithdrawalForm'));
-const ReferralSystem = lazyWithErrorBoundary(() => import('./components/ReferralSystem'));
-const WaitlistSignup = lazyWithErrorBoundary(() => import('./components/WaitlistSignup'));
-const EchoViewer = lazyWithErrorBoundary(() => import('./echo/EchoViewer'));
-// const EchoRemix = lazyWithErrorBoundary(() => import('./echo/EchoRemix')); // Unused for now
-const EchoMarketplace = lazyWithErrorBoundary(() => import('./echo/EchoMarketplace'));
 const AdminDashboard = lazyWithErrorBoundary(() => import('./components/AdminDashboard'));
 const Dashboard = lazyWithErrorBoundary(() => import('./components/Dashboard'));
 const WelcomeOnboarding = lazyWithErrorBoundary(() => import('./components/WelcomeOnboarding'));
@@ -71,8 +64,6 @@ const FeatureTour = lazyWithErrorBoundary(() => import('./components/FeatureTour
 const OnboardingProgress = lazyWithErrorBoundary(() => import('./components/OnboardingProgress'));
 const MyNfts = lazyWithErrorBoundary(() => import('./components/MyNfts'));
 const Collections = lazyWithErrorBoundary(() => import('./components/Collections'));
-const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
-const ArchiveAdvancedSearchForm = lazyWithErrorBoundary(() => import('./components/ArchiveAdvancedSearchForm'));
 const ProfessionalMarketplace = lazyWithErrorBoundary(() => import('./components/ProfessionalMarketplace'));
 const DiscoverMintPage = lazyWithErrorBoundary(() => import('./components/DiscoverMintPage'));
 
@@ -86,7 +77,6 @@ const LoadingSpinner = () => (
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState('discover');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics: _metrics, getPerformanceReport } = usePerformance();

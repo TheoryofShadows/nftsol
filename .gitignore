@@ -131,3 +131,6 @@ nftsol-frontend-deploy.zip
 
 # Local Netlify folder
 .netlify
+
+# Legacy server directory (migrated to apps/backend/)
+server/
