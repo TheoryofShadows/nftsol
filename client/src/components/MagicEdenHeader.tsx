@@ -17,6 +17,7 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   const { connected, publicKey, disconnect } = useWallet();
   const { setVisible } = useWalletModal();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isWalletDropdownOpen, setIsWalletDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [balance, setBalance] = useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -73,7 +74,22 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   const handleNavClick = (tabId: string) => {
     onTabChange(tabId);
     setIsMenuOpen(false);
+    setIsDropdownOpen(false);
+    setIsWalletDropdownOpen(false);
   };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('header')) {
+        setIsDropdownOpen(false);
+        setIsWalletDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-[#0a0a0a] border-b border-[#1e1e1e] backdrop-blur-md">
@@ -183,7 +199,7 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
             {connected && publicKey ? (
               <div className="relative">
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => setIsWalletDropdownOpen(!isWalletDropdownOpen)}
                   className="flex items-center gap-2 px-4 py-2 bg-[#c9a84c]/10 border border-[#c9a84c]/20 text-[#c9a84c] rounded-lg font-medium text-sm transition-all hover:bg-[#c9a84c]/15"
                 >
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
@@ -192,10 +208,19 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
                 </button>
 
                 {/* Wallet Dropdown */}
-                {isDropdownOpen && (
+                {isWalletDropdownOpen && (
                   <div className="absolute top-full right-0 mt-2 w-56 bg-[#111111] border border-[#1e1e1e] rounded-lg shadow-xl py-2 z-50">
-                    <div className="px-4 py-3 border-b border-[#1e1e1e]">
-                      <div className="text-xs text-zinc-500 mb-2">Connected Wallet</div>
+                    <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-[#1e1e1e]">
+                      <div className="text-xs text-zinc-500">Connected Wallet</div>
+                      <button
+                        onClick={() => setIsWalletDropdownOpen(false)}
+                        aria-label="Close wallet menu"
+                        className="w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white text-base leading-none transition-all"
+                      >
+                        ×
+                      </button>
+                    </div>
+                    <div className="px-4 pb-3 border-b border-[#1e1e1e]">
                       <div className="font-mono text-xs text-zinc-400 break-all mb-2">{publicKey.toBase58()}</div>
                       {isLoadingBalance ? (
                         <div className="flex items-center gap-1 text-xs text-zinc-500">
@@ -213,7 +238,7 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
                     <button
                       onClick={() => {
                         disconnect();
-                        setIsDropdownOpen(false);
+                        setIsWalletDropdownOpen(false);
                         setBalance(null);
                       }}
                       className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-all"
@@ -238,16 +263,18 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
             {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
             >
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {isMenuOpen ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>

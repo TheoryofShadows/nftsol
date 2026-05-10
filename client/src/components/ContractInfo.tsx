@@ -29,6 +29,7 @@ export default function ContractInfo() {
   const [programs, setPrograms] = useState<ProgramConfig>({});
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -62,21 +63,34 @@ export default function ContractInfo() {
   const contractAddresses = { ...defaultPrograms, ...programs };
 
   if (loading && !expanded) {
-    return null; // Don't show until loaded or user expands
+    return null;
+  }
+
+  if (dismissed) {
+    return null;
   }
 
   return (
     <div className="glass rounded-xl p-4 border border-white/10 backdrop-blur-md">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between text-left mb-2 focus:outline-none"
-      >
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-          <span>📋</span>
-          Contract Addresses
-        </h3>
-        <span className="text-gray-400 text-sm">{expanded ? '▼' : '▶'}</span>
-      </button>
+      <div className="flex items-center justify-between mb-2">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex items-center gap-2 text-left focus:outline-none"
+        >
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <span>📋</span>
+            Contract Addresses
+          </h3>
+          <span className="text-gray-400 text-sm">{expanded ? '▼' : '▶'}</span>
+        </button>
+        <button
+          onClick={() => setDismissed(true)}
+          aria-label="Close"
+          className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-400 hover:text-white text-lg leading-none transition-all ml-2"
+        >
+          ×
+        </button>
+      </div>
 
       {expanded && (
         <div className="space-y-3 animate-fade-in">

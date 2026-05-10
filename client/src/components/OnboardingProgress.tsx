@@ -51,10 +51,10 @@ export default function OnboardingProgress() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-40">
+    <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="glass-card p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all min-w-[200px]"
+        className="glass-card p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"
       >
         <div className="flex items-center space-x-3">
           <div className="relative w-12 h-12">
@@ -99,7 +99,7 @@ export default function OnboardingProgress() {
       </button>
 
       {isExpanded && (
-        <div className="absolute bottom-20 right-0 glass-card p-6 rounded-2xl w-80 animate-fade-in animate-slide-up">
+        <div className="absolute bottom-16 right-0 glass-card p-4 md:p-6 rounded-2xl w-72 md:w-80 animate-fade-in animate-slide-up max-h-[80vh] overflow-y-auto">
           <div className="flex items-start justify-between mb-4">
             <h3 className="text-lg font-bold gradient-text-primary">Your Progress</h3>
             <button

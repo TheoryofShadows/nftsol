@@ -25,7 +25,7 @@ export default function MintForm() {
       console.log('  Wallet:', publicKey?.toBase58());
 
       console.log('Fetching CSRF token...');
-      const csrfRes = await fetch(API_ENDPOINTS.mint, {
+      const csrfRes = await fetch(API_ENDPOINTS.csrf, {
         method: 'GET',
         credentials: 'include',
       });
@@ -54,7 +54,7 @@ export default function MintForm() {
       formData.append('file', file, file.name);
       formData.append('_csrf', csrfToken);
 
-      console.log('Sending to:', API_ENDPOINTS.mint);
+      console.log('Sending mint to:', API_ENDPOINTS.mint);
 
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',
@@ -113,8 +113,8 @@ export default function MintForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg p-8">
-        <div className="text-center mb-8">
+      <div className="bg-[#111111] border border-[#1e1e1e] rounded-lg p-4 md:p-8">
+        <div className="text-center mb-6 md:mb-8">
           <h3 className="text-2xl font-bold text-white font-display mb-2">Mint Your NFT</h3>
           <p className="text-zinc-400 text-sm mb-5">Create your unique digital asset on Solana</p>
 
@@ -135,7 +135,7 @@ export default function MintForm() {
             <h4 className="text-center text-xs font-medium text-zinc-400 mb-4 uppercase tracking-wider">
               Why Choose NFTSol?
             </h4>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-3 gap-2 md:gap-4 text-center">
               <div>
                 <div className="text-[10px] text-zinc-500 mb-1">NFTSol</div>
                 <div className="text-xl font-bold text-[#c9a84c]">${comparison.nftSol.cost.toFixed(4)}</div>

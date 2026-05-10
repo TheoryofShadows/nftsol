@@ -89,18 +89,22 @@
     overflow-wrap: break-word !important;
     hyphens: auto !important;
   }
-  
-  /* Ensure no horizontal overflow */
-  * {
-    max-width: 100% !important;
+
+  /* Fix box sizing globally without capping widths (that breaks grids) */
+  *, *::before, *::after {
     box-sizing: border-box !important;
   }
-  
+
+  /* Only cap width on elements that can legitimately overflow */
+  img, video, canvas, svg, iframe, table {
+    max-width: 100% !important;
+  }
+
   /* Fix header overflow */
   header {
     overflow-x: hidden !important;
   }
-  
+
   /* Fix main content overflow */
   main {
     overflow-x: hidden !important;
@@ -228,13 +232,6 @@
     font-size: 0.875rem !important;
   }
 
-  /* Prevent text from being too small */
-  p,
-  span,
-  div {
-    font-size: 0.875rem !important;
-  }
-
   h1 {
     font-size: 1.75rem !important;
   }
@@ -262,6 +259,11 @@
 
 /* iPhone specific fixes */
 @media (max-width: 480px) {
+  /* Only cap overflowing media, not all elements — prevents grid breakage */
+  img, video, canvas, svg, iframe, table {
+    max-width: 100% !important;
+  }
+
   /* Even more aggressive sizing for small phones */
   header h1 {
     font-size: 1.25rem !important;
@@ -302,12 +304,6 @@
   /* Wallet info card should be compact */
   .glass.px-4.py-3 {
     padding: 0.5rem !important;
-  }
-
-  /* Prevent overflowing elements */
-  * {
-    max-width: 100% !important;
-    box-sizing: border-box !important;
   }
 
   /* Animations might be too heavy on mobile - simplify or reduce */

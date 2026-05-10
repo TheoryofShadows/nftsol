@@ -39,9 +39,10 @@
 [context.production.environment]
   NODE_ENV = "production"
   VITE_API_BASE = "https://nftsol.onrender.com"
-  VITE_SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com"
   VITE_HELIUS_API_KEY = "$HELIUS_API_KEY"
+  VITE_SOLANA_RPC_URL = "https://mainnet.helius-rpc.com/?api-key=$HELIUS_API_KEY"
   VITE_SOLANA_CLUSTER = "mainnet-beta"
+  VITE_WALLET_ADAPTER_NETWORK = "mainnet-beta"
 
 [context.develop.environment]
   NODE_ENV = "development"

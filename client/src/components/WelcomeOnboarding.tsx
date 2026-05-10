@@ -54,8 +54,8 @@ export default function WelcomeOnboarding() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-      <div className="glass-card max-w-2xl w-full p-8 md:p-12 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="glass-card max-w-2xl w-full p-6 md:p-12 relative overflow-hidden my-auto">
         {/* Progress Indicator */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
           <div
@@ -65,18 +65,18 @@ export default function WelcomeOnboarding() {
         </div>
 
         {/* Slide Content */}
-        <div className="text-center py-8">
+        <div className="text-center py-4 md:py-8">
           <div
-            className={`w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-5xl shadow-2xl`}
+            className={`w-16 h-16 md:w-24 md:h-24 mx-auto mb-4 md:mb-6 rounded-full bg-gradient-to-br ${slides[currentSlide].gradient} flex items-center justify-center text-3xl md:text-5xl shadow-2xl`}
           >
             {slides[currentSlide].icon}
           </div>
 
-          <h2 className="text-4xl md:text-5xl font-bold gradient-text-primary mb-4">
+          <h2 className="text-2xl md:text-4xl font-bold gradient-text-primary mb-3 md:mb-4">
             {slides[currentSlide].title}
           </h2>
 
-          <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-md mx-auto leading-relaxed">
+          <p className="text-gray-300 text-base md:text-xl mb-6 md:mb-8 max-w-md mx-auto leading-relaxed">
             {slides[currentSlide].description}
           </p>
 

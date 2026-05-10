@@ -678,8 +678,8 @@ function AppContent() {
       {/* CloutBadge - Fixed position showing user's CLOUT balance */}
       <CloutBadge />
 
-      {/* ContractInfo - Shows CLOUT contract addresses */}
-      <div className="fixed left-4 bottom-4 z-40 max-w-xs">
+      {/* ContractInfo - Shows CLOUT contract addresses (hidden on mobile to avoid blocking) */}
+      <div className="hidden sm:block fixed left-4 bottom-4 z-40 max-w-xs">
         <ContractInfo />
       </div>
 
