@@ -41,38 +41,46 @@ export async function verifyWithGrok(
       return await verifyWithCloudflareAI(videoUri, nftId);
     }
 
-    const prompt = `
-You are Grok, AI verifier for NFTSol. 
-Analyze this video NFT for authenticity:
+    const prompt = `You are an NFT authenticity verifier for NFTSol. Analyze this video NFT and return a JSON object with these exact fields:
+{
+  "verdict": "VERIFIED" | "NEEDS_REVIEW" | "REJECTED",
+  "score": <integer 0-100>,
+  "factualAccuracy": <integer 0-100>,
+  "sourceReliability": <integer 0-100>,
+  "contentAuthenticity": <integer 0-100>,
+  "flags": [<string>, ...],
+  "summary": "<one sentence>"
+}
+
+NFT to analyze:
 - Video URL: ${videoUri}
 - NFT ID: ${nftId}
-- Minted on Solana via Metaplex Bubblegum
+- Platform: Solana / Metaplex Bubblegum
 
-Check for:
-1. Deepfake indicators
-2. Timestamp consistency
-3. Metadata integrity
-4. Visual tampering
+Score criteria:
+- Score 80-100: Clearly authentic, original content, trusted source domain (pinata.cloud, arweave.net, ipfs.io)
+- Score 60-79: Likely authentic, minor concerns
+- Score 40-59: Uncertain, needs manual review
+- Score 0-39: Strong indicators of tampering, deepfake, or copyright violation
 
-Respond with: VERIFIED or NEEDS_REVIEW
-`;
+Be conservative. Only score above 80 if there are clear positive signals. Respond with only the JSON object, no extra text.`;
 
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       {
-        model: 'grok-4-latest',
+        model: 'grok-beta',
         messages: [
           {
             role: 'system',
-            content: 'You are Grok, AI verifier for NFTSol. Analyze video NFTs for authenticity, deepfakes, timestamp consistency, and metadata integrity.',
+            content: 'You are an NFT authenticity verifier. Respond only with valid JSON.',
           },
           {
             role: 'user',
             content: prompt,
           },
         ],
-        max_tokens: 500,
-        temperature: 0,
+        max_tokens: 400,
+        temperature: 0.1,
         stream: false,
       },
       {
@@ -80,45 +88,48 @@ Respond with: VERIFIED or NEEDS_REVIEW
           Authorization: `Bearer ${xaiApiKey}`,
           'Content-Type': 'application/json',
         },
-        timeout: 30000, // 30 second timeout
+        timeout: 30000,
       }
     );
 
-    const content = response.data.choices[0]?.message?.content?.toLowerCase() || '';
-    const isVerified = content.includes('verified') && !content.includes('needs_review');
-
-    // Calculate score based on response
-    let score = 50;
-    if (isVerified) {
-      score = 85 + Math.floor(Math.random() * 15); // 85-100 for verified
-    } else if (content.includes('needs_review')) {
-      score = 40 + Math.floor(Math.random() * 25); // 40-65 for needs review
+    const rawContent = response.data.choices[0]?.message?.content || '';
+    let parsed: any = {};
+    try {
+      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+    } catch {
+      console.warn('[Grok] Could not parse JSON response, falling back');
+      return await verifyWithCloudflareAI(videoUri, nftId);
     }
+
+    const score = typeof parsed.score === 'number' ? Math.max(0, Math.min(100, parsed.score)) : 50;
+    const verdict = parsed.verdict || 'NEEDS_REVIEW';
+    const isVerified = verdict === 'VERIFIED' && score >= 60;
 
     return {
       verified: isVerified,
       score,
-      confidence: isVerified ? 0.9 : 0.6,
+      confidence: score / 100,
       analysis: {
-        factualAccuracy: score,
-        sourceReliability: isVerified ? 85 : 50,
-        contentAuthenticity: score,
-        biasDetection: 80,
+        factualAccuracy: typeof parsed.factualAccuracy === 'number' ? parsed.factualAccuracy : score,
+        sourceReliability: typeof parsed.sourceReliability === 'number' ? parsed.sourceReliability : score,
+        contentAuthenticity: typeof parsed.contentAuthenticity === 'number' ? parsed.contentAuthenticity : score,
+        biasDetection: 70,
       },
-      flags: isVerified ? [] : ['Requires manual review'],
+      flags: Array.isArray(parsed.flags) ? parsed.flags : (isVerified ? [] : ['Requires manual review']),
       recommendations: isVerified
-        ? ['High quality content - recommended for minting']
-        : ['Content needs additional verification'],
+        ? ['Content verified - suitable for minting']
+        : score >= 60
+          ? ['Content likely authentic - review recommended before minting']
+          : ['Content requires additional verification before minting'],
       verifiedFacts: [
         {
-          claim: 'Video authenticity verified',
+          claim: 'Video authenticity analyzed',
           verified: isVerified,
           sources: ['xAI Grok Analysis'],
         },
       ],
-      summary: isVerified
-        ? `Content verification score: ${score}/100. This content demonstrates high authenticity and factual accuracy.`
-        : `Content verification score: ${score}/100. This content requires additional verification.`,
+      summary: parsed.summary || `Verification score: ${score}/100. Verdict: ${verdict}.`,
     };
   } catch (error: any) {
     console.warn('[Grok] xAI API failed, using Cloudflare AI fallback:', error.message);

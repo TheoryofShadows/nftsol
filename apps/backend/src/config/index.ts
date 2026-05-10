@@ -69,7 +69,7 @@ export const env = {
   PLATFORM_WALLET_ADDRESS: process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
 
   // Platform signing wallet public key (signs mint transactions server-side)
-  PLATFORM_SIGNING_PUBKEY: '7D9JHq6MDMpjVH4jVU7rdhZ5zW3bnAPC5ZFWX2CvGTJs',
+  PLATFORM_SIGNING_PUBKEY: process.env.PLATFORM_SIGNING_PUBKEY || 'AG1VGXCa2wUDPEXyS9RZHG348DwEBLyvT4fx8fvnkadK',
 
   // CLOUT treasury — receives CLOUT token distributions
   CLOUT_TREASURY_ADDRESS: process.env.CLOUT_TREASURY_ADDRESS || 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',

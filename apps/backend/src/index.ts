@@ -1167,8 +1167,6 @@ app.use('/api/metrics', performanceMetricsRouter);
 app.use('/api/clout', cloutRouter);
 
 // DEBUG: ping to confirm route registration reached this point
-app.get('/api/_ping', (_req, res) => res.json({ ok: true, registered: ['marketplace','mint'] }));
-
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/marketplace', marketplaceBrowseRouter);
