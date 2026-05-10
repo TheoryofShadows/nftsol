@@ -53,20 +53,16 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
   }, [connected, publicKey]);
 
   const primaryNavItems = [
+    { id: 'discover', label: 'Discover & Mint' },
     { id: 'market', label: 'Marketplace' },
-    { id: 'mint', label: 'Mint' },
-    { id: 'my-nfts', label: 'Portfolio' },
-    { id: 'collections', label: 'Collections' },
+    { id: 'mint', label: 'Upload & Mint' },
+    { id: 'my-nfts', label: 'My NFTs' },
   ];
 
   const advancedNavItems = [
     { id: 'dashboard', label: 'Dashboard' },
-    { id: 'echo-marketplace', label: 'Echo Market' },
-    { id: 'echo-mint', label: 'Mint Echo' },
-    { id: 'echo-viewer', label: 'Echo Viewer' },
-    { id: 'archive', label: 'Archive Search' },
     { id: 'clout', label: 'CLOUT Token' },
-    { id: 'referrals', label: 'Referrals' },
+    { id: 'collections', label: 'Collections' },
     { id: 'withdraw', label: 'Withdraw' },
     { id: 'admin', label: 'Admin' },
   ];

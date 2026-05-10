@@ -154,69 +154,78 @@ export default function EchoMint() {
     setMinting(true);
 
     try {
-      // Call backend API to prepare mint data and get verification info
-      const prepareResponse = await fetch(`${API_BASE}/api/echo/mint`, {
+      // Build attributes including Grok truth score so it lands on-chain
+      const attributes = [
+        { trait_type: 'Source', value: 'Internet Archive' },
+        { trait_type: 'Archive ID', value: mintData.iaId },
+        { trait_type: 'Grok Truth Score', value: mintData.truthScore },
+        { trait_type: 'Grok Verified', value: mintData.verified ? 'Yes' : 'No' },
+      ];
+
+      const mintRes = await fetch(`${API_BASE}/api/mint/ultra-cheap`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ iaId: mintData.iaId }),
+        body: JSON.stringify({
+          toAddress: publicKey.toBase58(),
+          name: mintData.title.slice(0, 32),
+          symbol: 'ECHO',
+          description: [
+            mintData.description || mintData.title,
+            mintData.teaser ? `Grok: ${mintData.teaser}` : '',
+          ].filter(Boolean).join(' | ').slice(0, 400),
+          imageUrl: mintData.thumbnailUri || `https://archive.org/services/img/${mintData.iaId}`,
+          externalUrl: `https://archive.org/details/${mintData.iaId}`,
+          attributes,
+        }),
       });
 
-      if (!prepareResponse.ok) {
-        const error = await prepareResponse.json();
-        throw new Error(error.message || 'Failed to prepare echo mint');
+      const mintJson = await mintRes.json();
+      if (!mintJson.success) throw new Error(mintJson.error || 'Mint failed');
+
+      const txSig = mintJson.data?.signature ?? null;
+
+      // Award CLOUT for verified high-score content (best-effort)
+      if (mintData.verified && mintData.truthScore >= 70) {
+        try {
+          await fetch(`${API_BASE}/api/clout/reward`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recipientAddress: publicKey.toBase58(),
+              amount: 10,
+              multiplier: mintData.truthScore >= 90 ? 2.0 : 1.5,
+            }),
+          });
+        } catch { /* CLOUT is best-effort */ }
       }
 
-      const preparedData = await prepareResponse.json();
-
-      // Generate unique ledger ID combining IA ID and timestamp
-      const ledgerId = `${preparedData.iaId}-${Date.now()}-${publicKey.toString().slice(0, 8)}`;
-
-      // Store echo metadata in localStorage as persistent record
-      const echoRecord = {
-        ledgerId,
-        iaId: preparedData.iaId,
-        title: preparedData.title,
-        videoUri: preparedData.videoUri,
-        thumbnailUri: preparedData.thumbnailUri,
-        creator: preparedData.creator,
-        year: preparedData.year,
-        grokTruthHash: preparedData.grokTruthHash,
-        truthScore: preparedData.truthScore,
-        verified: preparedData.verified,
-        mintedBy: publicKey.toString(),
-        mintedAt: new Date().toISOString(),
-        txSignature: null, // Will be updated if real transaction is implemented
-      };
-
-      localStorage.setItem(`echo-${ledgerId}`, JSON.stringify(echoRecord));
-      localStorage.setItem('currentEchoLedger', ledgerId);
-
-      // Trigger confetti celebration with Solana colors
       confetti({
         particleCount: 150,
         spread: 90,
         origin: { y: 0.6 },
-        colors: ['#9945FF', '#14F195', '#00D4FF', '#FF6B9D', '#FFA500'],
+        colors: ['#9945FF', '#14F195', '#00D4FF', '#c9a84c', '#ffffff'],
       });
 
-      // Show success notification with verification info
       addNotification({
         type: 'success',
-        title: '🎉 Echo Minted Successfully!',
-        message: `"${preparedData.title}" minted with ${preparedData.truthScore}% truth score. CLOUT x2 bonus applied! 🌟`,
-        duration: 6000,
+        title: 'Echo Minted!',
+        message: `"${mintData.title.slice(0, 40)}" minted on Solana with ${mintData.truthScore}% truth score${mintData.verified ? ' — CLOUT reward sent!' : ''}.`,
+        duration: 7000,
       });
 
-      // Auto-navigate to Echo Viewer after success
+      // Navigate to portfolio so user can see their new NFT
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('change-tab', { detail: 'echo-viewer' }));
-      }, 500);
+        window.dispatchEvent(new CustomEvent('change-tab', { detail: 'my-nfts' }));
+      }, 1000);
+
+      // Keep txSig available in console for debugging
+      if (txSig) console.info('[EchoMint] tx:', txSig);
     } catch (error: any) {
       console.error('[EchoMint] Error:', error);
       addNotification({
         type: 'error',
         title: 'Echo Mint Failed',
-        message: error.message || 'Failed to mint echo. Please verify your wallet is connected and try again.',
+        message: error.message || 'Failed to mint echo. Please check your wallet is connected and try again.',
         duration: 5000,
       });
     } finally {

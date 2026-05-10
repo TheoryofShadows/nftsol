@@ -74,6 +74,7 @@ const Collections = lazyWithErrorBoundary(() => import('./components/Collections
 const UnifiedDashboard = lazyWithErrorBoundary(() => import('./components/UnifiedDashboard'));
 const ArchiveAdvancedSearchForm = lazyWithErrorBoundary(() => import('./components/ArchiveAdvancedSearchForm'));
 const ProfessionalMarketplace = lazyWithErrorBoundary(() => import('./components/ProfessionalMarketplace'));
+const DiscoverMintPage = lazyWithErrorBoundary(() => import('./components/DiscoverMintPage'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -84,7 +85,7 @@ const LoadingSpinner = () => (
 );
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('discover');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
@@ -298,15 +299,23 @@ function AppContent() {
         )}
 
         <div className="min-h-[600px]">
+          {activeTab === 'discover' && (
+            <div className="animate-fade-in animate-slide-up">
+              <Suspense fallback={<LoadingSpinner />}>
+                <DiscoverMintPage />
+              </Suspense>
+            </div>
+          )}
+
           {activeTab === 'home' && (
             <div className="animate-fade-in animate-slide-up mt-12">
               {/* Quick Actions Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {[
+                  { id: 'discover', label: 'Search & Mint' },
                   { id: 'market', label: 'Browse Marketplace' },
-                  { id: 'mint', label: 'Mint NFT' },
-                  { id: 'echo-mint', label: 'Create Echo' },
-                  { id: 'echo-marketplace', label: 'Echo Market' },
+                  { id: 'mint', label: 'Upload & Mint' },
+                  { id: 'my-nfts', label: 'My NFTs' },
                 ].map((action) => (
                   <button
                     key={action.id}
@@ -317,50 +326,6 @@ function AppContent() {
                   </button>
                 ))}
               </div>
-
-              {/* Featured NFTs Preview */}
-              {!loading && nfts.length > 0 && (
-                <div className="mb-12">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-3xl font-bold text-white font-display">Featured NFTs</h2>
-                    <button
-                      onClick={() => handleTabChange('market')}
-                      className="text-gold hover:opacity-80 transition-opacity font-semibold"
-                    >
-                      View All
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {nfts.slice(0, 4).map((nft) => (
-                      <div
-                        key={nft.id}
-                        onClick={() => handleTabChange('market')}
-                        className="group bg-[#111111] border border-[#1e1e1e] rounded-lg overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:border-gold/25 hover:shadow-xl"
-                      >
-                        <div className="aspect-square relative overflow-hidden">
-                          <img
-                            src={nft.imageUrl || '/placeholder-nft.png'}
-                            alt={nft.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/placeholder-nft.svg';
-                            }}
-                          />
-                          {nft.price && (
-                            <div className="absolute top-2 right-2 bg-black/70 px-2 py-1 rounded-lg">
-                              <span className="text-gold font-bold text-sm">{nft.price} SOL</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-3">
-                          <h3 className="font-bold text-white text-sm truncate">{nft.name}</h3>
-                          <p className="text-zinc-500 text-xs truncate">{nft.description || 'No description'}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           )}
 
@@ -390,38 +355,6 @@ function AppContent() {
             </div>
           )}
 
-          {activeTab === 'archive' && (
-            <div className="animate-fade-in animate-slide-up">
-              <Suspense fallback={<LoadingSpinner />}>
-                <ArchiveAdvancedSearchForm />
-              </Suspense>
-            </div>
-          )}
-
-          {activeTab === 'echo-marketplace' && (
-            <div className="animate-fade-in animate-slide-up">
-              <Suspense fallback={<LoadingSpinner />}>
-                <EchoMarketplace />
-              </Suspense>
-            </div>
-          )}
-
-          {activeTab === 'echo-mint' && (
-            <div className="animate-fade-in animate-slide-up">
-              <Suspense fallback={<LoadingSpinner />}>
-                <UnifiedDashboard />
-              </Suspense>
-            </div>
-          )}
-
-          {activeTab === 'echo-viewer' && (
-            <div className="animate-fade-in animate-slide-up">
-              <Suspense fallback={<LoadingSpinner />}>
-                <EchoViewer />
-              </Suspense>
-            </div>
-          )}
-
           {activeTab === 'clout' && (
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
@@ -441,11 +374,14 @@ function AppContent() {
             <div className="animate-fade-in animate-slide-up">
               <div className="text-center mb-8">
                 <h2 className="text-4xl font-bold text-white font-display mb-4">
-                  Mint New NFT
+                  Upload & Mint
                 </h2>
                 <p className="text-gray-300 max-w-2xl mx-auto">
-                  Create your unique digital asset on the Solana blockchain. Fast, secure, and
-                  cost-effective.
+                  Upload your own image and mint it as a compressed Solana NFT for fractions of a cent.
+                  Want to mint from the Internet Archive instead? Use{' '}
+                  <button onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))} className="text-gold underline hover:opacity-80">
+                    Discover &amp; Mint
+                  </button>.
                 </p>
               </div>
               <Suspense
@@ -490,53 +426,6 @@ function AppContent() {
             <div className="animate-fade-in animate-slide-up">
               <Suspense fallback={<LoadingSpinner />}>
                 <MyNfts />
-              </Suspense>
-            </div>
-          )}
-
-          {activeTab === 'referrals' && (
-            <div className="animate-fade-in animate-slide-up">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-white font-display mb-4">
-                  Referral System
-                </h2>
-                <p className="text-gray-300 max-w-2xl mx-auto">
-                  Earn 5% from every NFT minted through your referral link. Build your empire!
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex justify-center items-center py-20">
-                    <div className="loading-spinner"></div>
-                    <span className="ml-4 text-gray-300">Loading referral system...</span>
-                  </div>
-                }
-              >
-                <ReferralSystem />
-              </Suspense>
-            </div>
-          )}
-
-          {activeTab === 'waitlist' && (
-            <div className="animate-fade-in animate-slide-up">
-              <div className="text-center mb-8">
-                <h2 className="text-4xl font-bold text-white font-display mb-4">
-                  Join the Waitlist
-                </h2>
-                <p className="text-gray-300 max-w-2xl mx-auto">
-                  Be the first to experience the future of NFT marketplaces. Early access, exclusive
-                  rewards, and more!
-                </p>
-              </div>
-              <Suspense
-                fallback={
-                  <div className="flex justify-center items-center py-20">
-                    <div className="loading-spinner"></div>
-                    <span className="ml-4 text-gray-300">Loading waitlist...</span>
-                  </div>
-                }
-              >
-                <WaitlistSignup />
               </Suspense>
             </div>
           )}
