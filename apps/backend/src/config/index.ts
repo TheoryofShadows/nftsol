@@ -68,6 +68,9 @@ export const env = {
   // Developer/platform wallet — receives 5% marketplace fee
   PLATFORM_WALLET_ADDRESS: process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
 
+  // Platform signing wallet public key (signs mint transactions server-side)
+  PLATFORM_SIGNING_PUBKEY: '7D9JHq6MDMpjVH4jVU7rdhZ5zW3bnAPC5ZFWX2CvGTJs',
+
   // CLOUT treasury — receives CLOUT token distributions
   CLOUT_TREASURY_ADDRESS: process.env.CLOUT_TREASURY_ADDRESS || 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',
 
