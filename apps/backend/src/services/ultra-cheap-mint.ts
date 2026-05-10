@@ -14,8 +14,8 @@
 import { 
   Connection,
 } from '@solana/web3.js';
-import { 
-  createUmi,
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import {
   keypairIdentity,
   generateSigner,
   Umi,
@@ -86,51 +86,40 @@ export class UltraCheapMintService {
    */
   private async initializeUmi(): Promise<UmiInstance> {
     if (this.umi) return this.umi;
-    
+
     try {
-      // Get platform keypair
       const platformKeypair = getPlatformKeypair();
       if (!platformKeypair) {
         throw new Error('Platform keypair not found');
       }
 
-      // Create UMI instance with the RPC endpoint
-      const umi = createUmi()
+      const irysAddress = solanaConfig.cluster === 'mainnet-beta'
+        ? 'https://node1.irys.xyz'
+        : 'https://devnet.irys.xyz';
+
+      // Build UMI once with the correct Helius RPC endpoint
+      const umi = createUmi(solanaConfig.rpcUrl)
         .use(mplBubblegum())
         .use(irysUploader({
-          address: solanaConfig.cluster === 'mainnet-beta' 
-            ? 'https://node1.irys.xyz' 
-            : 'https://devnet.irys.xyz',
+          address: irysAddress,
           providerUrl: solanaConfig.rpcUrl,
           timeout: 60000,
         }));
-      
-      // Set the RPC endpoint
-      umi.rpc = createUmi().rpc;
-      
-      // Convert the keypair to UMI format
+
       const umiKeypair = umi.eddsa.createKeypairFromSecretKey(
         platformKeypair.secretKey
       );
-      
-      // Create a signer from the keypair
       const signer = createSignerFromKeypair(umi, umiKeypair);
-      
-      // Configure UMI with the keypair and plugins
-      umi.use(keypairIdentity(signer))
-         .use(irysUploader())
-         .use(mplBubblegum());
-      
-      // Store the UMI instance
+      umi.use(keypairIdentity(signer));
+
       this.umi = umi as UmiInstance;
-      
+
       console.log('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
-      
       return this.umi;
-      
+
     } catch (error) {
       console.error('[UltraCheapMint] Initialization failed:', error);
-      throw error; // Re-throw to prevent silent failures
+      throw error;
     }
   }
 
@@ -182,30 +171,42 @@ export class UltraCheapMintService {
   }
 
   /**
-   * Ensure merkle tree exists
+   * Ensure merkle tree exists.
+   * Reuses BUBBLEGUM_TREE_ADDRESS from env if set, otherwise creates a new one.
    */
   private async ensureMerkleTree(attempt = 1, maxAttempts = 3) {
     if (this.merkleTree) return this.merkleTree;
-    
+
+    // Reuse existing tree from env — avoids paying ~0.15 SOL each time
+    const existingTreeAddress = process.env.BUBBLEGUM_TREE_ADDRESS;
+    if (existingTreeAddress) {
+      try {
+        const umi = await this.initializeUmi();
+        this.merkleTree = { publicKey: umiPublicKey(existingTreeAddress) };
+        console.log(`[UltraCheapMint] Reusing existing Merkle tree: ${existingTreeAddress}`);
+        return this.merkleTree;
+      } catch (error) {
+        console.warn('[UltraCheapMint] Could not reuse tree from env, will create new one:', error);
+      }
+    }
+
     try {
       const umi = await this.initializeUmi();
       if (!umi) throw new Error('Failed to initialize UMI');
-      
-      // Check if we already have a merkle tree
+
       const trees = await this.getOrCreateMerkleTree();
-      this.merkleTree = trees[0]; // Use the first tree
-      
+      this.merkleTree = trees[0];
+
       return this.merkleTree;
-      
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error(`[UltraCheapMint] Merkle tree initialization failed (attempt ${attempt}/${maxAttempts}):`, errorMessage);
-      
+
       if (attempt >= maxAttempts) {
         throw new Error(`Failed to initialize merkle tree after ${maxAttempts} attempts: ${errorMessage}`);
       }
-      
-      // Wait before retrying
+
       await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
       return this.ensureMerkleTree(attempt + 1, maxAttempts);
     }

@@ -280,7 +280,7 @@ export default function DiscoverMintPage() {
           Search. Verify. <span className="text-[#c9a84c]">Mint.</span>
         </h1>
         <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto">
-          Find anything in the Internet Archive's 40M+ items, verify authenticity with Grok AI,
+          Find anything in the Internet Archive&apos;s 40M+ items, verify authenticity with Grok AI,
           then mint it as a compressed Solana NFT for fractions of a cent.
         </p>
       </div>
@@ -507,8 +507,8 @@ export default function DiscoverMintPage() {
                   <div className="text-3xl mb-2">🤖</div>
                   <h3 className="text-white font-semibold mb-1">Verify with Grok AI</h3>
                   <p className="text-zinc-500 text-sm mb-4">
-                    Grok analyses the content's authenticity, source reliability, and factual accuracy.
-                    The truth score gets embedded in your NFT's metadata on-chain.
+                    Grok analyses the content&apos;s authenticity, source reliability, and factual accuracy.
+                    The truth score gets embedded in your NFT&apos;s metadata on-chain.
                   </p>
                   {verifyError && (
                     <p className="text-yellow-400 text-xs mb-3">{verifyError}</p>
@@ -628,7 +628,7 @@ export default function DiscoverMintPage() {
 
             {/* What gets minted */}
             <div className="bg-[#0c0c0c] border border-[#1e1e1e] rounded-xl p-4 mb-6">
-              <h3 className="text-zinc-400 text-xs uppercase tracking-wider font-medium mb-3">What's included in the NFT</h3>
+              <h3 className="text-zinc-400 text-xs uppercase tracking-wider font-medium mb-3">What&apos;s included in the NFT</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Title</span>

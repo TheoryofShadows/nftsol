@@ -201,7 +201,7 @@ export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClos
               {!verifyResult ? (
                 <div className="bg-[#0c0c0c] border border-[#1e1e1e] rounded-xl p-4 text-center">
                   <p className="text-zinc-400 text-sm mb-3">
-                    Run Grok AI verification to embed a truth score in your NFT's metadata.
+                    Run Grok AI verification to embed a truth score in your NFT&apos;s metadata.
                   </p>
                   {verifyError && <p className="text-yellow-400 text-xs mb-2">{verifyError}</p>}
                   <button
