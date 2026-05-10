@@ -9,7 +9,7 @@ import {
   createTransferInstruction,
   TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
-import { solanaConfig } from '../config';
+import { solanaConfig, env } from '../config';
 import { pool } from '../lib/db';
 
 interface ListNFTParams {
@@ -205,9 +205,9 @@ export class MarketplaceService {
         })
       );
 
-      // 2. Platform fee (5% of price) - transfer to platform wallet if configured
-      if (process.env.PLATFORM_WALLET_ADDRESS) {
-        const platformPubkey = new PublicKey(process.env.PLATFORM_WALLET_ADDRESS);
+      // 2. Platform fee (5% of price)
+      if (env.PLATFORM_WALLET_ADDRESS) {
+        const platformPubkey = new PublicKey(env.PLATFORM_WALLET_ADDRESS);
         const platformFee = Math.floor(price * 0.05 * LAMPORTS_PER_SOL);
         transaction.add(
           SystemProgram.transfer({

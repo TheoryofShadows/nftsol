@@ -44,8 +44,11 @@ export const env = {
   // Database
   DATABASE_URL: process.env.DATABASE_URL || '',
   
-  // Solana
-  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
+  // Solana — prefer Helius over rate-limited public RPC
+  SOLANA_RPC_URL: process.env.SOLANA_RPC_URL ||
+    (process.env.HELIUS_API_KEY
+      ? `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`
+      : 'https://api.mainnet-beta.solana.com'),
   SOLANA_WS_URL: process.env.SOLANA_WS_URL,
   SOLANA_COMMITMENT: (process.env.SOLANA_COMMITMENT || 'confirmed') as 'confirmed' | 'processed' | 'finalized',
   
@@ -61,6 +64,9 @@ export const env = {
   
   // Helius
   HELIUS_API_KEY: process.env.HELIUS_API_KEY || '',
+
+  // Platform wallet — receives 5% marketplace fee
+  PLATFORM_WALLET_ADDRESS: process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
   
   // Other environment variables
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
@@ -90,7 +96,11 @@ export const appConfig: AppConfig = {
 };
 
 export const solanaConfig: SolanaConfig = {
-  rpcUrl: getEnv('SOLANA_RPC_URL', 'https://api.mainnet-beta.solana.com'),
+  rpcUrl: getEnv('SOLANA_RPC_URL',
+    process.env.HELIUS_API_KEY
+      ? `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_API_KEY}`
+      : 'https://api.mainnet-beta.solana.com'
+  ),
   commitment: 'confirmed',
   cluster: (getEnv('SOLANA_CLUSTER', 'mainnet-beta') as 'devnet' | 'testnet' | 'mainnet-beta'),
 };
