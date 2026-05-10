@@ -1,9 +1,9 @@
-// Real Program IDs for NFTSol Smart Contracts (MAINNET)
+// Real Program IDs and wallet addresses for NFTSol (MAINNET)
 export const PROGRAM_IDS = {
-  CLOUT_STAKING: '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab', // Mainnet CLOUT token
-  MARKET_ESCROW: 'HTs1hErzM8MywaUojfUY7QA1T6gLQD977R3HsCnKj7m7',
+  CLOUT_STAKING: '26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab', // CLOUT token mint
+  MARKET_ESCROW: 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs',  // Marketplace fee wallet
   LOYALTY_REGISTRY: '2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9',
-  BUBBLEGUM: 'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY', // Mainnet Bubblegum program ID
+  BUBBLEGUM: 'BGUMAp9Gq7iTEuizy4pqaxsTyUCBK68MDfK752saRPUY',       // Metaplex Bubblegum
   // REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT (deterministic ATA)
 } as const;
 

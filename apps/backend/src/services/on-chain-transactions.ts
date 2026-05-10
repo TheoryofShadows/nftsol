@@ -21,7 +21,7 @@ import {
   getAccount,
   createAssociatedTokenAccountInstruction,
 } from '@solana/spl-token';
-import { solanaConfig, programConfig as _programConfig } from '../config';
+import { solanaConfig, programConfig as _programConfig, env } from '../config';
 import { pool } from '../lib/db';
 
 interface CreateBuyTransactionParams {
@@ -102,19 +102,14 @@ export class OnChainTransactionService {
         })
       );
 
-      // 2. Platform fee (to treasury)
-      // Use developer wallet as platform treasury (this will receive marketplace fees)
+      // 2. Platform fee — split between marketplace wallet and developer wallet
       if (platformFee > 0) {
-        const platformTreasury = new PublicKey(
-          process.env.DEVELOPER_WALLET || process.env.MARKETPLACE_TREASURY || 
-          '3XEs3MJ8PFiqTTqrK6RAkK9vt95jQQ1hKNNKHiE6jJ3o' // Fallback to your wallet
-        );
+        const marketplacePubkey = new PublicKey(env.MARKETPLACE_WALLET_ADDRESS);
+        const developerPubkey = new PublicKey(env.PLATFORM_WALLET_ADDRESS);
+        const halfFee = Math.floor(platformFee / 2);
         transaction.add(
-          SystemProgram.transfer({
-            fromPubkey: buyerPubkey,
-            toPubkey: platformTreasury,
-            lamports: platformFee,
-          })
+          SystemProgram.transfer({ fromPubkey: buyerPubkey, toPubkey: marketplacePubkey, lamports: halfFee }),
+          SystemProgram.transfer({ fromPubkey: buyerPubkey, toPubkey: developerPubkey, lamports: platformFee - halfFee }),
         );
       }
 

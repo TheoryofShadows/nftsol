@@ -65,9 +65,18 @@ export const env = {
   // Helius
   HELIUS_API_KEY: process.env.HELIUS_API_KEY || '',
 
-  // Platform wallet — receives 5% marketplace fee
+  // Developer/platform wallet — receives 5% marketplace fee
   PLATFORM_WALLET_ADDRESS: process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad',
-  
+
+  // CLOUT treasury — receives CLOUT token distributions
+  CLOUT_TREASURY_ADDRESS: process.env.CLOUT_TREASURY_ADDRESS || 'FsoPx1WmXA6FDxYTSULRDko3tKbNG7KxdRTq2icQJGjM',
+
+  // Marketplace fee receiver — collects listing/sale fees
+  MARKETPLACE_WALLET_ADDRESS: process.env.MARKETPLACE_WALLET_ADDRESS || 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs',
+
+  // Creator escrow — holds funds for creator royalty payouts
+  CREATOR_ESCROW_ADDRESS: process.env.CREATOR_ESCROW_ADDRESS || '9BT76L38TeFQitfizvV3vEqoU3agmDQaFt9iXiw4jL7E',
+
   // Other environment variables
   IS_PRODUCTION: process.env.NODE_ENV === 'production',
   IS_DEVELOPMENT: process.env.NODE_ENV === 'development',

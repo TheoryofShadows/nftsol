@@ -205,18 +205,21 @@ export class MarketplaceService {
         })
       );
 
-      // 2. Platform fee (5% of price)
-      if (env.PLATFORM_WALLET_ADDRESS) {
-        const platformPubkey = new PublicKey(env.PLATFORM_WALLET_ADDRESS);
-        const platformFee = Math.floor(price * 0.05 * LAMPORTS_PER_SOL);
-        transaction.add(
-          SystemProgram.transfer({
-            fromPubkey: buyerPubkey,
-            toPubkey: platformPubkey,
-            lamports: platformFee,
-          })
-        );
-      }
+      // 2. Platform fee (5% of price) — 2.5% to marketplace wallet, 2.5% to developer wallet
+      const platformFee = Math.floor(price * 0.05 * LAMPORTS_PER_SOL);
+      const halfFee = Math.floor(platformFee / 2);
+      transaction.add(
+        SystemProgram.transfer({
+          fromPubkey: buyerPubkey,
+          toPubkey: new PublicKey(env.MARKETPLACE_WALLET_ADDRESS),
+          lamports: halfFee,
+        }),
+        SystemProgram.transfer({
+          fromPubkey: buyerPubkey,
+          toPubkey: new PublicKey(env.PLATFORM_WALLET_ADDRESS),
+          lamports: platformFee - halfFee,
+        }),
+      );
 
       // 3. Transfer NFT from seller to buyer
       const sellerTokenAccount = await getAssociatedTokenAddress(mintPubkey, sellerPubkey);
