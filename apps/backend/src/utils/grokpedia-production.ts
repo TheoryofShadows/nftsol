@@ -68,7 +68,7 @@ Be conservative. Only score above 80 if there are clear positive signals. Respon
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       {
-        model: 'grok-beta',
+        model: 'grok-4-latest',
         messages: [
           {
             role: 'system',
@@ -94,16 +94,35 @@ Be conservative. Only score above 80 if there are clear positive signals. Respon
 
     const rawContent = response.data.choices[0]?.message?.content || '';
     let parsed: any = {};
-    try {
-      const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
-      parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
-    } catch {
-      console.warn('[Grok] Could not parse JSON response, falling back');
-      return await verifyWithCloudflareAI(videoUri, nftId);
-    }
+    let verdict: string;
+    let score: number;
 
-    const score = typeof parsed.score === 'number' ? Math.max(0, Math.min(100, parsed.score)) : 50;
-    const verdict = parsed.verdict || 'NEEDS_REVIEW';
+    const jsonMatch = rawContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+        score = typeof parsed.score === 'number' ? Math.max(0, Math.min(100, parsed.score)) : 50;
+        verdict = parsed.verdict || 'NEEDS_REVIEW';
+      } catch {
+        // fall through to text parsing
+        parsed = {};
+        score = 50;
+        verdict = 'NEEDS_REVIEW';
+      }
+    } else {
+      // Handle plain-text response: "VERIFIED - ..." or "NEEDS_REVIEW - ..."
+      if (rawContent.toUpperCase().includes('VERIFIED') && !rawContent.toUpperCase().includes('NEEDS_REVIEW')) {
+        verdict = 'VERIFIED';
+        score = 90;
+      } else if (rawContent.toUpperCase().includes('REJECTED')) {
+        verdict = 'REJECTED';
+        score = 20;
+      } else {
+        verdict = 'NEEDS_REVIEW';
+        score = 50;
+      }
+      parsed = { summary: rawContent.split(' - ')[1] || rawContent };
+    }
     const isVerified = verdict === 'VERIFIED' && score >= 60;
 
     return {
