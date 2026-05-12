@@ -37,6 +37,8 @@ import echoRouter from './routes/echo';
 import cloutRouter from './routes/clout';
 import marketplaceRouter from './routes/marketplace';
 import mintRouter from './routes/mint';
+import { ultraCheapMintService } from './services/ultra-cheap-mint';
+import { fileStorageService } from './services/file-storage';
 import marketplaceBrowseRouter from './routes/marketplace-browse';
 import grokVerificationRouter from './routes/grok-verification';
 import transactionsRouter from './routes/transactions';
@@ -798,13 +800,44 @@ apiV1.post(
         return res.status(503).json(response);
       }
 
-      // Create the mint using real blockchain
-      const mintResult = await nftService.createRealMint(mintRequest);
+      // Upload image file if provided
+      let imageUrl = mintRequest.imageUrl || '';
+      if (mintRequest.file) {
+        const storageResult = await fileStorageService.uploadFile(
+          mintRequest.file.buffer,
+          mintRequest.file.originalname,
+          mintRequest.file.mimetype
+        );
+        if (!storageResult.success || !storageResult.url) {
+          return res.status(500).json({
+            success: false,
+            error: storageResult.error || 'Failed to upload image',
+            code: 'STORAGE_FAILED',
+          });
+        }
+        imageUrl = storageResult.url;
+      }
+
+      // Mint as compressed NFT (ultra-cheap, ~$0.0001) using platform wallet
+      const mintResult = await ultraCheapMintService.mint({
+        toAddress: mintRequest.creatorWallet,
+        name: mintRequest.name,
+        symbol: mintRequest.name.slice(0, 4).toUpperCase(),
+        description: mintRequest.description || `NFT created on NFTSol`,
+        imageUrl,
+      });
 
       if (mintResult.success) {
         const response: ApiResponse = {
           success: true,
-          data: mintResult,
+          data: {
+            mintAddress: mintResult.mintAddress || mintResult.assetId,
+            signature: mintResult.signature,
+            cost: mintResult.cost,
+            costUSD: mintResult.costUSD,
+            imageUrl,
+            treeAddress: mintResult.treeAddress,
+          },
           message: 'NFT minted successfully',
         };
         res.json(response);
