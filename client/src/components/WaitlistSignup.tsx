@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
+import { API_BASE } from '../config/api';
 
 interface WaitlistData {
   email: string;
@@ -46,8 +47,8 @@ export default function WaitlistSignup() {
         source: referralCode ? 'referral' : 'landing',
       };
 
-      // Submit to ConvertKit (or your preferred service)
-      const response = await fetch('/api/waitlist/subscribe', {
+      // Submit to backend
+      const response = await fetch(`${API_BASE}/api/waitlist/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

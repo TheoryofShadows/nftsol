@@ -28,6 +28,8 @@ import { ApiResponse, MintRequest } from './types';
 import withdrawalRoutes from './routes/withdrawals';
 import adminWithdrawalRoutes from './routes/admin/withdrawals';
 import migrationRoutes from './routes/migrations';
+import recommendationsRouter from './routes/recommendations';
+import { runPendingMigrations } from './lib/auto-migrate';
 import jwt from 'jsonwebtoken';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
@@ -1208,6 +1210,7 @@ app.use('/api/marketplace', marketplaceBrowseRouter);
 app.use('/api/tensor', tensorRouter);
 app.use('/api/pnl', pnlLeaderboardRouter);
 app.use('/api/alerts', alertsRouter);
+app.use('/api/v1/recommendations', recommendationsRouter);
 // Consolidated AI enhancement routes (migrated from legacy server/)
 app.use('/api/ai-features', aiFeaturesRouter);
 
@@ -2040,6 +2043,15 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
+
+// Apply pending DB migrations (non-blocking — server still starts if this fails)
+(async () => {
+  try {
+    await runPendingMigrations();
+  } catch (error) {
+    console.warn('Auto-migration failed:', error instanceof Error ? error.message : error);
+  }
+})();
 
 // Initialize CLOUT vault check (non-blocking)
 (async () => {

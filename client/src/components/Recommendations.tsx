@@ -39,15 +39,14 @@ export default function Recommendations() {
     const fetchRecommendations = async () => {
       setLoading(true);
       try {
-        const userId = publicKey.toBase58();
-        const response = await fetch(`${API_BASE}/api/recommendations/${userId}?limit=12&algorithm=${algorithm}`);
-        
+        const response = await fetch(`${API_BASE}/api/v1/recommendations/trending?limit=12`);
+
         if (!response.ok) {
           throw new Error('Failed to fetch recommendations');
         }
 
-        const data = await response.json();
-        setRecommendations(data || []);
+        const json = await response.json();
+        setRecommendations(json.data || []);
       } catch (error) {
         console.error('Error fetching recommendations:', error);
         addNotification({
