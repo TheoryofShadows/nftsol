@@ -339,10 +339,10 @@ export class MarketplaceService {
       const offset = (page - 1) * limit;
 
       let query = `
-        SELECT 
+        SELECT
           l.id, l.mint_address, l.seller, l.price, l.listed_at, l.listed,
           n.name, n.image_url, n.description, n.collection_id
-        FROM listings l
+        FROM nft_listings l
         LEFT JOIN nfts n ON l.mint_address = n.mint_address
         WHERE l.listed = true
       `;
@@ -383,7 +383,7 @@ export class MarketplaceService {
       const result = await pool.query(query, params);
 
       // Get total count
-      let countQuery = 'SELECT COUNT(*) FROM listings l LEFT JOIN nfts n ON l.mint_address = n.mint_address WHERE l.listed = true';
+      let countQuery = 'SELECT COUNT(*) FROM nft_listings l LEFT JOIN nfts n ON l.mint_address = n.mint_address WHERE l.listed = true';
       const countParams: any[] = [];
       let countParamIndex = 1;
 
@@ -454,15 +454,15 @@ export class MarketplaceService {
       const offset = (page - 1) * limit;
 
       const searchQuery = `
-        SELECT 
+        SELECT
           n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
           l.price, l.listed, l.seller
         FROM nfts n
-        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
-        WHERE 
-          n.name ILIKE $1 OR 
+        LEFT JOIN nft_listings l ON n.mint_address = l.mint_address AND l.listed = true
+        WHERE
+          n.name ILIKE $1 OR
           n.description ILIKE $1
-        ORDER BY 
+        ORDER BY
           CASE WHEN l.listed = true THEN 0 ELSE 1 END,
           n.created_at DESC
         LIMIT $2 OFFSET $3
@@ -496,18 +496,16 @@ export class MarketplaceService {
   async getTrendingNFTs(limit: number): Promise<any[]> {
     try {
       const query = `
-        SELECT 
+        SELECT
           n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
           l.price, l.listed, l.seller,
-          COUNT(DISTINCT s.id) as sales_count,
-          COUNT(DISTINCT nv.id) as view_count
+          COUNT(DISTINCT s.id) as sales_count
         FROM nfts n
-        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
-        LEFT JOIN sales s ON n.mint_address = s.mint_address AND s.created_at >= NOW() - INTERVAL '24 hours'
-        LEFT JOIN nft_views nv ON n.mint_address = nv.mint_address AND nv.viewed_at >= NOW() - INTERVAL '24 hours'
+        LEFT JOIN nft_listings l ON n.mint_address = l.mint_address AND l.listed = true
+        LEFT JOIN nft_sales s ON n.mint_address = s.mint_address AND s.sold_at >= NOW() - INTERVAL '24 hours'
         GROUP BY n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id, l.price, l.listed, l.seller
-        HAVING COUNT(DISTINCT s.id) > 0 OR COUNT(DISTINCT nv.id) > 0
-        ORDER BY (COUNT(DISTINCT s.id) * 3 + COUNT(DISTINCT nv.id)) DESC
+        HAVING COUNT(DISTINCT s.id) > 0
+        ORDER BY COUNT(DISTINCT s.id) DESC
         LIMIT $1
       `;
 
@@ -526,14 +524,11 @@ export class MarketplaceService {
   async getFeaturedNFTs(limit: number): Promise<any[]> {
     try {
       const query = `
-        SELECT 
+        SELECT
           n.id, n.mint_address, n.name, n.description, n.image_url, n.owner, n.collection_id,
-          l.price, l.listed, l.seller,
-          c.verified
+          l.price, l.listed, l.seller
         FROM nfts n
-        LEFT JOIN listings l ON n.mint_address = l.mint_address AND l.listed = true
-        LEFT JOIN collections c ON n.collection_id = c.id
-        WHERE c.verified = true AND l.listed = true
+        INNER JOIN nft_listings l ON n.mint_address = l.mint_address AND l.listed = true
         ORDER BY l.listed_at DESC
         LIMIT $1
       `;
