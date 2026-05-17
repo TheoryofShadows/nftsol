@@ -26,7 +26,8 @@
       "@hooks/*": ["./src/hooks/*"],
       "@context/*": ["./src/context/*"],
       "@lib/*": ["./src/lib/*"],
-      "@services/*": ["./src/services/*"]
+      "@services/*": ["./src/services/*"],
+      "@solana/wallet-adapter-wallets": ["./node_modules/@solana/wallet-adapter-wallets/lib/types/index.d.ts"]
     }
   },
   "include": ["src", "../shared"],
