@@ -28,7 +28,7 @@ export const MarketMetrics: React.FC<MarketMetricsProps> = ({
   subtitle,
   metrics,
   onMetricClick,
-  variant = 'trending',
+  variant: _variant = 'trending',
 }) => {
   if (metrics.length === 0) {
     return (

@@ -40,7 +40,7 @@ export async function createIrysNode(options: IrysUploadOptions): Promise<Irys> 
  */
 export async function uploadToIrys(
   _data: Buffer | Uint8Array | string,
-  options: IrysUploadOptions
+  _options: IrysUploadOptions
 ): Promise<IrysUploadResult> {
   // For now, we'll return a mock response since we're using @irys/query which is read-only
   // In a real implementation, you would use @irys/sdk for writing

@@ -128,7 +128,7 @@ export class OrbService {
   /**
    * Generate heatmap for echo contributions
    */
-  async generateHeatmap(ledgerPda: string): Promise<HeatmapData> {
+  async generateHeatmap(_ledgerPda: string): Promise<HeatmapData> {
     if (this.mockMode) {
       return this.getMockHeatmap();
     }
@@ -162,7 +162,7 @@ export class OrbService {
   // Remove when real Orb API is available
   // =============================================================
 
-  private getMockTxHistory(ledgerPda: string) {
+  private getMockTxHistory(_ledgerPda: string) {
     const now = Date.now();
 
     const txs: Transaction[] = [

@@ -40,7 +40,7 @@ describe('Database', () => {
 
   // Test basic query
   it('should execute a simple query', async () => {
-    const mockClient = {
+    const _mockClient = {
       query: jest.fn().mockResolvedValue({ rows: [{ message: 'Hello, World!' }], rowCount: 1 }),
       release: jest.fn(),
       on: jest.fn()

@@ -1,4 +1,3 @@
-import express from 'express';
 import session from 'express-session';
 import { appConfig as _appConfig } from './index';
 import MemoryStoreFactory from 'memorystore';

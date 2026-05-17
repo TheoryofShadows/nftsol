@@ -18,7 +18,7 @@ const client: AxiosInstance = axios.create({
 // Test data
 let testTenantId: string;
 let testApiKey: string;
-let testApiKeyId: string;
+let _testApiKeyId: string;
 let authenticatedClient: AxiosInstance;
 
 // ============================================
@@ -271,7 +271,7 @@ async function testApiKeyManagement() {
     }
 
     const newKey = createResponse.data.data;
-    testApiKeyId = createResponse.data.data.id || 'unknown'; // Will need to extract from response
+    _testApiKeyId = createResponse.data.data.id || 'unknown'; // Will need to extract from response
 
     logTest('Create New API Key', '✅', {
       name: 'Test Mobile App',

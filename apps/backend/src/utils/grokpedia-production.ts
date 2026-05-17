@@ -161,7 +161,7 @@ Be conservative. Only score above 80 if there are clear positive signals. Respon
  */
 async function verifyWithCloudflareAI(
   videoUri: string,
-  nftId: string
+  _nftId: string
 ): Promise<GrokVerificationResult> {
   try {
     // Cloudflare AI is free but requires different API structure

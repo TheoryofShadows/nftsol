@@ -181,7 +181,7 @@ export class UltraCheapMintService {
     const existingTreeAddress = process.env.BUBBLEGUM_TREE_ADDRESS;
     if (existingTreeAddress) {
       try {
-        const umi = await this.initializeUmi();
+        await this.initializeUmi();
         this.merkleTree = { publicKey: umiPublicKey(existingTreeAddress) };
         console.log(`[UltraCheapMint] Reusing existing Merkle tree: ${existingTreeAddress}`);
         return this.merkleTree;

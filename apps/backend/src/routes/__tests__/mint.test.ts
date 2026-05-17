@@ -309,7 +309,7 @@ describe('🚀 NFT Minting Tests', () => {
     it('cost estimate should respond quickly', async () => {
       const start = Date.now();
 
-      const response = await request(app)
+      await request(app)
         .get('/api/mint/estimate')
         .expect(200);
 
@@ -322,7 +322,7 @@ describe('🚀 NFT Minting Tests', () => {
     it('comparison data should respond quickly', async () => {
       const start = Date.now();
 
-      const response = await request(app)
+      await request(app)
         .get('/api/mint/compare')
         .expect(200);
 

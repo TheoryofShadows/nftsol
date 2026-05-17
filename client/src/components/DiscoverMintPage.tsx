@@ -8,7 +8,7 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { archiveService, SearchResult } from '../services/archiveService';
 import { useNotification } from './NotificationSystem';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS as _API_ENDPOINTS } from '../config/api';
 
 type Step = 'search' | 'verify' | 'mint' | 'done';
 

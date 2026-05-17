@@ -67,7 +67,7 @@ function sendMetricToBackend(metric: WebVitalMetric) {
 /**
  * Observe Cumulative Layout Shift
  */
-function observeCLS() {
+function _observeCLS() {
   let cls = 0;
 
   const observer = new PerformanceObserver((list) => {
@@ -97,7 +97,7 @@ function observeCLS() {
 /**
  * Observe Largest Contentful Paint
  */
-function observeLCP() {
+function _observeLCP() {
   const observer = new PerformanceObserver((list) => {
     const entries = list.getEntries();
     const lastEntry = entries[entries.length - 1] as LargestContentfulPaint;
@@ -123,7 +123,7 @@ function observeLCP() {
 /**
  * Observe First Input Delay
  */
-function observeFID() {
+function _observeFID() {
   const observer = new PerformanceObserver((list) => {
     for (const entry of list.getEntries()) {
       const fid = (entry as FirstInput).processingDuration;
@@ -150,7 +150,7 @@ function observeFID() {
 /**
  * Observe First Contentful Paint
  */
-function observeFCP() {
+function _observeFCP() {
   const observer = new PerformanceObserver((list) => {
     const entries = list.getEntries();
 
@@ -177,7 +177,7 @@ function observeFCP() {
 /**
  * Report Time to First Byte
  */
-function reportTTFB() {
+function _reportTTFB() {
   const navigationTiming = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
 
   if (!navigationTiming) return;

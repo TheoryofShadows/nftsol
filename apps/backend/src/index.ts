@@ -16,7 +16,7 @@ import { pool } from './lib/db';
 import { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
 import {
   validateWallet,
-  csrfProtection,
+  csrfProtection as _csrfProtection,
   generateCSRFToken,
   sanitizeInput,
   sanitizeRequestBody,
@@ -33,7 +33,7 @@ import { runPendingMigrations } from './lib/auto-migrate';
 import jwt from 'jsonwebtoken';
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
-import nftRouter from './routes/nfts';
+import nftsOptimizedRouter from './routes/nfts-optimized';
 import orbRouter from './routes/orb';
 import echoRouter from './routes/echo';
 import cloutRouter from './routes/clout';
@@ -1128,8 +1128,8 @@ apiV1.use(
 apiV1.use('/admin/withdrawals', authenticate, requireAdmin, adminWithdrawalRoutes);
 apiV1.use('/admin/migrations', migrationRoutes);
 
-// Mount NFT routes with caching
-apiV1.use('/nfts', nftRouter);
+// Mount NFT routes — optimized version with response caching
+apiV1.use('/nfts', nftsOptimizedRouter);
 
 // 🌍 Internet Archive + Grok + Echo Integration (revolutionary NFT workflow)
 apiV1.use('/archive', archiveGrokEchoRouter);
@@ -1201,7 +1201,6 @@ app.use('/api/metrics', performanceMetricsRouter);
 // CLOUT routes
 app.use('/api/clout', cloutRouter);
 
-// DEBUG: ping to confirm route registration reached this point
 // Marketplace routes
 app.use('/api/marketplace', marketplaceRouter);
 app.use('/api/marketplace', marketplaceBrowseRouter);

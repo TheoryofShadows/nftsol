@@ -51,7 +51,7 @@ export const FeaturedCarousel: React.FC<FeaturedCarouselProps> = ({
 
   const current = collections[currentIndex];
   const nextIndex = (currentIndex + 1) % collections.length;
-  const next = collections[nextIndex];
+  const _next = collections[nextIndex];
 
   return (
     <div className="w-full">

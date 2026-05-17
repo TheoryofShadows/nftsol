@@ -6,7 +6,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError as _AxiosError } from 'axios';
 import rateLimit from 'express-rate-limit';
 
 const router = Router();
