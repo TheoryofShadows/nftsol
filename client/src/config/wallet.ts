@@ -5,8 +5,9 @@ import {
   LedgerWalletAdapter,
   TorusWalletAdapter,
   CoinbaseWalletAdapter,
-  TrustWalletAdapter,
   MathWalletAdapter,
+  BackpackWalletAdapter,
+  ExodusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 /**
@@ -61,11 +62,12 @@ export const getWalletAdapters = () => {
   return [
     new PhantomWalletAdapter(),
     new SolflareWalletAdapter(),
+    new BackpackWalletAdapter(),
+    new ExodusWalletAdapter(),
     new CoinbaseWalletAdapter(),
-    new TrustWalletAdapter(),
+    new MathWalletAdapter(),
     new LedgerWalletAdapter(),
     new TorusWalletAdapter(),
-    new MathWalletAdapter(),
   ];
 };
 
