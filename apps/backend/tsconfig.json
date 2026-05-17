@@ -18,12 +18,6 @@
     "strictNullChecks": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
     "typeRoots": [
       "./node_modules/@types",
       "./src/@types"
