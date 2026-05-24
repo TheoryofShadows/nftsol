@@ -76,7 +76,7 @@ const LoadingSpinner = () => (
 );
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('discover');
+  const [activeTab, setActiveTab] = useState('home');
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics: _metrics, getPerformanceReport } = usePerformance();
@@ -469,24 +469,24 @@ function AppContent() {
               <h3 className="text-white font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="text-zinc-500 hover:text-gold transition-colors">
+                  <button onClick={() => handleTabChange('market')} className="text-zinc-500 hover:text-gold transition-colors">
                     Marketplace
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#" className="text-zinc-500 hover:text-gold transition-colors">
+                  <button onClick={() => handleTabChange('mint')} className="text-zinc-500 hover:text-gold transition-colors">
                     Mint NFT
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#" className="text-zinc-500 hover:text-gold transition-colors">
+                  <button onClick={() => handleTabChange('collections')} className="text-zinc-500 hover:text-gold transition-colors">
                     Collections
-                  </a>
+                  </button>
                 </li>
                 <li>
-                  <a href="#" className="text-zinc-500 hover:text-gold transition-colors">
+                  <button onClick={() => handleTabChange('my-nfts')} className="text-zinc-500 hover:text-gold transition-colors">
                     My NFTs
-                  </a>
+                  </button>
                 </li>
               </ul>
             </div>

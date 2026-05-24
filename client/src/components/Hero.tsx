@@ -195,7 +195,7 @@ export default function Hero() {
         {/* Action Buttons */}
         <div className="flex flex-wrap justify-center gap-3 md:gap-4 animate-fade-in animate-delay-400 px-4">
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'archive' }))}
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))}
             className="px-5 md:px-7 py-2.5 md:py-3 bg-[#c9a84c] text-black font-semibold rounded-lg hover:bg-[#b8973f] transition-colors text-sm md:text-base"
           >
             Search Archive
