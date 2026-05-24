@@ -160,11 +160,12 @@ npm run type-check       # Check types
 | Document | Description |
 |---------|-------------|
 | [README.md](README.md) | Project overview |
-| [TECHNICAL-DOCS.md](TECHNICAL-DOCS.md) | API reference, database schema |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System architecture |
-| [SECURITY.md](SECURITY.md) | Security policy |
+| [TECHNICAL-DOCS.md](TECHNICAL-DOCS.md) | Architecture, API reference, database schema |
+| [SECURITY.md](SECURITY.md) | Security policy & current measures |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contributing guidelines |
+| [CLAUDE.md](CLAUDE.md) | Guide for AI assistants working on this repo |
 | [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [docs/](docs/) | User-facing guides — also published at [theoryofshadows.github.io/nftsol](https://theoryofshadows.github.io/nftsol/) |
 
 ## Contributing
 
