@@ -2,9 +2,7 @@ name: Deploy Docs to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
-      - claude/docs-cleanup-github-pages-h0XRR  # TEMP: verification on this branch; remove before merge
+    branches: [main]
     paths:
       - 'docs/**'
       - '.github/workflows/pages.yml'
