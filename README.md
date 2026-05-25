@@ -21,10 +21,10 @@ Enterprise-grade NFT marketplace on Solana with compressed NFTs, CLOUT rewards, 
 - **Modern Dashboard** - Portfolio, stats, and activity feed
 - **Smart Onboarding** - Interactive tours and welcome experience
 - **CLOUT Token** - Native reward token (`26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`)
-- **Eternal Echoes** - Collaborative, layered NFT creation with video support
+- **Eternal Echoes** - Collaborative, layered NFT creation with video support (Anchor program: `14Z6HF4jSdKJse3C6uL6pyodepAZojVgqcMGDARwgNFG`)
 - **Compressed NFTs** - Low-cost minting via Metaplex Bubblegum
-- **Enterprise Security** - Rate limiting, JWT auth, audit trails
-- **9 Wallet Support** - Phantom, Solflare, Solong, Slope, Trust, TokenPocket, Ledger, MathWallet, Torus
+- **Enterprise Security** - Rate limiting, JWT + CSRF auth, structured logging with secret redaction
+- **Multi-Wallet Support** - Phantom, Solflare, Backpack, Ledger, Coinbase, MathWallet, Exodus, Torus via Solana Wallet Adapter
 - **Optimized Performance** - React Query, intelligent caching, RPC failover
 
 ## Architecture
@@ -42,9 +42,9 @@ Backend  (Node.js + Express + TypeScript)
 
 ## Tech Stack
 
-**Frontend**: React 18.3, TypeScript 5.9, Vite 7.1, Tailwind CSS, React Query, Solana Wallet Adapter
-**Backend**: Node.js 20, Express, PostgreSQL, Drizzle ORM, Solana Web3.js, Metaplex UMI, Irys SDK
-**Blockchain**: Solana Mainnet, Metaplex Bubblegum, SPL Token, Anchor Programs
+**Frontend**: React 18.3, TypeScript 5.9, Vite 7.1, Tailwind CSS 3.4, React Query 5, Solana Wallet Adapter (Phantom, Solflare, Backpack, Ledger, Coinbase, MathWallet, Exodus, Torus)
+**Backend**: Node.js 20, Express 4.18, PostgreSQL + Drizzle ORM 0.45, Solana Web3.js, Metaplex UMI + Bubblegum, Irys / Pinata / S3 uploaders, JWT + CSRF auth
+**Blockchain**: Solana Mainnet, Metaplex Bubblegum (compressed NFTs), SPL Token, Anchor 0.29 (eternal_echoes program)
 
 ## Quick Start
 
@@ -78,9 +78,11 @@ DATABASE_URL=postgresql://user:password@localhost:5432/nftsol
 SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
 SOLANA_CLUSTER=mainnet-beta
 HELIUS_API_KEY=your_helius_key
-CLOUT_PROGRAM_ID=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+CLOUT_MINT=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+REWARDS_OWNER=3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad
 PLATFORM_SECRET_KEY_BASE58=your_base58_secret_key
 JWT_SECRET=your_jwt_secret_64_chars
+ADMIN_WALLETS=comma,separated,admin,wallet,addresses
 ALLOWED_ORIGINS=https://nftsol.app,https://www.nftsol.app,https://nftsolmarket.netlify.app
 NODE_ENV=development
 ```
@@ -104,30 +106,41 @@ XAI_API_KEY=your_xai_api_key         # xAI Grok for AI verification
 ## API Endpoints
 
 ### Public
-- `GET /health` - Health check
-- `GET /api/v1/programs` - Program configuration
+- `GET /health`, `GET /api/health`, `GET /healthz` - Health checks (last one includes DB + Solana status)
+- `GET /api/public/stats` - Platform statistics
+- `GET /api/v1/programs` - Program configuration (mints, vaults, program IDs)
+- `GET /api/v1/solana/status` - Solana network health
 - `GET /api/v1/market` - Marketplace NFTs
-- `GET /api/v1/nfts/:mintAddress` - NFT metadata
-- `GET /api/v1/wallet/:address` - Wallet info
+- `GET /api/v1/collections` - Collections with floor prices
+- `GET /api/v1/nft/:mintAddress` - Single NFT metadata
+- `GET /api/v1/nfts/:owner` - NFTs owned by a wallet
+- `GET /api/v1/wallet/:address` - Wallet info (balance, existence)
+- `GET /api/clout/balance/:address` - CLOUT balance
+- `GET /api/clout/vault-balance` - Rewards vault balance
+- `GET /api/archive/search?q=...` - Internet Archive search
 
-### Protected (JWT)
-- `POST /api/v1/simple-mint` - Mint NFT
+### CSRF-protected (browser flows)
+- `POST /api/v1/simple-mint` - Mint NFT (double-submit CSRF; get token from `GET /api/v1/csrf-token` or `GET /api/csrf-token`)
 - `POST /api/echo/mint` - Mint Eternal Echo
-- `GET /api/clout/balance/:wallet` - CLOUT balance
+- `POST /api/marketplace/list` / `POST /api/marketplace/delist` - Listings
+- `POST /api/grok/verify` - AI content verification
 
-### Admin
-- `POST /api/v1/auth/admin` - Admin auth (wallet signature)
+### Admin (JWT, wallet-signature auth)
+- `POST /api/v1/auth/admin` - Admin auth (wallet signature → JWT)
+- `POST /api/clout/reward` - Distribute CLOUT
 - `POST /api/v1/admin/withdrawals` - Process withdrawals
+- `GET  /api/v1/admin/emergency/status` - Emergency pause status
+- `POST /api/v1/admin/emergency/pause-withdrawals` - Toggle withdrawal pause
 
 Full API docs: **[TECHNICAL-DOCS.md](TECHNICAL-DOCS.md)**
 
 ## CLOUT Token
 
-- **Token Address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`
-- **Rewards Vault**: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
+- **Mint Address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab` (9 decimals, 1B supply)
+- **Rewards Owner**: `3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad` (the rewards vault is the deterministic Associated Token Account of this owner for the CLOUT mint; auto-derived at runtime via `getRewardsVaultAddress()`)
 - **Solscan**: [View Token](https://solscan.io/token/26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab)
 
-Users earn CLOUT through minting, purchases, referrals, and engagement.
+Users earn CLOUT through minting, purchases, referrals, and engagement. See `shared/constants/index.ts` (`CLOUT_CONFIG.REWARD_RATES`) for the canonical reward schedule.
 
 ## Deployment
 
@@ -183,4 +196,4 @@ MIT License
 
 **Built on Solana** | https://nftsol.app
 
-*Last Updated: February 2026*
+*Last Updated: May 2026*

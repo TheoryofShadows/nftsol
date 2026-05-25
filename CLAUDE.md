@@ -1,6 +1,6 @@
 # CLAUDE.md — AI Assistant Guide for NFTSol
 
-**Version:** 3.0
+**Version:** 3.1
 **Last Updated:** May 2026
 **Purpose:** Orientation for AI assistants working on the NFTSol codebase
 
@@ -29,27 +29,26 @@ nftsol/
 ├── client/                 # Frontend React app (Vite)
 │   └── src/
 │       ├── components/    # Shared UI
-│       ├── hooks/         # Custom hooks (useCloutBalance, useNfts, useWallet)
+│       ├── hooks/         # Custom hooks (useCloutBalance, useNfts, etc.)
 │       ├── services/      # API client layer
 │       ├── context/       # React contexts
+│       ├── config/        # Client config (wallet adapters, RPC)
 │       ├── echo/          # Eternal Echoes feature
-│       └── wallet/        # Wallet adapters
-│
-├── server/                # Legacy server (still partly active)
-│   ├── routes/           # ai-features, ai-metadata, clout-deployment, solana-rewards, wallet-config
-│   └── services/         # clout-system, ai-features-service, enhanced-solana-api, recommendation-engine, etc.
+│       └── wallet/        # Phantom provider helper (modal wallets configured via @solana/wallet-adapter-wallets in config/wallet.ts)
 │
 ├── apps/
 │   ├── backend/          # Main backend (Express + Drizzle)
-│   │   └── src/{routes,services,middleware,config,lib,index.ts}
-│   └── smart-contracts/  # Anchor programs (eternal_echoes)
+│   │   └── src/{routes,services,middleware,config,lib,utils,index.ts}
+│   └── smart-contracts/  # Anchor workspace
+│       ├── Anchor.toml
+│       └── programs/eternal_echoes/   # Anchor 0.29 program
 │
-├── shared/               # Cross-cutting code (types, constants, config, validation, utils)
-├── docs/                 # User-facing guides → published to GitHub Pages
+├── shared/               # Cross-cutting code (types, constants, config, validation, utils, services)
+├── docs/                 # User-facing guides → published to GitHub Pages (Jekyll, Cayman theme)
 └── .github/workflows/    # ci.yml, deploy.yml, pages.yml, rust-clippy.yml, codeql.yml
 ```
 
-**Dual server caveat:** `server/` and `apps/backend/` coexist during migration. When touching backend code, check `git log -- <path>` to see which copy is live.
+> The legacy top-level `server/` directory has been removed. All backend code now lives under `apps/backend/`.
 
 ---
 
@@ -58,10 +57,10 @@ nftsol/
 These supplement (don't replace) [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### When you must check before editing
-- **`server/` vs `apps/backend/`** — Before modifying a backend file, confirm which copy is wired up (look at `apps/backend/src/index.ts` mounts and `server/index.ts` mounts).
 - **Solana mainnet code** — This handles real assets. Don't change RPC URLs, mint addresses, or vault addresses without explicit confirmation. Constants of note:
-  - CLOUT mint: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`
-  - Rewards vault: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
+  - CLOUT mint: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab` (env: `CLOUT_MINT` / `CLOUT_PROGRAM_ID`)
+  - Rewards owner: `3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad` (env: `REWARDS_OWNER`)
+  - Rewards vault: **auto-derived** as the deterministic ATA of `REWARDS_OWNER + CLOUT_MINT` via `getRewardsVaultAddress()` / `getOrCreateCloutVault()` in `apps/backend/src/utils/clout-vault.ts` — do not hardcode.
   - Platform secret: `PLATFORM_SECRET_KEY_BASE58` — never log, never commit, never include in outputs.
 
 ### Path aliases
@@ -88,9 +87,9 @@ import { NFT } from '@shared/types';                // shared/*
 ## Common task playbook
 
 **Adding an API endpoint**
-1. Create handler in `server/routes/` *or* `apps/backend/src/routes/` — match the surrounding pattern.
-2. Mount in the corresponding `index.ts`.
-3. Document the endpoint in `TECHNICAL-DOCS.md` under "API Reference".
+1. Create the handler under `apps/backend/src/routes/` — match the surrounding pattern (Express `Router`, export default).
+2. Mount it in `apps/backend/src/index.ts` (search for `app.use('/api/...')`). Versioned endpoints go on the `apiV1` router; feature routers mount under `/api/<feature>`.
+3. Document the endpoint in `TECHNICAL-DOCS.md` under "API Reference" and, if user-facing, add an example to `docs/API_EXAMPLES.md`.
 
 **Adding a React component**
 1. New file under `client/src/components/` (or feature folder like `echo/`, `wallet/`).
@@ -98,11 +97,12 @@ import { NFT } from '@shared/types';                // shared/*
 3. Use Tailwind utility classes — the design system already exists; don't add ad-hoc CSS files unless necessary.
 
 **Working with the wallet**
-- Use `useWallet()` from `@solana/wallet-adapter-react` — don't roll your own connection logic.
-- Connection RPC: `import.meta.env.VITE_SOLANA_RPC_URL` on client, `process.env.SOLANA_RPC_URL` on server.
+- Use `useWallet()` from `@solana/wallet-adapter-react` — don't roll your own connection logic. Adapters are configured in `client/src/config/wallet.ts` (`getWalletAdapters()`).
+- The `client/src/wallet/` folder contains a Phantom-specific provider helper (`getProvider.ts`, `usePhantom.tsx`) used in a few places; new code should prefer the standard wallet-adapter hooks.
+- Connection RPC: `import.meta.env.VITE_SOLANA_RPC_URL` (or `VITE_HELIUS_API_KEY`) on the client, `process.env.SOLANA_RPC_URL` on the server.
 
 **Working with CLOUT**
-- Backend: call `cloutService.distributeReward(address, amount, reason)` — don't manually craft SPL transfers.
+- Backend: instantiate `CloutTokenService` from `apps/backend/src/services/cloutToken.ts` and call `distributeCloutRewards(...)` — don't manually craft SPL transfers. The service handles ATA creation, vault derivation, and decimals (CLOUT uses 9).
 
 ---
 
@@ -127,7 +127,6 @@ For deeper troubleshooting, see [TECHNICAL-DOCS.md → Troubleshooting](TECHNICA
 - [ ] `npm run build` passes for client and/or backend
 - [ ] No new `console.log`s; use `logger`
 - [ ] No secrets in code or commits
-- [ ] No new files in the deprecated `server/` tree if `apps/backend/` already has the equivalent
 - [ ] Updated `TECHNICAL-DOCS.md` if you added/changed an API endpoint
 - [ ] Commit messages follow Conventional Commits (`feat:`, `fix:`, `docs:`, etc.)
 - [ ] Tests added or updated where logic changed

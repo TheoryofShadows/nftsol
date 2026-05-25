@@ -84,18 +84,18 @@ print(f"Total Volume: {stats['platform']['totalVolume']} SOL")
 
 ### Get Wallet Information
 
-Get wallet balance and existence status on-chain.
+Get wallet balance and existence status on-chain. The versioned endpoint is `GET /api/v1/wallet/:address`.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/wallet/11111111111111111111111111111111"
+curl -X GET "https://nftsol.onrender.com/api/v1/wallet/11111111111111111111111111111111"
 ```
 
 #### JavaScript
 ```javascript
 async function getWalletInfo(walletAddress) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/wallet/${walletAddress}`
+    `https://nftsol.onrender.com/api/v1/wallet/${walletAddress}`
   );
   const data = await response.json();
 
@@ -114,7 +114,7 @@ const info = await getWalletInfo('11111111111111111111111111111111');
 import requests
 
 def get_wallet_info(wallet_address):
-    url = f'https://nftsol.onrender.com/api/wallet/{wallet_address}'
+    url = f'https://nftsol.onrender.com/api/v1/wallet/{wallet_address}'
     response = requests.get(url)
     data = response.json()
 
@@ -132,7 +132,7 @@ info = get_wallet_info('11111111111111111111111111111111')
 
 ### List All NFTs
 
-Get NFTs from the marketplace with optional filtering.
+Get NFTs from the marketplace with optional filtering. Supports `owner`, `collection`, `status`, and `limit` query parameters.
 
 #### cURL
 ```bash
@@ -145,6 +145,8 @@ curl -X GET "https://nftsol.onrender.com/api/nfts?owner=111111111111111111111111
 # Get listed NFTs
 curl -X GET "https://nftsol.onrender.com/api/nfts?status=listed"
 ```
+
+> To fetch NFTs owned by a specific wallet on the versioned API, use `GET /api/v1/nfts/:owner` instead.
 
 #### JavaScript
 ```javascript
@@ -194,14 +196,14 @@ Get detailed information about a specific NFT.
 
 #### cURL
 ```bash
-curl -X GET "https://nftsol.onrender.com/api/nft/TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV"
+curl -X GET "https://nftsol.onrender.com/api/v1/nft/TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV"
 ```
 
 #### JavaScript
 ```javascript
 async function getNFTDetails(mintAddress) {
   const response = await fetch(
-    `https://nftsol.onrender.com/api/nft/${mintAddress}`
+    `https://nftsol.onrender.com/api/v1/nft/${mintAddress}`
   );
   const data = await response.json();
 
@@ -224,7 +226,7 @@ const nft = await getNFTDetails('TokenkegQfeZyiNwAJsyFbPVwwQQfyanppFWUNqLjV');
 import requests
 
 def get_nft_details(mint_address):
-    url = f'https://nftsol.onrender.com/api/nft/{mint_address}'
+    url = f'https://nftsol.onrender.com/api/v1/nft/{mint_address}'
     response = requests.get(url)
     data = response.json()
 
@@ -685,13 +687,13 @@ Search Internet Archive for public domain items.
 #### cURL
 ```bash
 # Basic search
-curl -X GET "https://nftsol.onrender.com/api/archive?q=jazz&limit=20"
+curl -X GET "https://nftsol.onrender.com/api/archive/search?q=jazz&limit=20"
 
 # Filter by media type
-curl -X GET "https://nftsol.onrender.com/api/archive?q=historical%20speeches&mediaType=audio"
+curl -X GET "https://nftsol.onrender.com/api/archive/search?q=historical%20speeches&mediaType=audio"
 
 # Search by year
-curl -X GET "https://nftsol.onrender.com/api/archive?q=moon%20landing&yearFrom=1950&yearTo=1980"
+curl -X GET "https://nftsol.onrender.com/api/archive/search?q=moon%20landing&yearFrom=1950&yearTo=1980"
 ```
 
 #### JavaScript
@@ -703,7 +705,7 @@ async function searchArchive(query, filters = {}) {
   });
 
   const response = await fetch(
-    `https://nftsol.onrender.com/api/archive?${params}`
+    `https://nftsol.onrender.com/api/archive/search?${params}`
   );
   return await response.json();
 }
@@ -733,7 +735,7 @@ def search_archive(query, filters=None):
         params.update(filters)
 
     response = requests.get(
-        'https://nftsol.onrender.com/api/archive',
+        'https://nftsol.onrender.com/api/archive/search',
         params=params
     )
     return response.json()
@@ -1044,4 +1046,4 @@ For questions or issues:
 
 ---
 
-**Last Updated**: November 2025
+**Last Updated**: May 2026
