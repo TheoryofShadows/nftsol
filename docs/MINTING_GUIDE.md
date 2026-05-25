@@ -85,7 +85,7 @@ Fill in the details:
 - Your NFT appears in the marketplace immediately
 
 **Cost Breakdown**:
-- Platform fee: 2% of sale price
+- Platform fee: 2.5% of sale price
 - Solana gas fee: ~0.00025 SOL
 - **Total**: ~$0.01 in SOL
 
@@ -177,7 +177,7 @@ Archive-based minting is special because:
   - Redeemed for exclusive access
 
 **Cost Breakdown**:
-- Platform fee: 2% of sale price
+- Platform fee: 2.5% of sale price
 - Solana gas: ~0.00025 SOL
 - **Total**: ~$0.01 in SOL
 - **Bonus**: +15 CLOUT rewards!
@@ -265,8 +265,8 @@ When someone buys the Echo NFT:
 #### Platform Fees
 - **Minting**: FREE (we cover the cost!)
 - **Listing**: FREE
-- **Selling**: 2% of sale price
-  - Example: Your NFT sells for 5 SOL → You get 4.9 SOL (2% = 0.1 SOL fee)
+- **Selling**: 2.5% of sale price
+  - Example: Your NFT sells for 5 SOL → You get 4.875 SOL (2.5% = 0.125 SOL fee)
 
 #### Optional: Grok Verification
 - **Cost**: FREE
@@ -279,8 +279,8 @@ When someone buys the Echo NFT:
 ```
 Upload art → Pay gas (~0.001 SOL)
 List for 2 SOL → Pay gas (~0.001 SOL)
-Buyer purchases → You get: 2 SOL - 0.04 SOL (2% fee) = 1.96 SOL
-Total cost to you: ~0.002 SOL + 2% of sales
+Buyer purchases → You get: 2 SOL - 0.05 SOL (2.5% fee) = 1.95 SOL
+Total cost to you: ~0.002 SOL + 2.5% of sales
 ```
 
 **Example 2: Mint Archive Item, Get CLOUT**
@@ -290,7 +290,7 @@ Prepare for mint → FREE
 Verify with Grok → FREE
 Mint NFT → Pay gas (~0.001 SOL)
 List for 1.5 SOL → Pay gas (~0.001 SOL)
-Buyer purchases → You get: 1.5 SOL - 0.03 SOL (2%) + 15 CLOUT
+Buyer purchases → You get: 1.5 SOL - 0.0375 SOL (2.5%) + 15 CLOUT
 Total cost: ~0.002 SOL, earn 15 CLOUT + income
 ```
 
@@ -540,4 +540,6 @@ A: Try:
 **Happy Minting!** 🎨✨
 
 Created with ❤️ for the Solana community.
+
+*Last Updated: May 2026*
 

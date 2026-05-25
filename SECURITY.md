@@ -6,7 +6,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x     | :white_check_mark: |
+| 2.x     | :white_check_mark: |
+| 1.x     | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -85,7 +86,7 @@ Report privately via one of:
 
 **Request validation**
 - Input sanitization (XSS, NoSQL injection protection)
-- Joi schemas for request bodies; type checking on every endpoint
+- `express-validator` and Zod schemas (`shared/validation/schemas.ts`) for request bodies; type checking on every endpoint
 - 10MB request size limit
 
 **Monitoring**
@@ -124,8 +125,8 @@ REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DB=0
 
-# CORS
-ALLOWED_ORIGINS=https://nftsol.app,https://www.nftsol.app
+# CORS — must include every origin the frontend can be served from
+ALLOWED_ORIGINS=https://nftsol.app,https://www.nftsol.app,https://nftsolmarket.netlify.app
 
 # Rate limiting
 RATE_LIMIT_WINDOW_MS=60000

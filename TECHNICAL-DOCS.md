@@ -1,6 +1,6 @@
 # NFTSol Technical Documentation
 
-**Version:** 2.1
+**Version:** 2.2
 **Last Updated:** May 2026
 **Status:** Production
 
@@ -43,17 +43,18 @@
                       │
         ┌─────────────┼─────────────┬──────────────┐
         │             │             │              │
-┌───────▼─────┐ ┌─────▼──────┐ ┌───▼────┐ ┌───────▼─────┐
-│   Solana    │ │PostgreSQL  │ │ Redis  │ │   IPFS      │
-│    RPC      │ │  Database  │ │ Cache  │ │  Storage    │
-└─────────────┘ └────────────┘ └────────┘ └─────────────┘
+┌───────▼─────┐ ┌─────▼──────┐ ┌───▼────┐ ┌───────▼──────┐
+│   Solana    │ │ PostgreSQL │ │ Redis  │ │  Storage     │
+│    RPC      │ │  Database  │ │ Cache  │ │ (Irys/Pinata │
+│             │ │ (Drizzle)  │ │        │ │  / AWS S3)   │
+└─────────────┘ └────────────┘ └────────┘ └──────────────┘
 ```
 
 ### Technology Stack
 
-**Frontend** — React 18.3, TypeScript 5.9, Vite 7.1, Tailwind CSS 4.1, `@solana/wallet-adapter-react` (9 adapters), `react-joyride`, `@solana/web3.js` 1.98+.
+**Frontend** — React 18.3, TypeScript 5.9, Vite 7.1, Tailwind CSS 3.4, `@solana/wallet-adapter-react` 0.15+ (Phantom, Solflare, Backpack, Ledger, Coinbase, MathWallet, Exodus, Torus), `@tanstack/react-query` 5+, `react-joyride`, `@solana/web3.js` 1.98+.
 
-**Backend** — Node.js 20+, Express 5.1+, TypeScript 5.9+, PostgreSQL + Drizzle ORM, `@solana/web3.js`, `@metaplex-foundation/js` + `umi`, `@coral-xyz/anchor` 0.32+, IPFS via Pinata, JWT auth.
+**Backend** — Node.js 20+, Express 4.18, TypeScript 5.9+, PostgreSQL + Drizzle ORM 0.45, `@solana/web3.js` 1.98+, `@metaplex-foundation/js` 0.20 + `umi` 1.x, `@metaplex-foundation/mpl-bubblegum` 5.x, `@coral-xyz/anchor` 0.29, content storage via Irys / Pinata / AWS S3, JWT auth (`jsonwebtoken`) plus CSRF (`@dr.pogodin/csurf`).
 
 ---
 
@@ -67,42 +68,40 @@ nftsol/
 │   │   ├── hooks/            # Custom React hooks
 │   │   ├── services/         # API service layer
 │   │   ├── context/          # React contexts
-│   │   ├── echo/             # Eternal Echoes feature
-│   │   ├── wallet/           # Wallet integration
-│   │   ├── styles/           # CSS
+│   │   ├── config/           # Client config (wallet adapters, RPC selection)
+│   │   ├── echo/             # Eternal Echoes feature (EchoMint, VideoUpload)
+│   │   ├── wallet/           # Phantom-specific provider helper
 │   │   └── App.tsx
 │   ├── vite.config.ts
 │   └── package.json
 │
-├── server/                    # Legacy server (some files still active)
-│   ├── routes/               # API route handlers
-│   └── services/             # Business logic
-│
 ├── apps/
 │   ├── backend/              # Main backend application
 │   │   ├── src/
-│   │   │   ├── routes/
-│   │   │   ├── services/
-│   │   │   ├── middleware/
-│   │   │   ├── config/
-│   │   │   ├── lib/
-│   │   │   └── index.ts
+│   │   │   ├── routes/       # 34 Express routers (clout, echo, marketplace, mint, grok, …)
+│   │   │   ├── services/     # CloutTokenService, BubblegumService, eternalEchoesService, …
+│   │   │   ├── middleware/   # Auth, CSRF, rate limit, security, file-upload
+│   │   │   ├── config/       # Env config, program IDs
+│   │   │   ├── lib/          # DB pool, swagger, helpers
+│   │   │   ├── utils/        # clout-vault, helpers
+│   │   │   └── index.ts      # Entry point (mounts all routers)
 │   │   └── tsconfig.json
-│   └── smart-contracts/      # Solana on-chain programs
-│       └── solana_rewards/
-│           └── programs/eternal_echoes/
+│   └── smart-contracts/      # Anchor workspace
+│       ├── Anchor.toml
+│       └── programs/eternal_echoes/   # Anchor 0.29 on-chain program
 │
 ├── shared/                   # Code shared client ↔ server
 │   ├── types/               # TS interfaces
-│   ├── constants/           # App-wide constants
+│   ├── constants/           # App-wide constants (CLOUT_CONFIG, RATE_LIMITS, …)
 │   ├── config/              # Environment config
 │   ├── validation/          # Zod schemas
-│   └── utils/               # Logger, errors, helpers
+│   ├── services/            # Cross-cutting services (email, etc.)
+│   └── utils/               # Logger, errors
 │
-└── docs/                    # User-facing guides (served via GitHub Pages)
+└── docs/                    # User-facing guides (served via GitHub Pages, Jekyll/Cayman)
 ```
 
-> **Note:** `server/` and `apps/backend/` coexist during migration to the `apps/backend/` layout. Check `git log -- <path>` to see which is active for a given file.
+> The legacy top-level `server/` directory has been removed. All backend code lives under `apps/backend/`.
 
 ---
 
@@ -201,10 +200,15 @@ PORT=3001
 SOLANA_RPC_URL=https://api.devnet.solana.com
 SOLANA_CLUSTER=devnet
 
-CLOUT_PROGRAM_ID=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
-REWARDS_VAULT=7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v
+# CLOUT — mint address is the same as CLOUT_PROGRAM_ID (legacy alias).
+CLOUT_MINT=26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
+REWARDS_OWNER=3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad
+# REWARDS_VAULT is auto-derived as the ATA(REWARDS_OWNER, CLOUT_MINT) at runtime.
 
 DATABASE_URL=postgresql://user:password@localhost:5432/nftsol
+
+# Admin wallets (comma-separated base58 pubkeys allowed to call admin endpoints)
+ADMIN_WALLETS=
 
 # Secrets — never commit
 PLATFORM_SECRET_KEY_BASE58=...
@@ -214,6 +218,7 @@ SESSION_SECRET=...
 # Optional
 HELIUS_API_KEY=...
 PINATA_JWT=...
+XAI_API_KEY=...
 ```
 
 ### Frontend `.env`
@@ -239,15 +244,15 @@ Most endpoints require wallet connection via Solana Wallet Adapter; admin endpoi
 
 **GET /api/clout/balance/:address** — token balance for a wallet
 ```json
-{ "success": true, "data": { "address": "...", "balance": 1000, "token": "CLOUT" } }
+{ "success": true, "data": { "address": "...", "balance": 1000, "token": "CLOUT", "mintAddress": "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab" } }
 ```
 
-**GET /api/clout/vault-balance** — rewards-vault balance
+**GET /api/clout/vault-balance** — rewards-vault balance (vault address is computed deterministically)
 ```json
 { "success": true, "data": { "balance": 50000, "token": "CLOUT", "vaultAddress": "..." } }
 ```
 
-**POST /api/clout/reward** *(admin)* — distribute CLOUT
+**POST /api/clout/reward** *(admin / CSRF)* — distribute CLOUT
 ```json
 // Request
 { "recipient": "...", "amount": 100, "reason": "NFT Sale" }
@@ -258,16 +263,30 @@ Most endpoints require wallet connection via Solana Wallet Adapter; admin endpoi
 ### NFT endpoints
 
 **GET /api/nfts** — list NFTs
-Query params: `page`, `limit`, `collection`, `creator`.
+Query params: `owner`, `collection`, `status`, `limit`.
 
-**POST /api/nfts/mint** — mint a new NFT (requires wallet signature)
+**GET /api/v1/nft/:mintAddress** — single NFT metadata (note: singular `nft`).
+
+**GET /api/v1/nfts/:owner** — NFTs owned by a wallet.
+
+**POST /api/v1/simple-mint** — mint a new NFT (CSRF-protected; fetch token from `GET /api/v1/csrf-token`).
 ```json
-{ "name": "My NFT", "description": "...", "image": "https://...", "attributes": [...], "royalty": 500 }
+{ "name": "My NFT", "description": "...", "imageUrl": "https://...", "creatorWallet": "..." }
 ```
+
+`POST /api/nfts/mint` and `POST /api/mint/nft` are kept as compatibility redirects to `/api/v1/simple-mint`.
+
+### Marketplace endpoints
+
+**GET /api/v1/market** — listings (with pagination).
+**GET /api/v1/collections** — collections + floor prices.
+**POST /api/marketplace/list** / **POST /api/marketplace/delist** — manage listings (CSRF).
 
 ### Health
 
-**GET /healthz**
+**GET /health** — liveness probe.
+**GET /api/health** — same, namespaced.
+**GET /healthz** — readiness; includes DB connectivity and Solana RPC status.
 ```json
 { "status": "healthy", "timestamp": "2026-05-24T12:00:00Z" }
 ```
@@ -279,8 +298,10 @@ All endpoints return:
 ```json
 { "success": true, "data": { /* payload */ } }
 // or
-{ "success": false, "error": { "message": "...", "code": "...", "details": {} } }
+{ "success": false, "error": "Human-readable message", "code": "ERROR_CODE", "requestId": "..." }
 ```
+
+`error` is a string and the error code/details are sibling fields, not a nested object.
 
 ---
 
@@ -336,15 +357,18 @@ const connection = new Connection(
 
 ### CLOUT token service
 
-The `CloutTokenService` handles balance queries, transfers, ATA creation, and vault management.
+`CloutTokenService` (`apps/backend/src/services/cloutToken.ts`) handles balance queries, transfers, ATA creation, and vault management.
 
 ```typescript
 class CloutTokenService {
-  async getBalance(address: string): Promise<number>
-  async transfer(recipient: string, amount: number): Promise<string>
+  async distributeCloutRewards(recipient: string, amount: number, reason: string): Promise<CloutRewardResult>
+  async getCloutBalance(walletAddress: string): Promise<number>
   async getVaultBalance(): Promise<number>
+  async ensureRewardsVault(platformKeypair: Keypair): Promise<PublicKey>
 }
 ```
+
+The rewards vault is the deterministic ATA of `REWARDS_OWNER` for the CLOUT mint — derive it via `getRewardsVaultAddress()` / `getOrCreateCloutVault()` in `apps/backend/src/utils/clout-vault.ts`. Don't hardcode the vault address.
 
 ### NFT minting via Metaplex
 
@@ -366,9 +390,10 @@ const { nft } = await metaplex.nfts().create({
 - **Mint address**: `26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab` (mainnet)
 - **Decimals**: 9
 - **Total supply**: 1,000,000,000 CLOUT
-- **Rewards vault**: `7SBYHw5KQasPKajH6gCDnpWmb5QAh9EBvTi3cUnFAc1v`
+- **Rewards owner**: `3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad`
+- **Rewards vault**: derived at runtime as the ATA of `REWARDS_OWNER` for the CLOUT mint (not a fixed environment variable).
 
-The vault ATA is auto-created when first referenced. Distribute rewards via `cloutService.distributeReward(address, amount, reason)`.
+Reward rates and distribution percentages live in `shared/constants/index.ts` under `CLOUT_CONFIG`. Distribute rewards via `cloutService.distributeCloutRewards(address, amount, reason)` — the service auto-creates the vault ATA on first use.
 
 ---
 
@@ -376,11 +401,11 @@ The vault ATA is auto-created when first referenced. Distribute rewards via `clo
 
 Full policy lives in [SECURITY.md](SECURITY.md). Quick summary:
 
-- Inputs validated via `express-validator` or Zod schemas
-- Rate limiting via `express-rate-limit` (and Redis-backed where deployed)
-- CORS locked to `ALLOWED_ORIGINS` in production
-- Helmet.js for security headers (CSP, HSTS, XFO, etc.)
-- JWT auth + CSRF double-submit cookies for stateful flows
+- Inputs validated via `express-validator` and Zod schemas (in `shared/validation/schemas.ts`)
+- Rate limiting via `express-rate-limit` (Redis-backed in production via `ioredis`)
+- CORS locked to `ALLOWED_ORIGINS` in production (production allowlist: `nftsol.app`, `www.nftsol.app`, `nftsolmarket.netlify.app`)
+- Helmet.js for security headers (CSP, HSTS, X-Frame-Options, etc.)
+- JWT auth (`jsonwebtoken`) + CSRF double-submit cookies (`@dr.pogodin/csurf`) for stateful browser flows; API token auth is exempted from CSRF.
 
 ---
 
