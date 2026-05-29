@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Pool, PoolClient, QueryResult, QueryResultRow, QueryConfig, } from 'pg';
 
 // Create a simple mock pool that implements only what's needed for testing
@@ -6,7 +7,7 @@ const mockPool = {
     queryTextOrConfig: string | QueryConfig<I>,
     values?: I
   ): Promise<QueryResult<R>> {
-    console.log('Mock DB Query:', queryTextOrConfig, values);
+    logger.info('Mock DB Query:', queryTextOrConfig, values);
     return {
       command: 'SELECT',
       rowCount: 0,

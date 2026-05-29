@@ -9,6 +9,7 @@
  *              These endpoints manage rewards distribution and balance queries.
  */
 
+import logger from '../utils/logger';
 import express from 'express';
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -103,7 +104,7 @@ router.post('/reward', sensitiveOpLimiter, validateWallet(), async (req, res) =>
     const err = error as Error;
     if (process.env.NODE_ENV === 'development') {
       // eslint-disable-next-line no-console
-      console.error('CLOUT reward endpoint error:', err);
+      logger.error('CLOUT reward endpoint error:', err);
     }
 
     const response: ApiResponse = {
@@ -135,7 +136,7 @@ router.get('/balance/:address', async (req, res) => {
       return res.status(400).json(response);
     }
 
-    console.log(`[CLOUT] Fetching balance for: ${address}`);
+    logger.info(`[CLOUT] Fetching balance for: ${address}`);
     const balance = await getCloutService().getCloutBalance(address);
 
     const response: ApiResponse = {
@@ -149,7 +150,7 @@ router.get('/balance/:address', async (req, res) => {
     };
     res.json(response);
   } catch (error: any) {
-    console.error('CLOUT balance endpoint error:', error);
+    logger.error('CLOUT balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: error.message || 'Failed to get CLOUT balance',
@@ -181,7 +182,7 @@ router.get('/vault-balance', async (req, res) => {
         vaultAddress = vault.toBase58();
       }
     } catch (err) {
-      console.warn('Could not calculate vault address:', err);
+      logger.warn('Could not calculate vault address:', err);
     }
 
     const response: ApiResponse = {
@@ -194,7 +195,7 @@ router.get('/vault-balance', async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    console.error('CLOUT vault balance endpoint error:', error);
+    logger.error('CLOUT vault balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get vault balance',

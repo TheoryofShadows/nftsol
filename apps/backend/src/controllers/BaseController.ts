@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Request, Response } from 'express';
 import { Pool, PoolClient } from 'pg';
 import { pool } from '../lib/db';
@@ -50,7 +51,7 @@ export abstract class BaseController {
   }
 
   protected handleError(res: Response, error: any, statusCode: number = 500) {
-    console.error(`[${this.constructor.name} Error]:`, error);
+    logger.error(`[${this.constructor.name} Error]:`, error);
     
     let errorMessage = 'An unexpected error occurred';
     let errorCode = 'INTERNAL_SERVER_ERROR';

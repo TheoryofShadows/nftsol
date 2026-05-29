@@ -8,6 +8,7 @@
  * - Response caching
  */
 
+import logger from '../utils/logger';
 import { Connection, Commitment as _Commitment } from '@solana/web3.js';
 
 interface RPCProvider {
@@ -71,9 +72,9 @@ class RPCFailoverService {
       this.connections.set(provider.name, connection);
       provider.healthy = true;
       provider.consecutiveFailures = 0;
-      console.log(`✓ Initialized RPC provider: ${provider.name}`);
+      logger.info(`✓ Initialized RPC provider: ${provider.name}`);
     } catch (error) {
-      console.error(`Failed to initialize provider ${provider.name}:`, error);
+      logger.error(`Failed to initialize provider ${provider.name}:`, error);
       provider.healthy = false;
     }
   }
@@ -100,7 +101,7 @@ class RPCFailoverService {
     const healthyProviders = this.providers.filter((p) => p.healthy !== false);
 
     if (healthyProviders.length === 0) {
-      console.error('No healthy RPC providers available, attempting recovery...');
+      logger.error('No healthy RPC providers available, attempting recovery...');
       return this.providers[0] || null;
     }
 
@@ -120,7 +121,7 @@ class RPCFailoverService {
       await this.checkProvidersHealth();
     }, this.healthCheckFrequency);
 
-    console.log('🏥 Health monitoring started');
+    logger.info('🏥 Health monitoring started');
   }
 
   /**
@@ -156,7 +157,7 @@ class RPCFailoverService {
       this.currentProvider &&
       !this.currentProvider.healthy
     ) {
-      console.warn(
+      logger.warn(
         `🔄 Current provider ${this.currentProvider.name} is unhealthy, switching...`
       );
       this.currentProvider = this.selectBestProvider();
@@ -238,7 +239,7 @@ class RPCFailoverService {
           continue;
         }
 
-        console.log(
+        logger.info(
           `📡 Attempting ${operationName} with ${provider.name}...`
         );
 
@@ -259,11 +260,11 @@ class RPCFailoverService {
         // Update current provider
         this.currentProvider = provider;
 
-        console.log(`✓ ${operationName} succeeded with ${provider.name}`);
+        logger.info(`✓ ${operationName} succeeded with ${provider.name}`);
         return result;
       } catch (error: any) {
         lastError = error;
-        console.warn(
+        logger.warn(
           `⚠️ ${operationName} failed with ${provider.name}: ${error.message}`
         );
 
@@ -322,7 +323,7 @@ class RPCFailoverService {
   shutdown(): void {
     if (this.healthCheckInterval) {
       clearInterval(this.healthCheckInterval);
-      console.log('🛑 Health monitoring stopped');
+      logger.info('🛑 Health monitoring stopped');
     }
   }
 }

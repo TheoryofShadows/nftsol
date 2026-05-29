@@ -1,9 +1,10 @@
+import logger from './utils/logger';
 // Mock database connection for testing purposes
-console.log('🔌 Using mock database connection');
+logger.info('🔌 Using mock database connection');
 
 export const pool = {
   query: async (text: string, _params?: any[]) => {
-    console.log('📝 Mock DB Query:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
+    logger.info('📝 Mock DB Query:', text.substring(0, 100) + (text.length > 100 ? '...' : ''));
     return { rows: [], rowCount: 0 };
   },
   connect: async () => ({

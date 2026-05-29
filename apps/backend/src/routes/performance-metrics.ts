@@ -3,6 +3,7 @@
  * Collects and serves performance data for monitoring
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 
 const router = Router();
@@ -44,7 +45,7 @@ router.post('/web-vitals', (req: Request, res: Response) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Failed to store Web Vital:', error);
+    logger.error('Failed to store Web Vital:', error);
     res.status(500).json({ success: false, error: 'Failed to store metric' });
   }
 });
@@ -65,7 +66,7 @@ router.get('/performance', async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Failed to generate performance report:', error);
+    logger.error('Failed to generate performance report:', error);
     res.status(500).json({ success: false, error: 'Failed to generate report' });
   }
 });
@@ -90,7 +91,7 @@ router.post('/visibility', (req: Request, res: Response) => {
     // Just acknowledge receipt - can extend to track visibility metrics
     res.json({ success: true });
   } catch (error) {
-    console.error('Failed to track visibility:', error);
+    logger.error('Failed to track visibility:', error);
     res.status(500).json({ success: false, error: 'Failed to track visibility' });
   }
 });

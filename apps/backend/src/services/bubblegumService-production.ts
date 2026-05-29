@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Connection, PublicKey as _Web3PublicKey, Keypair } from '@solana/web3.js';
 import { createUmi, publicKey as _publicKey } from '@metaplex-foundation/umi';
 import {
@@ -127,7 +128,7 @@ export class BubblegumService {
         );
         metadataUri = uploadResult.uri;
       } catch (error) {
-        console.error('Irys upload failed, using fallback IPFS URI:', error);
+        logger.error('Irys upload failed, using fallback IPFS URI:', error);
         // Fallback to IPFS or local gateway
         // Use a fallback URI if metadata.uri is not available
         // Use a fallback URI if metadata.uri is not available
@@ -176,7 +177,7 @@ export class BubblegumService {
         });
         assetId = (Array.isArray(assetIdPda) ? assetIdPda[0] : assetIdPda).toString();
       } catch (deriveError) {
-        console.warn('Failed to derive canonical cNFT asset ID:', deriveError);
+        logger.warn('Failed to derive canonical cNFT asset ID:', deriveError);
       }
 
       return {
@@ -186,7 +187,7 @@ export class BubblegumService {
         metadataUri,
       };
     } catch (error: any) {
-      console.error('Mint error:', error);
+      logger.error('Mint error:', error);
       return {
         success: false,
         error: error.message || 'Mint failed',

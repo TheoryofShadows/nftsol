@@ -1,3 +1,4 @@
+import logger from '../logger';
 import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddress, createTransferInstruction } from '@solana/spl-token';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { getConnection } from './connection';
@@ -106,7 +107,7 @@ export async function getTokenInfo(mintAddress: string) {
       metadata = accountInfo.data;
     }
   } catch (error) {
-    console.error('Error fetching token metadata:', error);
+    logger.error('Error fetching token metadata:', error);
   }
 
   return {

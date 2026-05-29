@@ -10,6 +10,7 @@
  *              This service manages the complete echo lifecycle from creation to minting.
  */
 
+import logger from '../utils/logger';
 import { PublicKey as _PublicKey } from '@solana/web3.js';
 import { BubblegumService, CompressedNFTMetadata } from './bubblegumService-production';
 import { CloutTokenService } from './cloutToken';
@@ -235,7 +236,7 @@ export class EternalEchoesService {
             1.0 // Honor multiplier
           );
         } catch (cloutError) {
-          console.warn('CLOUT award failed (non-critical):', cloutError);
+          logger.warn('CLOUT award failed (non-critical):', cloutError);
         }
       }
 
@@ -257,7 +258,7 @@ export class EternalEchoesService {
         // Add to mock data directly since we're using in-memory storage
         mockNfts.push(nftData);
       } catch (dbError) {
-        console.warn('DB insert failed (non-critical):', dbError);
+        logger.warn('DB insert failed (non-critical):', dbError);
       }
 
       return {
@@ -266,7 +267,7 @@ export class EternalEchoesService {
         signature: result.signature,
       };
     } catch (error: any) {
-      console.error('Mint Echo cNFT error:', error);
+      logger.error('Mint Echo cNFT error:', error);
       return {
         success: false,
         error: error.message || 'Mint failed',
@@ -301,9 +302,9 @@ export class EternalEchoesService {
         1.0 // Honor multiplier
       );
 
-      console.log(`✨ Awarded ${cloutAmount} CLOUT to ${contributorWallet.slice(0, 8)}...`);
+      logger.info(`✨ Awarded ${cloutAmount} CLOUT to ${contributorWallet.slice(0, 8)}...`);
     } catch (error) {
-      console.warn('CLOUT award error (non-critical):', error);
+      logger.warn('CLOUT award error (non-critical):', error);
     }
   }
 
@@ -353,7 +354,7 @@ export class EternalEchoesService {
         topEcho: contributedEchoes[0],
       };
     } catch (error) {
-      console.error('Get user echo stats error:', error);
+      logger.error('Get user echo stats error:', error);
       return {
         totalEchosMinted: 0,
         totalEchosContributed: 0,
@@ -391,7 +392,7 @@ export class EternalEchoesService {
         isEchoNFT: true,
       }));
     } catch (error) {
-      console.error('Get trending echoes error:', error);
+      logger.error('Get trending echoes error:', error);
       return [];
     }
   }

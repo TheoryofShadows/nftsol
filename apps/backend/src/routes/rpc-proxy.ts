@@ -5,6 +5,7 @@
  * This avoids CORS and rate-limiting issues when directly calling the RPC from the browser.
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import axios, { AxiosError as _AxiosError } from 'axios';
 import rateLimit from 'express-rate-limit';
@@ -119,7 +120,7 @@ router.post('/', rpcLimiter, async (req: Request, res: Response) => {
     };
 
     // Log the request (without sensitive data)
-    console.log(`RPC Proxy: ${method}`, {
+    logger.info(`RPC Proxy: ${method}`, {
       hasParams: !!params,
       paramCount: params?.length || 0,
     });
@@ -136,7 +137,7 @@ router.post('/', rpcLimiter, async (req: Request, res: Response) => {
     // Forward the response
     res.json(response.data);
   } catch (error: any) {
-    console.error('RPC Proxy Error:', {
+    logger.error('RPC Proxy Error:', {
       method: req.body?.method,
       error: error.message,
       status: error.response?.status,
@@ -215,7 +216,7 @@ router.post('/batch', rpcLimiter, async (req: Request, res: Response) => {
 
     res.json(response.data);
   } catch (error: any) {
-    console.error('RPC Batch Error:', error.message);
+    logger.error('RPC Batch Error:', error.message);
 
     if (error.code === 'ECONNABORTED') {
       return res.status(504).json({

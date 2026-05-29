@@ -8,6 +8,7 @@
  * 4. Mint with full provenance
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
 import ArchiveGrokEchoIntegration from '../services/archive-grok-echo-integration';
@@ -81,7 +82,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error('Archive search error:', error);
+    logger.error('Archive search error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -137,7 +138,7 @@ router.post('/advanced-search', searchLimiter, async (req: Request, res: Respons
       data: results,
     });
   } catch (error: any) {
-    console.error('Advanced search error:', error);
+    logger.error('Advanced search error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -167,7 +168,7 @@ router.get('/filter-options', searchLimiter, async (req: Request, res: Response)
       },
     });
   } catch (error: any) {
-    console.error('Filter options error:', error);
+    logger.error('Filter options error:', error);
     res.status(500).json({
       success: false,
       error: { message: 'Failed to fetch filter options' },
@@ -190,7 +191,7 @@ router.get('/trending', searchLimiter, async (req: Request, res: Response) => {
       },
     });
   } catch (error: any) {
-    console.error('Trending error:', error);
+    logger.error('Trending error:', error);
     res.status(500).json({
       success: false,
       error: { message: 'Failed to fetch trending searches' },
@@ -226,7 +227,7 @@ router.get('/suggestions', searchLimiter, async (req: Request, res: Response) =>
       },
     });
   } catch (error: any) {
-    console.error('Suggestions error:', error);
+    logger.error('Suggestions error:', error);
     res.status(500).json({
       success: false,
       error: { message: 'Failed to fetch suggestions' },
@@ -270,7 +271,7 @@ router.get('/:identifier', searchLimiter, async (req: Request, res: Response) =>
       data: metadata,
     });
   } catch (error: any) {
-    console.error('Metadata retrieval error:', error);
+    logger.error('Metadata retrieval error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -323,7 +324,7 @@ router.get('/:identifier/media', searchLimiter, async (req: Request, res: Respon
       },
     });
   } catch (error: any) {
-    console.error('Media files error:', error);
+    logger.error('Media files error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -388,7 +389,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      console.error('Prepare for mint error:', error);
+      logger.error('Prepare for mint error:', error);
       res.status(500).json({
         success: false,
         error: {
@@ -429,7 +430,7 @@ router.post('/:identifier/verify-with-grok', verifyLimiter, async (req: Request,
       },
     });
   } catch (error: any) {
-    console.error('Grok verification error:', error);
+    logger.error('Grok verification error:', error);
     res.status(500).json({
       success: false,
       error: {
@@ -495,7 +496,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      console.error('Create echo ledger error:', error);
+      logger.error('Create echo ledger error:', error);
       res.status(500).json({
         success: false,
         error: {
@@ -568,7 +569,7 @@ router.post(
         },
       });
     } catch (error: any) {
-      console.error('Add echo layer error:', error);
+      logger.error('Add echo layer error:', error);
       res.status(500).json({
         success: false,
         error: {

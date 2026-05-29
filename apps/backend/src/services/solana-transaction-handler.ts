@@ -7,6 +7,7 @@
  * - Anchor/Web3.js best practices
  */
 
+import logger from '../utils/logger';
 import {
   Connection,
   // PublicKey,
@@ -80,7 +81,7 @@ class SolanaTransactionHandler {
 
       return this.blockhashCache;
     } catch (error) {
-      console.error('Failed to get blockhash:', error);
+      logger.error('Failed to get blockhash:', error);
       throw new Error('Failed to retrieve latest blockhash');
     }
   }
@@ -121,7 +122,7 @@ class SolanaTransactionHandler {
         signature,
       };
     } catch (error: any) {
-      console.error('Failed to send transaction:', error);
+      logger.error('Failed to send transaction:', error);
       return {
         success: false,
         error: error.message || 'Unknown error sending transaction',
@@ -191,7 +192,7 @@ class SolanaTransactionHandler {
         attempts++;
         await this.delay(2000);
       } catch (error) {
-        console.error('Error confirming transaction:', error);
+        logger.error('Error confirming transaction:', error);
         attempts++;
         await this.delay(2000);
       }
@@ -219,7 +220,7 @@ class SolanaTransactionHandler {
       );
       return fee.value || 5000; // Default 5000 lamports
     } catch (error) {
-      console.warn('Failed to estimate fee, using default:', error);
+      logger.warn('Failed to estimate fee, using default:', error);
       return 5000; // Default fallback
     }
   }
@@ -235,7 +236,7 @@ class SolanaTransactionHandler {
       });
       return transaction;
     } catch (error) {
-      console.error('Failed to get transaction details:', error);
+      logger.error('Failed to get transaction details:', error);
       return null;
     }
   }
@@ -279,7 +280,7 @@ class SolanaTransactionHandler {
           simulationResult.value.unitsConsumed || undefined,
       };
     } catch (error: any) {
-      console.error('Failed to simulate transaction:', error);
+      logger.error('Failed to simulate transaction:', error);
       return {
         success: false,
         error: error.message || 'Transaction simulation failed',
@@ -330,7 +331,7 @@ class SolanaTransactionHandler {
       const status = await this.connection.getSignatureStatus(signature);
       return status.value;
     } catch (error) {
-      console.error('Failed to get transaction status:', error);
+      logger.error('Failed to get transaction status:', error);
       return null;
     }
   }

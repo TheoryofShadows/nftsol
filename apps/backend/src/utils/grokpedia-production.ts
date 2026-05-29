@@ -3,6 +3,7 @@
  * Real xAI Grok API with Cloudflare AI fallback
  */
 
+import logger from './logger';
 import axios from 'axios';
 
 export interface GrokVerificationResult {
@@ -37,7 +38,7 @@ export async function verifyWithGrok(
     const xaiApiKey = process.env.XAI_API_KEY;
 
     if (!xaiApiKey) {
-      console.warn('[Grok] XAI_API_KEY not set, using Cloudflare AI fallback');
+      logger.warn('[Grok] XAI_API_KEY not set, using Cloudflare AI fallback');
       return await verifyWithCloudflareAI(videoUri, nftId);
     }
 
@@ -151,7 +152,7 @@ Be conservative. Only score above 80 if there are clear positive signals. Respon
       summary: parsed.summary || `Verification score: ${score}/100. Verdict: ${verdict}.`,
     };
   } catch (error: any) {
-    console.warn('[Grok] xAI API failed, using Cloudflare AI fallback:', error.message);
+    logger.warn('[Grok] xAI API failed, using Cloudflare AI fallback:', error.message);
     return await verifyWithCloudflareAI(videoUri, nftId);
   }
 }
@@ -198,7 +199,7 @@ async function verifyWithCloudflareAI(
       }`,
     };
   } catch (error) {
-    console.error('[Grok] Cloudflare AI fallback failed:', error);
+    logger.error('[Grok] Cloudflare AI fallback failed:', error);
     // Ultimate fallback: return neutral verification
     return {
       verified: false,

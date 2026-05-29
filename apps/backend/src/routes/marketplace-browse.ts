@@ -3,6 +3,7 @@
  * Browse ALL NFTs available on Solana using Helius DAS API
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { heliusService } from '../services/helius';
 import { marketplaceService } from '../services/marketplace';
@@ -55,7 +56,7 @@ router.get('/browse', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error fetching listings:', error);
+    logger.error('[MarketplaceBrowse] Error fetching listings:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch NFT listings',
@@ -76,7 +77,7 @@ router.get('/browse/collections', async (req: Request, res: Response) => {
       data: collections,
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error fetching collections:', error);
+    logger.error('[MarketplaceBrowse] Error fetching collections:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch collections',
@@ -129,7 +130,7 @@ router.get('/browse/collection/:address', async (req: Request, res: Response) =>
       },
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error fetching collection:', error);
+    logger.error('[MarketplaceBrowse] Error fetching collection:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch collection NFTs',
@@ -172,7 +173,7 @@ router.get('/browse/search', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error searching NFTs:', error);
+    logger.error('[MarketplaceBrowse] Error searching NFTs:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to search NFTs',
@@ -196,7 +197,7 @@ router.get('/browse/trending', async (req: Request, res: Response) => {
       data: trending,
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error fetching trending:', error);
+    logger.error('[MarketplaceBrowse] Error fetching trending:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch trending NFTs',
@@ -220,7 +221,7 @@ router.get('/browse/featured', async (req: Request, res: Response) => {
       data: featured,
     });
   } catch (error) {
-    console.error('[MarketplaceBrowse] Error fetching featured:', error);
+    logger.error('[MarketplaceBrowse] Error fetching featured:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch featured NFTs',

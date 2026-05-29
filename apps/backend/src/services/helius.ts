@@ -10,6 +10,7 @@
  * - Account compression support
  */
 
+import logger from '../utils/logger';
 import { Connection, VersionedTransaction, Transaction } from '@solana/web3.js';
 import axios, { AxiosInstance } from 'axios';
 import { solanaConfig as _solanaConfig } from '../config';
@@ -129,9 +130,9 @@ export class HeliusService {
       },
     });
 
-    console.log(`[Helius] Service initialized`);
-    console.log(`[Helius] Cluster: ${cluster}`);
-    console.log(`[Helius] API Key: ${apiKey ? 'Configured' : 'Not configured'}`);
+    logger.info(`[Helius] Service initialized`);
+    logger.info(`[Helius] Cluster: ${cluster}`);
+    logger.info(`[Helius] API Key: ${apiKey ? 'Configured' : 'Not configured'}`);
   }
 
   /**
@@ -155,7 +156,7 @@ export class HeliusService {
 
       return response.data || null;
     } catch (error) {
-      console.error('[Helius] Failed to get asset:', error);
+      logger.error('[Helius] Failed to get asset:', error);
       return null;
     }
   }
@@ -188,7 +189,7 @@ export class HeliusService {
         limit: response.data.limit || 50,
       };
     } catch (error) {
-      console.error('[Helius] Failed to get assets by owner:', error);
+      logger.error('[Helius] Failed to get assets by owner:', error);
       return { items: [], total: 0, page: 1, limit: 50 };
     }
   }
@@ -215,7 +216,7 @@ export class HeliusService {
         total: response.data.total || 0,
       };
     } catch (error) {
-      console.error('[Helius] Failed to search assets:', error);
+      logger.error('[Helius] Failed to search assets:', error);
       return { items: [], total: 0 };
     }
   }
@@ -234,7 +235,7 @@ export class HeliusService {
 
       return response.data.priorityFeeEstimate || null;
     } catch (error) {
-      console.error('[Helius] Failed to get priority fee estimate:', error);
+      logger.error('[Helius] Failed to get priority fee estimate:', error);
       return null;
     }
   }
@@ -261,7 +262,7 @@ export class HeliusService {
 
       return response.data || [];
     } catch (error) {
-      console.error('[Helius] Failed to get enhanced transactions:', error);
+      logger.error('[Helius] Failed to get enhanced transactions:', error);
       return [];
     }
   }
@@ -325,7 +326,7 @@ export class HeliusService {
     hasMore: boolean;
   }> {
     try {
-      console.log('[Helius] 🚀 Using new getTransactionsForAddress API');
+      logger.info('[Helius] 🚀 Using new getTransactionsForAddress API');
       
       const response = await this.httpClient.post(
         '/v1/transactions',
@@ -350,7 +351,7 @@ export class HeliusService {
         hasMore: response.data.hasMore || false,
       };
     } catch (error) {
-      console.error('[Helius] Failed to get transactions for address:', error);
+      logger.error('[Helius] Failed to get transactions for address:', error);
       return {
         transactions: [],
         hasMore: false,
@@ -370,7 +371,7 @@ export class HeliusService {
     let cursor: string | undefined;
     let hasMore = true;
 
-    console.log('[Helius] Fetching complete transaction history (no rate limits!)');
+    logger.info('[Helius] Fetching complete transaction history (no rate limits!)');
 
     while (hasMore && allTransactions.length < maxTransactions) {
       const result = await this.getTransactionsForAddress(address, {
@@ -382,10 +383,10 @@ export class HeliusService {
       cursor = result.cursor;
       hasMore = result.hasMore && !!cursor;
 
-      console.log(`[Helius] Fetched ${allTransactions.length} transactions...`);
+      logger.info(`[Helius] Fetched ${allTransactions.length} transactions...`);
     }
 
-    console.log(`[Helius] ✅ Complete! Total: ${allTransactions.length} transactions`);
+    logger.info(`[Helius] ✅ Complete! Total: ${allTransactions.length} transactions`);
     return allTransactions;
   }
 
@@ -408,7 +409,7 @@ export class HeliusService {
       const feeRecommendation = await this.getPriorityFeeEstimate();
       
       if (feeRecommendation) {
-        console.log('[Helius] Using recommended priority fee:', feeRecommendation.medium);
+        logger.info('[Helius] Using recommended priority fee:', feeRecommendation.medium);
       }
 
       // Send transaction
@@ -423,7 +424,7 @@ export class HeliusService {
 
       return signature;
     } catch (error) {
-      console.error('[Helius] Failed to send transaction:', error);
+      logger.error('[Helius] Failed to send transaction:', error);
       throw error;
     }
   }
@@ -452,7 +453,7 @@ export class HeliusService {
         total: response.data.total || 0,
       };
     } catch (error) {
-      console.error('[Helius] Failed to get assets by collection:', error);
+      logger.error('[Helius] Failed to get assets by collection:', error);
       return { items: [], total: 0 };
     }
   }
@@ -472,7 +473,7 @@ export class HeliusService {
       const slot = await this.connection.getSlot();
       return slot > 0;
     } catch (error) {
-      console.error('[Helius] Health check failed:', error);
+      logger.error('[Helius] Health check failed:', error);
       return false;
     }
   }

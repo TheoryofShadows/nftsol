@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 /**
  * Helius Orb Service - AI-Powered Transaction Explorer
  *
@@ -68,7 +69,7 @@ export class OrbService {
       // const { HeliusOrb } = require('@helius-labs/orb-sdk');
       // this.mockMode = false;
     } catch {
-      console.log('⚠️ Helius Orb SDK not available, using mock mode');
+      logger.info('⚠️ Helius Orb SDK not available, using mock mode');
     }
   }
 

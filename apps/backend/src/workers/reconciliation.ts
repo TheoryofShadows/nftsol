@@ -15,7 +15,7 @@ class ReconciliationWorker {
 
   async runReconciliation(): Promise<ReconciliationIssue[]> {
     if (this.isRunning) {
-      console.log('Reconciliation already running, skipping...');
+      logger.info('Reconciliation already running, skipping...');
       return [];
     }
 
@@ -23,7 +23,7 @@ class ReconciliationWorker {
     const issues: ReconciliationIssue[] = [];
 
     try {
-      console.log('🔍 Starting reconciliation check...');
+      logger.info('🔍 Starting reconciliation check...');
 
       // Check 1: Negative balances
       const negativeBalances = await this.checkNegativeBalances();
@@ -48,10 +48,10 @@ class ReconciliationWorker {
       // Process issues
       await this.processIssues(issues);
 
-      console.log(`✅ Reconciliation complete. Found ${issues.length} issues.`);
+      logger.info(`✅ Reconciliation complete. Found ${issues.length} issues.`);
       return issues;
     } catch (error) {
-      console.error('❌ Reconciliation failed:', error);
+      logger.error('❌ Reconciliation failed:', error);
       throw error;
     } finally {
       this.isRunning = false;
@@ -182,7 +182,7 @@ class ReconciliationWorker {
 
   private async processIssues(issues: ReconciliationIssue[]): Promise<void> {
     for (const issue of issues) {
-      console.log(`🚨 ${issue.severity}: ${issue.description}`);
+      logger.info(`🚨 ${issue.severity}: ${issue.description}`);
 
       // Log to monitoring system
       await this.logIssue(issue);
@@ -221,7 +221,9 @@ export const reconciliationWorker = new ReconciliationWorker();
 if (process.env.NODE_ENV === 'production') {
   setInterval(
     () => {
-      reconciliationWorker.runReconciliation().catch(console.error);
+      reconciliationWorker.runReconciliation().catch((err) =>
+        logger.error('Reconciliation run failed:', err),
+      );
     },
     15 * 60 * 1000
   ); // 15 minutes

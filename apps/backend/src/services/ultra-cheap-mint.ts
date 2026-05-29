@@ -11,6 +11,7 @@
  * ✅ CHEAPER THAN MEME COINS!
  */
 
+import logger from '../utils/logger';
 import { 
   Connection,
 } from '@solana/web3.js';
@@ -116,11 +117,11 @@ export class UltraCheapMintService {
 
       this.umi = umi as UmiInstance;
 
-      console.log('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
+      logger.info('[UltraCheapMint] UMI initialized with Bubblegum & Irys');
       return this.umi;
 
     } catch (error) {
-      console.error('[UltraCheapMint] Initialization failed:', error);
+      logger.error('[UltraCheapMint] Initialization failed:', error);
       throw error;
     }
   }
@@ -164,10 +165,10 @@ export class UltraCheapMintService {
         commitment: 'confirmed',
       });
       
-      console.log(`[UltraCheapMint] Created new merkle tree: ${merkleTree.publicKey}`);
+      logger.info(`[UltraCheapMint] Created new merkle tree: ${merkleTree.publicKey}`);
       return [merkleTree];
     } catch (error) {
-      console.error('[UltraCheapMint] Failed to create merkle tree:', error);
+      logger.error('[UltraCheapMint] Failed to create merkle tree:', error);
       throw error;
     }
   }
@@ -185,10 +186,10 @@ export class UltraCheapMintService {
       try {
         await this.initializeUmi();
         this.merkleTree = { publicKey: umiPublicKey(existingTreeAddress) };
-        console.log(`[UltraCheapMint] Reusing existing Merkle tree: ${existingTreeAddress}`);
+        logger.info(`[UltraCheapMint] Reusing existing Merkle tree: ${existingTreeAddress}`);
         return this.merkleTree;
       } catch (error) {
-        console.warn('[UltraCheapMint] Could not reuse tree from env, will create new one:', error);
+        logger.warn('[UltraCheapMint] Could not reuse tree from env, will create new one:', error);
       }
     }
 
@@ -203,7 +204,7 @@ export class UltraCheapMintService {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[UltraCheapMint] Merkle tree initialization failed (attempt ${attempt}/${maxAttempts}):`, errorMessage);
+      logger.error(`[UltraCheapMint] Merkle tree initialization failed (attempt ${attempt}/${maxAttempts}):`, errorMessage);
 
       if (attempt >= maxAttempts) {
         throw new Error(`Failed to initialize merkle tree after ${maxAttempts} attempts: ${errorMessage}`);
@@ -287,7 +288,7 @@ export class UltraCheapMintService {
       const uri = await umi.uploader.uploadJson(metadata);
       return uri;
     } catch (error) {
-      console.error('Failed to upload metadata:', error);
+      logger.error('Failed to upload metadata:', error);
       throw new Error(`Failed to upload metadata: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -314,7 +315,7 @@ export class UltraCheapMintService {
         throw new Error('Failed to initialize merkle tree');
       }
 
-      console.log('[UltraCheapMint] Starting compressed NFT mint...');
+      logger.info('[UltraCheapMint] Starting compressed NFT mint...');
       // Upload metadata to Irys
       const metadataUri = await this.uploadMetadata(params);
       
@@ -349,7 +350,7 @@ export class UltraCheapMintService {
         throw new Error('Transaction failed: No signature returned');
       }
       
-      console.log('[UltraCheapMint] Mint transaction confirmed');
+      logger.info('[UltraCheapMint] Mint transaction confirmed');
       
       // Get the signature as base58
       const signature = bs58.encode(result.signature);
@@ -368,7 +369,7 @@ export class UltraCheapMintService {
         });
         assetId = (Array.isArray(assetIdPda) ? assetIdPda[0] : assetIdPda).toString();
       } catch (deriveError) {
-        console.warn(
+        logger.warn(
           '[UltraCheapMint] Could not derive canonical asset ID from leaf, using fallback:',
           deriveError,
         );
@@ -388,7 +389,7 @@ export class UltraCheapMintService {
         treeAddress: merkleTreePublicKey.toString(),
       };
     } catch (error) {
-      console.error('[UltraCheapMint] Mint failed:', error);
+      logger.error('[UltraCheapMint] Mint failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Compressed NFT minting failed',

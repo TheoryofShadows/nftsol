@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Router } from 'express';
 import multer from 'multer';
 import { validateUpload } from '../utils/validation';
@@ -30,7 +31,7 @@ router.post(
         }
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      logger.error('Upload error:', error);
       res.status(500).json({ 
         success: false, 
         error: 'Failed to process file upload' 

@@ -3,6 +3,7 @@
  * Verify content authenticity and generate truth scores for Eternal Echoes
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { verifyWithGrok } from '../utils/grokpedia-production';
@@ -62,7 +63,7 @@ router.post('/verify', async (req: Request, res: Response) => {
       data: verificationResult,
     });
   } catch (error) {
-    console.error('[Grok] Verification error:', error);
+    logger.error('[Grok] Verification error:', error);
     res.status(500).json({
       success: false,
       error: 'Verification failed',
@@ -96,7 +97,7 @@ router.post('/verify-video', async (req: Request, res: Response) => {
       data: verificationResult,
     });
   } catch (error) {
-    console.error('[Grok] Video verification error:', error);
+    logger.error('[Grok] Video verification error:', error);
     res.status(500).json({
       success: false,
       error: 'Video verification failed',
@@ -143,7 +144,7 @@ router.post('/analyze-eternal-echo', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Grok] Eternal Echo analysis error:', error);
+    logger.error('[Grok] Eternal Echo analysis error:', error);
     res.status(500).json({
       success: false,
       error: 'Analysis failed',
@@ -170,7 +171,7 @@ router.get('/archive/live-feed', async (req: Request, res: Response) => {
       data: liveFeed,
     });
   } catch (error) {
-    console.error('[Grok] Live feed error:', error);
+    logger.error('[Grok] Live feed error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch live feed',
@@ -252,7 +253,7 @@ async function verifyContentWithGrok(
       };
     } catch (apiError: unknown) {
       const msg = apiError instanceof Error ? apiError.message : 'unknown error';
-      console.warn('[Grok] xAI API failed, using heuristic fallback:', msg);
+      logger.warn('[Grok] xAI API failed, using heuristic fallback:', msg);
     }
   }
 
@@ -334,7 +335,7 @@ async function fetchArchiveContent(archiveUrl: string): Promise<any> {
       },
     };
   } catch (error) {
-    console.error('[Grok] Failed to fetch archive content:', error);
+    logger.error('[Grok] Failed to fetch archive content:', error);
     return {
       text: '',
       timestamp: new Date().toISOString(),
@@ -375,7 +376,7 @@ async function fetchInternetArchiveLiveFeed(category: string, limit: number): Pr
       thumbnailUrl: `https://archive.org/services/img/${doc.identifier}`,
     }));
   } catch (error) {
-    console.error('[Grok] Failed to fetch live feed:', error);
+    logger.error('[Grok] Failed to fetch live feed:', error);
     return [];
   }
 }

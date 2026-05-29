@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 /**
  * 🔄 Irys Address Conversion Utilities
  * Handle both Irys (base58) and Execution (hex/EVM) address formats
@@ -101,7 +102,7 @@ export class IrysAddressConverter {
       const addressBytes = bytes.slice(0, 20);
       return "0x" + addressBytes.toString("hex");
     } catch (error) {
-      console.error("Failed to convert Irys to Execution address:", error);
+      logger.error("Failed to convert Irys to Execution address:", error);
       throw new Error(`Invalid Irys address: ${irysAddr}`);
     }
   }
@@ -116,7 +117,7 @@ export class IrysAddressConverter {
       const bytes = Buffer.from(hexAddr, "hex");
       return this.base58Encode(bytes);
     } catch (error) {
-      console.error("Failed to convert Execution to Irys address:", error);
+      logger.error("Failed to convert Execution to Irys address:", error);
       throw new Error(`Invalid Execution address: ${execAddr}`);
     }
   }
@@ -173,13 +174,13 @@ export class IrysAddressConverter {
   static printAddressInfo(address: string): void {
     try {
       const normalized = this.normalize(address);
-      console.log(`\n[Irys] Address Information:`);
-      console.log(`  Input Format: ${normalized.format}`);
-      console.log(`  Irys Address (base58): ${normalized.irys}`);
-      console.log(`  Execution Address (hex): ${normalized.execution}`);
-      console.log(`\n`);
+      logger.info(`\n[Irys] Address Information:`);
+      logger.info(`  Input Format: ${normalized.format}`);
+      logger.info(`  Irys Address (base58): ${normalized.irys}`);
+      logger.info(`  Execution Address (hex): ${normalized.execution}`);
+      logger.info(`\n`);
     } catch (error) {
-      console.error("Failed to print address info:", error);
+      logger.error("Failed to print address info:", error);
     }
   }
 }

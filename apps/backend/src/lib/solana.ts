@@ -1,4 +1,5 @@
 // src/lib/solana.ts
+import logger from '../utils/logger';
 import {
   Connection,
   PublicKey,
@@ -64,7 +65,7 @@ export async function mintNFT(
   try {
     // Check platform wallet balance BEFORE attempting mint
     const balance = await ensurePlatformBalance(0.02); // Need at least 0.02 SOL
-    console.log(`[Mint] Platform balance: ${balance.toFixed(4)} SOL`);
+    logger.info(`[Mint] Platform balance: ${balance.toFixed(4)} SOL`);
 
     // Validate RPC connection by getting latest blockhash
     try {
@@ -77,7 +78,7 @@ export async function mintNFT(
     const metaplexInstance = getMetaplex();
     const keypair = getPlatformKeypair();
 
-    console.log(`[Mint] Minting NFT "${name}" to ${toAddress}`);
+    logger.info(`[Mint] Minting NFT "${name}" to ${toAddress}`);
 
     const { nft } = await metaplexInstance.nfts().create({
       uri: metadataUri,
@@ -88,7 +89,7 @@ export async function mintNFT(
       mintAuthority: keypair,
     });
 
-    console.log(`[Mint] NFT created: ${nft.address.toString()}`);
+    logger.info(`[Mint] NFT created: ${nft.address.toString()}`);
 
     // Transfer NFT to user
     const transferResult = await metaplexInstance.nfts().transfer({
@@ -96,7 +97,7 @@ export async function mintNFT(
       toOwner: toPublicKey,
     });
 
-    console.log(`[Mint] ✅ Success! Signature: ${transferResult.response.signature}`);
+    logger.info(`[Mint] ✅ Success! Signature: ${transferResult.response.signature}`);
 
     return {
       mintAddress: nft.address.toString(),
@@ -104,7 +105,7 @@ export async function mintNFT(
       success: true,
     };
   } catch (error) {
-    console.error('[Mint] ❌ NFT minting error:', error);
+    logger.error('[Mint] ❌ NFT minting error:', error);
 
     // Provide detailed error in development, generic in production
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -187,7 +188,7 @@ export async function sendSOL(toAddress: string, amountSol: number) {
 
     return { success: true, txSig };
   } catch (error) {
-    console.error('SOL transfer error:', error);
+    logger.error('SOL transfer error:', error);
     // Don't expose internal error details to client
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
@@ -205,7 +206,7 @@ export async function getWalletBalance(address: string) {
     const balance = await connection.getBalance(publicKey);
     return balance / 1e9; // Convert lamports to SOL
   } catch (error) {
-    console.error('Balance check error:', error);
+    logger.error('Balance check error:', error);
     return 0;
   }
 }

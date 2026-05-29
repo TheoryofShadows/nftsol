@@ -3,6 +3,7 @@
  * Handles user video uploads, Pinata storage, and metadata creation
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response, NextFunction, ErrorRequestHandler, RequestHandler } from 'express';
 import { Multer as _Multer } from 'multer';
 import multer from 'multer';
@@ -90,9 +91,9 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
     }
 
     // 1. Upload video to Pinata (free 1GB tier)
-    console.log(`[Video] Uploading ${file.size} bytes to Pinata...`);
+    logger.info(`[Video] Uploading ${file.size} bytes to Pinata...`);
     const videoCid = await uploadToPinata(file.buffer, file.originalname || 'video.mp4');
-    console.log(`[Video] Uploaded to Pinata: ${videoCid}`);
+    logger.info(`[Video] Uploaded to Pinata: ${videoCid}`);
 
     // 2. Create metadata JSON
     const metadata = {
@@ -117,7 +118,7 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
     };
 
     // 3. Upload metadata to Irys (free, under 100KB limit)
-    console.log(`[Video] Uploading metadata to Irys...`);
+    logger.info(`[Video] Uploading metadata to Irys...`);
     
     // Get platform keypair for Irys (from environment or config)
     const platformSecretKey = process.env.PLATFORM_SECRET_KEY_BASE58;
@@ -139,7 +140,7 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
       network: solanaConfig.cluster as 'mainnet-beta' | 'devnet',
     });
 
-    console.log(`[Video] Metadata uploaded to Irys: ${metadataResult.uri}`);
+    logger.info(`[Video] Metadata uploaded to Irys: ${metadataResult.uri}`);
 
     // 4. Trigger Grok verification (async, don't block response)
     let verificationResult: GrokVerificationResult | null = null;
@@ -147,9 +148,9 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
       const videoUrl = `https://gateway.pinata.cloud/ipfs/${videoCid}`;
       const nftId = `video-${Date.now()}`;
       verificationResult = await verifyWithGrok(videoUrl, nftId);
-      console.log(`[Video] Grok verification: ${verificationResult.verified ? 'VERIFIED' : 'NEEDS_REVIEW'} (score: ${verificationResult.score})`);
+      logger.info(`[Video] Grok verification: ${verificationResult.verified ? 'VERIFIED' : 'NEEDS_REVIEW'} (score: ${verificationResult.score})`);
     } catch (verificationError) {
-      console.warn('[Video] Grok verification failed (non-blocking):', verificationError);
+      logger.warn('[Video] Grok verification failed (non-blocking):', verificationError);
       // Don't fail upload if verification fails
     }
 
@@ -172,7 +173,7 @@ router.post('/upload', uploadLimiter, contentLengthCheck, videoUpload.single('vi
       },
     });
   } catch (error: any) {
-    console.error('[Video] Upload error:', error);
+    logger.error('[Video] Upload error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Video upload failed',

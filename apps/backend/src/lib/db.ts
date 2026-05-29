@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { 
   Pool, 
   PoolClient, 
@@ -80,7 +81,7 @@ class _MockPool {
   private connected = false;
 
   async query<T = any>(text: string, params?: any[]): Promise<{ rows: T[]; rowCount?: number }> {
-    console.log(`[Mock DB] Query: ${text}`, { params });
+    logger.info(`[Mock DB] Query: ${text}`, { params });
     
     // Handle common queries
     if (text.includes('SELECT') && text.includes('FROM')) {
@@ -99,20 +100,20 @@ class _MockPool {
 
   async connect() {
     this.connected = true;
-    console.log('[Mock DB] Connected to mock database');
+    logger.info('[Mock DB] Connected to mock database');
     
     return {
       ...this,
       release: () => {
         this.connected = false;
-        console.log('[Mock DB] Connection released');
+        logger.info('[Mock DB] Connection released');
       },
       on: (event: string, callback: (...args: any[]) => void) => {
-        console.log(`[Mock DB] Event: ${event}`, callback);
+        logger.info(`[Mock DB] Event: ${event}`, callback);
         return this;
       },
       once: (event: string, callback: (...args: any[]) => void) => {
-        console.log(`[Mock DB] Event (once): ${event}`, callback);
+        logger.info(`[Mock DB] Event (once): ${event}`, callback);
         return this;
       },
       removeListener: () => this,
@@ -122,28 +123,28 @@ class _MockPool {
 
   async end() {
     this.connected = false;
-    console.log('[Mock DB] Connection pool ended');
+    logger.info('[Mock DB] Connection pool ended');
     return Promise.resolve();
   }
 
   // Event emitter methods
   on(event: string, _listener: (...args: any[]) => void) {
-    console.log(`[Mock DB] Added listener for ${event}`);
+    logger.info(`[Mock DB] Added listener for ${event}`);
     return this;
   }
 
   once(event: string, _listener: (...args: any[]) => void) {
-    console.log(`[Mock DB] Added one-time listener for ${event}`);
+    logger.info(`[Mock DB] Added one-time listener for ${event}`);
     return this;
   }
 
   removeListener(event: string, _listener: (...args: any[]) => void) {
-    console.log(`[Mock DB] Removed listener for ${event}`);
+    logger.info(`[Mock DB] Removed listener for ${event}`);
     return this;
   }
 
   removeAllListeners(event?: string | symbol) {
-    console.log(`[Mock DB] Removed all listeners${event ? ` for ${event.toString()}` : ''}`);
+    logger.info(`[Mock DB] Removed all listeners${event ? ` for ${event.toString()}` : ''}`);
     return this;
   }
 }
@@ -247,15 +248,15 @@ async function createPoolWithRetry(attempt = 1): Promise<Pool> {
     });
 
     // Don't test the connection immediately - let it fail gracefully on first use
-    console.log('✅ Database pool created (will test on first query)');
+    logger.info('✅ Database pool created (will test on first query)');
     return pool;
   } catch (error) {
     if (attempt >= MAX_RETRIES) {
-      console.error('❌ Failed to connect to database after multiple attempts:', error);
+      logger.error('❌ Failed to connect to database after multiple attempts:', error);
       throw error;
     }
     
-    console.warn(`⚠️  Database connection attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`);
+    logger.warn(`⚠️  Database connection attempt ${attempt} failed, retrying in ${RETRY_DELAY}ms...`);
     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     return createPoolWithRetry(attempt + 1);
   }
@@ -266,7 +267,7 @@ async function createPoolWithRetry(attempt = 1): Promise<Pool> {
  */
 async function getPool(): Promise<DatabasePool> {
   if (!poolInstance) {
-    console.log('🔹 Connecting to database...');
+    logger.info('🔹 Connecting to database...');
     const pgPool = await createPoolWithRetry();
     
     poolInstance = {
@@ -277,7 +278,7 @@ async function getPool(): Promise<DatabasePool> {
           const client = await pgPool.connect();
           return wrapPoolClient(client);
         } catch (error) {
-          console.error('Failed to get database client:', error);
+          logger.error('Failed to get database client:', error);
           throw error;
         }
       },
@@ -345,20 +346,20 @@ async function getPool(): Promise<DatabasePool> {
 
     // Handle errors on idle clients
     pgPool.on('error', (err: Error, client: PoolClient) => {
-      console.error('⚠️  Unexpected error on idle database client:', err.message);
+      logger.error('⚠️  Unexpected error on idle database client:', err.message);
       // Gracefully handle the error without crashing
       if (client) {
         try {
           client.release(err);
         } catch (releaseErr) {
-          console.error('Error releasing client:', releaseErr);
+          logger.error('Error releasing client:', releaseErr);
         }
       }
     });
 
     // Handle connection errors
     pgPool.on('connect', () => {
-      console.log('[DB Pool] New connection established');
+      logger.info('[DB Pool] New connection established');
     });
 
     // Set up periodic health check to detect stale connections
@@ -366,10 +367,10 @@ async function getPool(): Promise<DatabasePool> {
       try {
         const health = await poolInstance!.healthCheck();
         if (health.status !== 'healthy') {
-          console.warn('⚠️  Database health check failed:', health.details.message);
+          logger.warn('⚠️  Database health check failed:', health.details.message);
         }
       } catch (error) {
-        console.warn('Health check error:', error instanceof Error ? error.message : error);
+        logger.warn('Health check error:', error instanceof Error ? error.message : error);
       }
     }, 30000); // Every 30 seconds
 
@@ -412,7 +413,7 @@ export const pool: DatabasePool = {
         return await pool.query(queryTextOrConfig);
       }
     } catch (error) {
-      console.error('Query failed:', { 
+      logger.error('Query failed:', { 
         query: typeof queryTextOrConfig === 'string' ? queryTextOrConfig : queryTextOrConfig.text,
         params: values || (typeof queryTextOrConfig === 'object' ? queryTextOrConfig.values : []),
         error 
@@ -432,7 +433,7 @@ export const pool: DatabasePool = {
       await new Promise(resolve => setTimeout(resolve, 50));
       return client;
     } catch (error) {
-      console.error('Failed to get database client:', error);
+      logger.error('Failed to get database client:', error);
       throw error;
     }
   },
@@ -444,9 +445,9 @@ export const pool: DatabasePool = {
     if (poolInstance) {
       try {
         await poolInstance.end();
-        console.log('Database pool closed successfully');
+        logger.info('Database pool closed successfully');
       } catch (error) {
-        console.error('Error closing database pool:', error);
+        logger.error('Error closing database pool:', error);
         throw error;
       } finally {
         poolInstance = null;
@@ -480,7 +481,7 @@ export const pool: DatabasePool = {
         }
       };
     } catch (error) {
-      console.error('Database health check failed:', error);
+      logger.error('Database health check failed:', error);
       return {
         status: 'unhealthy',
         details: {
@@ -516,17 +517,17 @@ const initializeDatabase = async () => {
 
   try {
     if (process.env.NODE_ENV === 'development') {
-      console.log('🔹 Initializing development database...');
+      logger.info('🔹 Initializing development database...');
       // Skip health check for now to avoid hanging - will retry on first query
-      console.log('✅ Development database will connect on first query');
+      logger.info('✅ Development database will connect on first query');
     } else {
       // In production, just test the connection
-      console.log('🔹 Testing production database connection...');
+      logger.info('🔹 Testing production database connection...');
       const health = await pool.healthCheck();
-      console.log(`✅ Database connection ${health.status}: ${health.details.message}`);
+      logger.info(`✅ Database connection ${health.status}: ${health.details.message}`);
     }
   } catch (error) {
-    console.error('⚠️  Database initialization warning (will retry on first query):', (error instanceof Error ? error.message : error));
+    logger.error('⚠️  Database initialization warning (will retry on first query):', (error instanceof Error ? error.message : error));
     // Don't throw here to allow the application to start
     // The connection will be retried when actually needed
   }
@@ -535,46 +536,46 @@ const initializeDatabase = async () => {
 // Initialize the database asynchronously without blocking
 // Set a timeout to prevent hanging
 const dbInitTimeout = setTimeout(() => {
-  console.warn('⚠️  Database initialization timeout - proceeding without DB connection');
+  logger.warn('⚠️  Database initialization timeout - proceeding without DB connection');
 }, 3000);
 
 initializeDatabase().catch(err => {
-  console.warn('⚠️  Database initialization failed, will retry on first query:', err instanceof Error ? err.message : err);
+  logger.warn('⚠️  Database initialization failed, will retry on first query:', err instanceof Error ? err.message : err);
 }).finally(() => {
   clearTimeout(dbInitTimeout);
 });
 
 // Ensure we clean up connections on process exit
 process.on('SIGINT', async () => {
-  console.log('\n🔴 Received SIGINT. Closing database connections...');
+  logger.info('\n🔴 Received SIGINT. Closing database connections...');
   try {
     await pool.end();
-    console.log('✅ Database connections closed');
+    logger.info('✅ Database connections closed');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error closing database connections:', error);
+    logger.error('❌ Error closing database connections:', error);
     process.exit(1);
   }
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', async (error) => {
-  console.error('🛑 Uncaught exception:', error);
+  logger.error('🛑 Uncaught exception:', error);
   try {
     await pool.end();
   } catch (e) {
-    console.error('Error closing database connections during uncaught exception:', e);
+    logger.error('Error closing database connections during uncaught exception:', e);
   }
   process.exit(1);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+  logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
 });
 // Handle pool errors
 pool.on('error', (err: Error) => {
-  console.error('Unexpected error on idle database client', err.message);
+  logger.error('Unexpected error on idle database client', err.message);
 });
 
 /**
@@ -596,7 +597,7 @@ export async function withClient<T>(
     try {
       await client.query('ROLLBACK');
     } catch (rollbackError) {
-      console.error('Error during ROLLBACK:', rollbackError);
+      logger.error('Error during ROLLBACK:', rollbackError);
       // Continue with cleanup even if rollback fails
     }
     throw error;
@@ -607,7 +608,7 @@ export async function withClient<T>(
         client.release();
         isReleased = true;
       } catch (releaseError) {
-        console.error('Error releasing client:', releaseError);
+        logger.error('Error releasing client:', releaseError);
       }
     }
   }

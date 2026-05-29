@@ -1,3 +1,4 @@
+import logger from '../../utils/logger';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { pool } from '../../lib/db';
@@ -55,7 +56,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     req.user = { id: userId, wallet_address: decoded.wallet, is_admin: decoded.isAdmin ?? false };
     next();
   } catch (error) {
-    console.error('Authentication error:', error);
+    logger.error('Authentication error:', error);
     return res.status(401).json({ 
       success: false,
       error: 'Unauthorized: Invalid token',
