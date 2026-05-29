@@ -600,45 +600,6 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/echo/stats
- * Get overall Echo platform statistics
- */
-router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
-  try {
-    // Calculate stats from in-memory store
-    const allEchoes: EchoRow[] = await echoStore.all();
-    const totalLayers = allEchoes.length;
-    const totalLedgers = await echoStore.ledgerCount();
-    
-    const verifiedCount = allEchoes.filter(e => e.grokVerified).length;
-    const avgScore = allEchoes.length > 0
-      ? allEchoes.reduce((sum, e) => sum + e.verificationScore, 0) / allEchoes.length
-      : 0;
-
-    res.json({
-      success: true,
-      data: {
-        totalLayers,
-        totalLedgers,
-        verifiedCount,
-        avgVerificationScore: Math.round(avgScore * 100) / 100,
-        platformStats: {
-          totalEchoes: totalLedgers,
-          totalContributions: totalLayers,
-          verificationRate: totalLayers > 0 ? (verifiedCount / totalLayers) * 100 : 0,
-        },
-      },
-    });
-  } catch (error) {
-    logger.error('Get echo stats error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch stats',
-    });
-  }
-});
-
-/**
  * GET /api/echo/:id
  * Get specific Echo NFT by ID (must be after /stats route)
  */

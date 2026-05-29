@@ -103,7 +103,6 @@ router.post('/reward', sensitiveOpLimiter, validateWallet(), async (req, res) =>
   } catch (error) {
     const err = error as Error;
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
       logger.error('CLOUT reward endpoint error:', err);
     }
 

@@ -63,7 +63,6 @@ export function securityHeaders(_req: Request, res: Response, next: NextFunction
 // Lightweight request logger for security-sensitive info
 export function securityLogger(req: Request, _res: Response, next: NextFunction) {
   // Keep minimal to avoid PII
-  // eslint-disable-next-line no-console
   logger.info(`[SEC] ${req.method} ${req.path}`);
   next();
 }

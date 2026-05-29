@@ -63,7 +63,6 @@ router.post('/mint', validateWallet(), async (req, res) => {
   } catch (err) {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
       logger.error('NFT minting error:', error);
     }
 
@@ -109,7 +108,6 @@ router.get('/balance/:address', async (req, res) => {
   } catch (err) {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
       logger.error('Balance check error:', error);
     }
 
@@ -153,7 +151,6 @@ router.get('/verify/:address', async (req, res) => {
   } catch (err) {
     const error = err as Error;
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
       logger.error('Wallet verification error:', error);
     }
 
