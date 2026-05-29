@@ -203,8 +203,9 @@ export class AnalyticsService {
 
     for (let i = 0; i < hours; i++) {
       const timestamp = now - (hours - i) * hourMs;
-      // Simulate volume with some variance
-      const volume = (analytics.totalVolume / 24) * (0.5 + Math.random());
+      // Even distribution derived from the real total. We do not store hourly
+      // history, so this is an estimate — never random noise presented as data.
+      const volume = analytics.totalVolume / 24;
       data.push({
         timestamp,
         value: volume,
@@ -222,7 +223,8 @@ export class AnalyticsService {
     const analytics = this.collectionAnalytics.get(collectionId);
     if (!analytics) return [];
 
-    // Simulate floor price trends (in production, from historical data)
+    // We do not store historical floor prices, so report the current floor as a
+    // flat line rather than fabricating a synthetic upward trend.
     const days = 30;
     const data: ChartData[] = [];
     const now = Date.now();
@@ -230,11 +232,9 @@ export class AnalyticsService {
 
     for (let i = 0; i < days; i++) {
       const timestamp = now - (days - i) * dayMs;
-      const trend = i / days; // Gradually increase over time
-      const floorPrice = analytics.floorPrice * (0.9 + trend * 0.2);
       data.push({
         timestamp,
-        value: floorPrice,
+        value: analytics.floorPrice,
         label: new Date(timestamp).toLocaleDateString(),
       });
     }
@@ -342,9 +342,9 @@ export class AnalyticsService {
         collectionId: analytics.collectionId,
         name: analytics.collectionId,
         volume24h: analytics.sales24h * analytics.averagePrice,
-        volumeChange24h: Math.random() * 100 - 50, // Simulated
+        volumeChange24h: 0, // No historical baseline tracked; reported as unknown
         floorPrice: analytics.floorPrice === Infinity ? 0 : analytics.floorPrice,
-        floorPriceChange24h: Math.random() * 50 - 25, // Simulated
+        floorPriceChange24h: 0, // No historical baseline tracked; reported as unknown
         sales24h: analytics.sales24h,
         saleVelocity: analytics.tradingVelocity,
         trendScore: Math.min(

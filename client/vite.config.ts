@@ -56,14 +56,18 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'solana-vendor': [
-            '@solana/web3.js',
-            '@solana/wallet-adapter-react',
-            '@solana/wallet-adapter-react-ui',
-          ],
-          'query-vendor': ['@tanstack/react-query'],
+        // Use a resolver function rather than a static map: the bare-specifier
+        // form ('react', 'react-dom') produced an EMPTY react-vendor chunk
+        // because the app actually imports react/jsx-runtime and react-dom/client.
+        // Matching on the resolved module path captures those sub-paths too.
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return undefined;
+          if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+            return 'react-vendor';
+          }
+          if (id.includes('@solana/')) return 'solana-vendor';
+          if (id.includes('@tanstack/react-query')) return 'query-vendor';
+          return undefined;
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',

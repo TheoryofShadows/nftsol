@@ -31,10 +31,12 @@ type UmiInstance = Umi & {
   identity: KeypairSigner;
 };
 
-import { 
-  createTree, 
-  mintV1, 
+import {
+  createTree,
+  mintV1,
   mplBubblegum,
+  findLeafAssetIdPda,
+  parseLeafFromMintV1Transaction,
 } from '@metaplex-foundation/mpl-bubblegum';
 import { irysUploader } from '@metaplex-foundation/umi-uploader-irys';
 import { solanaConfig } from '../config';
@@ -351,9 +353,27 @@ export class UltraCheapMintService {
       
       // Get the signature as base58
       const signature = bs58.encode(result.signature);
-      
-      // Generate a unique asset ID using the merkle tree and signature
-      const assetId = `${merkleTreePublicKey.toString()}-${signature.slice(0, 8)}`;
+
+      // Derive the canonical compressed-NFT asset ID from the on-chain leaf so the
+      // returned id actually resolves via the DAS API (e.g. Helius getAsset).
+      // Previously this returned a synthetic `${tree}-${sigPrefix}` string that no
+      // indexer could ever resolve. Fall back to the synthetic id only if leaf
+      // parsing fails, so a successful mint never silently reports an unusable id.
+      let assetId: string;
+      try {
+        const leaf = await parseLeafFromMintV1Transaction(umi, result.signature);
+        const assetIdPda = findLeafAssetIdPda(umi, {
+          merkleTree: merkleTreePublicKey,
+          leafIndex: leaf.nonce,
+        });
+        assetId = (Array.isArray(assetIdPda) ? assetIdPda[0] : assetIdPda).toString();
+      } catch (deriveError) {
+        console.warn(
+          '[UltraCheapMint] Could not derive canonical asset ID from leaf, using fallback:',
+          deriveError,
+        );
+        assetId = `${merkleTreePublicKey.toString()}-${signature.slice(0, 8)}`;
+      }
 
       // Calculate actual cost
       const { solCost, usdCost } = await this.estimateCost();
