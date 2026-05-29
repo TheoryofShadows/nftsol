@@ -25,27 +25,11 @@ import { Connection, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
-// Optional service (not required for dev/in-memory mode). Avoid importing to reduce build surface.
+import { echoStore, EchoRow } from '../services/echoStore';
 
 const router = Router();
 
-// In-memory echo store for development
-type EchoRow = {
-  id: string;
-  ledgerId: string;
-  echoData: string;
-  echoType: 'Text' | 'Audio' | 'Annotation' | 'Video';
-  videoUri?: string; // For video echoes
-  dataHash: number[];
-  contributor: string;
-  grokVerified: boolean;
-  verificationScore: number;
-  timestamp: Date;
-};
-
-const echoStore: Map<string, EchoRow[]> = new Map();
-
-// Initialize service (optional)
+// Optional higher-level service hook (CLOUT rewards, etc.).
 let echoService: any = null;
 
 // ============================================================================
@@ -272,9 +256,7 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
   try {
     const { ledgerId } = req.params;
 
-    const echoes = (echoStore.get(ledgerId) || []).sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
+    const echoes = await echoStore.getByLedger(ledgerId);
 
     res.json({
       success: true,
@@ -316,9 +298,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       verificationScore: verification.score,
       timestamp: new Date(),
     };
-    const list = echoStore.get(ledgerId) || [];
-    list.push(insertedEcho);
-    echoStore.set(ledgerId, list);
+    await echoStore.insert(insertedEcho);
 
     // Real-time emit (optional, Socket.IO not initialized in minimal setup)
     // No-op for now. Hook up Socket.IO here if enabled.
@@ -399,7 +379,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
     const { parentLedgerId, remixMetadata, creatorWallet } = remixSchema.parse(req.body);
 
     // Verify parent ledger exists
-    const parentEchoes = echoStore.get(parentLedgerId);
+    const parentEchoes = await echoStore.getByLedger(parentLedgerId);
     if (!parentEchoes || parentEchoes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -470,7 +450,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
     };
 
     // Store remix
-    echoStore.set(remixLedgerId, [remixEcho]);
+    await echoStore.insert(remixEcho);
 
     res.json({
       success: true,
@@ -506,9 +486,7 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
     const { ledgerId } = z.object({ ledgerId: z.string() }).parse(req.body);
 
     // Fetch all echoes for this ledger
-    const echoes = (echoStore.get(ledgerId) || []).sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
+    const echoes = await echoStore.getByLedger(ledgerId);
 
     if (echoes.length === 0) {
       return res.status(404).json({
@@ -553,9 +531,9 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
 router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
   try {
     // Calculate stats from in-memory store
-    const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
+    const allEchoes: EchoRow[] = await echoStore.all();
     const totalLayers = allEchoes.length;
-    const totalLedgers = echoStore.size;
+    const totalLedgers = await echoStore.ledgerCount();
 
     // Calculate average truth score
     let avgTruthScore = 0;
@@ -598,7 +576,7 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
 
     if (!echoService) {
       // Fallback if service not initialized: compute trending from in-memory store
-      const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
+      const allEchoes: EchoRow[] = await echoStore.all();
       const sorted = allEchoes
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
         .slice(0, limit);
@@ -627,9 +605,9 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
 router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
   try {
     // Calculate stats from in-memory store
-    const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
+    const allEchoes: EchoRow[] = await echoStore.all();
     const totalLayers = allEchoes.length;
-    const totalLedgers = echoStore.size;
+    const totalLedgers = await echoStore.ledgerCount();
     
     const verifiedCount = allEchoes.filter(e => e.grokVerified).length;
     const avgScore = allEchoes.length > 0
@@ -674,15 +652,8 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
       });
     }
 
-    // Search in-memory store
-    let foundEcho: EchoRow | null = null;
-    for (const echoes of echoStore.values()) {
-      const echo = echoes.find(e => e.id === id || e.ledgerId === id);
-      if (echo) {
-        foundEcho = echo;
-        break;
-      }
-    }
+    // Look up the layer by id or ledger id
+    const foundEcho: EchoRow | null = await echoStore.findById(id);
 
     if (!foundEcho) {
       // Try database if available
@@ -707,7 +678,7 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
     }
 
     // Get all layers for this ledger
-    const ledgerEchoes = echoStore.get(foundEcho.ledgerId) || [];
+    const ledgerEchoes = await echoStore.getByLedger(foundEcho.ledgerId);
     
     res.json({
       success: true,
