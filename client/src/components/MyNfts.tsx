@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { NFT } from '../types';
 import { useNotification } from './NotificationSystem';
+import { logger } from '../utils/logger';
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string) ||
@@ -42,10 +43,7 @@ export default function MyNfts() {
         
         if (Array.isArray(nftList)) {
           setNfts(nftList);
-          if (import.meta.env.DEV) {
-            // eslint-disable-next-line no-console
-            console.log(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
-          }
+          logger.info(`[MyNFTs] Loaded ${nftList.length} NFTs from ${data.source || 'blockchain'}`);
         } else {
           setNfts([]);
         }

@@ -3,6 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import confetti from 'canvas-confetti';
 import { useNotification } from './NotificationSystem';
 import { useMintCost } from '../hooks/useMintCost';
+import { logger } from '../utils/logger';
 
 export default function MintForm() {
   const { publicKey, connected } = useWallet();
@@ -19,12 +20,12 @@ export default function MintForm() {
     try {
       const { API_ENDPOINTS } = await import('../config/api');
 
-      console.log('Starting NFT mint...');
-      console.log('  Name:', name);
-      console.log('  File:', file.name, `(${(file.size / 1024).toFixed(2)}KB)`);
-      console.log('  Wallet:', publicKey?.toBase58());
+      logger.info('Starting NFT mint...');
+      logger.info('  Name:', name);
+      logger.info('  File:', file.name, `(${(file.size / 1024).toFixed(2)}KB)`);
+      logger.info('  Wallet:', publicKey?.toBase58());
 
-      console.log('Fetching CSRF token...');
+      logger.info('Fetching CSRF token...');
       const csrfRes = await fetch(API_ENDPOINTS.csrf, {
         method: 'GET',
         credentials: 'include',
@@ -45,7 +46,7 @@ export default function MintForm() {
         throw new Error('Failed to obtain CSRF token');
       }
 
-      console.log('CSRF token obtained');
+      logger.info('CSRF token obtained');
 
       const formData = new FormData();
       formData.append('name', name);
@@ -54,7 +55,7 @@ export default function MintForm() {
       formData.append('file', file, file.name);
       formData.append('_csrf', csrfToken);
 
-      console.log('Sending mint to:', API_ENDPOINTS.mint);
+      logger.info('Sending mint to:', API_ENDPOINTS.mint);
 
       const mintRes = await fetch(API_ENDPOINTS.mint, {
         method: 'POST',

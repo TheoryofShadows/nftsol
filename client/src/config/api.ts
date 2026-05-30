@@ -2,6 +2,7 @@
  * Centralized API Configuration
  * Handles API base URL for both development and production
  */
+import { logger } from '../utils/logger';
 
 // Determine API base URL
 const getApiBase = (): string => {
@@ -35,14 +36,9 @@ if (typeof window !== 'undefined') {
 export const API_BASE = getApiBase();
 
 // Log API base in development
-if (import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
-  console.log('🔗 API Base URL:', API_BASE);
-  // eslint-disable-next-line no-console
-  console.log('🌍 Environment:', import.meta.env.MODE);
-  // eslint-disable-next-line no-console
-  console.log('📦 Production Mode:', import.meta.env.PROD);
-}
+logger.info('🔗 API Base URL:', API_BASE);
+logger.info('🌍 Environment:', import.meta.env.MODE);
+logger.info('📦 Production Mode:', import.meta.env.PROD);
 
 // Helper function to build full API URLs
 export const buildApiUrl = (endpoint: string): string => {
