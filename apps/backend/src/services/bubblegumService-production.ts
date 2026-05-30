@@ -165,10 +165,14 @@ export class BubblegumService {
 
       const result = await builder.sendAndConfirm(this.umi);
 
+      const signature = bs58.encode(result.signature);
+
       // Derive the canonical compressed-NFT asset ID from the minted leaf so the
       // returned id resolves via the DAS API. Previously this returned a random
-      // `cNFT_<ts>_<rand>` string that no indexer could ever resolve.
-      let assetId = '';
+      // `cNFT_<ts>_<rand>` string that no indexer could ever resolve. Fall back to
+      // a deterministic `<tree>-<sigPrefix>` id (as in ultra-cheap-mint) if leaf
+      // parsing fails, so a confirmed mint never returns success with an empty id.
+      let assetId: string;
       try {
         const leaf = await parseLeafFromMintV1Transaction(this.umi, result.signature);
         const assetIdPda = findLeafAssetIdPda(this.umi, {
@@ -177,13 +181,14 @@ export class BubblegumService {
         });
         assetId = (Array.isArray(assetIdPda) ? assetIdPda[0] : assetIdPda).toString();
       } catch (deriveError) {
-        logger.warn('Failed to derive canonical cNFT asset ID:', deriveError);
+        logger.warn('Failed to derive canonical cNFT asset ID, using fallback:', deriveError);
+        assetId = `${treePublicKey.toString()}-${signature.slice(0, 8)}`;
       }
 
       return {
         success: true,
         assetId,
-        signature: bs58.encode(result.signature),
+        signature,
         metadataUri,
       };
     } catch (error: any) {

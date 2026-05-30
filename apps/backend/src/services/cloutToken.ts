@@ -9,7 +9,7 @@
  *              This service manages token distribution and balance tracking.
  */
 
-import logger from '../utils/logger';
+import logger, { redactRpcUrl } from '../utils/logger';
 import {
   Connection,
   Keypair,
@@ -64,7 +64,7 @@ export class CloutTokenService {
 
     logger.info(`[CLOUT] Service initialized`);
     logger.info(`[CLOUT] Mint address: ${this.mint.toBase58()}`);
-    logger.info(`[CLOUT] RPC URL: ${solanaConfig.rpcUrl}`);
+    logger.info(`[CLOUT] RPC URL: ${redactRpcUrl(solanaConfig.rpcUrl)}`);
     logger.info(`[CLOUT] Cluster: ${solanaConfig.cluster}`);
   }
 

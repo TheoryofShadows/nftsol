@@ -9,6 +9,7 @@
  *              layered NFT creation from public domain video archives with AI verification.
  */
 
+import { randomUUID } from 'crypto';
 import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
@@ -288,7 +289,10 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
     const verified = verification.verified;
 
     const insertedEcho: EchoRow = {
-      id: `${ledgerId}:${Date.now()}`,
+      // Append a random suffix so concurrent inserts in the same millisecond
+      // don't generate identical IDs (which the Postgres ON CONFLICT (id) DO
+      // NOTHING path would silently drop, losing a user contribution).
+      id: `${ledgerId}:${Date.now()}:${randomUUID()}`,
       ledgerId,
       echoData,
       echoType,
@@ -438,7 +442,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
 
     // Create initial remix echo entry
     const remixEcho: EchoRow = {
-      id: `${remixLedgerId}:${Date.now()}`,
+      id: `${remixLedgerId}:${Date.now()}:${randomUUID()}`,
       ledgerId: remixLedgerId,
       echoData: `Remix of ${parentLedgerId} with ${remixMetadata.layers.length} layers`,
       echoType: 'Video',

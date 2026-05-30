@@ -13,7 +13,7 @@ import { Connection } from '@solana/web3.js';
 import { appConfig, solanaConfig, programConfig } from './config/index';
 import { verifyCloutVault, getRewardsVaultAddress } from './utils/clout-vault';
 import { pool } from './lib/db';
-import logger, { requestLogger, errorLogger, auditLogger, securityLogger } from './utils/logger';
+import logger, { requestLogger, errorLogger, auditLogger, securityLogger, redactRpcUrl } from './utils/logger';
 import {
   validateWallet,
   csrfProtection as _csrfProtection,
@@ -2075,7 +2075,7 @@ server.listen(serverPort, '0.0.0.0', async () => {
   logger.info(`🌐 CORS Origins: ${appConfig.cors.origin.join(', ')}`);
   logger.info(`⚡ Rate Limit: ${appConfig.rateLimit.max} requests per ${appConfig.rateLimit.windowMs / 1000}s`);
   logger.info(`📤 File Upload: Max ${appConfig.fileUpload.maxSize / 1024 / 1024}MB`);
-  logger.info(`🔗 Solana RPC: ${solanaConfig.rpcUrl}`);
+  logger.info(`🔗 Solana RPC: ${redactRpcUrl(solanaConfig.rpcUrl)}`);
   logger.info(`🌐 Cluster: ${solanaConfig.cluster}`);
   logger.info(`✅ Server ready at http://0.0.0.0:${serverPort}`);
 

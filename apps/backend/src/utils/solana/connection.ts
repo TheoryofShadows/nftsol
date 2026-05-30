@@ -1,4 +1,4 @@
-import logger from '../logger';
+import logger, { redactRpcUrl } from '../logger';
 import { Connection, clusterApiUrl } from '@solana/web3.js';
 import config from '../../config';
 
@@ -24,7 +24,7 @@ export function getConnection(): Connection {
     });
     
     // Log connection info
-    logger.info(`Connected to Solana ${getNetwork()} at ${rpcUrl}`);
+    logger.info(`Connected to Solana ${getNetwork()} at ${redactRpcUrl(rpcUrl)}`);
   }
   return connection;
 }
