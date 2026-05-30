@@ -64,7 +64,7 @@ If no recipient is passed, the script generates a throwaway buyer keypair.
       public `api.mainnet-beta.solana.com`.
 - [ ] Mainnet platform wallet is funded for expected mint volume.
 - [ ] `CLOUT_MINT` / `REWARDS_OWNER` unchanged (see
-      [CLAUDE.md](../CLAUDE.md) — these handle real assets).
+      [CLAUDE.md](../../../CLAUDE.md) — these handle real assets).
 
 ## 5. Post-deploy smoke (mainnet, optional but recommended)
 
@@ -73,7 +73,6 @@ If no recipient is passed, the script generates a throwaway buyer keypair.
 
 ---
 
-_Related: `apps/backend/scripts/devnet-mint-smoketest.ts`,
-`apps/backend/src/lib/solana.ts` (`mintNFT`),
-`apps/backend/src/__tests__/unit/mint-solana.test.ts`._
-</content>
+_Related: `./devnet-mint-smoketest.ts`,
+`../src/lib/solana.ts` (`mintNFT`),
+`../src/__tests__/unit/mint-solana.test.ts`._
