@@ -11,6 +11,7 @@
  * Production mode: Activate when Zama Solana support launches
  */
 
+import logger from '../utils/logger';
 import { createHash } from 'crypto';
 
 // Feature flag - set to true when Zama SDK available
@@ -70,9 +71,9 @@ export class FHEService {
       // });
 
       this.fhevmInitialized = true;
-      console.log('✅ FHE initialized:', this.config.keyType, this.config.network);
+      logger.info('✅ FHE initialized:', this.config.keyType, this.config.network);
     } catch (error) {
-      console.error('❌ FHE initialization failed:', error);
+      logger.error('❌ FHE initialization failed:', error);
       this.fhevmInitialized = false;
     }
   }
@@ -110,7 +111,7 @@ export class FHEService {
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
     } catch (error) {
-      console.error('FHE encryption error:', error);
+      logger.error('FHE encryption error:', error);
       throw new Error(`Failed to encrypt echo: ${(error as Error).message}`);
     }
   }
@@ -180,7 +181,7 @@ export class FHEService {
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
     } catch (error) {
-      console.error('FHE computation error:', error);
+      logger.error('FHE computation error:', error);
       throw new Error(`Failed to compute on encrypted data: ${(error as Error).message}`);
     }
   }
@@ -193,7 +194,7 @@ export class FHEService {
     operation: string,
     _params?: any
   ): ComputeResult {
-    console.log(`🔐 FHE Mock Compute: ${operation}`);
+    logger.info(`🔐 FHE Mock Compute: ${operation}`);
 
     // Simulate different operations
     let mockResult: any;
@@ -239,7 +240,7 @@ export class FHEService {
 
     try {
       // Audit log
-      console.log(`🔓 FHE Decryption requested by: ${requesterId || 'server'}`);
+      logger.info(`🔓 FHE Decryption requested by: ${requesterId || 'server'}`);
 
       if (FHE_MOCK_MODE) {
         return this.mockDecrypt(encryptedData);
@@ -257,7 +258,7 @@ export class FHEService {
 
       throw new Error('Real FHE not available yet. Use FHE_MOCK_MODE=true');
     } catch (error) {
-      console.error('FHE decryption error:', error);
+      logger.error('FHE decryption error:', error);
       throw new Error(`Failed to decrypt echo: ${(error as Error).message}`);
     }
   }

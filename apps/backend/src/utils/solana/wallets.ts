@@ -1,3 +1,4 @@
+import logger from '../logger';
 import { Connection, PublicKey, Keypair, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import * as bs58 from 'bs58';
 
@@ -24,7 +25,7 @@ export async function getWalletBalance(connection: Connection, publicKey: Public
       lamports
     };
   } catch (error: unknown) {
-    console.error('Error getting wallet balance:', error);
+    logger.error('Error getting wallet balance:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Failed to get wallet balance: ${errorMessage}`);
   }
@@ -56,7 +57,7 @@ export async function transferSol(
     const signature = await connection.sendTransaction(transaction, [fromKeypair]);
     return signature;
   } catch (error: unknown) {
-    console.error('Error transferring SOL:', error);
+    logger.error('Error transferring SOL:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Failed to transfer SOL: ${errorMessage}`);
   }
@@ -72,7 +73,7 @@ export function getKeypairFromPrivateKey(privateKey: string): Keypair {
     const secretKey = bs58.decode(privateKey);
     return Keypair.fromSecretKey(secretKey);
   } catch (error) {
-    console.error('Error creating keypair from private key:', error);
+    logger.error('Error creating keypair from private key:', error);
     throw new Error('Invalid private key');
   }
 }
@@ -94,7 +95,7 @@ export function generateNewWallet(): {
       privateKey: bs58.encode(keypair.secretKey)
     };
   } catch (error) {
-    console.error('Error generating new wallet:', error);
+    logger.error('Error generating new wallet:', error);
     throw new Error('Failed to generate new wallet');
   }
 }

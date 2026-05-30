@@ -14,6 +14,7 @@ import {
 } from '../../utils/irysUpload';
 import { Connection, Keypair } from '@solana/web3.js';
 import Irys from '@irys/query';
+import logger from '../../utils/logger';
 
 // Mock the Irys module
 jest.mock('@irys/query');
@@ -97,12 +98,12 @@ describe('Irys Upload Utility', () => {
   describe('fundIrys', () => {
     it('should log funding message', async () => {
       const mockIrys = new MockedIrys();
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-      
+      const loggerSpy = jest.spyOn(logger, 'info').mockImplementation(() => logger);
+
       await fundIrys(mockIrys, 0.1);
-      
-      expect(consoleSpy).toHaveBeenCalledWith('[MOCK] Would fund Irys node with 0.1 SOL');
-      consoleSpy.mockRestore();
+
+      expect(loggerSpy).toHaveBeenCalledWith('[MOCK] Would fund Irys node with 0.1 SOL');
+      loggerSpy.mockRestore();
     });
   });
 });

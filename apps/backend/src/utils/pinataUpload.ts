@@ -4,6 +4,7 @@
  * Uploads files to IPFS via Pinata pinning service
  */
 
+import logger from './logger';
 import FormData from 'form-data';
 import axios from 'axios';
 
@@ -52,7 +53,7 @@ export async function uploadToPinata(
 
     return response.data.IpfsHash;
   } catch (error) {
-    console.error('Pinata upload failed:', error);
+    logger.error('Pinata upload failed:', error);
     throw new Error(
       `Failed to upload to Pinata: ${error instanceof Error ? error.message : 'Unknown error'}`
     );

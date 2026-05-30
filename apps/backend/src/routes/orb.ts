@@ -3,6 +3,7 @@
  * Transaction exploration and visualization endpoints
  */
 
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { OrbService } from '../services/orbService';
 import expressRateLimit from 'express-rate-limit';
@@ -39,7 +40,7 @@ router.get('/history/:ledgerId', orbLimiter, async (req: Request, res: Response)
       ...history,
     });
   } catch (error: any) {
-    console.error('Orb history error:', error);
+    logger.error('Orb history error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch transaction history',
@@ -63,7 +64,7 @@ router.get('/embed/:ledgerId', orbLimiter, async (req: Request, res: Response) =
       embedUrl,
     });
   } catch (error: any) {
-    console.error('Orb embed error:', error);
+    logger.error('Orb embed error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate embed URL',
@@ -86,7 +87,7 @@ router.get('/explain/:signature', orbLimiter, async (req: Request, res: Response
       explanation,
     });
   } catch (error: any) {
-    console.error('Orb explain error:', error);
+    logger.error('Orb explain error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to explain transaction',
@@ -109,7 +110,7 @@ router.get('/heatmap/:ledgerId', orbLimiter, async (req: Request, res: Response)
       heatmap,
     });
   } catch (error: any) {
-    console.error('Orb heatmap error:', error);
+    logger.error('Orb heatmap error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to generate heatmap',
@@ -136,7 +137,7 @@ router.get('/timeline/:ledgerId', orbLimiter, async (req: Request, res: Response
       timeline,
     });
   } catch (error: any) {
-    console.error('Orb timeline error:', error);
+    logger.error('Orb timeline error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch timeline',

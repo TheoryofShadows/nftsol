@@ -3,6 +3,7 @@
  * Automatically switches between RPC providers for optimal performance
  */
 
+import logger from './logger';
 import { Connection, PublicKey as _PublicKey } from '@solana/web3.js';
 
 interface RPCProvider {
@@ -85,7 +86,7 @@ class SolanaRPCManager {
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
       this.lastBlockhash = { hash: blockhash, lastValidBlockHeight, timestamp: Date.now() };
     } catch (error) {
-      console.error('Failed to refresh blockhash:', error);
+      logger.error('Failed to refresh blockhash:', error);
     }
   }
 
@@ -100,11 +101,11 @@ class SolanaRPCManager {
         provider.isHealthy = true;
         provider.responseTime = Date.now() - start;
         if (process.env.DEBUG_RPC) {
-          console.log(`✅ RPC healthy: ${provider.url} (${provider.responseTime}ms)`);
+          logger.info(`✅ RPC healthy: ${provider.url} (${provider.responseTime}ms)`);
         }
       } catch (error) {
         provider.isHealthy = false;
-        console.warn(`❌ RPC unhealthy: ${provider.url}`);
+        logger.warn(`❌ RPC unhealthy: ${provider.url}`);
       }
     }
   }

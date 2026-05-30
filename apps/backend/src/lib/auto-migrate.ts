@@ -34,6 +34,11 @@ export const MIGRATIONS: MigrationDef[] = [
     file: '20251028_add_withdrawals.sql',
     description: 'Creates withdrawals table and adds wallet columns',
   },
+  {
+    name: 'echo_layers',
+    file: '006_echo_layers.sql',
+    description: 'Creates echo_layers table for persistent Eternal Echoes layers',
+  },
 ];
 
 function safeResolve(baseDir: string, file: string): string {

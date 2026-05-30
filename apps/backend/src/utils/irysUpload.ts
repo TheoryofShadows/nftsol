@@ -5,6 +5,7 @@
  * This resolves nested axios vulnerabilities from deprecated Bundlr
  */
 
+import logger from './logger';
 import Irys from '@irys/query';
 import { Keypair, Connection } from '@solana/web3.js';
 
@@ -96,7 +97,7 @@ export async function uploadMetadataToIrys(
  */
 export async function checkIrysBalance(_irys: Irys, _requiredBytes?: number): Promise<boolean> {
   // Mock implementation since @irys/query is read-only
-  console.log('[MOCK] Checking Irys balance');
+  logger.info('[MOCK] Checking Irys balance');
   return true;
 }
 
@@ -107,5 +108,5 @@ export async function checkIrysBalance(_irys: Irys, _requiredBytes?: number): Pr
  */
 export async function fundIrys(_irys: Irys, amount: number = 0.1): Promise<void> {
   // Mock implementation since @irys/query is read-only
-  console.log(`[MOCK] Would fund Irys node with ${amount} SOL`);
+  logger.info(`[MOCK] Would fund Irys node with ${amount} SOL`);
 }

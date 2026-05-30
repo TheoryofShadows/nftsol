@@ -3,6 +3,7 @@
  * Uses OpenAI SDK + Redis caching for cost optimization
  */
 
+import logger from './logger';
 import crypto from 'crypto';
 
 // Type definitions
@@ -36,7 +37,7 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
       const result = await grokVerifyWithAPI(input);
       return result;
     } catch (error: any) {
-      console.warn('⚠️ xAI API failed, using fallback:', error.message);
+      logger.warn('⚠️ xAI API failed, using fallback:', error.message);
     }
   }
 

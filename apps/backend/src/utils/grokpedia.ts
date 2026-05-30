@@ -8,6 +8,7 @@
  * - JSON mode for structured responses
  */
 
+import logger from './logger';
 import crypto from 'crypto';
 
 export interface GrokVerificationResult {
@@ -36,7 +37,7 @@ export async function grokVerify(input: string): Promise<GrokVerificationResult>
 
   // Fallback to mock if no API key configured
   if (!apiKey) {
-    console.warn('⚠️ XAI_API_KEY not set, using fallback verification');
+    logger.warn('⚠️ XAI_API_KEY not set, using fallback verification');
     return grokVerifyMock(input);
   }
 
@@ -96,10 +97,10 @@ Score scale (0-100):
       sources: parsed.sources || ['xAI Grok Analysis'],
     };
   } catch (error: any) {
-    console.error('xAI Grok API Error:', error.message);
+    logger.error('xAI Grok API Error:', error.message);
 
     // Graceful fallback to mock on error
-    console.warn('⚠️ Falling back to heuristic verification');
+    logger.warn('⚠️ Falling back to heuristic verification');
     return grokVerifyMock(input);
   }
 }

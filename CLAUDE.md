@@ -38,7 +38,7 @@ nftsol/
 │
 ├── apps/
 │   ├── backend/          # Main backend (Express + Drizzle)
-│   │   └── src/{routes,services,middleware,config,lib,utils,index.ts}
+│   │   └── src/{routes,controllers,services,middleware,config,db,lib,utils,workers,types,index.ts}
 │   └── smart-contracts/  # Anchor workspace
 │       ├── Anchor.toml
 │       └── programs/eternal_echoes/   # Anchor 0.29 program
@@ -71,7 +71,7 @@ import { NFT } from '@shared/types';                // shared/*
 
 ### Prefer existing utilities over new ones
 - Errors: `@shared/utils/errors` (`AppError`, `NotFoundError`, `ValidationError`)
-- Logging: `@shared/utils/logger` — not `console.log`
+- Logging — not `console.log`. Backend/shared code: `@shared/utils/logger` (structured logs). Client code: `client/src/utils/logger.ts` (`logger`, styled console output, dev-gated).
 - Validation: `@shared/validation/schemas` (Zod)
 - Constants: `@shared/constants` — no inline magic numbers
 

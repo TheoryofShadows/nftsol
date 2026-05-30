@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import yaml from 'js-yaml';
@@ -9,7 +10,7 @@ export function loadSwaggerDocs(): Record<string, any> {
     const swaggerDoc = yaml.load(fileContents) as Record<string, any>;
     return swaggerDoc;
   } catch (error) {
-    console.error('Failed to load Swagger documentation:', error);
+    logger.error('Failed to load Swagger documentation:', error);
     // Return a basic fallback
     return {
       openapi: '3.0.0',

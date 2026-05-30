@@ -226,4 +226,16 @@ export const createModuleLogger = (moduleName: string) => {
   };
 };
 
+/**
+ * Redact secrets from an RPC URL before logging.
+ *
+ * Helius (and similar) RPC URLs embed the API key as a query parameter
+ * (e.g. `?api-key=...`). Logging the raw URL leaks that secret into logs,
+ * so mask any `api-key`/`apikey`/`access-token` query value.
+ */
+export const redactRpcUrl = (url: string): string => {
+  if (!url) return url;
+  return url.replace(/((?:api[-_]?key|access[-_]?token)=)[^&\s]+/gi, '$1[REDACTED]');
+};
+
 export default logger;

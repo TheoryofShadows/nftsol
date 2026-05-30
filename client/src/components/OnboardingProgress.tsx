@@ -2,9 +2,13 @@ import React from 'react';
 import { useOnboarding } from '../context/OnboardingContext';
 
 export default function OnboardingProgress() {
-  const { getProgress, completedSteps, startOnboarding, resetOnboarding } = useOnboarding();
+  const { getProgress, completedSteps, startOnboarding, resetOnboarding, progressDismissed, dismissProgress } =
+    useOnboarding();
   const progress = getProgress();
   const [isExpanded, setIsExpanded] = React.useState(false);
+
+  // User has permanently dismissed the progress widget — stay out of the way.
+  if (progressDismissed) return null;
 
   if (progress === 100) {
     return (
@@ -52,6 +56,13 @@ export default function OnboardingProgress() {
 
   return (
     <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40">
+      <button
+        onClick={dismissProgress}
+        aria-label="Dismiss getting started"
+        className="absolute -top-2 -right-2 z-10 w-6 h-6 rounded-full bg-white/10 hover:bg-white/25 text-gray-300 hover:text-white text-sm leading-none flex items-center justify-center shadow transition-colors"
+      >
+        ×
+      </button>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="glass-card p-3 md:p-4 rounded-2xl shadow-lg hover:shadow-xl transition-all"

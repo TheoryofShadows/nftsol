@@ -3,6 +3,7 @@
  * Complete buy/sell/list functionality with Solana transactions
  */
 
+import logger from '../utils/logger';
 import { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { 
   getAssociatedTokenAddress, 
@@ -81,7 +82,7 @@ export class MarketplaceService {
         listing: result.rows[0]
       };
     } catch (error) {
-      console.error('[Marketplace] List NFT error:', error);
+      logger.error('[Marketplace] List NFT error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to list NFT'
@@ -108,7 +109,7 @@ export class MarketplaceService {
 
       return { success: true };
     } catch (error) {
-      console.error('[Marketplace] Delist NFT error:', error);
+      logger.error('[Marketplace] Delist NFT error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to delist NFT'
@@ -139,7 +140,7 @@ export class MarketplaceService {
         total: parseInt(countResult.rows[0].count)
       };
     } catch (error) {
-      console.error('[Marketplace] Get listings error:', error);
+      logger.error('[Marketplace] Get listings error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get listings'
@@ -166,7 +167,7 @@ export class MarketplaceService {
         listing: result.rows[0]
       };
     } catch (error) {
-      console.error('[Marketplace] Get listing error:', error);
+      logger.error('[Marketplace] Get listing error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get listing'
@@ -250,7 +251,7 @@ export class MarketplaceService {
         transaction: serialized.toString('base64')
       };
     } catch (error) {
-      console.error('[Marketplace] Create buy transaction error:', error);
+      logger.error('[Marketplace] Create buy transaction error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to create transaction'
@@ -290,7 +291,7 @@ export class MarketplaceService {
 
       return { success: true };
     } catch (error) {
-      console.error('[Marketplace] Record sale error:', error);
+      logger.error('[Marketplace] Record sale error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to record sale'
@@ -315,7 +316,7 @@ export class MarketplaceService {
         sales: result.rows
       };
     } catch (error) {
-      console.error('[Marketplace] Get sales history error:', error);
+      logger.error('[Marketplace] Get sales history error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get sales history'
@@ -412,7 +413,7 @@ export class MarketplaceService {
         total,
       };
     } catch (error) {
-      console.error('[Marketplace] Error getting all listings:', error);
+      logger.error('[Marketplace] Error getting all listings:', error);
       return { items: [], total: 0 };
     }
   }
@@ -440,7 +441,7 @@ export class MarketplaceService {
       const result = await pool.query(query);
       return result.rows;
     } catch (error) {
-      console.error('[Marketplace] Error getting collections:', error);
+      logger.error('[Marketplace] Error getting collections:', error);
       return [];
     }
   }
@@ -485,7 +486,7 @@ export class MarketplaceService {
         total,
       };
     } catch (error) {
-      console.error('[Marketplace] Error searching NFTs:', error);
+      logger.error('[Marketplace] Error searching NFTs:', error);
       return { items: [], total: 0 };
     }
   }
@@ -512,7 +513,7 @@ export class MarketplaceService {
       const result = await pool.query(query, [limit]);
       return result.rows;
     } catch (error) {
-      console.error('[Marketplace] Error getting trending NFTs:', error);
+      logger.error('[Marketplace] Error getting trending NFTs:', error);
       // Return empty array if nft_views table doesn't exist yet
       return [];
     }
@@ -536,7 +537,7 @@ export class MarketplaceService {
       const result = await pool.query(query, [limit]);
       return result.rows;
     } catch (error) {
-      console.error('[Marketplace] Error getting featured NFTs:', error);
+      logger.error('[Marketplace] Error getting featured NFTs:', error);
       return [];
     }
   }

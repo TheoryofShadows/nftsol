@@ -47,6 +47,8 @@ export interface TensorOrderbook {
   numListed: number;
   numOwners: number;
   updatedAt: number;
+  /** True when this payload is synthetic demo data, not live Tensor data. */
+  isMock?: boolean;
 }
 
 export interface TensorCollectionStats {
@@ -70,9 +72,21 @@ export interface TensorPriceHistory {
 
 class TensorService {
   private apiKey: string | null;
+  /**
+   * Whether to serve synthetic orderbook data when the live Tensor API is
+   * unavailable. Off by default so randomized demo numbers can never be
+   * mistaken for real market data; opt in with TENSOR_ALLOW_MOCK=true.
+   */
+  private readonly allowMock: boolean;
 
   constructor() {
     this.apiKey = process.env.TENSOR_API_KEY || null;
+    this.allowMock = process.env.TENSOR_ALLOW_MOCK === 'true';
+  }
+
+  /** Return mock data only when explicitly enabled; otherwise null (→ 404). */
+  private mockOrNull(collectionSlug: string): TensorOrderbook | null {
+    return this.allowMock ? this.getMockOrderbook(collectionSlug) : null;
   }
 
   /**
@@ -216,7 +230,7 @@ class TensorService {
 
       if (!statsRes.ok && !listingsRes.ok) {
         logger.warn(`Tensor REST API failed for ${collectionSlug}`);
-        return this.getMockOrderbook(collectionSlug);
+        return this.mockOrNull(collectionSlug);
       }
 
       const stats = statsRes.ok ? await statsRes.json() : {};
@@ -252,7 +266,7 @@ class TensorService {
       return orderbook;
     } catch (error) {
       logger.error(`Tensor REST fallback failed for ${collectionSlug}:`, error);
-      return this.getMockOrderbook(collectionSlug);
+      return this.mockOrNull(collectionSlug);
     }
   }
 
@@ -469,6 +483,7 @@ class TensorService {
       numListed: Math.floor(Math.random() * 1000) + 100,
       numOwners: Math.floor(Math.random() * 5000) + 500,
       updatedAt: Date.now(),
+      isMock: true,
     };
   }
 

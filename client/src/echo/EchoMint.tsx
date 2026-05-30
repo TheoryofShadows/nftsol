@@ -18,6 +18,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { useNotification } from '../components/NotificationSystem';
 import TruthBadge from '../components/TruthBadge';
+import { logger } from '../utils/logger';
 import '../styles/EchoMint.css';
 
 // Lazy load video upload component
@@ -219,7 +220,7 @@ export default function EchoMint() {
       }, 1000);
 
       // Keep txSig available in console for debugging
-      if (txSig) console.info('[EchoMint] tx:', txSig);
+      if (txSig) logger.info('[EchoMint] tx:', txSig);
     } catch (error: any) {
       console.error('[EchoMint] Error:', error);
       addNotification({

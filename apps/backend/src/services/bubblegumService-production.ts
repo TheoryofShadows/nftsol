@@ -1,7 +1,15 @@
+import logger from '../utils/logger';
 import { Connection, PublicKey as _Web3PublicKey, Keypair } from '@solana/web3.js';
 import { createUmi, publicKey as _publicKey } from '@metaplex-foundation/umi';
-import { createTree, mintV1, mplBubblegum } from '@metaplex-foundation/mpl-bubblegum';
-import { publicKey as _umiPublicKey } from '@metaplex-foundation/umi';
+import {
+  createTree,
+  mintV1,
+  mplBubblegum,
+  findLeafAssetIdPda,
+  parseLeafFromMintV1Transaction,
+} from '@metaplex-foundation/mpl-bubblegum';
+import bs58 from 'bs58';
+import { publicKey as umiPublicKey } from '@metaplex-foundation/umi';
 import { publicKey as _umiToWeb3 } from '@metaplex-foundation/umi';
 import {
   createSignerFromKeypair,
@@ -93,7 +101,7 @@ export class BubblegumService {
     owner: string;
   }) {
     try {
-      const { treeAddress: _treeAddress, metadata, owner: _owner } = opts;
+      const { treeAddress, metadata, owner } = opts;
 
       // Upload metadata to Irys/Arweave using latest Irys SDK
       let metadataUri: string;
@@ -120,7 +128,7 @@ export class BubblegumService {
         );
         metadataUri = uploadResult.uri;
       } catch (error) {
-        console.error('Irys upload failed, using fallback IPFS URI:', error);
+        logger.error('Irys upload failed, using fallback IPFS URI:', error);
         // Fallback to IPFS or local gateway
         // Use a fallback URI if metadata.uri is not available
         // Use a fallback URI if metadata.uri is not available
@@ -129,10 +137,18 @@ export class BubblegumService {
           : `https://gateway.irys.xyz/${Date.now()}`;
       }
 
-      // Create public keys using UMI's publicKey function
-      const ownerPublicKey = this.umi.identity.publicKey; // Use signer's public key
-      const treePublicKey = this.umi.identity.publicKey; // This should be the actual tree address
-      
+      // Resolve the Merkle tree to mint into. This MUST be a real, initialized
+      // Bubblegum tree — the previous code minted into the signer's own pubkey,
+      // which is not a tree account and would fail on-chain.
+      const treeSource = treeAddress || process.env.BUBBLEGUM_TREE_ADDRESS;
+      if (!treeSource) {
+        throw new Error(
+          'No Bubblegum Merkle tree configured. Pass opts.treeAddress or set BUBBLEGUM_TREE_ADDRESS.',
+        );
+      }
+      const ownerPublicKey = owner ? umiPublicKey(owner) : this.umi.identity.publicKey;
+      const treePublicKey = umiPublicKey(treeSource);
+
       // Create the mint builder
       const builder = mintV1(this.umi, {
         leafOwner: ownerPublicKey,
@@ -149,14 +165,34 @@ export class BubblegumService {
 
       const result = await builder.sendAndConfirm(this.umi);
 
+      const signature = bs58.encode(result.signature);
+
+      // Derive the canonical compressed-NFT asset ID from the minted leaf so the
+      // returned id resolves via the DAS API. Previously this returned a random
+      // `cNFT_<ts>_<rand>` string that no indexer could ever resolve. Fall back to
+      // a deterministic `<tree>-<sigPrefix>` id (as in ultra-cheap-mint) if leaf
+      // parsing fails, so a confirmed mint never returns success with an empty id.
+      let assetId: string;
+      try {
+        const leaf = await parseLeafFromMintV1Transaction(this.umi, result.signature);
+        const assetIdPda = findLeafAssetIdPda(this.umi, {
+          merkleTree: treePublicKey,
+          leafIndex: leaf.nonce,
+        });
+        assetId = (Array.isArray(assetIdPda) ? assetIdPda[0] : assetIdPda).toString();
+      } catch (deriveError) {
+        logger.warn('Failed to derive canonical cNFT asset ID, using fallback:', deriveError);
+        assetId = `${treePublicKey.toString()}-${signature.slice(0, 8)}`;
+      }
+
       return {
         success: true,
-        assetId: `cNFT_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-        signature: result.signature.toString(),
+        assetId,
+        signature,
         metadataUri,
       };
     } catch (error: any) {
-      console.error('Mint error:', error);
+      logger.error('Mint error:', error);
       return {
         success: false,
         error: error.message || 'Mint failed',

@@ -9,6 +9,7 @@
  *              These endpoints manage rewards distribution and balance queries.
  */
 
+import logger from '../utils/logger';
 import express from 'express';
 import { PublicKey } from '@solana/web3.js';
 import { getAssociatedTokenAddress } from '@solana/spl-token';
@@ -19,7 +20,19 @@ import { programConfig } from '../config/index';
 import { sensitiveOpLimiter, dataLimiter as _dataLimiter } from '../middleware/rate-limiting';
 
 const router = express.Router();
-const cloutService = new CloutTokenService();
+
+// Lazily instantiate the CLOUT service. CloutTokenService throws if
+// CLOUT_MINT / CLOUT_PROGRAM_ID is not configured; constructing it at module
+// load time turned a missing env var into an uncaught exception that crashed
+// the whole process on startup. Deferring construction to first use surfaces
+// the misconfiguration as a clean per-request 500 instead.
+let cloutServiceInstance: CloutTokenService | null = null;
+function getCloutService(): CloutTokenService {
+  if (!cloutServiceInstance) {
+    cloutServiceInstance = new CloutTokenService();
+  }
+  return cloutServiceInstance;
+}
 
 /**
  * POST /api/clout/reward
@@ -62,7 +75,7 @@ router.post('/reward', sensitiveOpLimiter, validateWallet(), async (req, res) =>
       return res.status(400).json(response);
     }
 
-    const result = await cloutService.distributeCloutRewards(recipientAddress, amount, multiplier);
+    const result = await getCloutService().distributeCloutRewards(recipientAddress, amount, multiplier);
 
     if (result.success && result.txSignature) {
       const totalAmount = Math.floor(amount * multiplier);
@@ -90,8 +103,7 @@ router.post('/reward', sensitiveOpLimiter, validateWallet(), async (req, res) =>
   } catch (error) {
     const err = error as Error;
     if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.error('CLOUT reward endpoint error:', err);
+      logger.error('CLOUT reward endpoint error:', err);
     }
 
     const response: ApiResponse = {
@@ -123,8 +135,8 @@ router.get('/balance/:address', async (req, res) => {
       return res.status(400).json(response);
     }
 
-    console.log(`[CLOUT] Fetching balance for: ${address}`);
-    const balance = await cloutService.getCloutBalance(address);
+    logger.info(`[CLOUT] Fetching balance for: ${address}`);
+    const balance = await getCloutService().getCloutBalance(address);
 
     const response: ApiResponse = {
       success: true,
@@ -137,7 +149,7 @@ router.get('/balance/:address', async (req, res) => {
     };
     res.json(response);
   } catch (error: any) {
-    console.error('CLOUT balance endpoint error:', error);
+    logger.error('CLOUT balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: error.message || 'Failed to get CLOUT balance',
@@ -154,7 +166,7 @@ router.get('/balance/:address', async (req, res) => {
  */
 router.get('/vault-balance', async (req, res) => {
   try {
-    const balance = await cloutService.getVaultBalance();
+    const balance = await getCloutService().getVaultBalance();
 
     // Calculate vault address dynamically (deterministic ATA)
     let vaultAddress = 'Not configured';
@@ -169,7 +181,7 @@ router.get('/vault-balance', async (req, res) => {
         vaultAddress = vault.toBase58();
       }
     } catch (err) {
-      console.warn('Could not calculate vault address:', err);
+      logger.warn('Could not calculate vault address:', err);
     }
 
     const response: ApiResponse = {
@@ -182,7 +194,7 @@ router.get('/vault-balance', async (req, res) => {
     };
     res.json(response);
   } catch (error) {
-    console.error('CLOUT vault balance endpoint error:', error);
+    logger.error('CLOUT vault balance endpoint error:', error);
     const response: ApiResponse = {
       success: false,
       error: 'Failed to get vault balance',

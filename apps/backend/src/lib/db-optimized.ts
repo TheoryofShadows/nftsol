@@ -1,3 +1,4 @@
+import logger from '../utils/logger';
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 import { databaseConfig } from '../config/index';
 
@@ -12,8 +13,8 @@ const pool = new Pool({
 
 // Test connection on startup
 pool.query('SELECT NOW()')
-  .then(() => console.log('✅ Database connection pool established'))
-  .catch(err => console.error('❌ Database connection failed:', err.message));
+  .then(() => logger.info('✅ Database connection pool established'))
+  .catch(err => logger.error('❌ Database connection failed:', err.message));
 
 // Helper function for transactions
 export const withTransaction = async (callback: (client: any) => Promise<any>) => {
@@ -46,7 +47,7 @@ export const query = async <T extends QueryResultRow>(
       return result as QueryResult<T>;
     }
   } catch (error) {
-    console.error('Database query error:', { query: text, error });
+    logger.error('Database query error:', { query: text, error });
     throw error;
   }
 };

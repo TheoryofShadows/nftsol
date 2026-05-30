@@ -9,6 +9,8 @@
  *              layered NFT creation from public domain video archives with AI verification.
  */
 
+import { randomUUID } from 'crypto';
+import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { PublicKey } from '@solana/web3.js';
@@ -25,27 +27,11 @@ import { Connection, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { solanaConfig } from '../config';
 import expressRateLimit from 'express-rate-limit';
-// Optional service (not required for dev/in-memory mode). Avoid importing to reduce build surface.
+import { echoStore, EchoRow } from '../services/echoStore';
 
 const router = Router();
 
-// In-memory echo store for development
-type EchoRow = {
-  id: string;
-  ledgerId: string;
-  echoData: string;
-  echoType: 'Text' | 'Audio' | 'Annotation' | 'Video';
-  videoUri?: string; // For video echoes
-  dataHash: number[];
-  contributor: string;
-  grokVerified: boolean;
-  verificationScore: number;
-  timestamp: Date;
-};
-
-const echoStore: Map<string, EchoRow[]> = new Map();
-
-// Initialize service (optional)
+// Optional higher-level service hook (CLOUT rewards, etc.).
 let echoService: any = null;
 
 // ============================================================================
@@ -166,7 +152,7 @@ router.get('/search', searchLimiter, async (req: Request, res: Response) => {
       total: iaResponse.data.response?.numFound || 0,
     });
   } catch (error: any) {
-    console.error('IA Search Error:', error);
+    logger.error('IA Search Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -246,7 +232,7 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
 
     res.json(response);
   } catch (error: any) {
-    console.error('Mint Preparation Error:', error);
+    logger.error('Mint Preparation Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -272,9 +258,7 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
   try {
     const { ledgerId } = req.params;
 
-    const echoes = (echoStore.get(ledgerId) || []).sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
+    const echoes = await echoStore.getByLedger(ledgerId);
 
     res.json({
       success: true,
@@ -283,7 +267,7 @@ router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
       count: echoes.length,
     });
   } catch (error: any) {
-    console.error('Fetch Echoes Error:', error);
+    logger.error('Fetch Echoes Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch echoes',
@@ -305,7 +289,10 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
     const verified = verification.verified;
 
     const insertedEcho: EchoRow = {
-      id: `${ledgerId}:${Date.now()}`,
+      // Append a random suffix so concurrent inserts in the same millisecond
+      // don't generate identical IDs (which the Postgres ON CONFLICT (id) DO
+      // NOTHING path would silently drop, losing a user contribution).
+      id: `${ledgerId}:${Date.now()}:${randomUUID()}`,
       ledgerId,
       echoData,
       echoType,
@@ -316,9 +303,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
       verificationScore: verification.score,
       timestamp: new Date(),
     };
-    const list = echoStore.get(ledgerId) || [];
-    list.push(insertedEcho);
-    echoStore.set(ledgerId, list);
+    await echoStore.insert(insertedEcho);
 
     // Real-time emit (optional, Socket.IO not initialized in minimal setup)
     // No-op for now. Hook up Socket.IO here if enabled.
@@ -338,7 +323,7 @@ router.post('/add', echoLimiter, async (req: Request, res: Response) => {
         : '⚠️ Echo added but not verified.',
     });
   } catch (error: any) {
-    console.error('Add Echo Error:', error);
+    logger.error('Add Echo Error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -399,7 +384,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
     const { parentLedgerId, remixMetadata, creatorWallet } = remixSchema.parse(req.body);
 
     // Verify parent ledger exists
-    const parentEchoes = echoStore.get(parentLedgerId);
+    const parentEchoes = await echoStore.getByLedger(parentLedgerId);
     if (!parentEchoes || parentEchoes.length === 0) {
       return res.status(404).json({
         success: false,
@@ -457,7 +442,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
 
     // Create initial remix echo entry
     const remixEcho: EchoRow = {
-      id: `${remixLedgerId}:${Date.now()}`,
+      id: `${remixLedgerId}:${Date.now()}:${randomUUID()}`,
       ledgerId: remixLedgerId,
       echoData: `Remix of ${parentLedgerId} with ${remixMetadata.layers.length} layers`,
       echoType: 'Video',
@@ -470,7 +455,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
     };
 
     // Store remix
-    echoStore.set(remixLedgerId, [remixEcho]);
+    await echoStore.insert(remixEcho);
 
     res.json({
       success: true,
@@ -479,7 +464,7 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
       message: 'Remix created successfully',
     });
   } catch (error: any) {
-    console.error('[Echo] Remix creation error:', error);
+    logger.error('[Echo] Remix creation error:', error);
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -506,9 +491,7 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
     const { ledgerId } = z.object({ ledgerId: z.string() }).parse(req.body);
 
     // Fetch all echoes for this ledger
-    const echoes = (echoStore.get(ledgerId) || []).sort(
-      (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-    );
+    const echoes = await echoStore.getByLedger(ledgerId);
 
     if (echoes.length === 0) {
       return res.status(404).json({
@@ -537,7 +520,7 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
       echoCount: echoes.length,
     });
   } catch (error: any) {
-    console.error('Reverify Error:', error);
+    logger.error('Reverify Error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to reverify ledger',
@@ -553,9 +536,9 @@ router.post('/verify', echoLimiter, async (req: Request, res: Response) => {
 router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
   try {
     // Calculate stats from in-memory store
-    const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
+    const allEchoes: EchoRow[] = await echoStore.all();
     const totalLayers = allEchoes.length;
-    const totalLedgers = echoStore.size;
+    const totalLedgers = await echoStore.ledgerCount();
 
     // Calculate average truth score
     let avgTruthScore = 0;
@@ -579,7 +562,7 @@ router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
       trendingCount,
     });
   } catch (error: any) {
-    console.error('Get Echo stats error:', error);
+    logger.error('Get Echo stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch Echo statistics',
@@ -598,7 +581,7 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
 
     if (!echoService) {
       // Fallback if service not initialized: compute trending from in-memory store
-      const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
+      const allEchoes: EchoRow[] = await echoStore.all();
       const sorted = allEchoes
         .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
         .slice(0, limit);
@@ -612,49 +595,10 @@ router.get('/trending', echoLimiter, async (req: Request, res: Response) => {
       echoes: trending,
     });
   } catch (error: any) {
-    console.error('Get trending echoes error:', error);
+    logger.error('Get trending echoes error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch trending echoes',
-    });
-  }
-});
-
-/**
- * GET /api/echo/stats
- * Get overall Echo platform statistics
- */
-router.get('/stats', echoLimiter, async (req: Request, res: Response) => {
-  try {
-    // Calculate stats from in-memory store
-    const allEchoes: EchoRow[] = Array.from(echoStore.values()).flat();
-    const totalLayers = allEchoes.length;
-    const totalLedgers = echoStore.size;
-    
-    const verifiedCount = allEchoes.filter(e => e.grokVerified).length;
-    const avgScore = allEchoes.length > 0
-      ? allEchoes.reduce((sum, e) => sum + e.verificationScore, 0) / allEchoes.length
-      : 0;
-
-    res.json({
-      success: true,
-      data: {
-        totalLayers,
-        totalLedgers,
-        verifiedCount,
-        avgVerificationScore: Math.round(avgScore * 100) / 100,
-        platformStats: {
-          totalEchoes: totalLedgers,
-          totalContributions: totalLayers,
-          verificationRate: totalLayers > 0 ? (verifiedCount / totalLayers) * 100 : 0,
-        },
-      },
-    });
-  } catch (error) {
-    console.error('Get echo stats error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch stats',
     });
   }
 });
@@ -674,15 +618,8 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
       });
     }
 
-    // Search in-memory store
-    let foundEcho: EchoRow | null = null;
-    for (const echoes of echoStore.values()) {
-      const echo = echoes.find(e => e.id === id || e.ledgerId === id);
-      if (echo) {
-        foundEcho = echo;
-        break;
-      }
-    }
+    // Look up the layer by id or ledger id
+    const foundEcho: EchoRow | null = await echoStore.findById(id);
 
     if (!foundEcho) {
       // Try database if available
@@ -707,7 +644,7 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
     }
 
     // Get all layers for this ledger
-    const ledgerEchoes = echoStore.get(foundEcho.ledgerId) || [];
+    const ledgerEchoes = await echoStore.getByLedger(foundEcho.ledgerId);
     
     res.json({
       success: true,
@@ -732,7 +669,7 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('[Echo] Get by ID error:', error);
+    logger.error('[Echo] Get by ID error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to get Echo',
@@ -765,7 +702,7 @@ router.get('/stats/:wallet', echoLimiter, async (req: Request, res: Response) =>
       ...stats,
     });
   } catch (error: any) {
-    console.error('Get echo stats error:', error);
+    logger.error('Get echo stats error:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch stats',

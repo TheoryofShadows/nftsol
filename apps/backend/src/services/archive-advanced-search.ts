@@ -15,6 +15,7 @@
  * - And more...
  */
 
+import logger from '../utils/logger';
 import axios from 'axios';
 
 // archive.org serves its advanced search via a Solr-style endpoint that expects
@@ -166,7 +167,7 @@ export class ArchiveAdvancedSearchService {
       // instead of JSON. Treat that as a hard failure so the caller sees it
       // instead of silently returning an empty result set.
       if (!response.data || typeof response.data !== 'object' || !response.data.response) {
-        console.error('Advanced search returned unexpected payload', {
+        logger.error('Advanced search returned unexpected payload', {
           contentType: response.headers?.['content-type'],
           query: params.q,
           sample:
@@ -192,7 +193,7 @@ export class ArchiveAdvancedSearchService {
         facets: response.data.facets,
       };
     } catch (error) {
-      console.error('Advanced search failed:', error);
+      logger.error('Advanced search failed:', error);
       throw new Error(`Advanced search failed: ${error}`);
     }
   }

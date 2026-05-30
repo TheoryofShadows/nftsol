@@ -1,3 +1,4 @@
+import logger from './utils/logger';
 import express from 'express';
 import { createServer } from 'http';
 import compression from 'compression';
@@ -74,30 +75,30 @@ app.use(morgan('combined', { stream: accessLogStream }));
 
 // Log all requests
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  console.log('Headers:', req.headers);
-  console.log('Cookies:', req.cookies);
-  console.log('Session:', req.session);
+  logger.info(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  logger.info('Headers:', req.headers);
+  logger.info('Cookies:', req.cookies);
+  logger.info('Session:', req.session);
   next();
 });
 
 // Log all incoming requests
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  console.log('Headers:', req.headers);
-  console.log('Cookies:', req.cookies);
-  console.log('Session ID:', req.sessionID);
-  console.log('Session:', req.session);
+  logger.info(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  logger.info('Headers:', req.headers);
+  logger.info('Cookies:', req.cookies);
+  logger.info('Session ID:', req.sessionID);
+  logger.info('Session:', req.session);
   next();
 });
 
 // API routes
 app.use('/api/auth', authRouter);
-console.log('Auth routes mounted at /api/auth');
+logger.info('Auth routes mounted at /api/auth');
 
 // Protected API routes with CSRF protection
 app.use('/api/nfts', validateCSRFToken, nftRouter);
-console.log('NFT routes mounted at /api/nfts');
+logger.info('NFT routes mounted at /api/nfts');
 
 // Debug route to list all routes
 app.get('/api/routes', (req, res) => {
@@ -131,7 +132,7 @@ app.use((req: any, res: any, next: any) => {
 
     // Log slow requests
     if (duration > 1000) {
-      console.warn(`🐌 Slow request: ${req.method} ${req.path} took ${duration}ms`);
+      logger.warn(`🐌 Slow request: ${req.method} ${req.path} took ${duration}ms`);
     }
   });
 
@@ -174,7 +175,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     userAgent: req.get('User-Agent'),
   };
 
-  console.error('Error:', JSON.stringify(errorLog, null, 2));
+  logger.error('Error:', JSON.stringify(errorLog, null, 2));
 
   // Determine status code
   const statusCode = err.statusCode || err.status || 500;

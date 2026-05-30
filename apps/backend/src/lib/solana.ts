@@ -1,4 +1,5 @@
 // src/lib/solana.ts
+import logger from '../utils/logger';
 import {
   Connection,
   PublicKey,
@@ -8,7 +9,21 @@ import {
   Commitment,
   ComputeBudgetProgram,
 } from '@solana/web3.js';
-import { Metaplex, keypairIdentity } from '@metaplex-foundation/js';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import {
+  createNft,
+  transferV1,
+  TokenStandard,
+} from '@metaplex-foundation/mpl-token-metadata';
+import {
+  createSignerFromKeypair,
+  signerIdentity,
+  generateSigner,
+  percentAmount,
+  publicKey as umiPublicKey,
+  type Umi,
+} from '@metaplex-foundation/umi';
+import bs58 from 'bs58';
 import { getPlatformKeypair } from './platformKeypair';
 import { ensurePlatformBalance } from './checkBalance';
 
@@ -35,14 +50,23 @@ export async function getCachedBlockhash(): Promise<{ blockhash: string; lastVal
   return result;
 }
 
-let _metaplex: any = null;
+let _umi: Umi | null = null;
 
-export function getMetaplex() {
-  const keypair = getPlatformKeypair();
-  if (!_metaplex) {
-    _metaplex = Metaplex.make(connection).use(keypairIdentity(keypair));
+/**
+ * Lazily build a UMI instance signing with the platform keypair.
+ * Replaces the deprecated @metaplex-foundation/js client; uses the same
+ * platform keypair so on-chain authorities are unchanged.
+ */
+export function getMetaplex(): Umi {
+  if (!_umi) {
+    const keypair = getPlatformKeypair();
+    const umi = createUmi(RPC_URL);
+    const umiKeypair = umi.eddsa.createKeypairFromSecretKey(keypair.secretKey);
+    const signer = createSignerFromKeypair(umi, umiKeypair);
+    umi.use(signerIdentity(signer));
+    _umi = umi;
   }
-  return _metaplex;
+  return _umi;
 }
 
 // Legacy export for backward compatibility
@@ -64,7 +88,7 @@ export async function mintNFT(
   try {
     // Check platform wallet balance BEFORE attempting mint
     const balance = await ensurePlatformBalance(0.02); // Need at least 0.02 SOL
-    console.log(`[Mint] Platform balance: ${balance.toFixed(4)} SOL`);
+    logger.info(`[Mint] Platform balance: ${balance.toFixed(4)} SOL`);
 
     // Validate RPC connection by getting latest blockhash
     try {
@@ -73,38 +97,44 @@ export async function mintNFT(
       throw new Error(`RPC connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
+    // Validate recipient address up front (throws on malformed input).
     const toPublicKey = new PublicKey(toAddress);
-    const metaplexInstance = getMetaplex();
-    const keypair = getPlatformKeypair();
+    const umi = getMetaplex();
 
-    console.log(`[Mint] Minting NFT "${name}" to ${toAddress}`);
+    logger.info(`[Mint] Minting NFT "${name}" to ${toAddress}`);
 
-    const { nft } = await metaplexInstance.nfts().create({
-      uri: metadataUri,
+    // Mint to the platform wallet (the UMI identity), then transfer to the buyer.
+    const mint = generateSigner(umi);
+    await createNft(umi, {
+      mint,
       name,
       symbol: 'NFTSOL',
-      sellerFeeBasisPoints: 250, // 2.5% royalties
-      updateAuthority: keypair,
-      mintAuthority: keypair,
-    });
+      uri: metadataUri,
+      sellerFeeBasisPoints: percentAmount(2.5), // 2.5% royalties
+    }).sendAndConfirm(umi);
 
-    console.log(`[Mint] NFT created: ${nft.address.toString()}`);
+    const mintAddress = mint.publicKey.toString();
+    logger.info(`[Mint] NFT created: ${mintAddress}`);
 
-    // Transfer NFT to user
-    const transferResult = await metaplexInstance.nfts().transfer({
-      nftOrSft: nft,
-      toOwner: toPublicKey,
-    });
+    // Transfer NFT to the buyer's wallet.
+    const transferResult = await transferV1(umi, {
+      mint: mint.publicKey,
+      authority: umi.identity,
+      tokenOwner: umi.identity.publicKey,
+      destinationOwner: umiPublicKey(toPublicKey.toBase58()),
+      tokenStandard: TokenStandard.NonFungible,
+    }).sendAndConfirm(umi);
 
-    console.log(`[Mint] ✅ Success! Signature: ${transferResult.response.signature}`);
+    const txSig = bs58.encode(transferResult.signature);
+    logger.info(`[Mint] ✅ Success! Signature: ${txSig}`);
 
     return {
-      mintAddress: nft.address.toString(),
-      txSig: transferResult.response.signature,
+      mintAddress,
+      txSig,
       success: true,
     };
   } catch (error) {
-    console.error('[Mint] ❌ NFT minting error:', error);
+    logger.error('[Mint] ❌ NFT minting error:', error);
 
     // Provide detailed error in development, generic in production
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -187,7 +217,7 @@ export async function sendSOL(toAddress: string, amountSol: number) {
 
     return { success: true, txSig };
   } catch (error) {
-    console.error('SOL transfer error:', error);
+    logger.error('SOL transfer error:', error);
     // Don't expose internal error details to client
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
@@ -205,7 +235,7 @@ export async function getWalletBalance(address: string) {
     const balance = await connection.getBalance(publicKey);
     return balance / 1e9; // Convert lamports to SOL
   } catch (error) {
-    console.error('Balance check error:', error);
+    logger.error('Balance check error:', error);
     return 0;
   }
 }
