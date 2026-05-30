@@ -134,3 +134,7 @@ nftsol-frontend-deploy.zip
 
 # Legacy server directory (migrated to apps/backend/)
 server/
+
+# Auto-generated lefthook boilerplate (lefthook is configured per-package; the
+# root file the tool regenerates is empty example config, not real config)
+/lefthook.yml
