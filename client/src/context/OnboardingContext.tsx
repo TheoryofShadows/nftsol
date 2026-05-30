@@ -18,6 +18,7 @@ interface OnboardingState {
   completedSteps: OnboardingStep[];
   skipped: boolean;
   showWelcome: boolean;
+  progressDismissed: boolean;
   lastShownAt: number | null;
 }
 
@@ -27,6 +28,7 @@ interface OnboardingContextType extends OnboardingState {
   skipOnboarding: () => void;
   resetOnboarding: () => void;
   dismissWelcome: () => void;
+  dismissProgress: () => void;
   isStepCompleted: (step: OnboardingStep) => boolean;
   getProgress: () => number;
 }
@@ -37,6 +39,7 @@ const initialState: OnboardingState = {
   completedSteps: [],
   skipped: false,
   showWelcome: true,
+  progressDismissed: false,
   lastShownAt: null,
 };
 
@@ -72,6 +75,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
       isOnboardingActive: true,
       currentStep: step,
       showWelcome: step === 'welcome',
+      progressDismissed: false,
     }));
   }, []);
 
@@ -117,6 +121,13 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     }));
   }, []);
 
+  const dismissProgress = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      progressDismissed: true,
+    }));
+  }, []);
+
   const isStepCompleted = useCallback(
     (step: OnboardingStep) => {
       return state.completedSteps.includes(step);
@@ -136,6 +147,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     skipOnboarding,
     resetOnboarding,
     dismissWelcome,
+    dismissProgress,
     isStepCompleted,
     getProgress,
   };
