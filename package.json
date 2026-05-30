@@ -49,7 +49,7 @@
     "bcryptjs": "^3.0.3",
     "bs58": "^6.0.0",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express-session": "^1.18.2",
     "helmet": "^8.1.0",
