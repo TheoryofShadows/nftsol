@@ -28,7 +28,7 @@ interface MintResult {
 
 const API_BASE =
   (import.meta.env.VITE_API_BASE as string) ||
-  (typeof window !== 'undefined' ? window.location.origin : 'https://nftsol.onrender.com');
+  (typeof window !== 'undefined' ? window.location.origin : 'https://nftsol-1.onrender.com');
 
 export const ArchiveItemModal: React.FC<ArchiveItemModalProps> = ({ item, onClose }) => {
   const { connected, publicKey } = useWallet();

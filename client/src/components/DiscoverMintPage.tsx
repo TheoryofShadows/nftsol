@@ -177,7 +177,7 @@ export default function DiscoverMintPage() {
       }
 
       const res = await fetch(
-        `${(import.meta.env.VITE_API_BASE as string) || 'https://nftsol.onrender.com'}/api/mint/ultra-cheap`,
+        `${(import.meta.env.VITE_API_BASE as string) || 'https://nftsol-1.onrender.com'}/api/mint/ultra-cheap`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -222,7 +222,7 @@ export default function DiscoverMintPage() {
       if (verifyResult?.verified && verifyResult.truthScore >= 70) {
         try {
           await fetch(
-            `${(import.meta.env.VITE_API_BASE as string) || 'https://nftsol.onrender.com'}/api/clout/reward`,
+            `${(import.meta.env.VITE_API_BASE as string) || 'https://nftsol-1.onrender.com'}/api/clout/reward`,
             {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },

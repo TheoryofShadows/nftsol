@@ -43,7 +43,7 @@ function getApiBase(): string {
     
     // Production fallback
     if (window.location.hostname.includes('netlify.app')) {
-      return 'https://nftsol.onrender.com';
+      return 'https://nftsol-1.onrender.com';
     }
     
     return 'http://localhost:3001';

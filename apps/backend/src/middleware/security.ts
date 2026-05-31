@@ -26,6 +26,7 @@ export const corsConfig = cors({
       'https://nftsol.app',
       'https://www.nftsol.app',
       'https://nftsol.onrender.com',
+      'https://nftsol-1.onrender.com',
       'https://nftsolmarket.netlify.app',
     ];
 

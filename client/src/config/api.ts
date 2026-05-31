@@ -14,7 +14,7 @@ const getApiBase = (): string => {
   // Priority 2: Production environment - use production backend
   if (import.meta.env.MODE === 'production' || import.meta.env.PROD) {
     // Production backend URL
-    return 'https://nftsol.onrender.com';
+    return 'https://nftsol-1.onrender.com';
   }
 
   // Priority 3: Development - use localhost
