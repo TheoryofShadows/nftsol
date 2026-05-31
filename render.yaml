@@ -26,8 +26,13 @@ services:
       # Set these in Render dashboard as environment variables - DO NOT put real values here
       PLATFORM_SECRET_KEY_BASE58: ${PLATFORM_SECRET_KEY_BASE58}
       JWT_SECRET: ${JWT_SECRET}
+      # Used to sign sessions - set a random >=32 char string in the dashboard
+      SESSION_SECRET: ${SESSION_SECRET}
       ADMIN_WALLETS: ${ADMIN_WALLETS}
       HELIUS_API_KEY: ${HELIUS_API_KEY}
+      # Pinata JWT for IPFS image/metadata uploads - REQUIRED for minting.
+      # Set the real token in the Render dashboard (from pinata.cloud).
+      PINATA_JWT: ${PINATA_JWT}
       # CLOUT Configuration
       CLOUT_PROGRAM_ID: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
       CLOUT_MINT: 26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab
@@ -40,4 +45,6 @@ services:
       # Program IDs
       MARKET_PROGRAM_ID: Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs
       LOYALTY_PROGRAM_ID: 2TujfT3Czd2ncawJ6ZLmfGeJ2t1Ugb9bqEvxSE2EKoo9
+      # Bubblegum merkle tree for compressed NFT minting (public on-chain address)
+      BUBBLEGUM_TREE_ADDRESS: BJW4H8LZ518JsrXuC6Tj89JWBSGrqKXb4zfZEW6wtinJ
       # REWARDS_VAULT is auto-calculated from REWARDS_OWNER + CLOUT_MINT (deterministic ATA)
