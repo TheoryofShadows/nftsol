@@ -21,12 +21,22 @@ if (process.env.NODE_ENV === 'production') {
     (key) => !process.env[key] || process.env[key] === ''
   );
   if (missing.length > 0) {
+    // Log to stderr before throwing: when boot fails on a hosted runtime
+    // (e.g. Render), the thrown stack alone can be hard to spot, and a crash
+    // loop otherwise presents as an unexplained request hang.
+    // eslint-disable-next-line no-console
+    console.error(
+      `[Config] FATAL: missing required production env vars: ${missing.join(', ')}. ` +
+        `Set these in the host's environment/dashboard before the service can boot.`
+    );
     throw new Error(
       `[Config] Missing required environment variables for production: ${missing.join(', ')}`
     );
   }
   // Warn if using default insecure JWT secret
   if (process.env.JWT_SECRET === 'your-jwt-secret-minimum-32-characters') {
+    // eslint-disable-next-line no-console
+    console.error('[Config] FATAL: JWT_SECRET is still the default placeholder value.');
     throw new Error('[Config] JWT_SECRET must be changed from the default value in production');
   }
 }

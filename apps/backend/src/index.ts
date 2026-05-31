@@ -2068,6 +2068,21 @@ const server = createServer(app);
 
 // Start server
 const serverPort = process.env.PORT ? parseInt(process.env.PORT, 10) : appConfig.port;
+
+// Surface bind failures loudly instead of leaving the process alive but
+// unable to accept connections (which presents as a request hang behind a
+// proxy like Render's router rather than a clear error).
+server.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EADDRINUSE') {
+    logger.error(`❌ Port ${serverPort} is already in use — cannot start server`);
+  } else if (err.code === 'EACCES') {
+    logger.error(`❌ Permission denied binding to port ${serverPort}`);
+  } else {
+    logger.error('❌ HTTP server error:', err);
+  }
+  process.exit(1);
+});
+
 server.listen(serverPort, '0.0.0.0', async () => {
   logger.info(`🚀 NFTSol Backend Server Started`);
   logger.info(`📍 Port: ${serverPort} (from ${process.env.PORT ? 'PORT env var' : 'config'})`);
