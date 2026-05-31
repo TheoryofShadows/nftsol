@@ -10,7 +10,7 @@ Enterprise-grade NFT marketplace on Solana with compressed NFTs, CLOUT rewards, 
 ## Production URLs
 
 - **App**: https://nftsol.app
-- **Backend API**: https://nftsol.onrender.com
+- **Backend API**: https://nftsol-1.onrender.com
 - **GitHub**: https://github.com/TheoryofShadows/nftsol
 
 ## Core Features
