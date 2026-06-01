@@ -8,8 +8,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "module": "commonjs",
-    "moduleResolution": "node",
-    "ignoreDeprecations": "5.0",
+    "moduleResolution": "node10",
+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
