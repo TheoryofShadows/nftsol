@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "install:all": "npm ci --ignore-scripts && cd client && npm ci && cd ../apps/backend && npm ci && cd ../..",
+    "install:all": "npm ci --ignore-scripts && cd client && npm ci --ignore-scripts && cd ../apps/backend && npm ci --ignore-scripts && cd ../..",
     "build": "cd apps/backend && npm run build && cd ../../client && npm run build",
     "start": "cd apps/backend && npm start",
     "start:prod": "cd apps/backend && npm run start:prod",
@@ -32,8 +32,8 @@
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
-    "eslint": "^10.4.1",
-    "lint-staged": "^17.0.6",
+    "eslint": "^9.39.4",
+    "lint-staged": "^15.2.11",
     "prettier": "^3.6.2"
   },
   "lint-staged": {
