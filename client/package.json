@@ -42,7 +42,7 @@
     "elliptic": "^6.6.1",
     "undici": "^7.10.0",
     "axios": "^1.9.0",
-    "uuid": ">=11.1.1"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.10",
