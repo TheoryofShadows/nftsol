@@ -10,7 +10,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint": "eslint . --ext .ts,.tsx --config .eslintrc.cjs",
     "lint:fix": "eslint . --ext .ts,.tsx --fix --config .eslintrc.cjs",
-    "build": "npm run clean && tsc -p tsconfig.build.json --ignoreDeprecations 5.0 || tsc -p tsconfig.build.json --ignoreDeprecations 6.0 || tsc -p tsconfig.build.json && npm run copy:assets",
+    "build": "npm run clean && (tsc -p tsconfig.build.json --ignoreDeprecations 5.0 || tsc -p tsconfig.build.json --ignoreDeprecations 6.0 || tsc -p tsconfig.build.json) && npm run copy:assets",
     "build:prod": "NODE_ENV=production npm run build",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "copy:assets": "node scripts/copy-assets.cjs",
