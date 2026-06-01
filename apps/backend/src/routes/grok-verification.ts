@@ -198,7 +198,7 @@ async function verifyContentWithGrok(
       const response = await axios.post(
         'https://api.x.ai/v1/chat/completions',
         {
-          model: 'grok-4-latest',
+          model: 'grok-2-1212',
           messages: [
             {
               role: 'system',
