@@ -33,3 +33,8 @@ for (const asset of assets) {
   const destDir = path.resolve(__dirname, '..', 'dist', asset);
   copyRecursive(srcDir, destDir);
 }
+
+// Also copy migrations from root of backend
+const migSrc = path.resolve(__dirname, '..', 'migrations');
+const migDest = path.resolve(__dirname, '..', 'dist', 'migrations');
+copyRecursive(migSrc, migDest);
