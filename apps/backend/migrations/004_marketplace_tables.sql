@@ -1,5 +1,4 @@
 -- Marketplace tables for NFT buy/sell functionality
-
 -- NFT Listings table
 CREATE TABLE IF NOT EXISTS nft_listings (
   id SERIAL PRIMARY KEY,
@@ -37,11 +36,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='nfts' AND column_name='listed') THEN
     ALTER TABLE nfts ADD COLUMN listed BOOLEAN DEFAULT false;
   END IF;
-  
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='nfts' AND column_name='price') THEN
     ALTER TABLE nfts ADD COLUMN price DECIMAL(20, 9);
   END IF;
-  
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='nfts' AND column_name='status') THEN
     ALTER TABLE nfts ADD COLUMN status VARCHAR(20) DEFAULT 'active';
   END IF;
@@ -58,10 +55,9 @@ SELECT
   n.name,
   n.description,
   n.image_url,
-  n.creator,
-  n.metadata_uri
+  n.creator_address as creator,
+  n.metadata as metadata_uri
 FROM nft_listings l
 LEFT JOIN nfts n ON l.mint_address = n.mint_address
 WHERE l.listed = true
 ORDER BY l.listed_at DESC;
-

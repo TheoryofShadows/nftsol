@@ -77,7 +77,7 @@ class PnLService {
           nft_count INTEGER NOT NULL,
           snapshot_type VARCHAR(20) DEFAULT 'daily',
           created_at TIMESTAMP DEFAULT NOW(),
-          UNIQUE(wallet, snapshot_type, DATE(created_at))
+          UNIQUE(wallet, snapshot_type, created_at)
         )
       `);
 
@@ -208,7 +208,7 @@ class PnLService {
       await pool.query(
         `INSERT INTO portfolio_snapshots (wallet, total_value, nft_count, snapshot_type)
          VALUES ($1, $2, $3, 'daily')
-         ON CONFLICT (wallet, snapshot_type, (created_at::date))
+         ON CONFLICT (wallet, snapshot_type, created_at)
          DO UPDATE SET total_value = $2, nft_count = $3`,
         [wallet, totalValue, nftCount]
       );

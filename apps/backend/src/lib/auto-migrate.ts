@@ -20,6 +20,11 @@ export interface MigrationDef {
 
 export const MIGRATIONS: MigrationDef[] = [
   {
+    name: 'base_tables',
+    file: '001_base_tables.sql',
+    description: 'Creates core nfts and wallets tables',
+  },
+  {
     name: 'marketplace_tables',
     file: '004_marketplace_tables.sql',
     description: 'Creates nft_listings, nft_sales and marketplace columns on nfts',
