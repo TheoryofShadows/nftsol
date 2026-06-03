@@ -67,7 +67,7 @@
     "compression": "^1.7.4",
     "connect-redis": "^9.0.0",
     "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
+    "cors": "^2.8.6",
     "csurf": "^1.2.2",
     "csv-parse": "^6.1.0",
     "dotenv": "^17.4.2",
