@@ -165,7 +165,7 @@
     "@faker-js/faker": "^8.4.1",
     "@jest-mock/express": "^3.0.0",
     "@jest/globals": "^29.7.0",
-    "@shelf/jest-mongodb": "^5.0.1",
+    "@shelf/jest-mongodb": "^6.0.2",
     "@snyk/protect": "^1.0.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
