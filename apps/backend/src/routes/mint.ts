@@ -61,6 +61,30 @@ router.get('/estimate', async (_req: Request, res: Response) => {
 });
 
 /**
+ * GET /api/mint/relayer-status
+ * Report the platform relayer wallet (the actual fee payer for gasless mints)
+ * so it can be funded with SOL. Read-only — exposes only the public address,
+ * never the secret key. When `funded` is false, minting will fail until topped up.
+ */
+router.get('/relayer-status', async (_req: Request, res: Response) => {
+  try {
+    const status = await ultraCheapMintService.getRelayerStatus();
+    const response: ApiResponse = {
+      success: true,
+      data: status,
+    };
+    res.json(response);
+  } catch (error) {
+    const response: ApiResponse = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to read relayer status',
+      code: 'RELAYER_STATUS_FAILED',
+    };
+    res.status(500).json(response);
+  }
+});
+
+/**
  * GET /api/mint/compare
  * Get cost comparison with other platforms
  */

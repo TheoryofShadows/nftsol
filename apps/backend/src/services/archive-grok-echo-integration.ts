@@ -43,6 +43,8 @@ export interface GrokVerificationResult {
   confidence: number; // 0-100
   summary: string;
   concerns?: string[];
+  /** How the score was produced: real AI verifier vs. local heuristic fallback. */
+  method: 'grok' | 'heuristic';
   authenticity: 'authentic' | 'suspicious' | 'inconclusive';
   originAnalysis: {
     likelySource: string;
@@ -384,6 +386,48 @@ export class GrokArchiveVerificationService {
   }
 
   /**
+   * Deterministic heuristic score used when the AI verifier is unavailable
+   * (no API key, network failure, or unparseable response). Unlike the old
+   * hardcoded 85, this varies per item from real Archive signals so different
+   * content gets different, defensible scores — and is never presented as
+   * AI-verified (see `method: 'heuristic'`).
+   *
+   * Score is built from independent signals and clamped to 0-100:
+   * - License: public-domain/CC-BY are strongest provenance signals
+   * - Downloads: popularity is a weak legitimacy signal (log-scaled tiers)
+   * - Creator attribution present
+   * - Description richness (more context = more verifiable)
+   * - Public/upload date present
+   */
+  private computeHeuristicScore(item: ArchiveMediaItem): number {
+    let score = 40; // conservative base
+
+    const license = (item.licenseType || '').toLowerCase();
+    if (license === 'public-domain') score += 22;
+    else if (license === 'cc-by' || license === 'cc-by-sa') score += 16;
+    else if (license.startsWith('cc-')) score += 10;
+
+    const downloads = Number(item.downloads) || 0;
+    if (downloads >= 100000) score += 14;
+    else if (downloads >= 10000) score += 11;
+    else if (downloads >= 1000) score += 8;
+    else if (downloads >= 100) score += 5;
+    else if (downloads >= 10) score += 2;
+
+    const creator = (item.creator || '').trim();
+    if (creator && creator.toLowerCase() !== 'unknown') score += 8;
+
+    const descLen = (item.description || '').trim().length;
+    if (descLen >= 400) score += 8;
+    else if (descLen >= 120) score += 5;
+    else if (descLen >= 30) score += 2;
+
+    if ((item.publicDate || '').trim() || (item.year || '').trim()) score += 6;
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  /**
    * Verify archive content authenticity with Grok
    * Checks: source credibility, content authenticity, origin verification
    */
@@ -454,6 +498,7 @@ IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
         verified: truthScore >= 70,
         truthScore,
         confidence: parsed.originConfidence,
+        method: 'grok',
         summary: `Archive item verified by Grok: ${parsed.authenticity} (${truthScore}% confidence)`,
         concerns: parsed.concerns || [],
         authenticity: parsed.authenticity,
@@ -465,23 +510,35 @@ IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
         timestamp: Date.now(),
       };
     } catch (error) {
-      logger.error('Grok verification failed:', error);
-      // Fallback for public domain archive items
+      logger.warn('Grok verification unavailable, using heuristic fallback:', error);
+      // Honest heuristic fallback — the AI verifier is unavailable (no/invalid
+      // API key, network error, or unparseable response). Score varies per item
+      // and is explicitly labelled `method: 'heuristic'` so the UI never claims
+      // it was AI-verified.
+      const truthScore = this.computeHeuristicScore(archiveItem);
+      const evidence: string[] = [];
+      if ((archiveItem.licenseType || '').toLowerCase() === 'public-domain') {
+        evidence.push('Public domain status on Internet Archive');
+      }
+      if ((Number(archiveItem.downloads) || 0) > 0) {
+        evidence.push(`${archiveItem.downloads} downloads on Internet Archive`);
+      }
+      if ((archiveItem.creator || '').trim()) {
+        evidence.push(`Attributed creator: ${archiveItem.creator}`);
+      }
       return {
         contentHash: this.hashContent(JSON.stringify(archiveItem)),
-        verified: true,
-        truthScore: 85,
-        confidence: 80,
-        summary: 'Public domain archive item - verified by Internet Archive',
-        authenticity: 'authentic',
+        verified: truthScore >= 70,
+        truthScore,
+        confidence: truthScore,
+        method: 'heuristic',
+        summary: `Heuristic estimate (AI verifier unavailable): ${truthScore}% based on Internet Archive metadata.`,
+        concerns: ['AI verifier unavailable — heuristic score, not AI-verified'],
+        authenticity: truthScore >= 70 ? 'authentic' : 'inconclusive',
         originAnalysis: {
-          likelySource: archiveItem.creator,
-          confidence: 80,
-          supportingEvidence: [
-            'Verified public domain status',
-            'Archived by Internet Archive',
-            'Multiple downloads confirm legitimacy',
-          ],
+          likelySource: archiveItem.creator || 'Internet Archive',
+          confidence: truthScore,
+          supportingEvidence: evidence.length ? evidence : ['Sourced from Internet Archive'],
         },
         timestamp: Date.now(),
       };
@@ -545,6 +602,7 @@ Return JSON:
         verified: parsed.isLegitimate && parsed.qualityScore >= 50,
         truthScore: parsed.qualityScore,
         confidence: parsed.legitimacyScore,
+        method: 'grok',
         summary: `Echo layer verification: ${parsed.isLegitimate ? 'Valid' : 'Questionable'} derivation`,
         concerns: parsed.concerns || [],
         authenticity: parsed.isLegitimate ? 'authentic' : 'suspicious',
@@ -715,6 +773,7 @@ export class ArchiveGrokEchoIntegration {
           verified: true,
           truthScore: 75,
           confidence: 75,
+          method: 'heuristic' as const,
           summary: 'Layer verification pending archive parent',
           authenticity: 'authentic' as const,
           originAnalysis: {
