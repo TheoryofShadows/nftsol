@@ -199,9 +199,14 @@ export class FHEService {
     // Simulate different operations
     let mockResult: any;
     switch (operation) {
-      case 'fact_check':
-        mockResult = { score: 85, verified: true };
+      case 'fact_check': {
+        // Deterministic-but-varying mock score derived from the encrypted input
+        // (60-95) instead of a constant 85, so mock runs don't all look identical.
+        const digest = createHash('sha256').update(encryptedData.ciphertext).digest();
+        const score = 60 + (digest[0] % 36); // 60..95
+        mockResult = { score, verified: score >= 70 };
         break;
+      }
       case 'sentiment':
         mockResult = { sentiment: 'positive', confidence: 0.9 };
         break;
