@@ -69,7 +69,7 @@ Be conservative. Only score above 80 if there are clear positive signals. Respon
     const response = await axios.post(
       'https://api.x.ai/v1/chat/completions',
       {
-        model: 'grok-2-1212',
+        model: 'grok-4-latest',
         messages: [
           {
             role: 'system',
