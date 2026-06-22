@@ -64,10 +64,10 @@ async function grokVerifyWithAPI(input: string): Promise<GrokVerificationResult>
         role: 'system',
         content: `You are Grokipedia, a fact-checking AI for Internet Archive content.
 
-Analyze the provided content and return ONLY valid JSON in this format:
+Analyze the provided content and return ONLY valid JSON in this format (values below are placeholders, not defaults — score strictly from the content):
 {
   "summary": "Brief 1-2 sentence summary",
-  "score": 85,
+  "score": <0-100>,
   "sources": ["Source 1", "Source 2"]
 }
 

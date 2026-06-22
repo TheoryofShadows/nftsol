@@ -16,8 +16,11 @@ import ArchiveAdvancedSearchService, { AdvancedSearchFilters } from '../services
 
 const router = Router();
 
-// Initialize the integration service
-const grokApiKey = process.env.XAI_API_KEY || '';
+// Initialize the integration service.
+// Accept either env var name — XAI_API_KEY is canonical, GROK_API_KEY is a
+// legacy alias used elsewhere in the codebase — so a configured key actually
+// takes effect instead of silently falling back to the heuristic scorer.
+const grokApiKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY || '';
 const integration = new ArchiveGrokEchoIntegration(grokApiKey);
 const advancedSearch = new ArchiveAdvancedSearchService();
 

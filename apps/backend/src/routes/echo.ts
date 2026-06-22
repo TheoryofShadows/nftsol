@@ -23,6 +23,7 @@ import {
   getVerificationTeaser,
 } from '../utils/grokpedia';
 import { uploadMetadataToIrys } from '../utils/irysUpload';
+import { deriveRemixScore } from '../utils/remixScore';
 import { Connection, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { solanaConfig } from '../config';
@@ -404,6 +405,9 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
     // Create new ledger ID for remix
     const remixLedgerId = `remix-${parentLedgerId}-${Date.now()}`;
 
+    // Derive the remix's verification from the parent's real score (no hardcoded 85)
+    const { score: remixScore, verified: remixVerified } = deriveRemixScore(parentEchoes);
+
     // Upload remix metadata to Irys
     const connection = new Connection(solanaConfig.rpcUrl, solanaConfig.commitment);
     const platformSecretKey = process.env.PLATFORM_SECRET_KEY_BASE58;
@@ -423,6 +427,8 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
           { trait_type: 'Type', value: 'Remix' },
           { trait_type: 'Parent Ledger', value: parentLedgerId },
           { trait_type: 'Layers', value: remixMetadata.layers.length.toString() },
+          { trait_type: 'Verification Score', value: remixScore.toString() },
+          { trait_type: 'Score Basis', value: 'Inherited from parent ledger' },
         ],
         properties: {
           remix: {
@@ -449,8 +455,8 @@ router.post('/remix', echoLimiter, async (req: Request, res: Response) => {
       videoUri: remixMetadata.layers[0]?.videoUri || baseVideo?.videoUri,
       dataHash: Array.from(generateTruthHash(remixLedgerId)),
       contributor: creatorWallet,
-      grokVerified: true, // Remix metadata is considered verified
-      verificationScore: 85, // High score for remixes
+      grokVerified: remixVerified, // Inherited from parent ledger's real verification
+      verificationScore: remixScore, // Derived from parent, never a hardcoded value
       timestamp: new Date(),
     };
 

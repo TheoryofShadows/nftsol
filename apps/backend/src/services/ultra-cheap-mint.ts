@@ -52,6 +52,26 @@ const MERKLE_TREE_CONFIG = {
   canopyDepth: 0, // No canopy for maximum compression
 };
 
+// Minimum SOL the platform relayer needs to fund an Irys metadata upload + the
+// compressed-mint fee. Tree creation (~0.15 SOL) is a one-time cost and is
+// skipped entirely when BUBBLEGUM_TREE_ADDRESS is set.
+const MIN_PLATFORM_SOL = 0.01;
+
+/**
+ * Rewrite Solana's cryptic low-balance errors into an honest, actionable
+ * message. The user's connected wallet is never the fee payer for gasless
+ * mints — the platform relayer is — so "insufficient funds for fee" is
+ * misleading without this context.
+ */
+function humanizeMintError(message: string, relayerAddress?: string): string {
+  if (/insufficient funds|debit an account|attempt to debit/i.test(message)) {
+    return `Minting temporarily unavailable: the platform relayer wallet needs SOL.${
+      relayerAddress ? ` Fund ${relayerAddress}.` : ''
+    }`;
+  }
+  return message;
+}
+
 interface UltraCheapMintParams {
   toAddress: string;
   name: string;
@@ -255,6 +275,30 @@ export class UltraCheapMintService {
   }
 
   /**
+   * Read the platform relayer wallet — the actual fee payer for gasless mints.
+   * Exposed for the /api/mint/relayer-status diagnostics endpoint and reused by
+   * the mint() preflight. Only ever returns the public key, never the secret.
+   */
+  async getRelayerStatus(): Promise<{
+    address: string;
+    balanceSol: number;
+    cluster: string;
+    funded: boolean;
+    minSol: number;
+  }> {
+    const keypair = getPlatformKeypair();
+    const lamports = await this.connection.getBalance(keypair.publicKey);
+    const balanceSol = lamports / 1e9;
+    return {
+      address: keypair.publicKey.toBase58(),
+      balanceSol,
+      cluster: solanaConfig.cluster ?? 'mainnet-beta',
+      funded: balanceSol >= MIN_PLATFORM_SOL,
+      minSol: MIN_PLATFORM_SOL,
+    };
+  }
+
+  /**
    * Upload metadata to Arweave via Irys (included with UMI)
    */
   private async uploadMetadata(params: UltraCheapMintParams): Promise<string> {
@@ -301,13 +345,30 @@ export class UltraCheapMintService {
    * Standard: Metaplex Bubblegum (latest 2024+ standard)
    */
   async mint(params: UltraCheapMintParams): Promise<MintResult> {
+    let relayerAddress: string | undefined;
     try {
+      // Preflight: the platform relayer (NOT the user's connected wallet) pays
+      // every fee for gasless minting — the Irys metadata upload and the cNFT
+      // mint. If it's out of SOL these fail deep in the UMI stack with a cryptic
+      // "insufficient funds for fee". Check up front and return a clear message.
+      const relayer = await this.getRelayerStatus();
+      relayerAddress = relayer.address;
+      if (!relayer.funded) {
+        logger.error(
+          `[UltraCheapMint] Platform relayer underfunded: ${relayer.address} has ${relayer.balanceSol.toFixed(4)} SOL (need >= ${relayer.minSol})`,
+        );
+        return {
+          success: false,
+          error: `Minting temporarily unavailable: the platform relayer wallet needs SOL. Fund ${relayer.address} (currently ${relayer.balanceSol.toFixed(4)} SOL, need >= ${relayer.minSol}).`,
+        };
+      }
+
       // Initialize UMI if not already done
       const umi = await this.initializeUmi();
       if (!umi) {
         throw new Error('Failed to initialize UMI');
       }
-      
+
       // Ensure merkle tree exists
       await this.ensureMerkleTree();
       
@@ -390,9 +451,10 @@ export class UltraCheapMintService {
       };
     } catch (error) {
       logger.error('[UltraCheapMint] Mint failed:', error);
+      const rawMessage = error instanceof Error ? error.message : 'Compressed NFT minting failed';
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Compressed NFT minting failed',
+        error: humanizeMintError(rawMessage, relayerAddress),
       };
     }
   }

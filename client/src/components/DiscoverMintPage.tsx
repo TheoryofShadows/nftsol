@@ -18,6 +18,8 @@ interface VerifyResult {
   summary: string;
   concerns: string[];
   confidence?: number;
+  /** 'grok' = real AI verifier; 'heuristic' = local fallback when AI is unavailable. */
+  method?: 'grok' | 'heuristic';
 }
 
 interface MintResult {
@@ -147,6 +149,7 @@ export default function DiscoverMintPage() {
         summary: v?.summary ?? (raw as any).summary ?? '',
         concerns: Array.isArray(v?.concerns) ? v.concerns : [],
         confidence: v?.confidence,
+        method: v?.method === 'grok' ? 'grok' : v?.method === 'heuristic' ? 'heuristic' : undefined,
       });
       setStep('mint');
     } catch {
@@ -172,8 +175,12 @@ export default function DiscoverMintPage() {
       if (selectedItem.year) attributes.push({ trait_type: 'Year', value: selectedItem.year });
       if (selectedItem.creator) attributes.push({ trait_type: 'Creator', value: selectedItem.creator });
       if (verifyResult) {
-        attributes.push({ trait_type: 'Grok Truth Score', value: verifyResult.truthScore });
-        attributes.push({ trait_type: 'Grok Verified', value: verifyResult.verified ? 'Yes' : 'No' });
+        const scoreLabel = verifyResult.method === 'heuristic' ? 'Estimated Score' : 'Grok Truth Score';
+        attributes.push({ trait_type: scoreLabel, value: verifyResult.truthScore });
+        attributes.push({
+          trait_type: 'Grok Verified',
+          value: verifyResult.method === 'heuristic' ? 'Heuristic' : verifyResult.verified ? 'Yes' : 'No',
+        });
       }
 
       const res = await fetch(
@@ -545,12 +552,13 @@ export default function DiscoverMintPage() {
                         : verifyResult.truthScore >= 50 ? 'text-yellow-400'
                         : 'text-red-400'
                       }`}>
-                        {verifyResult.verified ? '✓ Verified by Grok'
+                        {verifyResult.method === 'heuristic' ? '◷ Heuristic estimate (AI unavailable)'
+                          : verifyResult.verified ? '✓ Verified by Grok'
                           : verifyResult.truthScore >= 50 ? '⚠ Partially verified'
                           : '✗ Low confidence'}
                       </div>
                       <div className="text-zinc-400 text-sm">
-                        Truth score: <strong className="text-white">{verifyResult.truthScore}%</strong>
+                        {verifyResult.method === 'heuristic' ? 'Estimated score' : 'Truth score'}: <strong className="text-white">{verifyResult.truthScore}%</strong>
                         {verifyResult.verified && verifyResult.truthScore >= 70 && (
                           <span className="ml-2 text-[#c9a84c] font-medium">+CLOUT reward</span>
                         )}
@@ -614,7 +622,7 @@ export default function DiscoverMintPage() {
                       verifyResult.verified ? 'bg-green-400' : 'bg-yellow-400'
                     }`} />
                     <span className="text-sm text-zinc-400">
-                      Grok score: <strong className={verifyResult.verified ? 'text-green-400' : 'text-yellow-400'}>
+                      {verifyResult.method === 'heuristic' ? 'Estimated score' : 'Grok score'}: <strong className={verifyResult.verified ? 'text-green-400' : 'text-yellow-400'}>
                         {verifyResult.truthScore}%
                       </strong>
                     </span>
@@ -644,7 +652,7 @@ export default function DiscoverMintPage() {
                 </div>
                 {verifyResult && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-500">Grok Truth Score</span>
+                    <span className="text-zinc-500">{verifyResult.method === 'heuristic' ? 'Estimated Score' : 'Grok Truth Score'}</span>
                     <span className={`font-bold ${verifyResult.verified ? 'text-green-400' : 'text-yellow-400'}`}>
                       {verifyResult.truthScore}%
                     </span>
@@ -762,7 +770,7 @@ export default function DiscoverMintPage() {
               )}
               {verifyResult && (
                 <div>
-                  <div className="text-xs text-zinc-500 mb-0.5">Grok Truth Score (on-chain)</div>
+                  <div className="text-xs text-zinc-500 mb-0.5">{verifyResult.method === 'heuristic' ? 'Estimated Score (on-chain)' : 'Grok Truth Score (on-chain)'}</div>
                   <div className={`text-sm font-bold ${verifyResult.verified ? 'text-green-400' : 'text-yellow-400'}`}>
                     {verifyResult.truthScore}%
                   </div>

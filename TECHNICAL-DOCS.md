@@ -276,6 +276,12 @@ Query params: `owner`, `collection`, `status`, `limit`.
 
 `POST /api/nfts/mint` and `POST /api/mint/nft` are kept as compatibility redirects to `/api/v1/simple-mint`.
 
+**GET /api/mint/relayer-status** — report the platform relayer wallet that pays fees for gasless mints. Minting is gasless for users: the **platform relayer keypair** (not the user's connected wallet) funds the Irys metadata upload and the compressed-mint fee. If this wallet runs out of SOL, mints fail with a clear "relayer wallet needs SOL" message instead of a cryptic "insufficient funds for fee". Use this endpoint to find the address to top up. Read-only — never exposes the secret key.
+```json
+// Response
+{ "success": true, "data": { "address": "Fz...9k", "balanceSol": 0.0042, "cluster": "mainnet-beta", "funded": false, "minSol": 0.01 } }
+```
+
 ### Marketplace endpoints
 
 **GET /api/v1/market** — listings (with pagination).

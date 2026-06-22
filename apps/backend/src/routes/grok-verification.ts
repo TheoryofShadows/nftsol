@@ -202,7 +202,7 @@ async function verifyContentWithGrok(
           messages: [
             {
               role: 'system',
-              content: `You are Grok, AI verifier for NFTSol. Analyze content for authenticity, factual accuracy, source reliability, and bias. Respond ONLY with valid JSON matching this schema: {"score":85,"factualAccuracy":90,"sourceReliability":80,"contentAuthenticity":85,"biasDetection":75,"flags":[],"summary":"Brief analysis"}`,
+              content: `You are Grok, AI verifier for NFTSol. Analyze content for authenticity, factual accuracy, source reliability, and bias. Score each dimension independently from 0-100 based strictly on the content; do not default to any particular value. Respond ONLY with valid JSON matching this schema (values are placeholders, not defaults): {"score":<0-100>,"factualAccuracy":<0-100>,"sourceReliability":<0-100>,"contentAuthenticity":<0-100>,"biasDetection":<0-100>,"flags":[],"summary":"Brief analysis"}`,
             },
             {
               role: 'user',
