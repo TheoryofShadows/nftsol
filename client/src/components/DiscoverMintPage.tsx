@@ -33,10 +33,9 @@ interface MintResult {
 
 const MEDIA_TYPES = [
   { value: '', label: 'All types' },
+  { value: 'image', label: 'Images' },
   { value: 'video', label: 'Video' },
   { value: 'audio', label: 'Audio' },
-  { value: 'image', label: 'Image' },
-  { value: 'text', label: 'Text / Books' },
 ];
 
 const SORT_OPTIONS = [
@@ -111,9 +110,10 @@ export default function DiscoverMintPage() {
     setVerifyResult(null);
     setStep('search');
     try {
-      const res = await archiveService.advancedSearch(query, {
-        mediaTypes: mediaType ? [mediaType as any] : undefined,
-        sortBy: sortBy as any,
+      // Broader web search across the open web (Openverse) + Internet Archive
+      // video, all license-safe for minting.
+      const res = await archiveService.webSearch(query, {
+        mediaType: (mediaType || 'all') as 'all' | 'image' | 'audio' | 'video',
         limit: 24,
       });
       setResults(res.results);
@@ -123,7 +123,7 @@ export default function DiscoverMintPage() {
     } finally {
       setSearching(false);
     }
-  }, [query, mediaType, sortBy]);
+  }, [query, mediaType]);
 
   const handleSelectItem = (item: SearchResult) => {
     setSelectedItem(item);
@@ -138,7 +138,12 @@ export default function DiscoverMintPage() {
     setVerifying(true);
     setVerifyError('');
     try {
-      const raw = await archiveService.verifyWithGrok(selectedItem.identifier);
+      // Web results (Openverse/etc.) verify by passing the full item; Internet
+      // Archive items can still verify by identifier. Either way Grok/heuristic
+      // returns the same shape.
+      const raw = selectedItem.source && selectedItem.source !== 'internet-archive'
+        ? await archiveService.verifyWebContent(selectedItem)
+        : await archiveService.verifyWithGrok(selectedItem.identifier);
       // Normalise across both response shapes the backend can return
       const v = (raw as any).verification ?? raw;
       setVerifyResult({
@@ -168,10 +173,16 @@ export default function DiscoverMintPage() {
     setMinting(true);
     try {
       // Build metadata — include Grok truth score as an attribute
+      const sourceLabel = selectedItem.source === 'openverse'
+        ? 'Openverse (open web)'
+        : selectedItem.source === 'internet-archive' || !selectedItem.source
+        ? 'Internet Archive'
+        : selectedItem.source;
       const attributes: { trait_type: string; value: string | number }[] = [
-        { trait_type: 'Source', value: 'Internet Archive' },
-        { trait_type: 'Archive ID', value: selectedItem.identifier },
+        { trait_type: 'Source', value: sourceLabel },
+        { trait_type: 'Source ID', value: selectedItem.identifier },
         { trait_type: 'Media Type', value: selectedItem.mediaType },
+        { trait_type: 'License', value: selectedItem.licenseType },
       ];
       if (selectedItem.year) attributes.push({ trait_type: 'Year', value: selectedItem.year });
       if (selectedItem.creator) attributes.push({ trait_type: 'Creator', value: selectedItem.creator });
@@ -288,8 +299,9 @@ export default function DiscoverMintPage() {
           Search. Verify. <span className="text-[#c9a84c]">Mint.</span>
         </h1>
         <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto">
-          Find anything in the Internet Archive&apos;s 40M+ items, verify authenticity with Grok AI,
-          then mint it as a compressed Solana NFT for fractions of a cent.
+          Search the open web — hundreds of millions of openly-licensed images, audio &amp; video
+          (Openverse + Internet Archive) — verify authenticity with Grok AI, then mint it as a
+          compressed Solana NFT for fractions of a cent.
         </p>
       </div>
 
@@ -408,35 +420,41 @@ export default function DiscoverMintPage() {
 
           {/* Results grid */}
           {results.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
               {results.map(item => (
                 <button
                   key={item.identifier}
                   onClick={() => handleSelectItem(item)}
-                  className="group text-left bg-[#111111] border border-[#1e1e1e] hover:border-[#c9a84c]/40 rounded-xl overflow-hidden transition-all hover:shadow-xl hover:-translate-y-0.5"
+                  className="group text-left bg-[#111111] border border-[#1e1e1e] hover:border-[#c9a84c]/40 active:border-[#c9a84c]/60 rounded-xl overflow-hidden transition-all hover:shadow-xl hover:-translate-y-0.5"
                 >
                   {/* Thumbnail */}
                   <div className="aspect-video relative overflow-hidden bg-[#0a0a0a]">
                     <img
                       src={item.thumbnailUrl}
                       alt={item.title}
+                      loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                     <div className="absolute top-2 left-2">
-                      <span className="px-2 py-0.5 bg-black/70 rounded text-xs text-zinc-300 capitalize">
+                      <span className="px-2 py-0.5 bg-black/70 rounded text-[10px] sm:text-xs text-zinc-300 capitalize">
                         {item.mediaType}
+                      </span>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <span className="px-2 py-0.5 bg-black/70 rounded text-[10px] sm:text-xs text-[#c9a84c] capitalize">
+                        {item.source === 'openverse' ? 'web' : 'archive'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3">
-                    <h3 className="text-white font-semibold text-sm leading-tight line-clamp-2 mb-1 group-hover:text-[#c9a84c] transition-colors">
+                  <div className="p-2.5 sm:p-3">
+                    <h3 className="text-white font-semibold text-xs sm:text-sm leading-tight line-clamp-2 mb-1 group-hover:text-[#c9a84c] transition-colors">
                       {item.title}
                     </h3>
-                    <div className="flex items-center justify-between text-xs text-zinc-500">
-                      <span>{item.year || ''}{item.creator ? ` · ${item.creator.slice(0, 20)}` : ''}</span>
-                      <span>{item.downloads.toLocaleString()} DL</span>
+                    <div className="flex items-center justify-between gap-2 text-[10px] sm:text-xs text-zinc-500">
+                      <span className="truncate">{item.creator && item.creator !== 'Unknown' ? item.creator.slice(0, 18) : item.year || ''}</span>
+                      <span className="shrink-0 uppercase tracking-wide">{item.licenseType.replace('cc-', 'CC ').replace('public-domain', 'PD')}</span>
                     </div>
                   </div>
                 </button>
@@ -645,11 +663,15 @@ export default function DiscoverMintPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Source</span>
-                  <span className="text-white">Internet Archive</span>
+                  <span className="text-white">{selectedItem.source === 'openverse' ? 'Openverse (open web)' : 'Internet Archive'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Archive ID</span>
-                  <span className="text-zinc-300 font-mono text-xs">{selectedItem.identifier}</span>
+                  <span className="text-zinc-500">License</span>
+                  <span className="text-white uppercase text-xs">{selectedItem.licenseType.replace('cc-', 'CC ').replace('public-domain', 'Public Domain')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Source ID</span>
+                  <span className="text-zinc-300 font-mono text-xs truncate ml-4 max-w-[60%]">{selectedItem.identifier}</span>
                 </div>
                 {verifyResult && (
                   <div className="flex justify-between">

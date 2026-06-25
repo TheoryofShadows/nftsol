@@ -55,6 +55,8 @@ export interface SearchResult {
   language?: string;
   archiveUrl: string;
   matchScore?: number;
+  /** Provenance, e.g. 'internet-archive' | 'openverse'. */
+  source?: string;
 }
 
 export interface AdvancedSearchResponse {
@@ -309,6 +311,38 @@ class ArchiveService {
       headers: { 'Content-Type': 'application/json' },
     });
     if (!res.ok) throw new Error('Failed to verify with Grok');
+    return (await res.json() as { data: Record<string, unknown> }).data;
+  }
+
+  /**
+   * Broader web search across the open web (Openverse images/audio + Internet
+   * Archive video), license-safe for minting. Backend-aggregated.
+   */
+  async webSearch(
+    query: string,
+    opts: { mediaType?: 'all' | 'image' | 'audio' | 'video'; page?: number; limit?: number } = {},
+  ): Promise<{ results: SearchResult[]; totalResults: number; sources: string[] }> {
+    const res = await fetch(`${API_BASE}/api/v1/web-search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, mediaType: opts.mediaType ?? 'all', page: opts.page ?? 1, limit: opts.limit ?? 24 }),
+    });
+    if (!res.ok) throw new Error('Web search failed');
+    const data = (await res.json() as { data: { results: SearchResult[]; totalResults: number; sources: string[] } }).data;
+    return { results: data.results ?? [], totalResults: data.totalResults ?? 0, sources: data.sources ?? [] };
+  }
+
+  /**
+   * Grok/heuristic verification for a web-search result (any source). Passes the
+   * full item so the backend can score it without an archive.org identifier.
+   */
+  async verifyWebContent(item: SearchResult): Promise<Record<string, unknown>> {
+    const res = await fetch(`${API_BASE}/api/v1/web-search/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    });
+    if (!res.ok) throw new Error('Failed to verify content');
     return (await res.json() as { data: Record<string, unknown> }).data;
   }
 
