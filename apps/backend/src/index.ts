@@ -51,6 +51,7 @@ import { createSolanaRPCFailover } from './services/rpc-failover';
 import { initializeHelius } from './services/helius-optimized';
 import solanaToolsRouter from './routes/solana-tools';
 import archiveGrokEchoRouter from './routes/archive-grok-echo';
+import webSearchRouter from './routes/web-search';
 import performanceMetricsRouter from './routes/performance-metrics';
 import rpcProxyRouter from './routes/rpc-proxy';
 import swaggerUi from 'swagger-ui-express';
@@ -1134,6 +1135,9 @@ apiV1.use('/nfts', nftsOptimizedRouter);
 // 🌍 Internet Archive + Grok + Echo Integration (revolutionary NFT workflow)
 apiV1.use('/archive', archiveGrokEchoRouter);
 
+// 🌐 Broader web search (Openverse + Archive, license-safe, Grok-verified)
+apiV1.use('/web-search', webSearchRouter);
+
 // Apply response compression and caching headers
 apiV1.use((req, res, next) => {
   // Set cache headers for GET requests
@@ -1224,6 +1228,9 @@ app.use('/api/activity', activityFeedRouter);
 
 // Archive + Grok + Echo integration routes
 app.use('/api/archive', archiveGrokEchoRouter);
+
+// Broader web search (Openverse + Archive)
+app.use('/api/web-search', webSearchRouter);
 
 // Solana RPC Proxy (handles JSON-RPC requests, avoids CORS/rate limiting issues)
 app.use('/api/rpc', rpcProxyRouter);

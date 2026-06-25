@@ -116,6 +116,8 @@ export interface SearchResult {
   language?: string;
   archiveUrl: string;
   matchScore?: number;
+  /** Provenance of the result, e.g. 'internet-archive' | 'openverse'. */
+  source?: string;
 }
 
 export interface AdvancedSearchResponse {
