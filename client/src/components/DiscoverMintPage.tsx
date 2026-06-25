@@ -153,9 +153,10 @@ export default function DiscoverMintPage() {
       });
       setStep('mint');
     } catch {
-      setVerifyError('Grok verification failed. You can still mint, but the item won\'t carry a truth score.');
-      // Allow minting without verification
-      setVerifyResult({ verified: false, truthScore: 0, summary: '', concerns: [] });
+      setVerifyError('Verification is unavailable right now. You can still mint — the item just won\'t carry a truth score.');
+      // Allow minting without verification. Use null (not a fake 0%) so the UI
+      // shows "No verification score" instead of a misleading zero.
+      setVerifyResult(null);
       setStep('mint');
     } finally {
       setVerifying(false);
