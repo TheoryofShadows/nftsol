@@ -11,7 +11,7 @@
 import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import rateLimit from 'express-rate-limit';
-import ArchiveGrokEchoIntegration from '../services/archive-grok-echo-integration';
+import ArchiveGrokEchoIntegration, { ArchiveMediaItem } from '../services/archive-grok-echo-integration';
 import ArchiveAdvancedSearchService, { AdvancedSearchFilters } from '../services/archive-advanced-search';
 
 const router = Router();
@@ -421,7 +421,29 @@ router.post('/:identifier/verify-with-grok', verifyLimiter, async (req: Request,
   try {
     const { identifier } = req.params;
 
-    const archiveItem = await integration['archiveService'].getArchiveMetadata(identifier);
+    // Archive.org metadata can be slow or unavailable for some items. Never let
+    // that hard-fail verification (which made the UI show a misleading 0%): fall
+    // back to a minimal item so we still return an honest heuristic score.
+    let archiveItem: ArchiveMediaItem;
+    try {
+      archiveItem = await integration['archiveService'].getArchiveMetadata(identifier);
+    } catch (metaError) {
+      logger.warn(`Archive metadata unavailable for ${identifier}, using minimal item:`, metaError);
+      archiveItem = {
+        identifier,
+        title: identifier,
+        description: '',
+        creator: 'Unknown',
+        mediaType: 'video',
+        downloads: 0,
+        url: `https://archive.org/download/${identifier}`,
+        thumbnailUrl: `https://archive.org/services/img/${identifier}`,
+        licenseType: 'public-domain',
+        archiveUrl: `https://archive.org/details/${identifier}`,
+        metadata: {},
+      };
+    }
+
     const verification = await integration['grokService'].verifyArchiveContent(archiveItem);
 
     res.json({

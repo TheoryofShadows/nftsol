@@ -195,9 +195,11 @@ export class InternetArchiveService {
    */
   async getArchiveMetadata(identifier: string): Promise<ArchiveMediaItem> {
     try {
-      // Use Archive.org metadata API
+      // Use Archive.org metadata API. Cap this user-facing call at 10s — some
+      // items sit on slow/broken storage nodes and archive.org can hang ~30s
+      // before returning an error, which otherwise stalls the whole verify flow.
       const metadataUrl = `${this.baseUrl}/metadata/${identifier}`;
-      const response = await this.apiClient.get(metadataUrl);
+      const response = await this.apiClient.get(metadataUrl, { timeout: 10000 });
 
       const item = response.data;
 
