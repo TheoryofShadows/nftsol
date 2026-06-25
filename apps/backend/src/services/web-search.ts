@@ -14,7 +14,10 @@
 import logger from '../utils/logger';
 import ArchiveAdvancedSearchService, { SearchResult } from './archive-advanced-search';
 
-const OPENVERSE_BASE = 'https://api.openverse.org/v1';
+// Outbound requests are pinned to this exact origin (defence-in-depth against
+// SSRF — user input only ever fills the query string, never the host/path).
+const OPENVERSE_ORIGIN = 'https://api.openverse.org';
+const OPENVERSE_BASE_PATH = '/v1';
 const USER_AGENT = 'NFTSol/1.0 (+https://nftsol.app)';
 // Only surface results that are safe to mint & reuse commercially with modification.
 const OPENVERSE_LICENSE_TYPE = 'commercial,modification';
@@ -74,9 +77,18 @@ function mapOpenverseLicense(license?: string): string {
 export class WebSearchService {
   private archive = new ArchiveAdvancedSearchService();
 
-  /** GET JSON from Openverse with a hard timeout (uses built-in fetch). */
-  private async openverseGet(path: string, query: Record<string, string>): Promise<any> {
-    const url = `${OPENVERSE_BASE}${path}?${new URLSearchParams(query).toString()}`;
+  /**
+   * GET JSON from Openverse with a hard timeout (uses built-in fetch).
+   * The request target is built from a constant origin via the URL constructor —
+   * user input only ever populates the query string — and the resolved origin is
+   * asserted before the request, so a search term can never redirect the call.
+   */
+  private async openverseGet(path: '/images/' | '/audio/', query: Record<string, string>): Promise<any> {
+    const url = new URL(`${OPENVERSE_BASE_PATH}${path}`, OPENVERSE_ORIGIN);
+    url.search = new URLSearchParams(query).toString();
+    if (url.origin !== OPENVERSE_ORIGIN) {
+      throw new Error('Refusing request to non-Openverse host');
+    }
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), PROVIDER_TIMEOUT_MS);
     try {

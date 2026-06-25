@@ -195,10 +195,15 @@ export class InternetArchiveService {
    */
   async getArchiveMetadata(identifier: string): Promise<ArchiveMediaItem> {
     try {
+      // Validate the identifier before it reaches the request URL so a user
+      // value can never steer the archive.org call (path traversal / SSRF).
+      if (!/^[A-Za-z0-9._-]+$/.test(identifier)) {
+        throw new Error('Invalid archive identifier');
+      }
       // Use Archive.org metadata API. Cap this user-facing call at 10s — some
       // items sit on slow/broken storage nodes and archive.org can hang ~30s
       // before returning an error, which otherwise stalls the whole verify flow.
-      const metadataUrl = `${this.baseUrl}/metadata/${identifier}`;
+      const metadataUrl = `${this.baseUrl}/metadata/${encodeURIComponent(identifier)}`;
       const response = await this.apiClient.get(metadataUrl, { timeout: 10000 });
 
       const item = response.data;
