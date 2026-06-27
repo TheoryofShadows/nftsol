@@ -74,17 +74,22 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
     setIsWalletDropdownOpen(false);
   };
 
-  // Close dropdowns when clicking outside
+  // Close dropdowns and the mobile menu when tapping/clicking outside the header
   useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
+    const handleOutsideClick = (e: Event) => {
       const target = e.target as HTMLElement;
       if (!target.closest('header')) {
         setIsDropdownOpen(false);
         setIsWalletDropdownOpen(false);
+        setIsMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('touchstart', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('touchstart', handleOutsideClick);
+    };
   }, []);
 
   return (

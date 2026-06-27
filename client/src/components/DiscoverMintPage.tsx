@@ -95,9 +95,39 @@ export default function DiscoverMintPage() {
   const [mintResult, setMintResult] = useState<MintResult | null>(null);
 
   const searchRef = useRef<HTMLInputElement>(null);
+  // True while applying a browser Back/forward, so pushStep doesn't re-push.
+  const isPopping = useRef(false);
 
   useEffect(() => {
     searchRef.current?.focus();
+  }, []);
+
+  // Advance to a deeper step and add a browser-history entry so Back returns
+  // here (and iOS swipe-back walks search→verify→mint). Idempotent per step.
+  const pushStep = (next: Step) => {
+    setStep(next);
+    if (isPopping.current || typeof window === 'undefined') return;
+    const cur = window.history.state as { tab?: string; step?: Step } | null;
+    if (cur && cur.tab === 'discover' && cur.step === next) return;
+    window.history.pushState({ tab: 'discover', step: next }, '', '#discover');
+  };
+
+  // Restore the step from history on Back/forward within the Discover tab.
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const st = e.state as { tab?: string; step?: Step } | null;
+      if (!st || st.tab !== 'discover') return;
+      isPopping.current = true;
+      const next = st.step || 'search';
+      setStep(next);
+      if (next === 'search') {
+        setSelectedItem(null);
+        setVerifyResult(null);
+      }
+      isPopping.current = false;
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
   }, []);
 
   const handleSearch = useCallback(async (e?: React.FormEvent) => {
@@ -129,7 +159,7 @@ export default function DiscoverMintPage() {
     setSelectedItem(item);
     setVerifyResult(null);
     setVerifyError('');
-    setStep('verify');
+    pushStep('verify');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -156,13 +186,13 @@ export default function DiscoverMintPage() {
         confidence: v?.confidence,
         method: v?.method === 'grok' ? 'grok' : v?.method === 'heuristic' ? 'heuristic' : undefined,
       });
-      setStep('mint');
+      pushStep('mint');
     } catch {
       setVerifyError('Verification is unavailable right now. You can still mint — the item just won\'t carry a truth score.');
       // Allow minting without verification. Use null (not a fake 0%) so the UI
       // shows "No verification score" instead of a misleading zero.
       setVerifyResult(null);
-      setStep('mint');
+      pushStep('mint');
     } finally {
       setVerifying(false);
     }
@@ -228,7 +258,7 @@ export default function DiscoverMintPage() {
         imageUrl: selectedItem.thumbnailUrl,
       });
 
-      setStep('done');
+      pushStep('done');
 
       confetti({
         particleCount: 180,
@@ -280,6 +310,10 @@ export default function DiscoverMintPage() {
     setMintResult(null);
     setResults([]);
     setQuery('');
+    // Collapse the in-flow history entries back to the Discover base.
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({ tab: 'discover', step: 'search' }, '', '#discover');
+    }
   };
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
@@ -598,7 +632,7 @@ export default function DiscoverMintPage() {
               {/* Continue to mint */}
               {verifyResult && (
                 <button
-                  onClick={() => setStep('mint')}
+                  onClick={() => pushStep('mint')}
                   className="w-full py-3.5 bg-[#c9a84c] hover:bg-[#b8973f] text-black font-bold rounded-xl transition-colors text-base"
                 >
                   Continue to Mint →
@@ -607,7 +641,7 @@ export default function DiscoverMintPage() {
 
               {/* Back */}
               <button
-                onClick={() => { setStep('search'); setSelectedItem(null); }}
+                onClick={() => window.history.back()}
                 className="w-full mt-3 py-2.5 text-zinc-500 hover:text-white text-sm transition-colors"
               >
                 ← Back to results
@@ -741,7 +775,7 @@ export default function DiscoverMintPage() {
             )}
 
             <button
-              onClick={() => setStep('verify')}
+              onClick={() => window.history.back()}
               className="w-full mt-3 py-2.5 text-zinc-500 hover:text-white text-sm transition-colors"
             >
               ← Back to verification
