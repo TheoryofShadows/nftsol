@@ -6,7 +6,7 @@ layout: default
 
 # NFTSol Documentation
 
-Welcome to the user-facing documentation for **NFTSol** — an enterprise NFT marketplace on Solana with compressed NFTs, CLOUT rewards, Eternal Echoes, and AI-powered video verification.
+Welcome to the user-facing documentation for **NFTSol** — an enterprise NFT marketplace on Solana with open-web media search, gasless compressed-NFT minting, CLOUT rewards, Eternal Echoes, and AI-powered verification.
 
 **Live app:** [nftsol.app](https://nftsol.app) · **Repo:** [github.com/TheoryofShadows/nftsol](https://github.com/TheoryofShadows/nftsol)
 
@@ -14,8 +14,8 @@ Welcome to the user-facing documentation for **NFTSol** — an enterprise NFT ma
 
 ## User Guides
 
-- [**Minting Guide**](./MINTING_GUIDE.md) — Step-by-step walkthrough for minting your first NFT (image and video).
-- [**Features Explained**](./FEATURES_EXPLAINED.md) — What CLOUT, Eternal Echoes, compressed NFTs, and Grok verification actually do.
+- [**Minting Guide**](./MINTING_GUIDE.md) — Step-by-step walkthrough for minting your first NFT, including searching the open web for license-safe media.
+- [**Features Explained**](./FEATURES_EXPLAINED.md) — What open-web search, CLOUT, Eternal Echoes, compressed NFTs, and Grok verification actually do.
 - [**API Examples**](./API_EXAMPLES.md) — Working request/response examples for the public API.
 
 ## Developer Reference

@@ -4,49 +4,50 @@ NFTSol isn't just another NFT marketplace. Here's what makes it revolutionary:
 
 ---
 
-## 📚 Feature 1: Internet Archive Integration
+## 📚 Feature 1: Open-Web Media Search (Openverse + Internet Archive)
 
 ### What It Is
 
-Access to **20 million+ items** from the Internet Archive:
-- Historical videos, films, documentaries
-- Audio recordings, speeches, music
-- Photographs, artwork, illustrations
-- Historical documents, books, manuscripts
-- All **public domain** or **creative commons licensed**
+Search the open web for **license-safe** media you can mint, spanning **~700M+
+openly-licensed works**:
+
+- **Openverse** (Creative Commons' own search API) indexes images & audio from across
+  the web — Flickr, Wikimedia Commons, the Smithsonian, museums, and more
+- **Internet Archive** supplies historical video, film, and audio (20M+ items)
+- Every result surfaced is **public domain** or **Creative Commons licensed** and
+  filtered to allow commercial use + modification, so it's safe to mint
 
 ### Why It's Revolutionary
 
 **Traditional NFT Creation**:
+
 1. Artist creates content
 2. Uploads to marketplace
 3. Mints NFT
 4. Problem: Limited audience, same content everywhere
 
-**NFTSol Archive Integration**:
-1. Discover from 20M+ items
-2. Curate with AI verification
+**NFTSol Open-Web Search**:
+
+1. Discover from ~700M+ openly-licensed works across the web
+2. Curate with AI (Grok) or heuristic verification
 3. Add your own metadata/context
-4. Mint with historical provenance
-5. Benefit: Infinite content source, unique curation opportunities, historical significance
+4. Mint gaslessly (the platform relayer pays the fees)
+5. Benefit: Near-infinite license-safe content source and unique curation opportunities
 
 ### How to Use
 
-#### Search the Archive
+#### Search the open web
+
 ```
-1. Click "Archive Search" tab
-2. Enter search: "1920s jazz", "historical speeches", "nature documentaries"
-3. Use 15+ filters:
-   - Media type (video, audio, image, document)
-   - Date range (find items from specific years)
-   - License (all are free to use)
-   - Language
-   - Downloads (popularity)
-   - Duration (length)
-   - Format (mp4, jpg, pdf, etc.)
+1. Open the "Discover" / search tab
+2. Enter a search: "1920s jazz", "apollo moon", "nature photography"
+3. Each result shows its source (Openverse / Internet Archive) and license badge
+   (e.g. CC0, CC BY) so you always know it's safe to mint
+4. Optionally narrow by media type: image, audio, or video
 ```
 
 #### Filter by Category
+
 ```
 Looking for music?
 → Filter: mediaType=audio, license=public-domain, language=en
@@ -69,6 +70,7 @@ Looking for educational content?
 ### Real-World Examples
 
 **Example 1: Rare Jazz Recording**
+
 ```
 Find: "Charlie Parker Live 1945" on Archive
 Mint as NFT with:
@@ -80,6 +82,7 @@ Result: Sell for 2-5 SOL, earn CLOUT rewards
 ```
 
 **Example 2: Historical Documentary**
+
 ```
 Find: "Moon Landing Footage" (public domain NASA archive)
 Create Echo NFT with:
@@ -91,6 +94,7 @@ Result: Collaborative artwork worth 5-50 SOL
 ```
 
 **Example 3: Book/Manuscript**
+
 ```
 Find: "1920 Fashion Magazine" PDF
 Mint with:
@@ -103,14 +107,14 @@ Result: Collectible document, dividends from resales
 
 ### Archive Integration Benefits
 
-| Feature | Traditional NFT | Archive Integration |
-|---------|-----------------|-------------------|
-| Content source | Only your creations | 20M+ public domain items |
-| Legal clarity | You must verify rights | Pre-cleared by Internet Archive |
-| Historical context | None | Comes with original metadata |
-| Discoverability | Just your audience | "Historical/archival" collectors |
-| Verification | Manual checking | Automatic with Grok AI |
-| Curation opportunities | Limited | Unlimited - be a curator |
+| Feature                | Traditional NFT        | Archive Integration              |
+| ---------------------- | ---------------------- | -------------------------------- |
+| Content source         | Only your creations    | 20M+ public domain items         |
+| Legal clarity          | You must verify rights | Pre-cleared by Internet Archive  |
+| Historical context     | None                   | Comes with original metadata     |
+| Discoverability        | Just your audience     | "Historical/archival" collectors |
+| Verification           | Manual checking        | Automatic with Grok AI           |
+| Curation opportunities | Limited                | Unlimited - be a curator         |
 
 ---
 
@@ -119,6 +123,7 @@ Result: Collectible document, dividends from resales
 ### What It Is
 
 **AI-powered verification system** that:
+
 - Analyzes content authenticity
 - Detects manipulated or AI-generated content
 - Verifies metadata accuracy
@@ -128,12 +133,14 @@ Result: Collectible document, dividends from resales
 ### Why It Matters
 
 **Without Verification**:
+
 - Users don't know if NFT is authentic
 - AI-generated content might be passed off as human
 - No way to verify it's original
 - Lower buyer confidence = lower prices
 
 **With Grok Verification**:
+
 - Permanent authenticity badge
 - Confidence score visible
 - Higher buyer trust
@@ -143,6 +150,7 @@ Result: Collectible document, dividends from resales
 ### How Grok Works
 
 #### For Traditional NFTs
+
 ```
 System analyzes:
 1. Content originality (is it AI-generated?)
@@ -158,6 +166,7 @@ Result: Confidence score
 ```
 
 #### For Archive Items
+
 ```
 System compares:
 1. Archive original vs. your version
@@ -169,6 +178,7 @@ Result: Archive Verified badge ✅
 ```
 
 #### For Echo Layers
+
 ```
 System verifies:
 1. Each layer's authenticity
@@ -182,6 +192,7 @@ Result: Verified Echo NFT with layer badges ✅
 ### Verification Examples
 
 **Example 1: Your Original Artwork**
+
 ```
 You upload: "Abstract Digital Painting"
 Grok analyzes:
@@ -194,6 +205,7 @@ Benefit: Buyers trust it's your work, can sell for premium
 ```
 
 **Example 2: Archive Item**
+
 ```
 You mint: "1945 Jazz Recording" from Archive
 Grok analyzes:
@@ -207,6 +219,7 @@ Benefit: Buyers know it's historically accurate, worth premium
 ```
 
 **Example 3: AI-Generated Content (Honest)**
+
 ```
 You upload: "AI-Generated Landscape (Midjourney)"
 Grok analyzes:
@@ -220,13 +233,13 @@ Benefit: Transparent labeling actually increases trust, collectors want AI art
 
 ### When to Verify
 
-| Situation | Recommendation | Why |
-|-----------|----------------|-----|
-| Your original artwork | ✅ Always | Proves authenticity, increases price |
-| Archive item | ✅ Always | Shows historical accuracy |
-| AI-generated content | ✅ Always | Transparency builds trust |
-| Derivative/remix work | ✅ Always | Shows proper attribution |
-| Echo NFTs | ✅ Always | Verifies all layer authenticity |
+| Situation             | Recommendation | Why                                  |
+| --------------------- | -------------- | ------------------------------------ |
+| Your original artwork | ✅ Always      | Proves authenticity, increases price |
+| Archive item          | ✅ Always      | Shows historical accuracy            |
+| AI-generated content  | ✅ Always      | Transparency builds trust            |
+| Derivative/remix work | ✅ Always      | Shows proper attribution             |
+| Echo NFTs             | ✅ Always      | Verifies all layer authenticity      |
 
 ### Verification Cost
 
@@ -242,6 +255,7 @@ Benefit: Transparent labeling actually increases trust, collectors want AI art
 ### What It Is
 
 **Collaborative NFT layers** where:
+
 - You create a base NFT
 - Other creators add layers on top
 - Final NFT shows all contributions
@@ -251,6 +265,7 @@ Benefit: Transparent labeling actually increases trust, collectors want AI art
 ### Why It's Revolutionary
 
 **Traditional NFT**:
+
 ```
 Creator A makes NFT
 ↓
@@ -262,6 +277,7 @@ End
 ```
 
 **Eternal Echo**:
+
 ```
 Creator A creates base NFT (e.g., "Jazz Recording")
 ↓
@@ -289,6 +305,7 @@ Infinite residual income
 ### Echo Layer Examples
 
 **Example 1: Music + Visuals**
+
 ```
 Base: Jazz instrumental recording
 + Visual Layer: Abstract animation synced to music
@@ -300,6 +317,7 @@ Revenue split: Each creator gets recurring royalties
 ```
 
 **Example 2: Photo + Story + Commentary**
+
 ```
 Base: Historical photograph (1920s)
 + Context Layer: Historical essay and background
@@ -311,6 +329,7 @@ Benefit: Each creator shares in value creation
 ```
 
 **Example 3: Community Art Project**
+
 ```
 Base: Digital artwork
 + 10 Echo Layers: Different artists add elements
@@ -327,11 +346,13 @@ Distribution: All 11 creators benefit forever
 ### How to Create an Echo
 
 #### Step 1: Start with Base
+
 - Create new NFT, OR
 - Use existing NFT, OR
 - Mint from Archive
 
 #### Step 2: Create Echo Container
+
 1. Click "Create Echo"
 2. Select your base NFT
 3. Set framework:
@@ -341,6 +362,7 @@ Distribution: All 11 creators benefit forever
    - Layer requirements
 
 #### Step 3: Invite Collaborators
+
 - Share Echo ID
 - Collaborators submit:
   - Media files
@@ -349,12 +371,14 @@ Distribution: All 11 creators benefit forever
   - Metadata enhancements
 
 #### Step 4: Review & Approve Layers
+
 - View each contribution
 - Accept/reject
 - Reorder layers
 - Add descriptions
 
 #### Step 5: Mint & Sell
+
 1. Click "Mint Echo"
 2. Pay gas fee (~0.001 SOL)
 3. List on marketplace
@@ -362,16 +386,17 @@ Distribution: All 11 creators benefit forever
 
 ### Echo Benefits
 
-| Role | Traditional | Echo NFT |
-|------|------------|----------|
-| Creator | Single income | Recurring royalties from all sales |
-| Contributor | Paid once per work | Royalties forever |
-| Community | Separate works | Collaborative masterpiece |
-| Buyer | Single perspective | Rich multi-layered creation |
+| Role        | Traditional        | Echo NFT                           |
+| ----------- | ------------------ | ---------------------------------- |
+| Creator     | Single income      | Recurring royalties from all sales |
+| Contributor | Paid once per work | Royalties forever                  |
+| Community   | Separate works     | Collaborative masterpiece          |
+| Buyer       | Single perspective | Rich multi-layered creation        |
 
 ### Real-World Value
 
 **Example Echo Valuation**:
+
 ```
 Base artwork value: 5 SOL
 + Visual enhancement: +5 SOL
@@ -431,14 +456,14 @@ Step 6: REPEAT
 
 ### Competitive Advantages
 
-| Feature | OpenSea | Magic Eden | Blur | NFTSol |
-|---------|---------|-----------|------|--------|
-| Archive Access | ❌ | ❌ | ❌ | ✅ 20M+ items |
-| AI Verification | ❌ | ❌ | ❌ | ✅ Grok |
-| Collaborative Layers | ❌ | ❌ | ❌ | ✅ Echo |
-| Recurring Royalties | Limited | Limited | Limited | ✅ Full automation |
-| Public Domain Content | ❌ | ❌ | ❌ | ✅ Unlimited |
-| Curation Rewards | ❌ | ❌ | ❌ | ✅ CLOUT tokens |
+| Feature               | OpenSea | Magic Eden | Blur    | NFTSol             |
+| --------------------- | ------- | ---------- | ------- | ------------------ |
+| Archive Access        | ❌      | ❌         | ❌      | ✅ 20M+ items      |
+| AI Verification       | ❌      | ❌         | ❌      | ✅ Grok            |
+| Collaborative Layers  | ❌      | ❌         | ❌      | ✅ Echo            |
+| Recurring Royalties   | Limited | Limited    | Limited | ✅ Full automation |
+| Public Domain Content | ❌      | ❌         | ❌      | ✅ Unlimited       |
+| Curation Rewards      | ❌      | ❌         | ❌      | ✅ CLOUT tokens    |
 
 ---
 
@@ -455,4 +480,3 @@ Step 6: REPEAT
 **NFTSol = Archive Access + AI Verification + Collaborative Layers**
 
 **The future of NFTs is here.** 🚀
-

@@ -1,7 +1,7 @@
 # NFTSol Technical Documentation
 
 **Version:** 2.2
-**Last Updated:** May 2026
+**Last Updated:** June 2026
 **Status:** Production
 
 ---
@@ -108,6 +108,7 @@ nftsol/
 ## Architectural Principles
 
 ### 1. Shared package
+
 Single source of truth for cross-cutting code:
 
 ```typescript
@@ -118,31 +119,39 @@ import { mintRequestSchema } from '@shared/validation/schemas';
 ```
 
 ### 2. Service layer pattern
+
 Keep business logic out of routes and components:
 
 ```typescript
 // services/nftService.ts
 export class NftService {
-  async getNfts(filters: NFTFilters): Promise<NFT[]> { /* ... */ }
+  async getNfts(filters: NFTFilters): Promise<NFT[]> {
+    /* ... */
+  }
 }
 ```
 
 ### 3. Error handling
+
 Use custom error classes (`AppError`, `ValidationError`, `NotFoundError`) and centralized middleware. Never throw bare `Error`s.
 
 ### 4. Type safety
+
 Strict TypeScript everywhere. Validate at boundaries with Zod schemas — don't trust untyped input.
 
 ### 5. No magic values
+
 Constants live in `@shared/constants`. No inline `60000`s.
 
 ### 6. Absolute imports
+
 Use path aliases — `@shared/...`, `@/...` — not `../../..`.
 
 ### 7. Structured logging
+
 ```typescript
-logger.info('NFT minted', { mintAddress, creator });  // ✅
-console.log('NFT minted');                              // ❌
+logger.info('NFT minted', { mintAddress, creator }); // ✅
+console.log('NFT minted'); // ❌
 ```
 
 ---
@@ -167,6 +176,7 @@ When adding cross-cutting code, prefer here over duplicating in `client/` and `a
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 20+
 - PostgreSQL 14+
 - Git
@@ -235,6 +245,7 @@ VITE_IMG_PROXY_BASE=http://localhost:3001
 ## API Reference
 
 **Base URLs**
+
 - Development: `http://localhost:3001`
 - Production: `https://nftsol.onrender.com`
 
@@ -243,16 +254,27 @@ Most endpoints require wallet connection via Solana Wallet Adapter; admin endpoi
 ### CLOUT endpoints
 
 **GET /api/clout/balance/:address** — token balance for a wallet
+
 ```json
-{ "success": true, "data": { "address": "...", "balance": 1000, "token": "CLOUT", "mintAddress": "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab" } }
+{
+  "success": true,
+  "data": {
+    "address": "...",
+    "balance": 1000,
+    "token": "CLOUT",
+    "mintAddress": "26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab"
+  }
+}
 ```
 
 **GET /api/clout/vault-balance** — rewards-vault balance (vault address is computed deterministically)
+
 ```json
 { "success": true, "data": { "balance": 50000, "token": "CLOUT", "vaultAddress": "..." } }
 ```
 
-**POST /api/clout/reward** *(admin / CSRF)* — distribute CLOUT
+**POST /api/clout/reward** _(admin / CSRF)_ — distribute CLOUT
+
 ```json
 // Request
 { "recipient": "...", "amount": 100, "reason": "NFT Sale" }
@@ -270,6 +292,7 @@ Query params: `owner`, `collection`, `status`, `limit`.
 **GET /api/v1/nfts/:owner** — NFTs owned by a wallet.
 
 **POST /api/v1/simple-mint** — mint a new NFT (CSRF-protected; fetch token from `GET /api/v1/csrf-token`).
+
 ```json
 { "name": "My NFT", "description": "...", "imageUrl": "https://...", "creatorWallet": "..." }
 ```
@@ -277,10 +300,60 @@ Query params: `owner`, `collection`, `status`, `limit`.
 `POST /api/nfts/mint` and `POST /api/mint/nft` are kept as compatibility redirects to `/api/v1/simple-mint`.
 
 **GET /api/mint/relayer-status** — report the platform relayer wallet that pays fees for gasless mints. Minting is gasless for users: the **platform relayer keypair** (not the user's connected wallet) funds the Irys metadata upload and the compressed-mint fee. If this wallet runs out of SOL, mints fail with a clear "relayer wallet needs SOL" message instead of a cryptic "insufficient funds for fee". Use this endpoint to find the address to top up. Read-only — never exposes the secret key.
+
 ```json
 // Response
-{ "success": true, "data": { "address": "Fz...9k", "balanceSol": 0.0042, "cluster": "mainnet-beta", "funded": false, "minSol": 0.01 } }
+{
+  "success": true,
+  "data": {
+    "address": "Fz...9k",
+    "balanceSol": 0.0042,
+    "cluster": "mainnet-beta",
+    "funded": false,
+    "minSol": 0.01
+  }
+}
 ```
+
+### Open-web search endpoints
+
+The Discover → Mint flow searches the open web for license-safe media, then runs the
+same verify → mint pipeline. Image/audio come from **Openverse** (Creative Commons'
+own API indexing ~700M openly-licensed works — no API key); video falls back to the
+**Internet Archive**. Each provider is best-effort, so one failing provider still
+returns the others. Both routes are also mounted unversioned at `/api/web-search`.
+
+**POST /api/v1/web-search** — search the open web.
+
+```json
+// Request
+{ "query": "apollo moon", "mediaType": "all", "limit": 24, "page": 1 }
+// Response
+{ "success": true, "data": { "query": "apollo moon", "totalResults": 1234,
+  "results": [ { "identifier": "openverse:…", "title": "…", "thumbnailUrl": "https://…",
+  "licenseType": "cc-by", "source": "openverse" } ], "sources": ["openverse"] } }
+```
+
+`mediaType` is one of `all | image | audio | video`. Results are normalised to the
+shared `SearchResult` shape (same as Internet Archive results) so they flow through
+verify and mint unchanged. Only commercial-use + modification licenses are surfaced.
+
+**POST /api/v1/web-search/verify** — Grok/heuristic verification for one open-web result.
+
+```json
+// Request: a single search result item (title, description, creator, licenseType, …)
+// Response
+{
+  "success": true,
+  "data": {
+    "verification": { "truthScore": 66, "method": "heuristic", "verified": false },
+    "readyForMinting": true
+  }
+}
+```
+
+`method` is `"grok"` when an `XAI_API_KEY`/`GROK_API_KEY` is configured, otherwise
+`"heuristic"` (an honest per-item estimate — never presented as AI-verified).
 
 ### Marketplace endpoints
 
@@ -293,6 +366,7 @@ Query params: `owner`, `collection`, `status`, `limit`.
 **GET /health** — liveness probe.
 **GET /api/health** — same, namespaced.
 **GET /healthz** — readiness; includes DB connectivity and Solana RPC status.
+
 ```json
 { "status": "healthy", "timestamp": "2026-05-24T12:00:00Z" }
 ```
@@ -367,10 +441,14 @@ const connection = new Connection(
 
 ```typescript
 class CloutTokenService {
-  async distributeCloutRewards(recipient: string, amount: number, reason: string): Promise<CloutRewardResult>
-  async getCloutBalance(walletAddress: string): Promise<number>
-  async getVaultBalance(): Promise<number>
-  async ensureRewardsVault(platformKeypair: Keypair): Promise<PublicKey>
+  async distributeCloutRewards(
+    recipient: string,
+    amount: number,
+    reason: string
+  ): Promise<CloutRewardResult>;
+  async getCloutBalance(walletAddress: string): Promise<number>;
+  async getVaultBalance(): Promise<number>;
+  async ensureRewardsVault(platformKeypair: Keypair): Promise<PublicKey>;
 }
 ```
 
@@ -449,6 +527,7 @@ Manual smoke test: start both servers, connect a wallet in the browser, mint/buy
 ## Troubleshooting
 
 **Port already in use**
+
 ```bash
 # Linux/Mac
 lsof -ti:3001 | xargs kill -9
@@ -457,11 +536,13 @@ npx kill-port 3001
 ```
 
 **Module resolution errors**
+
 - `npm install` in the right directory
 - Verify path aliases in `tsconfig.json`
 - Don't append `.js` to TypeScript imports
 
 **Wallet connection issues**
+
 - Wallet extension installed and unlocked
 - Browser console for adapter errors
 - RPC URL reachable

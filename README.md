@@ -10,14 +10,16 @@ Enterprise-grade NFT marketplace on Solana with compressed NFTs, CLOUT rewards, 
 ## Production URLs
 
 - **App**: https://nftsol.app
-- **Backend API**: https://nftsol-1.onrender.com
+- **Backend API**: https://nftsol.onrender.com
 - **GitHub**: https://github.com/TheoryofShadows/nftsol
 
 ## Core Features
 
 - **Full NFT Marketplace** - Mint, buy, sell NFTs on Solana mainnet
+- **Open-Web Media Search** - Search ~700M openly-licensed works (Openverse: Flickr, Wikimedia, Smithsonian, museums) plus Internet Archive video, then mint license-safe NFTs
+- **Gasless Minting** - The platform relayer pays mint/upload fees so users mint without holding SOL for gas
 - **Video NFT Minting** - Upload and mint video NFTs with Grok AI verification
-- **Grok AI Verification** - AI-powered authenticity verification for video NFTs
+- **Grok AI Verification** - AI-powered authenticity verification, with an honest heuristic fallback (labeled as such) when no AI key is configured
 - **Modern Dashboard** - Portfolio, stats, and activity feed
 - **Smart Onboarding** - Interactive tours and welcome experience
 - **CLOUT Token** - Native reward token (`26iJ37BE3icVtoo2QRkfjtYXFHMudG2sbTHAnhF2D6ab`)
@@ -49,6 +51,7 @@ Backend  (Node.js + Express + TypeScript)
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 20.x+
 - PostgreSQL 14+
 
@@ -106,6 +109,7 @@ XAI_API_KEY=your_xai_api_key         # xAI Grok for AI verification
 ## API Endpoints
 
 ### Public
+
 - `GET /health`, `GET /api/health`, `GET /healthz` - Health checks (last one includes DB + Solana status)
 - `GET /api/public/stats` - Platform statistics
 - `GET /api/v1/programs` - Program configuration (mints, vaults, program IDs)
@@ -118,14 +122,20 @@ XAI_API_KEY=your_xai_api_key         # xAI Grok for AI verification
 - `GET /api/clout/balance/:address` - CLOUT balance
 - `GET /api/clout/vault-balance` - Rewards vault balance
 - `GET /api/archive/search?q=...` - Internet Archive search
+- `POST /api/v1/web-search` - Open-web media search (Openverse images/audio + Internet Archive video)
+- `POST /api/v1/web-search/verify` - Grok/heuristic verification for an open-web result
+- `GET /api/mint/relayer-status` - Platform relayer wallet address + SOL balance (public key only) for gasless-mint readiness
+- `GET /api/mint/estimate` - Estimated mint cost
 
 ### CSRF-protected (browser flows)
+
 - `POST /api/v1/simple-mint` - Mint NFT (double-submit CSRF; get token from `GET /api/v1/csrf-token` or `GET /api/csrf-token`)
 - `POST /api/echo/mint` - Mint Eternal Echo
 - `POST /api/marketplace/list` / `POST /api/marketplace/delist` - Listings
 - `POST /api/grok/verify` - AI content verification
 
 ### Admin (JWT, wallet-signature auth)
+
 - `POST /api/v1/auth/admin` - Admin auth (wallet signature → JWT)
 - `POST /api/clout/reward` - Distribute CLOUT
 - `POST /api/v1/admin/withdrawals` - Process withdrawals
@@ -170,15 +180,15 @@ npm run type-check       # Check types
 
 ## Documentation
 
-| Document | Description |
-|---------|-------------|
-| [README.md](README.md) | Project overview |
-| [TECHNICAL-DOCS.md](TECHNICAL-DOCS.md) | Architecture, API reference, database schema |
-| [SECURITY.md](SECURITY.md) | Security policy & current measures |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributing guidelines |
-| [CLAUDE.md](CLAUDE.md) | Guide for AI assistants working on this repo |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [docs/](docs/) | User-facing guides — also published at [theoryofshadows.github.io/nftsol](https://theoryofshadows.github.io/nftsol/) |
+| Document                               | Description                                                                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [README.md](README.md)                 | Project overview                                                                                                     |
+| [TECHNICAL-DOCS.md](TECHNICAL-DOCS.md) | Architecture, API reference, database schema                                                                         |
+| [SECURITY.md](SECURITY.md)             | Security policy & current measures                                                                                   |
+| [CONTRIBUTING.md](CONTRIBUTING.md)     | Contributing guidelines                                                                                              |
+| [CLAUDE.md](CLAUDE.md)                 | Guide for AI assistants working on this repo                                                                         |
+| [CHANGELOG.md](CHANGELOG.md)           | Version history                                                                                                      |
+| [docs/](docs/)                         | User-facing guides — also published at [theoryofshadows.github.io/nftsol](https://theoryofshadows.github.io/nftsol/) |
 
 ## Contributing
 
@@ -196,4 +206,4 @@ MIT License
 
 **Built on Solana** | https://nftsol.app
 
-*Last Updated: May 2026*
+_Last Updated: June 2026_
