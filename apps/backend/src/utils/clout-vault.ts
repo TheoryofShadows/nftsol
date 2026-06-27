@@ -4,7 +4,7 @@
  */
 
 import logger from './logger';
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } from '@solana/web3.js';
 import {
   getAssociatedTokenAddress,
   createAssociatedTokenAccountInstruction,
@@ -73,15 +73,16 @@ export async function getOrCreateCloutVault(
   // ATA doesn't exist - create it
   logger.info(`Creating rewards vault ATA: ${ata.toBase58()}`);
 
-  // Prepare the instruction (not sent here; actual creation happens when sending rewards)
-  createAssociatedTokenAccountInstruction(
+  const instruction = createAssociatedTokenAccountInstruction(
     payer.publicKey, // payer
     ata, // ata
     owner, // owner
     mint // mint
   );
 
-  logger.info(`ATA creation instruction prepared. Will create on first reward send.`);
+  const transaction = new Transaction().add(instruction);
+  const signature = await sendAndConfirmTransaction(connection, transaction, [payer]);
+  logger.info(`Rewards vault ATA created. Signature: ${signature}`);
 
   return ata;
 }

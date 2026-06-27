@@ -119,8 +119,9 @@ pub mod eternal_echoes {
             ErrorCode::Unauthorized
         );
 
-        // Remove the echo
+        // Remove the echo and decrement count
         ledger.echoes.remove(echo_index);
+        ledger.echo_count = ledger.echo_count.saturating_sub(1);
         ledger.last_updated = Clock::get()?.unix_timestamp;
 
         emit!(EchoRemoved {
@@ -140,13 +141,20 @@ pub mod eternal_echoes {
         require!(new_score <= 100, ErrorCode::InvalidTruthScore);
 
         let ledger = &mut ctx.accounts.ledger;
+
+        require!(
+            ctx.accounts.authority.key() == ledger.owner,
+            ErrorCode::Unauthorized
+        );
+
+        let old_score = ledger.current_truth_score;
         ledger.current_truth_score = new_score;
         ledger.truth_hash = new_hash;
         ledger.last_updated = Clock::get()?.unix_timestamp;
 
         emit!(TruthScoreUpdated {
             ledger: ledger.key(),
-            old_score: ledger.initial_truth_score,
+            old_score,
             new_score,
         });
 

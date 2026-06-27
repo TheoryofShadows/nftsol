@@ -29,6 +29,10 @@ if (!isProduction) {
 }
 
 // Session configuration
+if (isProduction && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET must be set in production');
+}
+
 const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'debug-secret-key',
   name: 'connect.sid', // Using default name that works

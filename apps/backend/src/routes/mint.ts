@@ -10,6 +10,7 @@ import { fileStorageService } from '../services/file-storage';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types';
 import { sensitiveOpLimiter } from '../middleware/rate-limiting';
+import { authenticate } from '../middlewares/auth';
 import logger from '../utils/logger';
 
 const router = Router();
@@ -113,7 +114,7 @@ router.get('/compare', async (_req: Request, res: Response) => {
  * Mint NFT with file upload
  * Uploads image file to IPFS (via Pinata) and mints compressed NFT
  */
-router.post('/simple-mint', sensitiveOpLimiter, upload.single('file'), async (req: Request, res: Response) => {
+router.post('/simple-mint', sensitiveOpLimiter, authenticate, upload.single('file'), async (req: Request, res: Response) => {
   try {
     const { name, description, creatorWallet } = req.body;
     const file = (req as any).file;
@@ -227,7 +228,7 @@ router.post('/simple-mint', sensitiveOpLimiter, upload.single('file'), async (re
  * POST /api/mint/ultra-cheap
  * Mint NFT with ultra-low cost optimization
  */
-router.post('/ultra-cheap', sensitiveOpLimiter, validateWallet(), async (req: Request, res: Response) => {
+router.post('/ultra-cheap', sensitiveOpLimiter, authenticate, validateWallet(), async (req: Request, res: Response) => {
   try {
     const { toAddress, name, symbol, description, imageUrl, externalUrl } = req.body;
 
