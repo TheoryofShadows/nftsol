@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider, useWallet } from '@solana/wallet-adapter-react';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { getRpcUrl, getWalletAdapters } from './config/wallet';
@@ -75,8 +75,32 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Tabs that can appear in the URL hash (for browser Back/forward + deep links).
+const KNOWN_TABS = [
+  'home',
+  'discover',
+  'dashboard',
+  'market',
+  'clout',
+  'mint',
+  'withdraw',
+  'my-nfts',
+  'collections',
+  'admin',
+] as const;
+
+// Read a valid tab id from the URL hash (e.g. "#discover" or "#discover/verify").
+function tabFromHash(): string | null {
+  if (typeof window === 'undefined') return null;
+  const raw = window.location.hash.replace(/^#/, '').split('/')[0];
+  return (KNOWN_TABS as readonly string[]).includes(raw) ? raw : null;
+}
+
 function AppContent() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState<string>(() => tabFromHash() ?? 'home');
+  // True while we're applying a browser Back/forward, so navigateTab doesn't
+  // push a duplicate history entry in response to the resulting state change.
+  const isPopping = useRef(false);
   const { nfts, loading, error, loadMarketplace, clearError } = useApp();
   const { addNotification } = useNotification();
   const { metrics: _metrics, getPerformanceReport } = usePerformance();
@@ -168,6 +192,32 @@ function AppContent() {
     }
   }, [getPerformanceReport]);
 
+  // Switch tabs AND push a browser-history entry so Back/forward (and iOS
+  // swipe-back) move between tabs. Skipped while applying a popstate.
+  const navigateTab = useCallback((tab: string) => {
+    // The activeTab effect below handles analytics tracking on change.
+    setActiveTab(tab);
+    if (!isPopping.current && typeof window !== 'undefined') {
+      window.history.pushState({ tab }, '', `#${tab}`);
+    }
+  }, []);
+
+  // Browser history integration: anchor an initial entry and restore the tab
+  // on Back/forward. DiscoverMintPage reads the same history.state for its steps.
+  useEffect(() => {
+    const initialTab = tabFromHash() ?? 'home';
+    window.history.replaceState({ tab: initialTab }, '', `#${initialTab}`);
+
+    const onPop = (e: PopStateEvent) => {
+      isPopping.current = true;
+      const tab = (e.state && (e.state as { tab?: string }).tab) || tabFromHash() || 'home';
+      setActiveTab(tab);
+      isPopping.current = false;
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   // Allow programmatic tab changes (used by Echo components)
   useEffect(() => {
     const handler = (e: Event) => {
@@ -175,8 +225,7 @@ function AppContent() {
         const customEvent = e as CustomEvent<string>;
         const detail = customEvent?.detail;
         if (typeof detail === 'string') {
-          setActiveTab(detail);
-          trackTabChange(detail);
+          navigateTab(detail);
         }
       } catch (err) {
         if (import.meta.env.DEV) {
@@ -192,7 +241,7 @@ function AppContent() {
         // Silently fail on cleanup
       }
     };
-  }, []);
+  }, [navigateTab]);
 
   // Error handling with deduplication
   useEffect(() => {
@@ -265,7 +314,7 @@ function AppContent() {
   }, [nfts]);
 
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
+    navigateTab(tab);
     clearError();
   };
 

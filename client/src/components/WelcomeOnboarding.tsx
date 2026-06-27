@@ -54,8 +54,15 @@ export default function WelcomeOnboarding() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto">
-      <div className="glass-card max-w-2xl w-full p-6 md:p-12 relative overflow-hidden my-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in overflow-y-auto"
+      onClick={handleSkip}
+      role="presentation"
+    >
+      <div
+        className="glass-card max-w-2xl w-full p-6 md:p-12 relative overflow-hidden my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Progress Indicator */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
           <div
@@ -133,10 +140,10 @@ export default function WelcomeOnboarding() {
           </button>
         </div>
 
-        {/* Close Button */}
+        {/* Close Button (>=44px tap target for mobile) */}
         <button
           onClick={handleSkip}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-gray-400 hover:text-white transition-all"
+          className="absolute top-3 right-3 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-xl text-gray-400 hover:text-white transition-all"
           aria-label="Close"
         >
           ×
