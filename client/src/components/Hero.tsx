@@ -111,11 +111,11 @@ export default function Hero() {
 
         {/* Hero Title */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 md:mb-6 animate-fade-in leading-tight md:leading-none px-2 md:px-4 font-display tracking-tight">
-          Mint NFTs from 20M+ Public Domain Items
+          Mint NFTs from 700M+ Openly-Licensed Works
         </h1>
 
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-zinc-400 mb-3 md:mb-5 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">
-          Powered by Internet Archive + Grok AI + Eternal Echoes
+          Search the open web — Openverse + Internet Archive — verified by Grok AI
         </p>
 
         <p className="text-xs sm:text-sm md:text-base text-zinc-500 mb-8 md:mb-14 max-w-3xl mx-auto animate-fade-in animate-delay-100 px-2 md:px-4">

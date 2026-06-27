@@ -368,7 +368,7 @@ function AppContent() {
                 </h2>
                 <p className="text-gray-300 max-w-2xl mx-auto">
                   Upload your own image and mint it as a compressed Solana NFT for fractions of a cent.
-                  Want to mint from the Internet Archive instead? Use{' '}
+                  Want to mint from the open web instead? Use{' '}
                   <button onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))} className="text-gold underline hover:opacity-80">
                     Discover &amp; Mint
                   </button>.
