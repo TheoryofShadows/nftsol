@@ -20,6 +20,7 @@ Welcome! This guide walks you through creating your first NFT on NFTSol, whether
 ## Prerequisites
 
 ### What You Need:
+
 - ✅ **Solana Wallet**: Phantom, Solflare, Ledger, or another supported wallet
 - ✅ **SOL in Your Wallet**: For transaction fees (minimum 0.1 SOL recommended)
 - ✅ **Internet Connection**: Browser access to nftsol.app
@@ -45,10 +46,12 @@ Welcome! This guide walks you through creating your first NFT on NFTSol, whether
 **Step-by-Step**:
 
 #### Step 1: Navigate to "Mint NFT" Tab
+
 - Click the ✨ **Mint NFT** button on the home page, or
 - Use the navigation menu and select **Mint NFT**
 
 #### Step 2: Upload Content
+
 - Choose your media file (image, video, audio, or PDF)
 - **Supported formats**:
   - Images: JPG, PNG, GIF (max 50MB)
@@ -57,67 +60,74 @@ Welcome! This guide walks you through creating your first NFT on NFTSol, whether
   - Documents: PDF (max 50MB)
 
 #### Step 3: Add Metadata
+
 Fill in the details:
+
 - **Title**: Name of your NFT (max 100 characters)
 - **Description**: What is this? Why should people care? (max 1000 characters)
 - **Creator Name**: Your name or alias
 - **Tags**: Add 3-5 tags for discoverability (e.g., "art", "digital", "exclusive")
 
 #### Step 4: Set Price & Royalties
+
 - **Price**: How much SOL for your NFT? (e.g., 1.5 SOL, 0.5 SOL)
 - **Royalty**: Percentage of future sales you receive (5% = 0.05, 10% = 0.10)
   - Example: Set 10% royalty, your NFT sells for 5 SOL → you get 0.5 SOL every resale
 
 #### Step 5: Review & Approve
+
 - Review all information
 - Click **"Mint NFT"**
 - Approve transaction in your wallet
 - **Wait 2-10 seconds** for transaction confirmation
 
 #### Step 6: Grok Verification (Optional)
+
 - Click **"Verify with Grok AI"** to verify authenticity
 - **Timeline**: 1-5 minutes
 - **Result**: Shows verification confidence score
 
 #### Step 7: List for Sale
+
 - Once minted, click **"List for Sale"**
 - Set your price and confirm
 - Your NFT appears in the marketplace immediately
 
 **Cost Breakdown**:
+
 - Platform fee: 2.5% of sale price
 - Solana gas fee: ~0.00025 SOL
 - **Total**: ~$0.01 in SOL
 
 ---
 
-## Archive-Based NFT Minting
+## Open-Web NFT Minting
 
-### The Revolutionary Way: Mint from 20M+ Public Domain Items
+### The Revolutionary Way: Mint from ~700M+ Openly-Licensed Works
 
-Archive-based minting is special because:
-- ✅ Content is guaranteed to be public domain/creative commons
-- ✅ AI verification ensures authenticity
-- ✅ Content has historical significance and provenance
+Open-web minting is special because:
+
+- ✅ Content comes from **Openverse** (Flickr, Wikimedia, Smithsonian, museums) plus the **Internet Archive**
+- ✅ Only public-domain / Creative Commons items that allow commercial use + modification are surfaced — safe to mint
+- ✅ AI (Grok) or honest heuristic verification helps you gauge authenticity
+- ✅ Minting is **gasless** — the platform relayer pays the fees
 - ✅ Creators earn CLOUT rewards for curation
 
 **Timeline**: 10-15 minutes total
 
 ### Step-by-Step:
 
-#### Step 1: Search the Archive
-1. Click 📚 **Archive Search** tab
-2. Use search box: Enter what you're looking for
-   - Example: "nature documentaries", "historical speeches", "classical music"
-3. **Filter results** using:
-   - **Media Type**: Video, Audio, Image, Document
-   - **Date Range**: Find items from specific years
-   - **License**: All are public domain (free to use)
-   - **Downloads**: Popular items (sorted by downloads)
-   - **Language**: Choose your preferred language
-4. Browse results and click to preview
+#### Step 1: Search the open web
+
+1. Open the 🔍 **Discover** / search tab
+2. Use the search box: Enter what you're looking for
+   - Example: "nature photography", "apollo moon", "classical music"
+3. Each result shows its **source** (Openverse / Internet Archive) and a **license badge** (e.g. CC0, CC BY)
+4. Optionally narrow by **media type**: Image, Audio, or Video
+5. Browse results and click to preview
 
 #### Step 2: Select Your Item
+
 - Click on the item card to see full details
 - Review:
   - Title, description, creator
@@ -127,6 +137,7 @@ Archive-based minting is special because:
   - View the actual content if available
 
 #### Step 3: Prepare for Minting
+
 - Click **"Prepare for Mint"** button
 - System will:
   - Extract metadata
@@ -135,6 +146,7 @@ Archive-based minting is special because:
   - **Timeline**: 30-60 seconds
 
 #### Step 4: Verify with Grok AI (Recommended)
+
 - Click **"Verify with Grok"** button
 - AI will analyze the content for:
   - Authenticity
@@ -144,6 +156,7 @@ Archive-based minting is special because:
 - **Result**: Confidence score (80-100% is excellent)
 
 #### Step 5: Add Your Curatorial Metadata
+
 - **Your Title**: Create a compelling title
   - Example: "Rare 1920s Jazz Performance - Charlie Parker"
 - **Your Description**: Explain why this is valuable
@@ -154,6 +167,7 @@ Archive-based minting is special because:
   - "historical", "1920s", "jazz", "charlie-parker", "rare"
 
 #### Step 6: Set Price & Royalties
+
 - **Price**: How much do you think the NFT is worth?
   - Public domain items: Usually 0.5-5 SOL
   - Rare items: Can be higher
@@ -161,12 +175,14 @@ Archive-based minting is special because:
   - Recommended: 10-25% (depends on curation effort)
 
 #### Step 7: Mint & List
+
 - Click **"Mint NFT"**
 - Approve in wallet
 - Wait for confirmation (10-20 seconds)
 - NFT appears in your collection
 
 #### Step 8: Earn Rewards
+
 - You receive **CLOUT tokens** for:
   - ✅ Minting from Archive (+10 CLOUT)
   - ✅ Grok verification (+5 CLOUT)
@@ -177,6 +193,7 @@ Archive-based minting is special because:
   - Redeemed for exclusive access
 
 **Cost Breakdown**:
+
 - Platform fee: 2.5% of sale price
 - Solana gas: ~0.00025 SOL
 - **Total**: ~$0.01 in SOL
@@ -189,12 +206,14 @@ Archive-based minting is special because:
 ### What Are Echoes?
 
 Echoes are **collaborative layers** on top of a base NFT:
+
 - 🎬 **Base NFT**: The original (yours or from Archive)
 - 🎨 **Layers**: Contributors add creative work on top
 - 💰 **Rewards**: All contributors earn from sales
 - ♾️ **Forever**: Echoes are permanently tied to the NFT
 
 ### Example:
+
 ```
 Base NFT: "Charlie Parker Jazz Solo (1945)"
 └─ Echo Layer 1: "Colorful visualizer animation" (Artist A)
@@ -211,21 +230,25 @@ When someone buys the Echo NFT:
 ### How to Create an Echo:
 
 #### Step 1: Start with a Base NFT
+
 - Create your own NFT, OR
 - Use an Archive item as base
 
 #### Step 2: Click "Create Echo"
+
 - Select your base NFT
 - Review base metadata
 - Confirm you want to create collaborative version
 
 #### Step 3: Define Contribution Framework
+
 - Set how many echo layers are allowed
 - Define royalty split (how much each layer gets)
 - Set minimum contributor requirements
 - Lock/unlock additional contributors
 
 #### Step 4: Invite Collaborators
+
 - Share your Echo ID with collaborators
 - They can submit contributions via:
   - Media files (images, videos, audio)
@@ -233,18 +256,21 @@ When someone buys the Echo NFT:
   - Metadata additions (descriptions, tags)
 
 #### Step 5: Review & Approve Contributions
+
 - Preview each layer
 - Approve/reject contributions
 - Add layer descriptions
 - Order layers (first layer = base, second = first echo, etc.)
 
 #### Step 6: Mint Collaborative NFT
+
 - Click "Mint Echo NFT"
 - Approve in wallet
 - **Cost**: Same as regular NFT (~0.01 SOL)
 - **Rewards**: All contributors get listed on metadata
 
 #### Step 7: Sell Collaborative NFT
+
 - List on marketplace
 - When sold:
   - Each contributor automatically receives their share
@@ -258,17 +284,20 @@ When someone buys the Echo NFT:
 ### Breakdown of Costs:
 
 #### Transaction Costs (Paid to Solana Network)
+
 - **Minting an NFT**: ~0.00025 SOL (~$0.004)
 - **Listing for sale**: ~0.00025 SOL (~$0.004)
 - **Transferring NFT**: ~0.00025 SOL (~$0.004)
 
 #### Platform Fees
+
 - **Minting**: FREE (we cover the cost!)
 - **Listing**: FREE
 - **Selling**: 2.5% of sale price
   - Example: Your NFT sells for 5 SOL → You get 4.875 SOL (2.5% = 0.125 SOL fee)
 
 #### Optional: Grok Verification
+
 - **Cost**: FREE
 - **Time**: 2-5 minutes
 - **Benefit**: Verification badge, authenticity proof
@@ -276,6 +305,7 @@ When someone buys the Echo NFT:
 ### Cost Examples:
 
 **Example 1: Mint & Sell Your Own Art**
+
 ```
 Upload art → Pay gas (~0.001 SOL)
 List for 2 SOL → Pay gas (~0.001 SOL)
@@ -284,6 +314,7 @@ Total cost to you: ~0.002 SOL + 2.5% of sales
 ```
 
 **Example 2: Mint Archive Item, Get CLOUT**
+
 ```
 Search Archive, find item → FREE
 Prepare for mint → FREE
@@ -295,6 +326,7 @@ Total cost: ~0.002 SOL, earn 15 CLOUT + income
 ```
 
 **Example 3: Create Echo with Collaborators**
+
 ```
 Create Echo from archive item → FREE (gas only, ~0.001 SOL)
 5 collaborators add layers → All FREE
@@ -315,6 +347,7 @@ When sold for 5 SOL:
 ### What is Grok Verification?
 
 Grok is an **AI verification system** that:
+
 - ✅ Analyzes content authenticity
 - ✅ Detects AI-generated or manipulated content
 - ✅ Verifies metadata accuracy
@@ -324,6 +357,7 @@ Grok is an **AI verification system** that:
 ### Why Verify?
 
 **Benefits**:
+
 - 🏆 Gets a verification badge on your NFT
 - 💯 Higher buyer confidence
 - 📈 Potentially higher sale prices
@@ -333,11 +367,13 @@ Grok is an **AI verification system** that:
 ### How to Verify:
 
 #### Method 1: During Minting
+
 1. Click **"Verify with Grok"** during the minting process
 2. AI analyzes your content (2-5 minutes)
 3. Get verification badge immediately
 
 #### Method 2: After Minting
+
 1. Go to your NFT in your collection
 2. Click **"Verify Authenticity"**
 3. AI analyzes content
@@ -346,6 +382,7 @@ Grok is an **AI verification system** that:
 ### Understanding Verification Results:
 
 **Confidence Score**: 0-100%
+
 - **90-100%**: Authentic, original content
   - Example: "This is original artwork with no detected AI generation"
 - **70-89%**: Likely authentic, minor concerns
@@ -358,6 +395,7 @@ Grok is an **AI verification system** that:
 ### Archive Items Special Handling
 
 **Archive items automatically include**:
+
 - Original creator information (from Archive)
 - Historical provenance (publication date, source)
 - Authenticity proof (from Internet Archive's copies)
@@ -390,11 +428,13 @@ Grok is an **AI verification system** that:
 ### Set Competitive Prices:
 
 **Browse the marketplace** to see:
+
 - Average price for similar NFTs
 - Price trends over time
 - What sells quickly vs. slow
 
 **Pricing strategies**:
+
 - **New Creator**: Start at 0.5-1 SOL (easier to sell)
 - **Established Creator**: 1-5 SOL (based on following)
 - **Rare Archive Items**: 1-10 SOL (unique content)
@@ -414,6 +454,7 @@ A: Yes! Go to your NFT, click "Update Listing", and set new price.
 
 **Q: What if my mint fails?**
 A: Check that:
+
 1. You have enough SOL in wallet
 2. Your internet connection is stable
 3. Try again in 5 minutes
@@ -427,17 +468,20 @@ A: Yes, click "Unlist" on your NFT card. It stays in your collection but isn't f
 
 **Q: Can I modify content from the Archive?**
 A: You cannot modify original Archive content. But you CAN:
+
 - Add commentary in description
 - Create an Echo layer with modifications
 - Create derivative work based on it
 
 **Q: What if I want to create a derivative (remix, edit, etc.)?**
 A: Create it as:
+
 1. A separate NFT (derivative work), with credit to original, OR
 2. An Echo Layer on top of the original
 
 **Q: Do I get permission to use Archive content?**
 A: Yes! All Archive items are public domain or creative commons, so you have permission. Always:
+
 - Give credit to original creator
 - Include license type on your NFT
 - Mention the Internet Archive source
@@ -446,17 +490,20 @@ A: Yes! All Archive items are public domain or creative commons, so you have per
 
 **Q: What if Grok verification fails?**
 A: Low confidence scores mean:
+
 - Your content may have quality issues, OR
 - Metadata doesn't match content, OR
 - AI detected possible generation/manipulation
 
 You can:
+
 - Re-verify if you fixed issues
 - Upload cleaner version
 - Proceed without verification (less visible, may sell for less)
 
 **Q: Is verification mandatory?**
 A: No! It's optional but recommended. Unverified NFTs still sell, but verified ones have:
+
 - Better visibility
 - Higher buyer confidence
 - Potentially higher prices
@@ -465,6 +512,7 @@ A: No! It's optional but recommended. Unverified NFTs still sell, but verified o
 
 **Q: How much CLOUT can I earn?**
 A: Depends on your activity:
+
 - Minting: +10 CLOUT per NFT
 - Verification: +5 CLOUT per verification
 - Sales: +1 CLOUT per successful sale
@@ -472,6 +520,7 @@ A: Depends on your activity:
 
 **Q: What can I do with CLOUT?**
 A: Currently:
+
 - Hold for governance voting (coming soon)
 - Trade on secondary markets
 - Earn exclusive access/perks (coming soon)
@@ -480,6 +529,7 @@ A: Currently:
 
 **Q: "Insufficient balance" error**
 A: You need more SOL in your wallet.
+
 - Minimum: 0.1 SOL recommended
 - Go to a Solana exchange (Coinbase, Kraken, etc.) and buy SOL
 - Transfer to your wallet address
@@ -489,6 +539,7 @@ A: Click "Connect Wallet" again and approve in your wallet extension.
 
 **Q: My NFT isn't showing up**
 A: Try:
+
 1. Refresh the page (F5)
 2. Disconnect and reconnect wallet
 3. Wait 2-3 minutes (blockchain can be slow)
@@ -541,5 +592,4 @@ A: Try:
 
 Created with ❤️ for the Solana community.
 
-*Last Updated: May 2026*
-
+_Last Updated: June 2026_
