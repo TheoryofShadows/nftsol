@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getRarityService } from '../services/rarity.service';
 import logger from '../utils/logger';
+import { standardLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -8,7 +9,7 @@ const router = Router();
  * POST /api/v1/rarity/index-collection
  * Index collection for rarity calculations
  */
-router.post('/index-collection', (req, res) => {
+router.post('/index-collection', standardLimiter, (req, res) => {
   try {
     const { collectionId, nfts, floorPrice = 0, averagePrice = 0 } = req.body;
 
@@ -132,7 +133,7 @@ router.get('/collection/:collectionId/by-percentile', (req, res) => {
  * POST /api/v1/rarity/find-by-traits
  * Find NFTs with specific traits
  */
-router.post('/find-by-traits', (req, res) => {
+router.post('/find-by-traits', standardLimiter, (req, res) => {
   try {
     const { collectionId, traits, limit = 50 } = req.body;
 
@@ -154,7 +155,7 @@ router.post('/find-by-traits', (req, res) => {
  * POST /api/v1/rarity/price-prediction
  * Predict NFT price based on rarity
  */
-router.post('/price-prediction', (req, res) => {
+router.post('/price-prediction', standardLimiter, (req, res) => {
   try {
     const { nftMint, collectionFloorPrice, recentSalePrices = [] } = req.body;
 
