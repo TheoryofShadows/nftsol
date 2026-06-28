@@ -28,6 +28,7 @@ import {
 import { getPlatformKeypair } from '../lib/platformKeypair';
 import { programConfig, solanaConfig } from '../config/index';
 import { getOrCreateCloutVault } from '../utils/clout-vault';
+import { CLOUT_DISTRIBUTION_LIMITS } from '../../../../shared/constants/fees';
 
 export interface CloutRewardResult {
   success: boolean;
@@ -51,6 +52,62 @@ export class CloutTokenService {
   private readonly connection: Connection;
   private mintInfoCache: { decimals?: number; cachedAt?: number } = {};
   private readonly MINT_INFO_CACHE_TTL = 60000; // 1 minute
+
+  private dailyWalletTracker: Map<string, { amount: number; resetAt: number }> = new Map();
+  private dailyGlobalTracker: { amount: number; resetAt: number } = { amount: 0, resetAt: 0 };
+  private totalDistributed: number = 0;
+
+  private getDayKey(): number {
+    return Math.floor(Date.now() / 86_400_000);
+  }
+
+  private getWalletDailyUsage(wallet: string): number {
+    const entry = this.dailyWalletTracker.get(wallet);
+    if (!entry || entry.resetAt !== this.getDayKey()) return 0;
+    return entry.amount;
+  }
+
+  private recordDistribution(wallet: string, amount: number): void {
+    const dayKey = this.getDayKey();
+
+    const walletEntry = this.dailyWalletTracker.get(wallet);
+    if (!walletEntry || walletEntry.resetAt !== dayKey) {
+      this.dailyWalletTracker.set(wallet, { amount, resetAt: dayKey });
+    } else {
+      walletEntry.amount += amount;
+    }
+
+    if (this.dailyGlobalTracker.resetAt !== dayKey) {
+      this.dailyGlobalTracker = { amount, resetAt: dayKey };
+    } else {
+      this.dailyGlobalTracker.amount += amount;
+    }
+
+    this.totalDistributed += amount;
+  }
+
+  private checkDistributionLimits(wallet: string, amount: number): string | null {
+    if (amount > CLOUT_DISTRIBUTION_LIMITS.MAX_SINGLE_REWARD) {
+      return `Single reward exceeds maximum (${amount} > ${CLOUT_DISTRIBUTION_LIMITS.MAX_SINGLE_REWARD} CLOUT)`;
+    }
+
+    const walletUsage = this.getWalletDailyUsage(wallet);
+    if (walletUsage + amount > CLOUT_DISTRIBUTION_LIMITS.DAILY_WALLET_LIMIT) {
+      return `Wallet daily limit reached (${walletUsage}/${CLOUT_DISTRIBUTION_LIMITS.DAILY_WALLET_LIMIT} CLOUT used today)`;
+    }
+
+    const dayKey = this.getDayKey();
+    const globalUsage = this.dailyGlobalTracker.resetAt === dayKey ? this.dailyGlobalTracker.amount : 0;
+    if (globalUsage + amount > CLOUT_DISTRIBUTION_LIMITS.DAILY_GLOBAL_LIMIT) {
+      return `Global daily distribution limit reached (${globalUsage}/${CLOUT_DISTRIBUTION_LIMITS.DAILY_GLOBAL_LIMIT} CLOUT distributed today)`;
+    }
+
+    if (this.totalDistributed + amount > CLOUT_DISTRIBUTION_LIMITS.MAX_COMMUNITY_POOL) {
+      return `Community rewards pool exhausted (${this.totalDistributed}/${CLOUT_DISTRIBUTION_LIMITS.MAX_COMMUNITY_POOL} CLOUT distributed total)`;
+    }
+
+    return null;
+  }
 
   constructor() {
     // Use CLOUT_MINT if available, otherwise fall back to CLOUT_PROGRAM_ID
@@ -194,6 +251,13 @@ export class CloutTokenService {
         return { success: false, error: 'Final reward amount must be greater than 0' };
       }
 
+      // Enforce distribution limits
+      const limitError = this.checkDistributionLimits(recipientAddress, finalAmount);
+      if (limitError) {
+        logger.warn(`[CLOUT] Distribution blocked: ${limitError}`);
+        return { success: false, error: limitError };
+      }
+
       // Get mint info
       const mintInfo = await this.getMintInfo();
       const amountLamports = BigInt(finalAmount) * BigInt(10 ** mintInfo.decimals);
@@ -264,6 +328,8 @@ export class CloutTokenService {
         platformKeypair, // owner of source (rewards vault)
         amountLamports // amount
       );
+
+      this.recordDistribution(recipientAddress, finalAmount);
 
       logger.info(
         `[CLOUT] ✓ Successfully sent ${finalAmount} CLOUT to ${recipientAddress.slice(0, 8)}...`

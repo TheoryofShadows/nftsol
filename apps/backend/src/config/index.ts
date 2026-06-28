@@ -29,6 +29,21 @@ if (process.env.NODE_ENV === 'production') {
   if (process.env.JWT_SECRET === 'your-jwt-secret-minimum-32-characters') {
     throw new Error('[Config] JWT_SECRET must be changed from the default value in production');
   }
+
+  // Warn on missing critical optional vars (won't crash but features will fail)
+  const RECOMMENDED_PROD_ENV_VARS = [
+    'CLOUT_MINT',
+    'HELIUS_API_KEY',
+    'ALLOWED_ORIGINS',
+  ] as const;
+  const missingRecommended = RECOMMENDED_PROD_ENV_VARS.filter(
+    (key) => !process.env[key] || process.env[key] === ''
+  );
+  if (missingRecommended.length > 0) {
+    console.warn(
+      `[Config] WARNING: Recommended environment variables not set: ${missingRecommended.join(', ')}. Some features may not work correctly.`
+    );
+  }
 }
 
 // Helper to safely parse environment variables
