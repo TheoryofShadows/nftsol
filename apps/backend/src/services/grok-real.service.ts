@@ -52,6 +52,7 @@ interface VerificationResult {
 class GrokRealService {
   private apiKey: string;
   private baseUrl: string;
+  private static readonly MAX_INPUT_LENGTH = 2000;
 
   constructor() {
     this.apiKey = GROK_API_KEY || '';
@@ -61,6 +62,15 @@ class GrokRealService {
       logger.warn('⚠️ GROK_API_KEY not configured. Set GROK_API_KEY in .env');
       logger.warn('Get a free key at: https://console.x.ai/');
     }
+  }
+
+  private sanitizeForPrompt(input: string): string {
+    if (!input) return '';
+    return input
+      .slice(0, GrokRealService.MAX_INPUT_LENGTH)
+      .replace(/[^\w\s.,!?@#$%^&*()\-+=[\]{}<>:;'"/\\|`~]/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   }
 
   /**
@@ -114,9 +124,10 @@ class GrokRealService {
    * Verify general text content (claims, statements, etc.)
    */
   private async verifyText(content: string): Promise<VerificationResult> {
+    const safeContent = this.sanitizeForPrompt(content);
     const prompt = `Analyze the following content for authenticity, accuracy, and potential issues:
 
-"${content}"
+"${safeContent}"
 
 Provide analysis in JSON format with:
 - truthScore (0-100): How truthful/authentic is this?
@@ -135,12 +146,13 @@ Return ONLY valid JSON, no markdown or extra text.`;
    * Verify creator/artist authenticity and credentials
    */
   private async verifyCreator(creatorAddress: string, metadata?: Record<string, any>): Promise<VerificationResult> {
-    const portfolioInfo = metadata?.portfolio ? JSON.stringify(metadata.portfolio) : '';
-    const socialProof = metadata?.social ? JSON.stringify(metadata.social) : '';
+    const safeAddress = this.sanitizeForPrompt(creatorAddress);
+    const portfolioInfo = metadata?.portfolio ? this.sanitizeForPrompt(JSON.stringify(metadata.portfolio)) : '';
+    const socialProof = metadata?.social ? this.sanitizeForPrompt(JSON.stringify(metadata.social)) : '';
 
     const prompt = `Verify the authenticity and legitimacy of this NFT creator:
 
-Creator Address: ${creatorAddress}
+Creator Address: ${safeAddress}
 ${portfolioInfo ? `Portfolio Data: ${portfolioInfo}` : ''}
 ${socialProof ? `Social Proof: ${socialProof}` : ''}
 
@@ -168,13 +180,14 @@ Return ONLY valid JSON.`;
    * Verify NFT collection legitimacy (rug pull detection, etc.)
    */
   private async verifyCollection(collectionMint: string, metadata?: Record<string, any>): Promise<VerificationResult> {
-    const collectionInfo = metadata?.info ? JSON.stringify(metadata.info) : '';
-    const holders = metadata?.holders ? metadata.holders : 0;
-    const volume = metadata?.volume ? metadata.volume : 0;
+    const safeCollection = this.sanitizeForPrompt(collectionMint);
+    const collectionInfo = metadata?.info ? this.sanitizeForPrompt(JSON.stringify(metadata.info)) : '';
+    const holders = Number.isFinite(metadata?.holders) ? metadata.holders : 0;
+    const volume = Number.isFinite(metadata?.volume) ? metadata.volume : 0;
 
     const prompt = `Analyze this NFT collection for legitimacy and rug pull risk:
 
-Collection: ${collectionMint}
+Collection: ${safeCollection}
 ${collectionInfo ? `Info: ${collectionInfo}` : ''}
 Holders: ${holders}
 Trading Volume: ${volume}
@@ -204,12 +217,13 @@ Return ONLY valid JSON.`;
    * Verify deal/offer fairness
    */
   private async verifyDeal(dealInfo: string, metadata?: Record<string, any>): Promise<VerificationResult> {
-    const marketData = metadata?.market ? JSON.stringify(metadata.market) : '';
-    const terms = metadata?.terms ? JSON.stringify(metadata.terms) : '';
+    const safeDealInfo = this.sanitizeForPrompt(dealInfo);
+    const marketData = metadata?.market ? this.sanitizeForPrompt(JSON.stringify(metadata.market)) : '';
+    const terms = metadata?.terms ? this.sanitizeForPrompt(JSON.stringify(metadata.terms)) : '';
 
     const prompt = `Assess the fairness of this NFT deal:
 
-Deal Details: ${dealInfo}
+Deal Details: ${safeDealInfo}
 ${marketData ? `Market Data: ${marketData}` : ''}
 ${terms ? `Deal Terms: ${terms}` : ''}
 
@@ -237,13 +251,14 @@ Return ONLY valid JSON.`;
    * Verify community engagement authenticity
    */
   private async verifyCommunity(communityInfo: string, metadata?: Record<string, any>): Promise<VerificationResult> {
-    const holders = metadata?.holderCount ? metadata.holderCount : 0;
-    const activity = metadata?.activity ? JSON.stringify(metadata.activity) : '';
-    const voting = metadata?.voting ? JSON.stringify(metadata.voting) : '';
+    const safeCommunityInfo = this.sanitizeForPrompt(communityInfo);
+    const holders = Number.isFinite(metadata?.holderCount) ? metadata.holderCount : 0;
+    const activity = metadata?.activity ? this.sanitizeForPrompt(JSON.stringify(metadata.activity)) : '';
+    const voting = metadata?.voting ? this.sanitizeForPrompt(JSON.stringify(metadata.voting)) : '';
 
     const prompt = `Verify the authenticity of this NFT/DAO community:
 
-Community Info: ${communityInfo}
+Community Info: ${safeCommunityInfo}
 Unique Holders: ${holders}
 ${activity ? `Activity: ${activity}` : ''}
 ${voting ? `Voting Data: ${voting}` : ''}
@@ -273,13 +288,14 @@ Return ONLY valid JSON.`;
    * Verify NFT authenticity (original art, not stolen/fake)
    */
   private async verifyNFT(nftMint: string, metadata?: Record<string, any>): Promise<VerificationResult> {
-    const nftInfo = metadata?.info ? JSON.stringify(metadata.info) : '';
-    const imageUrl = metadata?.imageUrl || '';
-    const creatorAddress = metadata?.creator || '';
+    const safeMint = this.sanitizeForPrompt(nftMint);
+    const nftInfo = metadata?.info ? this.sanitizeForPrompt(JSON.stringify(metadata.info)) : '';
+    const imageUrl = metadata?.imageUrl ? this.sanitizeForPrompt(String(metadata.imageUrl)) : '';
+    const creatorAddress = metadata?.creator ? this.sanitizeForPrompt(String(metadata.creator)) : '';
 
     const prompt = `Verify this NFT's authenticity:
 
-NFT Mint: ${nftMint}
+NFT Mint: ${safeMint}
 ${nftInfo ? `NFT Info: ${nftInfo}` : ''}
 ${imageUrl ? `Image URL: ${imageUrl}` : ''}
 Creator: ${creatorAddress}
@@ -310,9 +326,10 @@ Return ONLY valid JSON.`;
    * Verify URL content authenticity
    */
   private async verifyURL(url: string): Promise<VerificationResult> {
+    const safeUrl = this.sanitizeForPrompt(url);
     const prompt = `Verify the content and authenticity of this URL:
 
-URL: ${url}
+URL: ${safeUrl}
 
 Assess:
 1. Is the domain legitimate?

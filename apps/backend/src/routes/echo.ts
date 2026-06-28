@@ -252,32 +252,6 @@ router.post('/mint', mintLimiter, async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/echo/:ledgerId
- * Get echo ledger details and all echoes
- */
-router.get('/:ledgerId', echoLimiter, async (req: Request, res: Response) => {
-  try {
-    const { ledgerId } = req.params;
-
-    const echoes = await echoStore.getByLedger(ledgerId);
-
-    res.json({
-      success: true,
-      ledgerId,
-      echoes,
-      count: echoes.length,
-    });
-  } catch (error: any) {
-    logger.error('Fetch Echoes Error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch echoes',
-      message: error.message,
-    });
-  }
-});
-
-/**
  * POST /api/echo/add
  * Add a new echo to a ledger
  */
@@ -628,6 +602,17 @@ router.get('/:id', echoLimiter, async (req: Request, res: Response) => {
     const foundEcho: EchoRow | null = await echoStore.findById(id);
 
     if (!foundEcho) {
+      // Try as a ledger ID — return all echoes for that ledger
+      const ledgerEchoes = await echoStore.getByLedger(id);
+      if (ledgerEchoes.length > 0) {
+        return res.json({
+          success: true,
+          ledgerId: id,
+          echoes: ledgerEchoes,
+          count: ledgerEchoes.length,
+        });
+      }
+
       // Try database if available
       if (echoService) {
         try {

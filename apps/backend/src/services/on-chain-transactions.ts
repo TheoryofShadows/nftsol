@@ -26,7 +26,7 @@ import { solanaConfig, programConfig as _programConfig } from '../config';
 
 const MARKETPLACE_WALLET = process.env.MARKETPLACE_WALLET_ADDRESS || 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs';
 const PLATFORM_WALLET = process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad';
-import { pool } from '../lib/db';
+import { pool, withClient } from '../lib/db';
 
 interface CreateBuyTransactionParams {
   buyer: string; // Buyer's wallet address
@@ -234,27 +234,23 @@ export class OnChainTransactionService {
     signature: string;
   }): Promise<{ success: boolean; error?: string }> {
     try {
-      await pool.query(
-        `INSERT INTO nft_sales (mint_address, buyer, seller, price, transaction_signature, sold_at)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [params.mintAddress, params.buyer, params.seller, params.price, params.signature]
-      );
+      await withClient(async (client) => {
+        await client.query(
+          `INSERT INTO nft_sales (mint_address, buyer, seller, price, transaction_signature, sold_at)
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [params.mintAddress, params.buyer, params.seller, params.price, params.signature]
+        );
 
-      // Update NFT owner in database
-      await pool.query(
-        `UPDATE nfts 
-         SET owner = $1, status = 'active'
-         WHERE "mintAddress" = $2`,
-        [params.buyer, params.mintAddress]
-      );
+        await client.query(
+          `UPDATE nfts SET owner = $1, status = 'active' WHERE "mintAddress" = $2`,
+          [params.buyer, params.mintAddress]
+        );
 
-      // Remove from listings
-      await pool.query(
-        `UPDATE nft_listings 
-         SET listed = false 
-         WHERE mint_address = $1`,
-        [params.mintAddress]
-      );
+        await client.query(
+          `UPDATE nft_listings SET listed = false WHERE mint_address = $1`,
+          [params.mintAddress]
+        );
+      });
 
       logger.info(`[OnChain] Sale recorded: ${params.mintAddress}`);
 

@@ -102,9 +102,10 @@ router.post('/auctions/:auctionId/bid', verifyAuth, (req, res) => {
  */
 router.post('/auctions/:auctionId/end', verifyAuth, (req, res) => {
   try {
+    const userId = req.user?.id;
     const { auctionId } = req.params;
     const service = getAdvancedMarketplaceService();
-    const auction = service.endAuction(auctionId);
+    const auction = service.endAuction(auctionId, userId);
 
     if (!auction) {
       return res.status(404).json({ error: 'Auction not found' });
@@ -218,9 +219,10 @@ router.get('/offers', (req, res) => {
  */
 router.post('/offers/:offerId/accept', verifyAuth, (req, res) => {
   try {
+    const userId = req.user?.id;
     const { offerId } = req.params;
     const service = getAdvancedMarketplaceService();
-    const success = service.acceptOffer(offerId);
+    const success = service.acceptOffer(offerId, userId);
 
     if (!success) {
       return res.status(400).json({ error: 'Cannot accept offer' });

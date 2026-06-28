@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { getPushService, AlertType } from '../services/push-protocol.service';
 import logger from '../utils/logger';
+import { standardLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -68,7 +69,7 @@ router.get('/subscriptions/:wallet', async (req, res) => {
  * POST /api/alerts/subscribe
  * Subscribe to an alert
  */
-router.post('/subscribe', async (req, res) => {
+router.post('/subscribe', standardLimiter, async (req, res) => {
   try {
     const { wallet, alertType, collection, targetPrice, threshold } = req.body;
 
@@ -133,7 +134,7 @@ router.post('/subscribe', async (req, res) => {
  * DELETE /api/alerts/unsubscribe/:subscriptionId
  * Unsubscribe from an alert
  */
-router.delete('/unsubscribe/:subscriptionId', async (req, res) => {
+router.delete('/unsubscribe/:subscriptionId', standardLimiter, async (req, res) => {
   try {
     const { subscriptionId } = req.params;
 
@@ -207,7 +208,7 @@ router.get('/history/:wallet', async (req, res) => {
  * POST /api/alerts/test
  * Send a test notification (for development)
  */
-router.post('/test', async (req, res) => {
+router.post('/test', standardLimiter, async (req, res) => {
   try {
     const { wallet, message } = req.body;
 

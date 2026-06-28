@@ -50,36 +50,51 @@ export default function VideoUpload({ onSuccess, onError }: VideoUploadProps) {
           }
         });
 
+        const handleUploadError = (errorMessage: string) => {
+          setUploading(false);
+          onError?.(errorMessage);
+          addNotification({
+            type: 'error',
+            title: 'Upload Failed',
+            message: errorMessage,
+            duration: 5000,
+          });
+        };
+
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
-            const response = JSON.parse(xhr.responseText);
-            if (response.success) {
-              setUploading(false);
-              setProgress(100);
-              onSuccess(
-                response.data.videoUrl,
-                response.data.metadataUri,
-                response.data.verification || undefined
-              );
-              const verificationMsg = response.data.verification
-                ? ` (${response.data.verification.verified ? 'Verified' : 'Needs Review'}: ${response.data.verification.score}%)`
-                : '';
-              addNotification({
-                type: 'success',
-                title: 'Video Uploaded',
-                message: `Video uploaded successfully!${verificationMsg} Ready to mint.`,
-                duration: 5000,
-              });
-            } else {
-              throw new Error(response.error || 'Upload failed');
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.success) {
+                setUploading(false);
+                setProgress(100);
+                onSuccess(
+                  response.data.videoUrl,
+                  response.data.metadataUri,
+                  response.data.verification || undefined
+                );
+                const verificationMsg = response.data.verification
+                  ? ` (${response.data.verification.verified ? 'Verified' : 'Needs Review'}: ${response.data.verification.score}%)`
+                  : '';
+                addNotification({
+                  type: 'success',
+                  title: 'Video Uploaded',
+                  message: `Video uploaded successfully!${verificationMsg} Ready to mint.`,
+                  duration: 5000,
+                });
+              } else {
+                handleUploadError(response.error || 'Upload failed');
+              }
+            } catch {
+              handleUploadError('Invalid response from server');
             }
           } else {
-            throw new Error(`Upload failed: ${xhr.statusText}`);
+            handleUploadError(`Upload failed: ${xhr.statusText}`);
           }
         });
 
         xhr.addEventListener('error', () => {
-          throw new Error('Network error during upload');
+          handleUploadError('Network error during upload');
         });
 
         xhr.open('POST', `${API_BASE}/api/video/upload`);

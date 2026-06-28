@@ -7,8 +7,11 @@ import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import axios from 'axios';
 import { verifyWithGrok } from '../utils/grokpedia-production';
+import { strictLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
+
+router.use(strictLimiter);
 
 interface GrokVerificationRequest {
   content: string;

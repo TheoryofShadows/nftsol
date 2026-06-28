@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import { getPnLService } from '../services/pnl.service';
 import logger from '../utils/logger';
+import { standardLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -102,7 +103,7 @@ router.get('/wallet/:address', async (req, res) => {
  * POST /api/pnl/snapshot
  * Take a portfolio snapshot (track wallet)
  */
-router.post('/snapshot', async (req, res) => {
+router.post('/snapshot', standardLimiter, async (req, res) => {
   try {
     const { wallet } = req.body;
 
@@ -182,7 +183,7 @@ router.get('/rank/:address', async (req, res) => {
  * POST /api/pnl/display-name
  * Set display name for leaderboard
  */
-router.post('/display-name', async (req, res) => {
+router.post('/display-name', standardLimiter, async (req, res) => {
   try {
     const { wallet, displayName } = req.body;
 

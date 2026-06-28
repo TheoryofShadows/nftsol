@@ -1,6 +1,7 @@
 import logger from '../utils/logger';
 import { Connection, PublicKey as _Web3PublicKey, Keypair } from '@solana/web3.js';
-import { createUmi, publicKey as _publicKey } from '@metaplex-foundation/umi';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
+import { publicKey as _publicKey } from '@metaplex-foundation/umi';
 import {
   createTree,
   mintV1,
@@ -44,8 +45,8 @@ export class BubblegumService {
     
     this.connection = new Connection(rpcUrl, 'confirmed');
     
-    // Initialize UMI
-    this.umi = createUmi()
+    // Initialize UMI with the RPC endpoint
+    this.umi = createUmi(rpcUrl)
       .use(mplBubblegum())
       .use(
         irysUploader({
@@ -57,9 +58,6 @@ export class BubblegumService {
           timeout: 60000,
         })
       );
-    
-    // Set the RPC endpoint
-    this.umi.rpc = createUmi().rpc;
   }
 
   setSigner(keypair: Keypair) {

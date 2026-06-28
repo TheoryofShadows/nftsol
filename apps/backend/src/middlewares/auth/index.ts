@@ -24,7 +24,16 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { userId?: string; id?: string; wallet?: string; isAdmin?: boolean };
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      logger.error('JWT_SECRET not configured');
+      return res.status(500).json({
+        success: false,
+        error: 'Server authentication not configured',
+        code: 'AUTH_MISCONFIGURED'
+      });
+    }
+    const decoded = jwt.verify(token, secret) as { userId?: string; id?: string; wallet?: string; isAdmin?: boolean };
 
     const userId = decoded.userId || decoded.id;
 

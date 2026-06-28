@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::Token;
 
 declare_id!("14Z6HF4jSdKJse3C6uL6pyodepAZojVgqcMGDARwgNFG");
 
@@ -59,8 +58,8 @@ pub mod eternal_echoes {
         let ledger = &mut ctx.accounts.ledger;
         let clock = Clock::get()?;
 
-        require!(ledger.echo_count < ledger.max_echoes, ErrorCode::LedgerFull);
-        require!(echo_data_hash.len() <= 256, ErrorCode::EchoDataTooLarge);
+        require!((ledger.echoes.len() as u64) < ledger.max_echoes, ErrorCode::LedgerFull);
+        require!(!echo_data_hash.is_empty() && echo_data_hash.len() <= 256, ErrorCode::EchoDataTooLarge);
 
         // Create new echo entry
         let echo = Echo {
@@ -74,12 +73,12 @@ pub mod eternal_echoes {
 
         // Add to ledger
         ledger.echoes.push(echo);
-        ledger.echo_count += 1;
+        ledger.echo_count = ledger.echoes.len() as u64;
         ledger.last_updated = clock.unix_timestamp;
 
         // Update truth score if verified
         if grok_verified {
-            ledger.current_truth_score = std::cmp::min(100, ledger.current_truth_score + 2);
+            ledger.current_truth_score = std::cmp::min(100, ledger.current_truth_score.saturating_add(2));
         }
 
         // Emit event for real-time updates
@@ -119,8 +118,9 @@ pub mod eternal_echoes {
             ErrorCode::Unauthorized
         );
 
-        // Remove the echo
+        // Remove the echo and sync count with actual vec length
         ledger.echoes.remove(echo_index);
+        ledger.echo_count = ledger.echoes.len() as u64;
         ledger.last_updated = Clock::get()?.unix_timestamp;
 
         emit!(EchoRemoved {
@@ -140,13 +140,20 @@ pub mod eternal_echoes {
         require!(new_score <= 100, ErrorCode::InvalidTruthScore);
 
         let ledger = &mut ctx.accounts.ledger;
+
+        require!(
+            ctx.accounts.authority.key() == ledger.owner,
+            ErrorCode::Unauthorized
+        );
+
+        let old_score = ledger.current_truth_score;
         ledger.current_truth_score = new_score;
         ledger.truth_hash = new_hash;
         ledger.last_updated = Clock::get()?.unix_timestamp;
 
         emit!(TruthScoreUpdated {
             ledger: ledger.key(),
-            old_score: ledger.initial_truth_score,
+            old_score,
             new_score,
         });
 

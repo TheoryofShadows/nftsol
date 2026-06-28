@@ -64,7 +64,11 @@ class ApiService {
 
     // Log API request
     const method = options.method || 'GET';
-    logger.api(method, endpoint, options.body ? JSON.parse(options.body as string) : undefined);
+    let logBody: unknown;
+    if (options.body && typeof options.body === 'string') {
+      try { logBody = JSON.parse(options.body); } catch { logBody = '[unparseable]'; }
+    }
+    logger.api(method, endpoint, logBody);
     const startTime = performance.now();
 
     try {

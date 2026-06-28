@@ -6,8 +6,12 @@
 import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
 import { grokRealService } from '../services/grok-real.service';
+import { strictLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
+
+// All verification routes hit the external Grok API — rate limit aggressively
+router.use(strictLimiter);
 
 interface ApiResponse<T = any> {
   success: boolean;
