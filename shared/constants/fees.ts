@@ -130,6 +130,27 @@ export const CLOUT_SUPPLY_ALLOCATION = {
 } as const;
 
 /**
+ * CLOUT Distribution Safety Limits
+ * Prevent runaway token distribution and abuse
+ */
+export const CLOUT_DISTRIBUTION_LIMITS = {
+  /** Total supply in whole tokens */
+  TOTAL_SUPPLY: 1_000_000_000,
+
+  /** Max community rewards pool (60% of supply) */
+  MAX_COMMUNITY_POOL: 600_000_000,
+
+  /** Max CLOUT any single wallet can receive per day */
+  DAILY_WALLET_LIMIT: 1_000,
+
+  /** Max CLOUT in a single distribution call */
+  MAX_SINGLE_REWARD: 500,
+
+  /** Max total CLOUT distributed across all wallets per day */
+  DAILY_GLOBAL_LIMIT: 100_000,
+} as const;
+
+/**
  * Verify supply allocation sums to 100%
  */
 export const verifySupplyAllocation = (): boolean => {
