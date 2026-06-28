@@ -98,7 +98,7 @@ export default function DiscoverMintPage() {
       return [...results].sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
     }
     if (sortBy === 'date') {
-      return [...results].sort((a, b) => (b.year || 0) - (a.year || 0));
+      return [...results].sort((a, b) => (b.year || '').localeCompare(a.year || ''));
     }
     return results;
   }, [results, sortBy]);
