@@ -17,7 +17,7 @@ import { CloutTokenService } from '../services/cloutToken';
 import { validateWallet } from '../utils/validation';
 import { ApiResponse } from '../types/index';
 import { programConfig } from '../config/index';
-import { sensitiveOpLimiter, dataLimiter as _dataLimiter } from '../middleware/rate-limiting';
+import { sensitiveOpLimiter } from '../middleware/rate-limiting';
 import { authenticate, isAdmin } from '../middlewares/auth';
 
 const router = express.Router();

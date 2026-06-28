@@ -181,7 +181,7 @@ export class FileStorageService {
     }
 
     // Check mime type
-    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedMimeTypes.includes(mimeType)) {
       return {
         valid: false,
@@ -191,7 +191,7 @@ export class FileStorageService {
 
     // Check file extension
     const extension = fileName.split('.').pop()?.toLowerCase();
-    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     if (!extension || !allowedExtensions.includes(extension)) {
       return {
         valid: false,

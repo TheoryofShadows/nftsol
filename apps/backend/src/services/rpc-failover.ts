@@ -9,7 +9,7 @@
  */
 
 import logger from '../utils/logger';
-import { Connection, Commitment as _Commitment } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 
 interface RPCProvider {
   name: string;
@@ -109,7 +109,7 @@ class RPCFailoverService {
     return healthyProviders.sort((a, b) => {
       const healthA = (a.healthy ? 1 : 0) * 1000;
       const healthB = (b.healthy ? 1 : 0) * 1000;
-      return (healthB + b.weight! - a.weight!) - (healthA + a.weight! - b.weight!);
+      return (healthB - healthA) || ((b.weight || 0) - (a.weight || 0));
     })[0];
   }
 

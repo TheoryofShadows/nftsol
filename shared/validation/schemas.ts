@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Validation Schemas
  * Centralized validation using Zod for type-safe validation
@@ -24,8 +23,9 @@ export const mintRequestSchema = z.object({
   imageUrl: z.string().url().optional(),
   attributes: z.array(nftAttributeSchema).max(NFT_METADATA.MAX_ATTRIBUTES).optional(),
   collection: z.string().optional(),
+  file: z.any().optional(),
 }).refine(
-  (data) => data.imageUrl || data.file, 
+  (data) => data.imageUrl || data.file,
   { message: 'Either imageUrl or file must be provided' }
 );
 

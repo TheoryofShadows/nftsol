@@ -2,13 +2,12 @@
  * DiscoverMintPage — unified Search → Verify → Mint flow.
  * Replaces the disconnected Archive Search, Echo Mint, and Unified Dashboard tabs.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import confetti from 'canvas-confetti';
 import { archiveService, SearchResult } from '../services/archiveService';
 import { useNotification } from './NotificationSystem';
-import { API_ENDPOINTS as _API_ENDPOINTS } from '../config/api';
 
 type Step = 'search' | 'verify' | 'mint' | 'done';
 
@@ -93,6 +92,16 @@ export default function DiscoverMintPage() {
   // Mint state
   const [minting, setMinting] = useState(false);
   const [mintResult, setMintResult] = useState<MintResult | null>(null);
+
+  const sortedResults = useMemo(() => {
+    if (sortBy === 'downloads') {
+      return [...results].sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+    }
+    if (sortBy === 'date') {
+      return [...results].sort((a, b) => (b.year || 0) - (a.year || 0));
+    }
+    return results;
+  }, [results, sortBy]);
 
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -419,9 +428,9 @@ export default function DiscoverMintPage() {
           )}
 
           {/* Results grid */}
-          {results.length > 0 && (
+          {sortedResults.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {results.map(item => (
+              {sortedResults.map(item => (
                 <button
                   key={item.identifier}
                   onClick={() => handleSelectItem(item)}

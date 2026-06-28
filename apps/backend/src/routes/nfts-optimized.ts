@@ -6,7 +6,6 @@ import { Router, Request, Response } from 'express';
 import { cacheMiddleware, clearCache } from '../middleware/cache';
 import { optimizedNFTService } from '../services/nft-optimized';
 import { validateWallet } from '../utils/validation';
-import { ApiResponse as _ApiResponse } from '../types';
 import multer from 'multer';
 
 const router = Router();
@@ -45,7 +44,7 @@ router.get('/owner/:owner', async (req: Request, res: Response) => {
   try {
     const { owner } = req.params;
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
 
     const result = await optimizedNFTService.getNFTsByOwner(owner, page, limit);
 

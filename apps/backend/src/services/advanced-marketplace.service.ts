@@ -201,9 +201,14 @@ export class AdvancedMarketplaceService {
   /**
    * End auction
    */
-  public endAuction(auctionId: string): AuctionListing | null {
+  public endAuction(auctionId: string, userId?: string): AuctionListing | null {
     const auction = this.auctions.get(auctionId);
     if (!auction) return null;
+
+    if (userId && auction.seller !== userId) {
+      logger.warn(`Unauthorized auction end attempt: user ${userId} is not seller ${auction.seller}`);
+      return null;
+    }
 
     auction.status = AuctionStatus.ENDED;
     logger.info(`Auction ${auctionId} ended. Winner: ${auction.highestBidder} with ${auction.currentPrice} SOL`);
@@ -307,10 +312,23 @@ export class AdvancedMarketplaceService {
   /**
    * Accept offer
    */
-  public acceptOffer(offerId: string): boolean {
+  public acceptOffer(offerId: string, userId?: string): boolean {
     const offer = this.offers.get(offerId);
     if (!offer || offer.offerStatus !== 'pending') {
       return false;
+    }
+
+    if (userId) {
+      const isOwner = Array.from(this.listings.values()).some(
+        l => 'nftMint' in l && (l as FixedPriceListing).nftMint === offer.nftMint && l.seller === userId
+      );
+      const isAuctionOwner = Array.from(this.auctions.values()).some(
+        a => a.nftMint === offer.nftMint && a.seller === userId
+      );
+      if (!isOwner && !isAuctionOwner) {
+        logger.warn(`Unauthorized offer accept attempt: user ${userId} does not own NFT ${offer.nftMint}`);
+        return false;
+      }
     }
 
     offer.offerStatus = 'accepted';

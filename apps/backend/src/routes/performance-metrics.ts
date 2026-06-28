@@ -5,6 +5,8 @@
 
 import logger from '../utils/logger';
 import { Router, Request, Response } from 'express';
+import { authenticate, isAdmin } from '../middlewares/auth';
+import { dataLimiter } from '../middleware/rate-limiting';
 
 const router = Router();
 
@@ -23,7 +25,7 @@ const MAX_METRICS = 10000;
 /**
  * POST /api/metrics/web-vitals - Receive Web Vitals from clients
  */
-router.post('/web-vitals', (req: Request, res: Response) => {
+router.post('/web-vitals', dataLimiter, (req: Request, res: Response) => {
   try {
     const metric: WebVitalMetric = req.body;
 
@@ -53,7 +55,7 @@ router.post('/web-vitals', (req: Request, res: Response) => {
 /**
  * GET /api/metrics/performance - Get performance report
  */
-router.get('/performance', async (req: Request, res: Response) => {
+router.get('/performance', authenticate, isAdmin, async (req: Request, res: Response) => {
   try {
     const metricsReport = getMetricsReport();
 

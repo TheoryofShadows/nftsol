@@ -14,7 +14,7 @@ import { solanaConfig } from '../config';
 
 const MARKETPLACE_WALLET = process.env.MARKETPLACE_WALLET_ADDRESS || 'Aqx6ozBZmH761aEwtpiVcA33eQGLnbXtHPepi1bMfjgs';
 const PLATFORM_WALLET = process.env.PLATFORM_WALLET_ADDRESS || '3WCkmqcoJZnVbscWSD3xr9tyG1kqnc3MsVPusriKKKad';
-import { pool } from '../lib/db';
+import { pool, withClient } from '../lib/db';
 
 interface ListNFTParams {
   mintAddress: string;
@@ -266,28 +266,24 @@ export class MarketplaceService {
     const { mintAddress, buyer, seller, price, signature } = params;
 
     try {
-      // Update listing to sold
-      await pool.query(
-        `UPDATE nft_listings 
-         SET listed = false 
-         WHERE mint_address = $1`,
-        [mintAddress]
-      );
+      await withClient(async (client) => {
+        await client.query(
+          `UPDATE nft_listings SET listed = false WHERE mint_address = $1`,
+          [mintAddress]
+        );
 
-      // Record sale
-      await pool.query(
-        `INSERT INTO nft_sales (mint_address, seller, buyer, price, signature, sold_at)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [mintAddress, seller, buyer, price, signature]
-      );
+        await client.query(
+          `INSERT INTO nft_sales (mint_address, seller, buyer, price, signature, sold_at)
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [mintAddress, seller, buyer, price, signature]
+        );
 
-      // Update NFT owner
-      await pool.query(
-        `UPDATE nfts 
-         SET owner = $1, price = $2, listed = false, status = 'sold'
-         WHERE mint_address = $3`,
-        [buyer, price, mintAddress]
-      );
+        await client.query(
+          `UPDATE nfts SET owner = $1, price = $2, listed = false, status = 'sold'
+           WHERE mint_address = $3`,
+          [buyer, price, mintAddress]
+        );
+      });
 
       return { success: true };
     } catch (error) {
