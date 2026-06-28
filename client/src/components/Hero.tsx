@@ -178,39 +178,51 @@ export default function Hero() {
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-10 md:mb-14 animate-fade-in animate-delay-400 px-4 max-w-4xl mx-auto">
-          <div className="bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-lg hover:border-[#c9a84c]/20 transition-colors">
-            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5">Archive Search</h3>
-            <p className="text-xs md:text-sm text-zinc-500">Access 20M+ public domain items with 15+ advanced filters</p>
-          </div>
-          <div className="bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-lg hover:border-[#c9a84c]/20 transition-colors">
-            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5">Grok Verification</h3>
-            <p className="text-xs md:text-sm text-zinc-500">AI-powered authenticity verification for every NFT</p>
-          </div>
-          <div className="bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-lg hover:border-[#c9a84c]/20 transition-colors">
-            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5">Eternal Echoes</h3>
-            <p className="text-xs md:text-sm text-zinc-500">Collaborative NFT layers with contributor rewards</p>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4 animate-fade-in animate-delay-400 px-4">
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))}
-            className="px-5 md:px-7 py-2.5 md:py-3 bg-[#c9a84c] text-black font-semibold rounded-lg hover:bg-[#b8973f] transition-colors text-sm md:text-base"
+            className="group bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-xl hover:border-[#c9a84c]/30 transition-all text-left"
           >
-            Search Archive
+            <div className="w-8 h-8 rounded-lg bg-[#c9a84c]/10 flex items-center justify-center mb-3 group-hover:bg-[#c9a84c]/20 transition-colors">
+              <svg className="w-4 h-4 text-[#c9a84c]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5 group-hover:text-[#c9a84c] transition-colors">Search &amp; Discover</h3>
+            <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">700M+ openly-licensed works from Openverse &amp; Internet Archive</p>
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))}
+            className="group bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-xl hover:border-purple-500/30 transition-all text-left"
+          >
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center mb-3 group-hover:bg-purple-500/20 transition-colors">
+              <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+            </div>
+            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5 group-hover:text-purple-400 transition-colors">AI Verification</h3>
+            <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">Grok-powered authenticity scoring embedded on-chain</p>
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'mint' }))}
-            className="px-5 md:px-7 py-2.5 md:py-3 bg-[#c9a84c] text-black font-semibold rounded-lg hover:bg-[#b8973f] transition-colors text-sm md:text-base"
+            className="group bg-[#111111] border border-[#1e1e1e] p-5 md:p-6 rounded-xl hover:border-green-500/30 transition-all text-left"
           >
-            Mint NFT
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center mb-3 group-hover:bg-green-500/20 transition-colors">
+              <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            </div>
+            <h3 className="text-sm md:text-base font-semibold text-white mb-1.5 group-hover:text-green-400 transition-colors">Mint for ~$0.0001</h3>
+            <p className="text-xs md:text-sm text-zinc-500 leading-relaxed">Compressed NFTs on Solana — 500,000x cheaper than Ethereum</p>
+          </button>
+        </div>
+
+        {/* Primary CTA */}
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4 animate-fade-in animate-delay-400 px-4">
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'discover' }))}
+            className="px-6 md:px-8 py-3 md:py-3.5 bg-[#c9a84c] text-black font-semibold rounded-xl hover:bg-[#b8973f] transition-colors text-sm md:text-base"
+          >
+            Start Discovering
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('change-tab', { detail: 'market' }))}
-            className="px-5 md:px-7 py-2.5 md:py-3 border border-[#c9a84c]/25 text-[#c9a84c] font-semibold rounded-lg hover:bg-[#c9a84c]/10 transition-colors text-sm md:text-base"
+            className="px-6 md:px-8 py-3 md:py-3.5 border border-[#2a2a2a] text-zinc-300 font-medium rounded-xl hover:border-[#c9a84c]/30 hover:text-white transition-all text-sm md:text-base"
           >
-            Browse Market
+            Browse Marketplace
           </button>
         </div>
 

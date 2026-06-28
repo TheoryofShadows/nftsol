@@ -19,6 +19,13 @@ interface VerifyResult {
   confidence?: number;
   /** 'grok' = real AI verifier; 'heuristic' = local fallback when AI is unavailable. */
   method?: 'grok' | 'heuristic';
+  evidence?: string[];
+  dimensions?: {
+    authenticity: number;
+    originConfidence: number;
+    sourceReliability: number;
+    contentQuality: number;
+  };
 }
 
 interface MintResult {
@@ -43,25 +50,43 @@ const SORT_OPTIONS = [
   { value: 'date', label: 'Newest First' },
 ];
 
-function ScoreRing({ score }: { score: number }) {
+function ScoreRing({ score, size = 80 }: { score: number; size?: number }) {
   const color = score >= 80 ? '#14f195' : score >= 60 ? '#c9a84c' : '#ef4444';
   const r = 28;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
   return (
-    <div className="relative w-20 h-20 flex-shrink-0">
-      <svg className="w-20 h-20 -rotate-90" viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="5" />
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }}>
+      <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
         <circle
           cx="32" cy="32" r={r} fill="none"
-          stroke={color} strokeWidth="5"
+          stroke={color} strokeWidth="4.5"
           strokeDasharray={`${dash} ${circ - dash}`}
           strokeLinecap="round"
+          className="transition-all duration-700 ease-out"
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold text-white">{score}</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-lg font-bold text-white leading-none">{score}</span>
+        <span className="text-[9px] text-zinc-500 uppercase tracking-wider">score</span>
       </div>
+    </div>
+  );
+}
+
+function DimensionBar({ label, value }: { label: string; value: number }) {
+  const color = value >= 80 ? 'bg-green-500' : value >= 60 ? 'bg-[#c9a84c]' : 'bg-red-400';
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-zinc-500 w-28 shrink-0 text-right">{label}</span>
+      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div
+          className={`h-full rounded-full ${color} transition-all duration-700 ease-out`}
+          style={{ width: `${value}%` }}
+        />
+      </div>
+      <span className="text-xs text-zinc-400 w-8 font-mono">{value}</span>
     </div>
   );
 }
@@ -185,6 +210,7 @@ export default function DiscoverMintPage() {
         : await archiveService.verifyWithGrok(selectedItem.identifier);
       // Normalise across both response shapes the backend can return
       const v = (raw as any).verification ?? raw;
+      const originAnalysis = v?.originAnalysis ?? (raw as any).originAnalysis;
       setVerifyResult({
         verified: !!(v?.verified ?? (raw as any).readyForMinting),
         truthScore: typeof v?.truthScore === 'number' ? v.truthScore
@@ -194,6 +220,8 @@ export default function DiscoverMintPage() {
         concerns: Array.isArray(v?.concerns) ? v.concerns : [],
         confidence: v?.confidence,
         method: v?.method === 'grok' ? 'grok' : v?.method === 'heuristic' ? 'heuristic' : undefined,
+        evidence: Array.isArray(originAnalysis?.supportingEvidence) ? originAnalysis.supportingEvidence : [],
+        dimensions: v?.dimensions ?? (raw as any).dimensions,
       });
       pushStep('mint');
     } catch {
@@ -338,18 +366,16 @@ export default function DiscoverMintPage() {
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl md:text-5xl font-bold text-white font-display mb-3">
+        <h1 className="text-2xl md:text-4xl font-bold text-white font-display mb-2 tracking-tight">
           Search. Verify. <span className="text-[#c9a84c]">Mint.</span>
         </h1>
-        <p className="text-zinc-400 text-base md:text-lg max-w-2xl mx-auto">
-          Search the open web — hundreds of millions of openly-licensed images, audio &amp; video
-          (Openverse + Internet Archive) — verify authenticity with Grok AI, then mint it as a
-          compressed Solana NFT for fractions of a cent.
+        <p className="text-zinc-500 text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+          700M+ openly-licensed works — verify with Grok AI, mint as a Solana NFT for ~$0.0001.
         </p>
       </div>
 
       {/* ── Progress breadcrumb ───────────────────────────────────────────── */}
-      <div className="flex items-center justify-center gap-2 mb-8">
+      <div className="flex items-center justify-center gap-1.5 mb-8">
         {steps.map((s, i) => (
           <React.Fragment key={s.key}>
             <button
@@ -359,21 +385,21 @@ export default function DiscoverMintPage() {
                   else if (s.key === 'verify' && selectedItem) { setStep('verify'); setVerifyResult(null); }
                 }
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 i <= stepIndex
-                  ? 'bg-[#c9a84c] text-black'
-                  : 'bg-[#1e1e1e] text-zinc-500'
-              }`}
+                  ? 'bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30'
+                  : 'bg-[#111] text-zinc-600 border border-[#1e1e1e]'
+              } ${i < stepIndex ? 'cursor-pointer hover:bg-[#c9a84c]/25' : i > stepIndex ? 'cursor-default' : ''}`}
             >
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
-                i < stepIndex ? 'bg-black/20' : i === stepIndex ? 'bg-black/20' : 'bg-[#2a2a2a]'
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                i < stepIndex ? 'bg-[#c9a84c] text-black' : i === stepIndex ? 'bg-[#c9a84c]/30 text-[#c9a84c]' : 'bg-[#1e1e1e] text-zinc-600'
               }`}>
                 {i < stepIndex ? '✓' : i + 1}
               </span>
               {s.label}
             </button>
             {i < steps.length - 1 && (
-              <div className={`h-px w-8 ${i < stepIndex ? 'bg-[#c9a84c]' : 'bg-[#2a2a2a]'}`} />
+              <div className={`h-px w-6 ${i < stepIndex ? 'bg-[#c9a84c]/40' : 'bg-[#1e1e1e]'}`} />
             )}
           </React.Fragment>
         ))}
@@ -463,41 +489,41 @@ export default function DiscoverMintPage() {
 
           {/* Results grid */}
           {sortedResults.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-3">
               {sortedResults.map(item => (
                 <button
                   key={item.identifier}
                   onClick={() => handleSelectItem(item)}
-                  className="group text-left bg-[#111111] border border-[#1e1e1e] hover:border-[#c9a84c]/40 active:border-[#c9a84c]/60 rounded-xl overflow-hidden transition-all hover:shadow-xl hover:-translate-y-0.5"
+                  className="group text-left bg-[#0e0e0e] border border-[#1a1a1a] hover:border-[#c9a84c]/30 rounded-xl overflow-hidden transition-all duration-200"
                 >
-                  {/* Thumbnail */}
-                  <div className="aspect-video relative overflow-hidden bg-[#0a0a0a]">
+                  <div className="aspect-[4/3] relative overflow-hidden bg-[#080808]">
                     <img
                       src={item.thumbnailUrl}
                       alt={item.title}
                       loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                    <div className="absolute top-2 left-2">
-                      <span className="px-2 py-0.5 bg-black/70 rounded text-[10px] sm:text-xs text-zinc-300 capitalize">
+                    <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#0e0e0e] to-transparent" />
+                    <div className="absolute top-1.5 left-1.5 flex gap-1">
+                      <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[10px] text-zinc-300 capitalize">
                         {item.mediaType}
                       </span>
                     </div>
-                    <div className="absolute top-2 right-2">
-                      <span className="px-2 py-0.5 bg-black/70 rounded text-[10px] sm:text-xs text-[#c9a84c] capitalize">
+                    <div className="absolute top-1.5 right-1.5">
+                      <span className="px-1.5 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[10px] text-[#c9a84c]">
                         {item.source === 'openverse' ? 'web' : 'archive'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-2.5 sm:p-3">
-                    <h3 className="text-white font-semibold text-xs sm:text-sm leading-tight line-clamp-2 mb-1 group-hover:text-[#c9a84c] transition-colors">
+                  <div className="p-2.5">
+                    <h3 className="text-white text-xs sm:text-sm font-medium leading-snug line-clamp-2 mb-1.5 group-hover:text-[#c9a84c] transition-colors">
                       {item.title}
                     </h3>
-                    <div className="flex items-center justify-between gap-2 text-[10px] sm:text-xs text-zinc-500">
-                      <span className="truncate">{item.creator && item.creator !== 'Unknown' ? item.creator.slice(0, 18) : item.year || ''}</span>
-                      <span className="shrink-0 uppercase tracking-wide">{item.licenseType.replace('cc-', 'CC ').replace('public-domain', 'PD')}</span>
+                    <div className="flex items-center justify-between gap-1.5 text-[10px] text-zinc-600">
+                      <span className="truncate">{item.creator && item.creator !== 'Unknown' ? item.creator.slice(0, 16) : item.year || ''}</span>
+                      <span className="shrink-0 uppercase tracking-wider font-medium">{item.licenseType.replace('cc-', 'CC ').replace('public-domain', 'PD')}</span>
                     </div>
                   </div>
                 </button>
@@ -572,69 +598,140 @@ export default function DiscoverMintPage() {
 
               {/* Verify CTA */}
               {!verifyResult && (
-                <div className="bg-[#0c0c0c] border border-[#1e1e1e] rounded-xl p-5 text-center">
-                  <div className="text-3xl mb-2">🤖</div>
-                  <h3 className="text-white font-semibold mb-1">Verify with Grok AI</h3>
-                  <p className="text-zinc-500 text-sm mb-4">
-                    Grok analyses the content&apos;s authenticity, source reliability, and factual accuracy.
-                    The truth score gets embedded in your NFT&apos;s metadata on-chain.
-                  </p>
+                <div className="bg-[#0a0a0a] border border-[#1e1e1e] rounded-xl p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-purple-600/20 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold text-base mb-1">Verify Authenticity</h3>
+                      <p className="text-zinc-500 text-sm leading-relaxed">
+                        Grok AI analyses source reliability, content authenticity, and origin confidence.
+                        The truth score is embedded in your NFT&apos;s on-chain metadata.
+                      </p>
+                    </div>
+                  </div>
                   {verifyError && (
-                    <p className="text-yellow-400 text-xs mb-3">{verifyError}</p>
+                    <p className="text-yellow-400 text-xs mt-3 pl-14">{verifyError}</p>
                   )}
                   <button
                     onClick={handleVerify}
                     disabled={verifying}
-                    className="w-full py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold rounded-xl transition-colors"
+                    className="w-full mt-4 py-3 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors"
                   >
                     {verifying ? (
-                      <span className="flex items-center justify-center gap-2">
+                      <span className="flex items-center justify-center gap-3">
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Grok is analysing…
+                        Analysing authenticity&hellip;
                       </span>
-                    ) : '🔍 Run Grok Verification'}
+                    ) : 'Run Verification'}
                   </button>
                 </div>
               )}
 
               {/* Verify result */}
               {verifyResult && (
-                <div className={`rounded-xl p-5 border mb-4 ${
-                  verifyResult.verified
-                    ? 'bg-green-500/10 border-green-500/30'
-                    : verifyResult.truthScore >= 50
-                    ? 'bg-yellow-500/10 border-yellow-500/30'
-                    : 'bg-red-500/10 border-red-500/30'
-                }`}>
-                  <div className="flex items-center gap-4 mb-3">
-                    <ScoreRing score={verifyResult.truthScore} />
-                    <div>
-                      <div className={`text-lg font-bold ${
-                        verifyResult.verified ? 'text-green-400'
-                        : verifyResult.truthScore >= 50 ? 'text-yellow-400'
-                        : 'text-red-400'
-                      }`}>
-                        {verifyResult.method === 'heuristic' ? '◷ Heuristic estimate (AI unavailable)'
-                          : verifyResult.verified ? '✓ Verified by Grok'
-                          : verifyResult.truthScore >= 50 ? '⚠ Partially verified'
-                          : '✗ Low confidence'}
-                      </div>
-                      <div className="text-zinc-400 text-sm">
-                        {verifyResult.method === 'heuristic' ? 'Estimated score' : 'Truth score'}: <strong className="text-white">{verifyResult.truthScore}%</strong>
-                        {verifyResult.verified && verifyResult.truthScore >= 70 && (
-                          <span className="ml-2 text-[#c9a84c] font-medium">+CLOUT reward</span>
-                        )}
+                <div className="space-y-4 mb-4">
+                  {/* Score + verdict */}
+                  <div className={`rounded-xl p-5 border ${
+                    verifyResult.verified
+                      ? 'bg-green-500/5 border-green-500/20'
+                      : verifyResult.truthScore >= 50
+                      ? 'bg-yellow-500/5 border-yellow-500/20'
+                      : 'bg-red-500/5 border-red-500/20'
+                  }`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <ScoreRing score={verifyResult.truthScore} />
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-base font-semibold ${
+                          verifyResult.verified ? 'text-green-400'
+                          : verifyResult.truthScore >= 50 ? 'text-yellow-400'
+                          : 'text-red-400'
+                        }`}>
+                          {verifyResult.method === 'heuristic' ? 'Metadata Analysis'
+                            : verifyResult.verified ? 'Verified by Grok AI'
+                            : verifyResult.truthScore >= 50 ? 'Partially Verified'
+                            : 'Low Confidence'}
+                        </div>
+                        <div className="text-zinc-500 text-xs mt-0.5">
+                          {verifyResult.method === 'heuristic'
+                            ? 'Scored by metadata signals (AI unavailable)'
+                            : 'AI-powered authenticity analysis'}
+                          {verifyResult.verified && verifyResult.truthScore >= 70 && (
+                            <span className="ml-2 text-[#c9a84c] font-medium">+CLOUT reward</span>
+                          )}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Summary */}
+                    {verifyResult.summary && (
+                      <p className="text-sm text-zinc-300 leading-relaxed mb-4">{verifyResult.summary}</p>
+                    )}
+
+                    {/* Dimension breakdown */}
+                    {verifyResult.dimensions && (
+                      <div className="space-y-2 mb-4">
+                        <DimensionBar label="Authenticity" value={verifyResult.dimensions.authenticity} />
+                        <DimensionBar label="Origin" value={verifyResult.dimensions.originConfidence} />
+                        <DimensionBar label="Source" value={verifyResult.dimensions.sourceReliability} />
+                        <DimensionBar label="Quality" value={verifyResult.dimensions.contentQuality} />
+                      </div>
+                    )}
+
+                    {/* Evidence */}
+                    {verifyResult.evidence && verifyResult.evidence.length > 0 && (
+                      <div className="mb-3">
+                        <div className="text-xs text-zinc-600 uppercase tracking-wider mb-1.5">Supporting evidence</div>
+                        <ul className="space-y-1">
+                          {verifyResult.evidence.map((e, i) => (
+                            <li key={i} className="text-xs text-zinc-400 flex items-start gap-1.5">
+                              <span className="text-green-500/70 mt-0.5 shrink-0">+</span>
+                              <span>{e}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Concerns */}
+                    {verifyResult.concerns.length > 0 && (
+                      <div>
+                        <div className="text-xs text-zinc-600 uppercase tracking-wider mb-1.5">Flags</div>
+                        <ul className="space-y-1">
+                          {verifyResult.concerns.map((c, i) => (
+                            <li key={i} className="text-xs text-zinc-500 flex items-start gap-1.5">
+                              <span className="text-yellow-500/70 mt-0.5 shrink-0">!</span>
+                              <span>{c}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
-                  {verifyResult.summary && (
-                    <p className="text-sm text-zinc-300 mb-2">{verifyResult.summary}</p>
-                  )}
-                  {verifyResult.concerns.length > 0 && (
-                    <ul className="text-xs text-zinc-500 space-y-1">
-                      {verifyResult.concerns.map((c, i) => <li key={i}>• {c}</li>)}
-                    </ul>
-                  )}
+
+                  {/* Re-verify button */}
+                  <button
+                    onClick={() => { setVerifyResult(null); handleVerify(); }}
+                    disabled={verifying}
+                    className="w-full py-2 text-zinc-500 hover:text-zinc-300 text-xs transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    {verifying ? (
+                      <>
+                        <div className="w-3 h-3 border border-zinc-500 border-t-zinc-300 rounded-full animate-spin" />
+                        Re-analysing&hellip;
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Run a different analysis
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
 
@@ -644,7 +741,7 @@ export default function DiscoverMintPage() {
                   onClick={() => pushStep('mint')}
                   className="w-full py-3.5 bg-[#c9a84c] hover:bg-[#b8973f] text-black font-bold rounded-xl transition-colors text-base"
                 >
-                  Continue to Mint →
+                  Continue to Mint
                 </button>
               )}
 
@@ -798,11 +895,15 @@ export default function DiscoverMintPage() {
       ══════════════════════════════════════════════════════════════════════ */}
       {step === 'done' && mintResult && (
         <div className="max-w-lg mx-auto text-center">
-          <div className="bg-[#111111] border border-[#c9a84c]/30 rounded-2xl p-8">
-            <div className="text-6xl mb-4">🎉</div>
-            <h2 className="text-3xl font-bold text-white mb-2">Minted!</h2>
-            <p className="text-zinc-400 mb-6">
-              Your NFT is live on Solana mainnet{mintResult.costUSD ? ` for $${mintResult.costUSD.toFixed(4)}` : ''}.
+          <div className="bg-[#111111] border border-[#1e1e1e] rounded-2xl p-8">
+            <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-1">Minted Successfully</h2>
+            <p className="text-zinc-500 text-sm mb-6">
+              Live on Solana mainnet{mintResult.costUSD ? ` for $${mintResult.costUSD.toFixed(4)}` : ''}
             </p>
 
             {mintResult.imageUrl && (
