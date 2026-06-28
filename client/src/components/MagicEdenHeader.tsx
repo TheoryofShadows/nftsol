@@ -102,7 +102,7 @@ export const MagicEdenHeader: React.FC<MagicEdenHeaderProps> = ({ activeTab, onT
             className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
             onClick={() => handleNavClick('home')}
           >
-            <div className="w-8 h-8 rounded-lg shadow-lg" style={{ background: 'linear-gradient(135deg, #c9a84c, #e8d48b, #c9a84c)', boxShadow: '0 4px 12px rgba(201, 168, 76, 0.3)' }}></div>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c9a84c] via-[#e8d48b] to-[#c9a84c] shadow-[0_4px_12px_rgba(201,168,76,0.3)]"></div>
             <span className="text-xl font-bold text-white hidden sm:inline">NFTSol</span>
           </div>
 

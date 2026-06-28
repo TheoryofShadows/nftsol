@@ -213,7 +213,7 @@ async function verifyContentWithGrok(
             },
           ],
           max_tokens: 300,
-          temperature: 0,
+          temperature: 0.4,
           response_format: { type: 'json_object' },
         },
         {
@@ -252,7 +252,7 @@ async function verifyContentWithGrok(
           { claim: 'Content source is verifiable', verified: hasSource, sources: metadata?.source ? [metadata.source] : [] },
           { claim: 'Content has timestamp', verified: hasTimestamp, sources: [] },
         ],
-        summary: raw.summary || generateSummary(score, flags, recommendations),
+        summary: raw.summary || generateSummary(score, flags, recommendations, contentType, metadata, content),
       };
     } catch (apiError: unknown) {
       const msg = apiError instanceof Error ? apiError.message : 'unknown error';
@@ -292,7 +292,7 @@ async function verifyContentWithGrok(
       { claim: 'Content source is verifiable', verified: hasSource, sources: metadata?.source ? [metadata.source] : [] },
       { claim: 'Content has timestamp', verified: hasTimestamp, sources: [] },
     ],
-    summary: generateSummary(score, flags, recommendations),
+    summary: generateSummary(score, flags, recommendations, contentType, metadata, content),
   };
 }
 
@@ -397,29 +397,43 @@ function calculateEstimatedValue(score: number): number {
   return 0.1; // Minimum value
 }
 
-/**
- * Helper: Generate summary text
- */
-function generateSummary(score: number, flags: string[], recommendations: string[]): string {
-  let summary = `Content verification score: ${score}/100. `;
+function generateSummary(
+  score: number,
+  flags: string[],
+  recommendations: string[],
+  contentType?: string,
+  metadata?: Record<string, string | undefined>,
+  contentSnippet?: string
+): string {
+  const parts: string[] = [];
+
+  const typeLabel = contentType === 'url' ? 'URL' : contentType === 'video' ? 'video' : 'content';
+
+  if (metadata?.source) {
+    parts.push(`${typeLabel} from ${metadata.source}`);
+  }
 
   if (score >= 90) {
-    summary += 'This content demonstrates high authenticity and factual accuracy. ';
+    parts.push(`scored ${score}/100 — high authenticity and factual accuracy`);
   } else if (score >= 75) {
-    summary += 'This content shows good reliability with some areas for improvement. ';
+    parts.push(`scored ${score}/100 — reliable with minor gaps`);
+  } else if (score >= 60) {
+    parts.push(`scored ${score}/100 — moderate confidence, some signals inconclusive`);
   } else {
-    summary += 'This content requires additional verification. ';
+    parts.push(`scored ${score}/100 — limited verification signals`);
   }
 
-  if (flags.length > 0) {
-    summary += `Flags: ${flags.join(', ')}. `;
+  const actionableFlags = flags.filter(f => f !== 'Requires manual review' && f !== 'AI verification unavailable - heuristic used');
+  if (actionableFlags.length > 0) {
+    parts.push(actionableFlags[0]);
   }
 
-  if (recommendations.length > 0) {
-    summary += recommendations[0];
+  if (contentSnippet && contentSnippet.length > 20) {
+    const topic = contentSnippet.slice(0, 60).replace(/\s+/g, ' ').trim();
+    parts.push(`topic: "${topic}…"`);
   }
 
-  return summary;
+  return parts.join('. ') + '.';
 }
 
 export default router;

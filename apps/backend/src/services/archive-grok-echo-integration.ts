@@ -51,6 +51,12 @@ export interface GrokVerificationResult {
     confidence: number;
     supportingEvidence: string[];
   };
+  dimensions?: {
+    authenticity: number;
+    originConfidence: number;
+    sourceReliability: number;
+    contentQuality: number;
+  };
   timestamp: number;
 }
 
@@ -442,33 +448,34 @@ export class GrokArchiveVerificationService {
     archiveItem: ArchiveMediaItem
   ): Promise<GrokVerificationResult> {
     try {
-      const verificationPrompt = `You are an expert content verification system.
+      const descSnippet = (archiveItem.description || '').slice(0, 600);
+      const verificationPrompt = `You are an expert digital-media authenticator. Analyze this item and produce a UNIQUE, SPECIFIC assessment — never use generic boilerplate.
 
-Analyze this Internet Archive item for authenticity and origin:
-
+ITEM:
 Title: ${archiveItem.title}
 Creator: ${archiveItem.creator}
-Description: ${archiveItem.description}
-Public Date: ${archiveItem.publicDate || 'Unknown'}
-Media Type: ${archiveItem.mediaType}
+Description: ${descSnippet}
+Date: ${archiveItem.publicDate || archiveItem.year || 'Unknown'}
+Type: ${archiveItem.mediaType}
 License: ${archiveItem.licenseType}
 Archive URL: ${archiveItem.archiveUrl}
 Downloads: ${archiveItem.downloads}
 
-Provide a verification assessment:
-1. Authenticity Score (0-100): Is this content genuine and not AI-generated/forged?
-2. Origin Confidence: How confident are you about the stated origin/creator?
-3. Authenticity Assessment: 'authentic' | 'suspicious' | 'inconclusive'
-4. Potential Concerns: List any red flags
-5. Supporting Evidence: Specific indicators of authenticity
+INSTRUCTIONS:
+- Score each dimension INDEPENDENTLY based on the actual content signals.
+- Write a 1-2 sentence summary that references THIS SPECIFIC item (title, creator, subject matter) — not a generic template.
+- List specific concerns and evidence unique to this item.
 
-IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
+Return ONLY valid JSON, no markdown:
 {
-  "authenticityScore": <number>,
-  "originConfidence": <number>,
-  "authenticity": "<string>",
-  "concerns": ["<string>"],
-  "evidence": ["<string>"]
+  "authenticityScore": <0-100>,
+  "originConfidence": <0-100>,
+  "sourceReliability": <0-100>,
+  "contentQuality": <0-100>,
+  "authenticity": "authentic" | "suspicious" | "inconclusive",
+  "summary": "<specific 1-2 sentence analysis of THIS item>",
+  "concerns": ["<specific concern>"],
+  "evidence": ["<specific evidence point>"]
 }`;
 
       const response = await axios.post(
@@ -477,11 +484,15 @@ IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
           model: 'grok-2',
           messages: [
             {
+              role: 'system',
+              content: 'You are an expert content authenticator. Every response must be specific to the item being analyzed — never repeat generic summaries. Vary your language and focus on what makes each item unique.',
+            },
+            {
               role: 'user',
               content: verificationPrompt,
             },
           ],
-          temperature: 0.3,
+          temperature: 0.5,
           max_tokens: 1000,
         },
         {
@@ -494,62 +505,177 @@ IMPORTANT: Return a valid JSON object ONLY, no markdown or extra text.
       );
 
       const content = response.data.choices[0]?.message?.content || '{}';
-      const parsed = JSON.parse(content);
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : '{}');
+
+      const authScore = Math.max(0, Math.min(100, parsed.authenticityScore ?? 50));
+      const originConf = Math.max(0, Math.min(100, parsed.originConfidence ?? 50));
+      const srcReliability = Math.max(0, Math.min(100, parsed.sourceReliability ?? Math.round((authScore + originConf) / 2)));
+      const contentQuality = Math.max(0, Math.min(100, parsed.contentQuality ?? authScore));
 
       const truthScore = Math.round(
-        (parsed.authenticityScore + parsed.originConfidence) / 2
+        authScore * 0.35 + originConf * 0.25 + srcReliability * 0.25 + contentQuality * 0.15
       );
 
       return {
         contentHash: this.hashContent(JSON.stringify(archiveItem)),
         verified: truthScore >= 70,
         truthScore,
-        confidence: parsed.originConfidence,
+        confidence: originConf,
         method: 'grok',
-        summary: `Archive item verified by Grok: ${parsed.authenticity} (${truthScore}% confidence)`,
+        summary: parsed.summary || `Grok analysis of "${archiveItem.title}": authenticity ${authScore}%, origin confidence ${originConf}%.`,
         concerns: parsed.concerns || [],
-        authenticity: parsed.authenticity,
+        authenticity: parsed.authenticity || (truthScore >= 70 ? 'authentic' : 'inconclusive'),
         originAnalysis: {
           likelySource: archiveItem.creator,
-          confidence: parsed.originConfidence,
+          confidence: originConf,
           supportingEvidence: parsed.evidence || [],
+        },
+        dimensions: {
+          authenticity: authScore,
+          originConfidence: originConf,
+          sourceReliability: srcReliability,
+          contentQuality,
         },
         timestamp: Date.now(),
       };
     } catch (error) {
       logger.warn('Grok verification unavailable, using heuristic fallback:', error);
-      // Honest heuristic fallback — the AI verifier is unavailable (no/invalid
-      // API key, network error, or unparseable response). Score varies per item
-      // and is explicitly labelled `method: 'heuristic'` so the UI never claims
-      // it was AI-verified.
       const truthScore = this.computeHeuristicScore(archiveItem);
-      const evidence: string[] = [];
-      if ((archiveItem.licenseType || '').toLowerCase() === 'public-domain') {
-        evidence.push('Public domain status on Internet Archive');
-      }
-      if ((Number(archiveItem.downloads) || 0) > 0) {
-        evidence.push(`${archiveItem.downloads} downloads on Internet Archive`);
-      }
-      if ((archiveItem.creator || '').trim()) {
-        evidence.push(`Attributed creator: ${archiveItem.creator}`);
-      }
+      const summary = this.buildHeuristicSummary(archiveItem, truthScore);
+      const evidence = this.buildHeuristicEvidence(archiveItem);
+      const concerns = this.buildHeuristicConcerns(archiveItem, truthScore);
+
+      const license = (archiveItem.licenseType || '').toLowerCase();
+      const downloads = Number(archiveItem.downloads) || 0;
+      const hasCreator = !!(archiveItem.creator || '').trim() && archiveItem.creator.toLowerCase() !== 'unknown';
+      const descLen = (archiveItem.description || '').trim().length;
+
+      const srcReliability = license === 'public-domain' ? 80 : license.startsWith('cc-') ? 65 : 40;
+      const originConf = (hasCreator ? 50 : 20) + (downloads >= 1000 ? 20 : downloads >= 100 ? 10 : 0);
+      const contentQuality = Math.min(100, 30 + (descLen >= 200 ? 30 : descLen >= 50 ? 15 : 0) + (downloads >= 1000 ? 20 : 0));
+
       return {
         contentHash: this.hashContent(JSON.stringify(archiveItem)),
         verified: truthScore >= 70,
         truthScore,
         confidence: truthScore,
         method: 'heuristic',
-        summary: `Heuristic estimate (AI verifier unavailable): ${truthScore}% based on Internet Archive metadata.`,
-        concerns: ['AI verifier unavailable — heuristic score, not AI-verified'],
+        summary,
+        concerns,
         authenticity: truthScore >= 70 ? 'authentic' : 'inconclusive',
         originAnalysis: {
           likelySource: archiveItem.creator || 'Internet Archive',
           confidence: truthScore,
-          supportingEvidence: evidence.length ? evidence : ['Sourced from Internet Archive'],
+          supportingEvidence: evidence,
+        },
+        dimensions: {
+          authenticity: truthScore,
+          originConfidence: Math.min(100, originConf),
+          sourceReliability: srcReliability,
+          contentQuality,
         },
         timestamp: Date.now(),
       };
     }
+  }
+
+  private buildHeuristicSummary(item: ArchiveMediaItem, score: number): string {
+    const title = item.title || 'this item';
+    const creator = (item.creator || '').trim();
+    const license = (item.licenseType || '').toLowerCase();
+    const downloads = Number(item.downloads) || 0;
+
+    const parts: string[] = [];
+
+    if (license === 'public-domain') {
+      parts.push(`"${title}" is in the public domain`);
+    } else if (license.startsWith('cc-')) {
+      parts.push(`"${title}" is shared under a Creative Commons license`);
+    } else {
+      parts.push(`"${title}" has unverified licensing`);
+    }
+
+    if (creator && creator.toLowerCase() !== 'unknown') {
+      parts.push(`attributed to ${creator}`);
+    }
+
+    if (downloads >= 10000) {
+      parts.push(`with ${downloads.toLocaleString()} downloads indicating broad community trust`);
+    } else if (downloads >= 1000) {
+      parts.push(`with solid community engagement (${downloads.toLocaleString()} downloads)`);
+    }
+
+    let assessment: string;
+    if (score >= 80) {
+      assessment = 'Strong provenance signals from metadata analysis.';
+    } else if (score >= 65) {
+      assessment = 'Moderate confidence — some metadata signals could be stronger.';
+    } else {
+      assessment = 'Limited metadata makes full assessment difficult.';
+    }
+
+    return parts.join(', ') + '. ' + assessment;
+  }
+
+  private buildHeuristicEvidence(item: ArchiveMediaItem): string[] {
+    const evidence: string[] = [];
+    const license = (item.licenseType || '').toLowerCase();
+    const downloads = Number(item.downloads) || 0;
+    const creator = (item.creator || '').trim();
+
+    if (license === 'public-domain') {
+      evidence.push('Public domain status verified on Internet Archive');
+    } else if (license.startsWith('cc-')) {
+      evidence.push(`Creative Commons (${license.toUpperCase()}) license on Internet Archive`);
+    }
+
+    if (downloads > 0) {
+      evidence.push(`${downloads.toLocaleString()} downloads on Internet Archive`);
+    }
+
+    if (creator && creator.toLowerCase() !== 'unknown') {
+      evidence.push(`Creator attribution: ${creator}`);
+    }
+
+    if (item.publicDate || item.year) {
+      evidence.push(`Publication date recorded: ${item.publicDate || item.year}`);
+    }
+
+    if ((item.description || '').trim().length >= 100) {
+      evidence.push('Detailed description available for cross-reference');
+    }
+
+    if (evidence.length === 0) {
+      evidence.push('Sourced from Internet Archive');
+    }
+
+    return evidence;
+  }
+
+  private buildHeuristicConcerns(item: ArchiveMediaItem, score: number): string[] {
+    const concerns: string[] = ['AI verifier unavailable — scored by metadata analysis'];
+    const creator = (item.creator || '').trim();
+    const descLen = (item.description || '').trim().length;
+    const downloads = Number(item.downloads) || 0;
+
+    if (!creator || creator.toLowerCase() === 'unknown') {
+      concerns.push('No creator attribution — origin cannot be confirmed');
+    }
+
+    if (descLen < 30) {
+      concerns.push('Minimal description — limited context for verification');
+    }
+
+    if (downloads < 10) {
+      concerns.push('Very few downloads — limited community validation');
+    }
+
+    if (score < 60) {
+      concerns.push('Score below confidence threshold — manual review recommended');
+    }
+
+    return concerns;
   }
 
   /**
