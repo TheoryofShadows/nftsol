@@ -28,7 +28,7 @@ import {
 import { getPlatformKeypair } from '../lib/platformKeypair';
 import { programConfig, solanaConfig } from '../config/index';
 import { getOrCreateCloutVault } from '../utils/clout-vault';
-import { CLOUT_DISTRIBUTION_LIMITS } from '../../../../shared/constants/fees';
+import { CLOUT_DISTRIBUTION_LIMITS } from '../constants/cloutLimits';
 
 export interface CloutRewardResult {
   success: boolean;
