@@ -3,6 +3,11 @@
  * Node 22+ exposes localStorage/sessionStorage as globals that throw
  * SecurityError unless --localstorage-file is passed. Stub them out.
  */
+
+// Ensure NODE_ENV=test so environment-gated behaviour (e.g. rate-limiter
+// bypass in src/middleware/rate-limiting.ts) is active even if the runner
+// did not export it.
+process.env.NODE_ENV = 'test';
 const storage = {
   getItem: () => null,
   setItem: () => undefined,

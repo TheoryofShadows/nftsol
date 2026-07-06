@@ -182,8 +182,8 @@ Return ONLY valid JSON.`;
   private async verifyCollection(collectionMint: string, metadata?: Record<string, any>): Promise<VerificationResult> {
     const safeCollection = this.sanitizeForPrompt(collectionMint);
     const collectionInfo = metadata?.info ? this.sanitizeForPrompt(JSON.stringify(metadata.info)) : '';
-    const holders = Number.isFinite(metadata?.holders) ? metadata.holders : 0;
-    const volume = Number.isFinite(metadata?.volume) ? metadata.volume : 0;
+    const holders = Number.isFinite(metadata?.holders) ? metadata?.holders : 0;
+    const volume = Number.isFinite(metadata?.volume) ? metadata?.volume : 0;
 
     const prompt = `Analyze this NFT collection for legitimacy and rug pull risk:
 
@@ -252,7 +252,7 @@ Return ONLY valid JSON.`;
    */
   private async verifyCommunity(communityInfo: string, metadata?: Record<string, any>): Promise<VerificationResult> {
     const safeCommunityInfo = this.sanitizeForPrompt(communityInfo);
-    const holders = Number.isFinite(metadata?.holderCount) ? metadata.holderCount : 0;
+    const holders = Number.isFinite(metadata?.holderCount) ? metadata?.holderCount : 0;
     const activity = metadata?.activity ? this.sanitizeForPrompt(JSON.stringify(metadata.activity)) : '';
     const voting = metadata?.voting ? this.sanitizeForPrompt(JSON.stringify(metadata.voting)) : '';
 

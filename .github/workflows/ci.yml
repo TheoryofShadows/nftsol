@@ -36,6 +36,16 @@ jobs:
           npm ci || npm install
         continue-on-error: false
 
+      - name: Install dependencies - Shared
+        # shared/ is a real package (@nftsol/shared) with its own deps (zod).
+        # Client + backend type-check ../shared, so its deps must be resolvable
+        # in CI (locally they resolve via a hoisted root node_modules that CI
+        # never creates). Without this, tsc reports TS2307 "Cannot find module 'zod'".
+        working-directory: shared
+        run: |
+          npm ci || npm install
+        continue-on-error: false
+
       - name: Build Client
         working-directory: client
         run: npm run build

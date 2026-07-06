@@ -16,6 +16,11 @@ export function getClientIp(req: Request): string {
     'unknown';
 }
 
+// Bypass rate limiting under the test runner so integration tests exercise
+// route logic deterministically instead of tripping the limiter (e.g. the
+// strict 3/min cap). Never true in dev or production.
+const skipInTest = () => process.env.NODE_ENV === 'test';
+
 // Standard rate limiter: 100 requests per 15 minutes
 export const standardLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -27,6 +32,7 @@ export const standardLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTest,
   keyGenerator: (req) => getClientIp(req),
   handler: (req, res) => {
     res.status(429).json({
@@ -47,6 +53,7 @@ export const authLimiter = rateLimit({
     code: 'AUTH_RATE_LIMIT_EXCEEDED'
   },
   skipSuccessfulRequests: true, // Only count failed attempts
+  skip: skipInTest,
   keyGenerator: (req) => `${getClientIp(req)}:${req.body?.email || 'unknown'}`,
   handler: (req, res) => {
     res.status(429).json({
@@ -66,6 +73,7 @@ export const sensitiveOpLimiter = rateLimit({
     error: 'Too many sensitive operations, please try again later',
     code: 'SENSITIVE_OP_RATE_LIMIT_EXCEEDED'
   },
+  skip: skipInTest,
   keyGenerator: (req) => {
     // Use wallet address if available, otherwise IP
     const walletAddress = req.body?.walletAddress || req.query?.walletAddress || getClientIp(req);
@@ -89,6 +97,7 @@ export const strictLimiter = rateLimit({
     error: 'Too many requests, please try again later',
     code: 'STRICT_RATE_LIMIT_EXCEEDED'
   },
+  skip: skipInTest,
   keyGenerator: (req) => getClientIp(req),
   handler: (req, res) => {
     res.status(429).json({
@@ -108,6 +117,7 @@ export const webhookLimiter = rateLimit({
     error: 'Too many webhook requests, please try again later',
     code: 'WEBHOOK_RATE_LIMIT_EXCEEDED'
   },
+  skip: skipInTest,
   keyGenerator: (req) => getClientIp(req),
   handler: (req, res) => {
     res.status(429).json({
@@ -127,6 +137,7 @@ export const dataLimiter = rateLimit({
     error: 'Too many data requests, please try again later',
     code: 'DATA_RATE_LIMIT_EXCEEDED'
   },
+  skip: skipInTest,
   keyGenerator: (req) => getClientIp(req),
   handler: (req, res) => {
     res.status(429).json({
