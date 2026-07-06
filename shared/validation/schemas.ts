@@ -20,7 +20,7 @@ export const mintRequestSchema = z.object({
   name: z.string().min(1).max(NFT_METADATA.MAX_NAME_LENGTH),
   description: z.string().max(NFT_METADATA.MAX_DESCRIPTION_LENGTH),
   creatorWallet: z.string().min(32).max(44), // Solana address length
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.url().optional(),
   attributes: z.array(nftAttributeSchema).max(NFT_METADATA.MAX_ATTRIBUTES).optional(),
   collection: z.string().optional(),
   file: z.any().optional(),
@@ -63,7 +63,7 @@ export const echoAddSchema = z.object({
   echoData: z.string().min(1).max(5000),
   echoType: echoTypeSchema,
   contributorWallet: walletAddressSchema,
-  videoUri: z.string().url().optional(),
+  videoUri: z.url().optional(),
 }).refine(
   (data) => data.echoType !== 'Video' || data.videoUri,
   { message: 'videoUri is required for Video echo type' }
