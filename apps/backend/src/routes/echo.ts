@@ -82,7 +82,7 @@ const addEchoSchema = z.object({
   ledgerId: z.string().min(1),
   echoData: z.string().min(1).max(5000),
   echoType: z.enum(['Text', 'Audio', 'Annotation', 'Video']),
-  videoUri: z.string().url().optional(), // For video echoes
+  videoUri: z.url().optional(), // For video echoes
   contributorWallet: z.string().refine((val) => {
     try {
       new PublicKey(val);
@@ -325,7 +325,7 @@ const remixSchema = z.object({
   remixMetadata: z.object({
     layers: z.array(
       z.object({
-        videoUri: z.string().url(),
+        videoUri: z.url(),
         startTime: z.number().min(0),
         endTime: z.number().min(0),
         opacity: z.number().min(0).max(1),
