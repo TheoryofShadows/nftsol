@@ -168,7 +168,7 @@
     "@jest-mock/express": "^3.0.0",
     "@jest/globals": "^29.7.0",
     "@shelf/jest-mongodb": "^5.0.1",
-    "@snyk/protect": "^1.0.0",
+    "@snyk/protect": "^1.1305.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.19",
