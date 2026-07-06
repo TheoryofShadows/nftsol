@@ -31,5 +31,9 @@ module.exports = {
   // Run serially: Node 22+ localStorage/sessionStorage globals cause
   // SecurityError in parallel workers before setupFiles can patch them.
   maxWorkers: 1,
+  // Exit once tests finish even if a mocked service left an async handle open
+  // (network/DB clients are mocked, so lingering handles are harmless). Without
+  // this Jest prints "did not exit" and hangs until the CI 30-min timeout.
+  forceExit: true,
 };
 

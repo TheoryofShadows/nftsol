@@ -3,6 +3,17 @@
  * Comprehensive testing of NFT minting functionality
  */
 
+// Mock auth so these validation-focused tests reach the route handler.
+// The /ultra-cheap route is `authenticate` -> `validateWallet()` -> handler;
+// without a bypass every request short-circuits at 401 before validation runs.
+// A dedicated "requires auth" assertion lives in the Security & Validation block.
+jest.mock('../../middlewares/auth', () => ({
+  authenticate: (req: any, _res: any, next: any) => {
+    req.user = { id: 'test-user', wallet: '11111111111111111111111111111111' };
+    next();
+  },
+}));
+
 // Mock the ultra-cheap-mint service to avoid real Solana RPC calls in tests
 jest.mock('../../services/ultra-cheap-mint', () => ({
   ultraCheapMintService: {
