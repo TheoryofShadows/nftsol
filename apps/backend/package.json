@@ -193,7 +193,7 @@
     "@typescript-eslint/eslint-plugin": "^7.3.0",
     "@typescript-eslint/parser": "^8.60.0",
     "cross-env": "^7.0.3",
-    "dependency-cruiser": "^17.4.0",
+    "dependency-cruiser": "^18.1.0",
     "drizzle-kit": "^0.31.6",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
