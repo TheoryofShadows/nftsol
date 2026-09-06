@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@radix-ui/themes": "^3.2.1",
-    "@sentry/react": "^10.27.0",
+    "@sentry/react": "^10.73.0",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
     "@solana/wallet-adapter-react-ui": "^0.9.39",
