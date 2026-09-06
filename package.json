@@ -28,7 +28,7 @@
     "check-licenses": "cd apps/backend && npm run check-licenses"
   },
   "devDependencies": {
-    "@commitlint/cli": "^19.5.0",
+    "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^19.5.0",
     "@types/jest": "^30.0.0",
     "@typescript-eslint/eslint-plugin": "^8.62.1",
