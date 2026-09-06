@@ -149,9 +149,9 @@
     "@esbuild-kit/core-utils": {
       "esbuild": "^0.25.0"
     },
-    "nanoid": "^5.1.11",
+    "nanoid": "$nanoid",
     "express-status-monitor": {
-      "nanoid": "^5.1.11"
+      "nanoid": "$nanoid"
     },
     "uuid": "$uuid"
   },
