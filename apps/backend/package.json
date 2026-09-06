@@ -80,7 +80,7 @@
     "express-rate-limit": "^7.5.1",
     "express-session": "^1.18.2",
     "express-validator": "^7.2.0",
-    "helmet": "^8.1.0",
+    "helmet": "^8.3.0",
     "http-errors": "^2.0.1",
     "ioredis": "^5.8.2",
     "ipfs-http-client": "^60.0.1",
