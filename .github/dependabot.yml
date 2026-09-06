@@ -4,14 +4,53 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 15
+    groups:
+      security-patch-transitive:
+        applies-to: security-updates
+        patterns:
+          - "axios"
+          - "js-yaml"
+          - "undici"
+          - "brace-expansion"
+          - "browserslist"
+          - "fast-uri"
+          - "toml"
+          - "nanoid"
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 15
+    groups:
+      security-patch-transitive:
+        applies-to: security-updates
+        patterns:
+          - "axios"
+          - "js-yaml"
+          - "undici"
+          - "brace-expansion"
+          - "browserslist"
+          - "fast-uri"
+          - "toml"
+          - "nanoid"
   - package-ecosystem: "npm"
     directory: "/apps/backend"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 15
+    groups:
+      security-patch-transitive:
+        applies-to: security-updates
+        patterns:
+          - "axios"
+          - "js-yaml"
+          - "undici"
+          - "brace-expansion"
+          - "browserslist"
+          - "fast-uri"
+          - "toml"
+          - "nanoid"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
