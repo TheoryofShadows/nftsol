@@ -71,7 +71,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "csurf": "^1.2.2",
-    "csv-parse": "^6.1.0",
+    "csv-parse": "^7.0.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.5.0",
