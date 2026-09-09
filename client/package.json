@@ -19,7 +19,7 @@
     "test:contracts": "echo 'Contract tests not yet configured' && exit 0"
   },
   "dependencies": {
-    "@radix-ui/themes": "^3.2.1",
+    "@radix-ui/themes": "^3.3.0",
     "@sentry/react": "^10.73.0",
     "@solana/wallet-adapter-base": "^0.9.27",
     "@solana/wallet-adapter-react": "^0.15.39",
