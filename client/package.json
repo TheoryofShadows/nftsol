@@ -27,7 +27,7 @@
     "@solana/wallet-adapter-wallets": "^0.16.10",
     "@solana/web3.js": "^1.98.4",
     "@tanstack/react-query": "^5.90.6",
-    "@tanstack/react-query-devtools": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.102.8",
     "@types/node": "^26.1.0",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^4.1.0",
