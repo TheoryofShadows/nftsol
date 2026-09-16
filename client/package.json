@@ -36,7 +36,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^20.1.1",
     "react-joyride": "^2.9.3",
-    "zod": "^4.5.4"
+    "zod": "^4.6.4"
   },
   "overrides": {
     "elliptic": "^6.6.1",
