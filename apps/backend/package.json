@@ -55,7 +55,7 @@
     "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
     "@metaplex-foundation/umi-uploader-irys": "^1.5.0",
     "@ory/hydra-client": "^25.4.0",
-    "@ory/kratos-client": "^1.1.1",
+    "@ory/kratos-client": "^26.2.0",
     "@simplewebauthn/server": "^8.0.0",
     "@socket.io/redis-adapter": "^8.3.0",
     "@solana/spl-account-compression": "^0.4.1",
