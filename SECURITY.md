@@ -140,7 +140,29 @@ PLATFORM_SECRET_KEY_BASE58=...
 
 ## Known Issues
 
-None at this time. All known vulnerabilities have been addressed.
+### Accepted advisories: 4 moderate, transitive under `@solana/web3.js`
+
+`npm audit` reports four moderate advisories. All four are transitive
+dependencies of `@solana/web3.js`, reached through `jayson`:
+
+| Package | Advisory | Severity |
+|---|---|---|
+| `stream-json` | [GHSA-528h-pc64-c93x](https://github.com/advisories/GHSA-528h-pc64-c93x) — O(depth²) filters, event-loop DoS | moderate |
+| `uuid` | [GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq) — missing buffer bounds check in v3/v5/v6 | moderate |
+
+**These are accepted, not unnoticed.** `npm audit fix --force` "resolves"
+them by installing `@solana/web3.js@0.0.3` — a downgrade from 1.x to a
+stub package that would break every on-chain code path in the
+marketplace. That is not a fix; it is a silent removal of the dependency.
+
+The advisories are reachable only by code that feeds attacker-controlled
+JSON through `stream-json`'s filters, or calls `uuid` v3/v5/v6 with a
+caller-supplied `buf`. This codebase does neither: `@solana/web3.js` uses
+`jayson` for RPC responses from the configured endpoint, and no route
+passes untrusted input into those paths.
+
+Re-evaluate when `@solana/web3.js` ships a release that bumps `jayson`.
+Do not run `npm audit fix --force` in this repository.
 
 ## Acknowledgments
 
